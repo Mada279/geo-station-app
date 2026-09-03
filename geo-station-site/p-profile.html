@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ملف الجهة | Geo Station</title>
+<meta name="description" content="ملف الجهة">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("provider", "p-profile.html", "ملف الجهة", `<a href="p-dashboard.html">بوابة المزوّد</a> / <b>ملف الجهة</b>`);
+
+setContent(`
+<div class="pagehead"><div><h2>ملف الجهة</h2>
+  <p>هذا ما يراه العملاء في صفحتك العامة. التعديلات الجوهرية تعود لمراجعة الإدارة قبل النشر.</p></div>
+  <div class="rowf"><a href="provider.html?slug=elite-survey" class="btn btn-soft">👁️ معاينة الصفحة العامة</a>
+   <button class="btn btn-pri" onclick="toast('✅ تم حفظ التعديلات وإرسالها للمراجعة')">حفظ وإرسال للمراجعة</button></div></div>
+
+<div class="split">
+ <div>
+  <div class="card"><h3>البيانات الأساسية</h3>
+   <div class="formgrid" style="margin-top:14px">
+    <div class="field"><label>الاسم التجاري *</label><input value="مكتب النخبة للمساحة"></div>
+    <div class="field"><label>نوع الجهة *</label><select><option>مكتب مساحة</option><option>شركة مساحة</option><option>مورد أجهزة</option><option>مركز معايرة</option><option>مركز تدريب</option></select></div>
+    <div class="field"><label>الاسم القانوني</label><input placeholder="كما في السجل التجاري"><div class="hint">لا يُعرض للعامة — يُستخدم للتوثيق فقط.</div></div>
+    <div class="field"><label>سنة بدء النشاط</label><input value="2012"></div>
+    <div class="field"><label>حجم الفريق</label><select><option>1-5</option><option selected>6-15</option><option>16-40</option><option>أكثر من 40</option></select></div>
+    <div class="field"><label>الرابط الدائم (Slug)</label><input value="elite-survey" disabled><div class="hint">لا يمكن تغييره بعد النشر حفاظًا على الروابط.</div></div>
+    <div class="field full"><label>نبذة عن الجهة *</label>
+      <textarea rows="4">مكتب متخصص في أعمال المساحة الأرضية والتقسيم وأعمال GIS، يخدم الإسكندرية والمحافظات المجاورة بفريق ميداني وأجهزة Leica وTopcon.</textarea>
+      <div class="hint">اذكر تخصصك ونطاق عملك وقدراتك الفعلية — الوصف الدقيق يرفع جودة الطلبات الواصلة إليك.</div></div>
+   </div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><h3>وسائل التواصل</h3>
+   <div class="formgrid" style="margin-top:14px">
+    <div class="field"><label>الهاتف الرئيسي *</label><input value="01x xxxx xxxx"></div>
+    <div class="field"><label>واتساب</label><input value="01x xxxx xxxx"></div>
+    <div class="field"><label>البريد الإلكتروني</label><input value="info@elite-survey.eg"></div>
+    <div class="field"><label>الموقع الإلكتروني</label><input placeholder="https://"></div>
+    <div class="field"><label>فيسبوك</label><input placeholder="https://facebook.com/"></div>
+    <div class="field"><label>لينكدإن</label><input placeholder="https://linkedin.com/company/"></div>
+   </div>
+   <div class="notice cy" style="margin-top:12px">بيانات الاتصال تُكشف للعميل بعد إنشاء طلب تواصل، ويُسجَّل كل كشف كحدث قابل للتدقيق.</div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><h3>الهوية البصرية</h3>
+   <div class="grid g2" style="margin-top:14px">
+    <div><div class="muted" style="margin-bottom:7px">الشعار</div><div class="drop">🖼️ ارفع شعارك<br><small>PNG مربّع، 400×400 على الأقل</small></div></div>
+    <div><div class="muted" style="margin-bottom:7px">صورة الغلاف</div><div class="drop">🏞️ ارفع صورة الغلاف<br><small>1600×500 — صورة من أعمالك الحقيقية أفضل</small></div></div>
+   </div>
+  </div>
+ </div>
+
+ <aside class="sticky">
+  <div class="card"><h3>حالة الملف</h3>
+   <div style="margin-top:12px">${st("منشور")} <span class="chip ok">✔ ملف موثّق</span> <span class="chip ok">✔ نشاط موثّق</span></div>
+   <div class="sep"></div>
+   <div class="rowb"><span class="muted">اكتمال الملف</span><b>82%</b></div>
+   <div class="bar" style="margin-top:7px"><i style="width:82%"></i></div>
+   <div class="sep"></div>
+   <div class="muted" style="font-size:13px">آخر مراجعة: 2026-08-20<br>آخر تعديل منشور: 2026-08-30</div>
+  </div>
+
+  <div class="card" style="margin-top:14px"><h3>مستندات التوثيق</h3>
+   <div style="margin-top:12px">
+    ${[["السجل التجاري","تم التحقق","ok"],["البطاقة الضريبية","تم التحقق","ok"],["مستند مزاولة النشاط","لم يُرفع",""]]
+      .map(([t,s,c])=>`<div class="rowb" style="padding:9px 0;border-bottom:1px solid var(--bd)">
+        <b style="font-size:13.5px">${t}</b><span class="chip ${c}">${s}</span></div>`).join("")}</div>
+   <button class="btn btn-soft btn-block btn-sm" style="margin-top:12px" onclick="toast('واجهة رفع مستند — نموذج')">⬆ رفع مستند</button>
+   <div class="notice" style="margin-top:12px;font-size:12.5px">شارات التوثيق تعكس ما راجعناه فعليًا فقط، ولا تُعدّ اعتمادًا فنيًا لأعمالك.</div>
+  </div>
+ </aside>
+</div>
+`);
+
+</script>
+</body>
+</html>

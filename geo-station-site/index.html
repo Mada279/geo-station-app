@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>المنصة الرقمية المتخصصة لقطاع المساحة في مصر | Geo Station</title>
+<meta name="description" content="Geo Station — ابحث عن مكاتب وشركات المساحة، أجهزة للبيع والإيجار، مراكز المعايرة والتدريب، الخدمات المساحية وفرص العمل في مصر.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main id="main">
+
+<section class="hero">
+  <div class="hero-bg"><img src="assets/img/office-gis-team.jpg" alt="فريق مساحة وGIS"></div>
+  <div class="wrap hero-in">
+    <span class="pill">◎ المنصة الرقمية المتخصصة لقطاع المساحة — مصر</span>
+    <h1>كل ما تحتاجه في عالم المساحة،<br><em>في منصة واحدة.</em></h1>
+    <p class="lead">مكاتب وشركات المساحة، أجهزة للبيع والإيجار، مراكز معايرة وصيانة، خدمات ميدانية، دورات تدريبية وفرص عمل — كلها موثّقة ومرتبة حسب موقعك.</p>
+
+    <div class="searchpanel">
+      <div class="searchtabs" id="stabs">
+        <button class="on" data-target="providers.html">مكاتب وشركات</button>
+        <button data-target="equipment.html">أجهزة</button>
+        <button data-target="services.html">خدمات</button>
+        <button data-target="jobs.html">وظائف</button>
+        <button data-target="academy.html">تدريب</button>
+      </div>
+      <form class="searchrow" onsubmit="event.preventDefault();runHomeSearch()">
+        <input id="h-q" placeholder="ابحث عن جهاز، مكتب، خدمة، أو تخصص...">
+        <select id="h-gov"><option value="">كل المحافظات</option></select>
+        <select id="h-cat"><option value="">كل الفئات</option></select>
+        <button class="btn btn-pri btn-lg">🔍 بحث</button>
+      </form>
+    </div>
+    <div class="searchhints">
+      <span>بحث شائع:</span>
+      <a href="equipment.html?cat=Total%20Station">Total Station</a>
+      <a href="equipment.html?mode=rent">أجهزة للإيجار</a>
+      <a href="providers.html?type=calibration">مراكز معايرة</a>
+      <a href="services.html">رفع مساحي</a>
+      <a href="academy.html">Civil 3D</a>
+    </div>
+
+    <div class="hero-stats" id="hstats"></div>
+  </div>
+</section>
+
+<section class="sec"><div class="wrap">
+  <div class="sechead"><div><div class="kicker">استكشف المنصة</div><h2>ابدأ من الفئة التي تناسب احتياجك</h2>
+    <p>ستة مسارات رئيسية تغطي منظومة المساحة كاملة — من الجهة المنفّذة حتى الجهاز والتدريب والوظيفة.</p></div>
+    <a href="directory.html" class="btn btn-soft">كل الدليل ←</a></div>
+  <div class="grid g4" id="cats"></div>
+</div></section>
+
+<section class="sec alt"><div class="wrap">
+  <div class="sechead"><div><div class="kicker">الأكثر طلبًا</div><h2>مكاتب وشركات مميّزة</h2>
+    <p>الظهور المميّز موضّح دائمًا بشارة، ولا يلغي معايير الصلة والتقييم والتوثيق.</p></div>
+    <a href="providers.html" class="btn btn-soft">عرض كل المزوّدين ←</a></div>
+  <div class="grid g3" id="featProv"></div>
+</div></section>
+
+<section class="sec"><div class="wrap">
+  <div class="sechead"><div><div class="kicker">Marketplace</div><h2>أجهزة معروضة للبيع والإيجار</h2>
+    <p>مع بيانات الحالة والموديل وحالة المعايرة كما وردت من المزوّد.</p></div>
+    <a href="equipment.html" class="btn btn-soft">سوق الأجهزة ←</a></div>
+  <div class="grid g3" id="featEquip"></div>
+</div></section>
+
+<section class="sec alt"><div class="wrap">
+  <div class="split">
+    <div>
+      <div class="kicker">كيف تعمل المنصة</div>
+      <h2 style="font-size:30px;margin:8px 0 14px">من البحث إلى التواصل في أربع خطوات</h2>
+      <div class="steps">
+        <div class="step"><h3>ابحث وحدّد موقعك</h3><p>اكتب ما تحتاجه واختر المحافظة، أو استخدم «بالقرب مني» للحصول على الأقرب.</p></div>
+        <div class="step"><h3>قارن بثقة</h3><p>راجع الخدمات والأجهزة والتقييمات ومستوى التوثيق وزمن الرد لكل جهة.</p></div>
+        <div class="step"><h3>اطلب تواصل</h3><p>تُنشئ المنصة طلبًا موثّقًا ويصل فورًا لصندوق المزوّد المناسب.</p></div>
+        <div class="step"><h3>اتفق ونفّذ</h3><p>الاتفاق والتنفيذ يتمّان مباشرة بينك وبين الجهة، ثم تقيّم التجربة.</p></div>
+      </div>
+      <a href="how-it-works.html" class="btn btn-dark" style="margin-top:18px">تفاصيل أكثر عن آلية العمل</a>
+    </div>
+    <img src="assets/img/gnss-construction.jpg" alt="مسّاح يستخدم GNSS في موقع إنشاءات">
+  </div>
+</div></section>
+
+<section class="sec"><div class="wrap">
+  <div class="sechead"><div><div class="kicker">الخدمات</div><h2>خدمات مساحية يقدّمها شركاء المنصة</h2>
+    <p>اختر الخدمة لعرض الجهات القادرة على تنفيذها داخل نطاقك الجغرافي.</p></div>
+    <a href="services.html" class="btn btn-soft">كل الخدمات ←</a></div>
+  <div class="grid g4" id="homeSvc"></div>
+</div></section>
+
+<section class="sec alt"><div class="wrap">
+  <div class="grid g2" style="align-items:start">
+    <div>
+      <div class="sechead"><div><div class="kicker">Academy</div><h2>تعلّم واتقن أدوات المهنة</h2>
+        <p>دورات تطبيقية من مراكز تدريب شريكة.</p></div></div>
+      <div class="grid g2" id="homeCourses"></div>
+      <a href="academy.html" class="btn btn-soft" style="margin-top:14px">كل الدورات ←</a>
+    </div>
+    <div>
+      <div class="sechead"><div><div class="kicker">وظائف</div><h2>أحدث الفرص في السوق</h2>
+        <p>منشورة من مكاتب وشركات معتمدة بعد مراجعة الإدارة.</p></div></div>
+      <div class="grid" id="homeJobs"></div>
+      <a href="jobs.html" class="btn btn-soft" style="margin-top:14px">كل الوظائف ←</a>
+    </div>
+  </div>
+</div></section>
+
+<div id="trust"></div>
+
+<section class="sec"><div class="wrap"><div class="band" style="background:linear-gradient(115deg,#0a2033,#12455f)">
+  <div style="max-width:600px">
+    <div class="kicker" style="color:var(--cyan2)">للمكاتب والشركات والموردين</div>
+    <h2>اعرض خدماتك وأجهزتك أمام من يبحث عنها فعلًا</h2>
+    <p>سجّل جهتك مجانًا، أضف خدماتك ومعداتك، واستقبل طلبات تواصل حقيقية من عملاء داخل نطاق عملك — مع لوحة تحكم ومؤشرات أداء.</p>
+    <div class="rowf" style="margin-top:18px">
+      <a href="join.html" class="btn btn-pri btn-lg">سجّل جهتك مجانًا</a>
+      <a href="how-it-works.html" class="btn btn-ghost btn-lg">كيف يعمل حساب المزوّد؟</a>
+    </div>
+  </div>
+  <img src="assets/img/team-total-station.jpg" alt="فريق مساحة" style="width:330px;border-radius:16px;object-fit:cover;height:220px">
+</div></div></section>
+
+<div id="cta"></div>
+
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+mountShell("index.html");
+
+$("#hstats").innerHTML = STATS.map(s=>`<div><b>${s.n}</b><span>${s.l}</span></div>`).join("");
+$("#h-gov").innerHTML += GOVS.map(g=>`<option>${g}</option>`).join("");
+$("#h-cat").innerHTML += PROVIDER_TYPES.map(t=>`<option value="${t.slug}">${t.name}</option>`).join("");
+$("#cats").innerHTML = PROVIDER_TYPES.map(t=>`<a class="card hov" href="providers.html?type=${t.slug}">
+  <div class="ico">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>
+  <div class="muted" style="margin-top:10px">${PROVIDERS.filter(p=>p.cat===t.slug).length} جهة مسجّلة ←</div></a>`).join("")
+ + `<a class="card hov" href="equipment.html"><div class="ico org">📡</div><h3>سوق الأجهزة</h3><p>Total Station وGNSS وScanners وDrones للبيع أو الإيجار.</p><div class="muted" style="margin-top:10px">${EQUIPMENT.length} عرض متاح ←</div></a>
+    <a class="card hov" href="jobs.html"><div class="ico org">💼</div><h3>الوظائف</h3><p>فرص للمسّاحين والمساعدين ومحللي GIS والفنيين.</p><div class="muted" style="margin-top:10px">${JOBS.length} وظيفة متاحة ←</div></a>`;
+$("#featProv").innerHTML = PROVIDERS.filter(p=>p.featured).concat(PROVIDERS.filter(p=>!p.featured)).slice(0,3).map(providerCard).join("");
+$("#featEquip").innerHTML = EQUIPMENT.slice(0,3).map(equipmentCard).join("");
+$("#homeSvc").innerHTML = SERVICES.slice(0,4).map(serviceCard).join("");
+$("#homeCourses").innerHTML = COURSES.slice(0,2).map(courseCard).join("");
+$("#homeJobs").innerHTML = JOBS.slice(0,3).map(jobCard).join("");
+$("#trust").innerHTML = trustBand();
+$("#cta").innerHTML = ctaBand();
+let TARGET="providers.html";
+$$("#stabs button").forEach(b=>b.onclick=()=>{$$("#stabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");TARGET=b.dataset.target});
+function runHomeSearch(){
+  const p=new URLSearchParams();
+  if($("#h-q").value.trim())p.set("q",$("#h-q").value.trim());
+  if($("#h-gov").value)p.set("gov",$("#h-gov").value);
+  if($("#h-cat").value && TARGET==="providers.html")p.set("type",$("#h-cat").value);
+  location.href=TARGET+(p.toString()?"?"+p:"");
+}
+
+</script>
+</body>
+</html>

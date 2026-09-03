@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>وظائف المساحة | Geo Station</title>
+<meta name="description" content="فرص عمل للمسّاحين ومساعدي المساحة ومحللي GIS وفنيي المعايرة في مصر.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main id="main">
+<section class="hero"><div class="hero-bg"><img src="assets/img/gnss-construction.jpg" alt=""></div>
+<div class="wrap hero-in" style="padding:52px 0 54px">
+  <div style="color:#9db2c6;font-size:13px">الرئيسية / الوظائف</div>
+  <h1 style="font-size:clamp(26px,3.6vw,40px);margin:12px 0 10px">وظائف قطاع المساحة</h1>
+  <p class="lead">فرص منشورة من مكاتب وشركات معتمدة بعد مراجعة الإدارة — قدّم بملفك المهني في دقائق.</p>
+</div></section><section class="sec"><div class="wrap">
+ <div class="layout">
+  <aside class="panel sticky">
+    <div class="fgroup"><h4>بحث</h4><input type="text" id="j-q" placeholder="مسمى وظيفي أو شركة"></div>
+    <div class="fgroup"><h4>المحافظة</h4><select id="j-gov"><option value="">كل المحافظات</option></select></div>
+    <div class="fgroup"><h4>نوع التعاقد</h4><select id="j-type"><option value="">الكل</option><option>دوام كامل</option><option>دوام جزئي</option><option>عقد مشروع</option></select></div>
+    <div class="fgroup"><h4>مستوى الخبرة</h4><label><input type="checkbox"> مبتدئ</label><label><input type="checkbox"> متوسط</label><label><input type="checkbox"> خبير</label></div>
+    <div class="sep"></div>
+    <h4 style="font-size:14px">صاحب عمل؟</h4><p class="muted" style="margin:6px 0 10px">انشر وظيفتك ووصّلها لمسّاحين مؤهلين.</p>
+    <a href="join.html" class="btn btn-dark btn-block btn-sm">انشر وظيفة</a>
+  </aside>
+  <div><div class="toolbar"><span class="muted" id="jcount"></span><div style="flex:1"></div>
+      <select><option>الأحدث</option><option>الأكثر ملاءمة</option></select></div>
+    <div class="grid" id="jout"></div></div>
+ </div>
+</div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+mountShell("jobs.html");
+
+$("#j-gov").innerHTML += GOVS.map(g=>`<option>${g}</option>`).join("");
+if(qs("gov")) $("#j-gov").value=qs("gov");
+function drawJ(){
+  const q=$("#j-q").value.trim(), g=$("#j-gov").value, t=$("#j-type").value;
+  const r=JOBS.filter(j=>(!q||j.t.includes(q)||j.company.includes(q))&&(!g||j.gov===g)&&(!t||j.type===t));
+  $("#jcount").innerHTML=`<b>${r.length}</b> وظيفة متاحة`;
+  $("#jout").innerHTML = r.length? r.map(jobCard).join("") :
+   `<div class="empty"><h3>لا توجد وظائف مطابقة</h3><p>جرّب توسيع البحث أو فعّل تنبيهًا ليصلك الجديد.</p>
+    <button class="btn btn-soft" onclick="toast('تم إنشاء تنبيه للوظائف المطابقة')">🔔 نبّهني</button></div>`;
+}
+["j-q","j-gov","j-type"].forEach(i=>{$("#"+i).addEventListener("input",drawJ);$("#"+i).addEventListener("change",drawJ)});
+drawJ(); $("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

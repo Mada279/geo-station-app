@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة المحتوى | Geo Station</title>
+<meta name="description" content="إدارة المحتوى">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-content.html", "إدارة المحتوى", `<a href="a-dashboard.html">لوحة الإدارة</a> / <b>المحتوى</b>`);
+
+let COLL="services";
+setContent(`
+<div class="pagehead"><div><h2>إدارة المحتوى</h2>
+  <p>الخدمات والدورات والوظائف والتقييمات والطلبات — إضافة وتعديل وحذف من مكان واحد.</p></div>
+  <div class="rowf" id="headActs"></div></div>
+
+<div class="tabs" id="collTabs" style="margin-bottom:16px">
+  <button class="on" data-c="services" onclick="setColl('services')">🛠️ الخدمات</button>
+  <button data-c="courses"  onclick="setColl('courses')">🎓 الدورات</button>
+  <button data-c="jobs"     onclick="setColl('jobs')">💼 الوظائف</button>
+  <button data-c="reviews"  onclick="setColl('reviews')">⭐ التقييمات</button>
+  <button data-c="leads"    onclick="setColl('leads')">📥 الطلبات</button>
+</div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  <div class="kpi"><div class="ic" id="cIc">🛠️</div><div><div class="lab" id="cLab">سجلات نشطة</div><div class="n" id="uActive">0</div></div></div>
+  <div class="kpi"><div class="ic">📦</div><div><div class="lab">مؤرشفة</div><div class="n" id="uArch">0</div></div></div>
+  ${kpi("إجمالي المحتوى المنشور","—","عبر كل الأنواع","flat","🗃️")}
+  <div class="card" style="padding:14px"><div class="rowb"><span class="muted" style="font-size:12.5px">التخزين</span>
+    <b id="stlab" style="font-size:12.5px">—</b></div>
+    <div class="storagebar" id="stbar" style="margin-top:8px"><i style="width:0%"></i></div></div>
+</div>
+
+<div class="tabs" style="margin-bottom:14px">
+  <button class="on" data-v="active" onclick="setView('active')">النشطة</button>
+  <button data-v="archived" onclick="setView('archived')">المؤرشفة</button></div>
+
+<div class="toolbar"><input id="q" placeholder="بحث…" style="min-width:230px" oninput="onQ(this.value)">
+  <div style="flex:1"></div><span class="muted" id="cnt">0</span></div>
+
+<div id="tblhost"></div>
+
+<div class="notice" style="margin-top:16px">المزوّد لا يستطيع حذف أو تعديل تقييم. تدخّل الإدارة في التقييمات يتم بقرار موثّق فقط ويظهر في سجل التدقيق.</div>
+`);
+
+const ICONS={services:"🛠️",courses:"🎓",jobs:"💼",reviews:"⭐",leads:"📥"};
+function setColl(c){
+  COLL=c; VIEW="active"; Q=""; FILT={};
+  $$("#collTabs button").forEach(b=>b.classList.toggle("on", b.dataset.c===c));
+  $("#cIc").textContent=ICONS[c];
+  $("#cLab").textContent=CRUD.SCHEMAS[c].label+" نشطة";
+  $("#headActs").innerHTML = CRUD.addBtn(c) +
+    ` <button class="btn btn-soft" onclick="GS.exportCSV('${c}')&&toast('⬇ تم تصدير CSV')">⬇ تصدير</button>`;
+  const q=$("#q"); if(q){ q.value=""; q.placeholder="بحث في "+CRUD.SCHEMAS[c].label+"…"; }
+  render();
+}
+function rowFilter(r){
+  if(!Q) return true;
+  return JSON.stringify(Object.entries(r).filter(([k])=>!k.startsWith("_"))).includes(Q);
+}
+function buildTable(rows){
+  const arch = VIEW==="archived";
+  if(COLL==="services") return table(["الخدمة","التصنيف","يبدأ من","المدة","مزوّدون","الإجراءات"],
+    rows.map(r=>[`<b>${r.ic||"🛠️"} ${r.name||"—"}</b>`, r.cat||"—",
+      r.from?num(r.from)+" ج.م":"—", r.dur||"—", r.providers||0, CRUD.actions(COLL,r.id,arch)]));
+  if(COLL==="courses") return table(["الدورة","المركز","المستوى","النمط","ساعات","الرسوم","الإجراءات"],
+    rows.map(r=>[`<b>${r.name||"—"}</b>`, r.center||"—", `<span class="chip cy">${r.level||"—"}</span>`,
+      r.mode||"—", r.hours||"—", r.price?num(r.price)+" ج.م":"—", CRUD.actions(COLL,r.id,arch)]));
+  if(COLL==="jobs") return table(["الوظيفة","جهة العمل","التعاقد","المحافظة","الخبرة","الراتب","الإجراءات"],
+    rows.map(r=>[`<b>${r.title||r.name||"—"}</b>`, r.company||"—", `<span class="chip cy">${r.type||"—"}</span>`,
+      r.gov||"—", r.exp||"—", r.salary||'<span class="muted">غير محدد</span>', CRUD.actions(COLL,r.id,arch)]));
+  if(COLL==="reviews") return table(["المزوّد","العميل","التقييم","النص","بلاغات","الحالة","الإجراءات"],
+    rows.map(r=>[`<b>${r.provider||"—"}</b>`, r.client||"—",
+      `<span class="stars">${"★".repeat(r.rate||0)}</span>`,
+      `<span class="muted" style="display:block;max-width:280px">${(r.text||"").slice(0,70)}${(r.text||"").length>70?"…":""}</span>`,
+      r.flags?`<span class="chip err">${r.flags}</span>`:'<span class="muted">—</span>',
+      st(r.status||"منشور"), CRUD.actions(COLL,r.id,arch)]));
+  return table(["الرقم","العميل","المزوّد","الموضوع","المصدر","الحالة","الإجراءات"],
+    rows.map(r=>[`<code>LD-${r.id}</code>`, r.client||"—", `<b>${r.provider||"—"}</b>`,
+      r.subject||"—", `<span class="muted">${r.source||"—"}</span>`, st(r.status||"جديد"),
+      CRUD.actions(COLL,r.id,arch)]));
+}
+
+let VIEW="active", Q="", FILT={};
+function refreshTable(){ render(); }
+function render(){
+  const rows = (VIEW==="archived"?GS.archived(COLL):GS.active(COLL)).filter(rowFilter);
+  $("#tblhost").innerHTML = rows.length ? buildTable(rows)
+    : `<div class="empty">لا توجد سجلات مطابقة. <button class="btn btn-soft btn-sm" onclick="clearF()">مسح الفلاتر</button></div>`;
+  $("#cnt").textContent = rows.length + " سجل";
+  const a=$("#uActive"); if(a) a.textContent = GS.active(COLL).length;
+  const b=$("#uArch");  if(b) b.textContent = GS.archived(COLL).length;
+  const sb=$("#stbar"); if(sb){ const u=GS.usage(); sb.querySelector("i").style.width=u.pct+"%";
+    sb.classList.toggle("hi",u.pct>75); $("#stlab").textContent = u.label+" / 5 م.ب"; }
+}
+function clearF(){ Q=""; FILT={}; const q=$("#q"); if(q)q.value=""; $$(".fsel").forEach(s=>s.value=""); render(); }
+function setView(v){ VIEW=v; $$(".tabs button").forEach(b=>b.classList.toggle("on", b.dataset.v===v)); render(); }
+function onQ(v){ Q=v.trim(); render(); }
+function onF(k,v){ FILT[k]=v; render(); }
+GS.onChange(render);
+
+setColl("services");
+
+</script>
+</body>
+</html>

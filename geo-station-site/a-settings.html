@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إعدادات النظام | Geo Station</title>
+<meta name="description" content="إعدادات النظام">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-settings.html", "إعدادات النظام", `<a href="a-dashboard.html">لوحة الإدارة</a> / <b>إعدادات النظام</b>`);
+function dbStats(){
+  const u=GS.usage(); const sb=$("#stbar");
+  if(sb){ sb.querySelector("i").style.width=u.pct+"%"; sb.classList.toggle("hi",u.pct>75); $("#stlab").textContent=u.label+" / 5 م.ب"; }
+  const host=$("#dbcounts"); if(!host) return;
+  host.innerHTML = Object.keys(GS.COLLECTIONS).filter(k=>k!=="audit").map(k=>
+    `<div class="rowb" style="padding:5px 0;border-bottom:1px solid var(--bd)">
+      <span style="font-size:12.8px">${GS.COLLECTIONS[k].label}</span><b style="font-size:12.8px">${GS.active(k).length}</b></div>`).join("");
+}
+function doImport(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const fr=new FileReader();
+  fr.onload=()=>{ const r=GS.importJSON(fr.result);
+    toast(r.ok?("✅ "+r.msg):("⚠ "+r.msg)); if(r.ok) dbStats(); };
+  fr.onerror=()=>toast("⚠ تعذّرت قراءة الملف");
+  fr.readAsText(f); input.value="";
+}
+function confirmReset(){
+  confirmAction("إعادة تعيين قاعدة البيانات",
+    "سيُحذف كل ما أضفته أو عدّلته وتعود البيانات للبذرة الأصلية. صدّر نسخة احتياطية أولًا إن أردت الاحتفاظ بعملك.",
+    "نعم، أعد التعيين", ()=>{ GS.reset(); dbStats(); toast("♻️ تمت إعادة التعيين للبيانات الأصلية"); });
+}
+GS.onChange(dbStats); dbStats();
+
+setContent(`
+<div class="pagehead"><div><h2>إعدادات النظام</h2>
+  <p>ضبط قواعد التشغيل والمراجعة والترتيب — كل تغيير يُسجَّل في سجل التدقيق.</p></div>
+  <button class="btn btn-pri" onclick="toast('✅ تم حفظ الإعدادات — سُجِّل التغيير')">حفظ التغييرات</button></div>
+
+<div class="split">
+ <div>
+  <div class="card"><h3>قواعد المراجعة والنشر</h3>
+   <div class="formgrid" style="margin-top:14px">
+    <div class="field"><label>مهلة مراجعة ملف المزوّد</label><select><option>24 ساعة</option><option selected>48 ساعة</option><option>72 ساعة</option></select></div>
+    <div class="field"><label>مهلة مراجعة إدراج جهاز</label><select><option selected>24 ساعة</option><option>48 ساعة</option></select></div>
+    <div class="field full">
+     <label class="check"><input type="checkbox" checked> منع النشر التلقائي — كل عنصر يمر بمراجعة بشرية</label>
+     <label class="check"><input type="checkbox" checked> رفض تلقائي للإدراجات التي تعرض معايرة منتهية كسارية</label>
+     <label class="check"><input type="checkbox" checked> تشغيل فحص التكرار عند كل تسجيل جديد</label>
+     <label class="check"><input type="checkbox"> السماح بالنشر التلقائي للمزوّدين ذوي التوثيق المتقدّم</label></div>
+   </div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><h3>قواعد الطلبات والمطابقة</h3>
+   <div class="formgrid" style="margin-top:14px">
+    <div class="field"><label>مهلة رد المزوّد (SLA)</label><select><option>12 ساعة</option><option selected>24 ساعة</option><option>48 ساعة</option></select></div>
+    <div class="field"><label>عدد المزوّدين لكل طلب احتياج</label><select><option>3</option><option selected>4</option><option>5</option></select></div>
+    <div class="field"><label>نصف قطر المطابقة الافتراضي</label><select><option>25 كم</option><option selected>50 كم</option><option>100 كم</option></select></div>
+    <div class="field"><label>إعادة توجيه الطلب بلا رد بعد</label><select><option selected>24 ساعة</option><option>48 ساعة</option><option>لا يُعاد توجيهه</option></select></div>
+    <div class="field full"><label class="check"><input type="checkbox" checked> استبعاد المزوّدين الموقوفين من المطابقة تلقائيًا</label>
+     <label class="check"><input type="checkbox" checked> خفض ترتيب المزوّدين ذوي نسبة الرد أقل من 60%</label></div>
+   </div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><h3>أوزان ترتيب نتائج البحث</h3>
+   <p class="muted" style="margin-top:6px">مجموع الأوزان يجب ألا يمنح الظهور المدفوع أفضلية على الصلة والثقة.</p>
+   <div style="margin-top:14px">${[["مطابقة الفئة والخدمة",30],["القرب الجغرافي",25],["مستوى التوثيق",18],["التقييم",14],["سرعة الرد",8],["الظهور المميّز (موسوم)",5]]
+    .map(([t,v])=>`<div style="margin-bottom:13px"><div class="rowb"><span style="font-size:13.5px">${t}</span><b>${v}%</b></div>
+      <input type="range" min="0" max="40" value="${v}" style="width:100%;accent-color:var(--cyan)"></div>`).join("")}</div>
+   <div class="notice">وزن الظهور المدفوع مُقيَّد بحد أقصى 10% بموجب سياسة المنصة، ويظل الإعلان موسومًا بشارة «مميّز» دائمًا.</div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><h3>سياسة التوثيق والتقييمات</h3>
+   <div style="margin-top:12px">
+    <label class="check"><input type="checkbox" checked> ربط التقييم بطلب تواصل حقيقي قبل النشر</label>
+    <label class="check"><input type="checkbox" checked> منع المزوّد من حذف أو تعديل التقييمات</label>
+    <label class="check"><input type="checkbox" checked> إخفاء تلقائي للتقييمات المُبلَّغ عنها لحين المراجعة</label>
+    <label class="check"><input type="checkbox" checked> مراجعة دورية للشارات كل 12 شهرًا</label>
+    <label class="check"><input type="checkbox" checked> إظهار متوسط التقييم فقط بعد 3 تقييمات موثّقة</label></div>
+  </div>
+ </div>
+
+ <aside class="sticky">
+  <div class="card"><h3>حالة النظام</h3>
+   <div style="margin-top:12px">${[["واجهة الموقع","تعمل","ok"],["واجهة API","تعمل","ok"],["فهرس البحث","تعمل","ok"],["خدمة الإشعارات","بطء مؤقت","warn"],["خدمة الخرائط","تعمل","ok"]]
+    .map(([t,s,c])=>`<div class="rowb" style="padding:8px 0;border-bottom:1px solid var(--bd)">
+      <span style="font-size:13.5px">${t}</span><span class="chip ${c}">${s}</span></div>`).join("")}</div>
+   <div class="sep"></div><div class="muted" style="font-size:12.5px">آخر فحص: اليوم 09:40<br>إصدار المنصة: 1.0.0</div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>التغطية الجغرافية المفعّلة</h3>
+   <div style="margin-top:12px">${["الإسكندرية","القاهرة","الجيزة","البحيرة","مطروح","الدقهلية","المنوفية","القليوبية"]
+     .map((g,i)=>`<label class="check"><input type="checkbox" ${i<6?"checked":""}> ${g}</label>`).join("")}</div>
+   <button class="btn btn-soft btn-block btn-sm" style="margin-top:12px" onclick="toast('تم تحديث التغطية')">حفظ التغطية</button>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>قاعدة البيانات</h3>
+   <p class="muted" style="margin-top:6px">البيانات محفوظة محليًا في هذا المتصفح. صدّرها لنقلها لجهاز آخر أو للنسخ الاحتياطي.</p>
+   <div class="rowb" style="margin-top:12px"><span class="muted" style="font-size:12.5px">المساحة المستخدمة</span><b id="stlab" style="font-size:12.5px">—</b></div>
+   <div class="storagebar" id="stbar" style="margin-top:8px"><i style="width:0%"></i></div>
+   <div style="margin-top:12px" id="dbcounts"></div>
+   <input type="file" id="dbfile" accept="application/json,.json" style="display:none" onchange="doImport(this)">
+   <button class="btn btn-cta btn-block btn-sm" style="margin-top:12px" onclick="GS.exportJSON();toast('⬇ تم تصدير قاعدة البيانات كملف JSON')">⬇ تصدير قاعدة البيانات</button>
+   <button class="btn btn-soft btn-block btn-sm" style="margin-top:8px" onclick="document.getElementById('dbfile').click()">📤 استيراد ملف قاعدة بيانات</button>
+   <button class="btn btn-err btn-block btn-sm" style="margin-top:8px" onclick="confirmReset()">♻️ إعادة التعيين للبيانات الأصلية</button>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>وضع الصيانة</h3>
+   <p class="muted" style="margin-top:6px">يعرض صفحة صيانة للزوار مع إبقاء البوابات متاحة للفريق.</p>
+   <button class="btn btn-err btn-block btn-sm" style="margin-top:10px" onclick="confirmAction('تفعيل وضع الصيانة','سيرى الزوار صفحة صيانة بدلًا من الموقع. البوابات الإدارية تبقى متاحة.','تفعيل الصيانة',()=>toast('تم تفعيل وضع الصيانة'))">تفعيل وضع الصيانة</button>
+  </div>
+ </aside>
+</div>
+`);
+
+</script>
+</body>
+</html>

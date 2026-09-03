@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة الإدارة | Geo Station</title>
+<meta name="description" content="لوحة الإدارة">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-dashboard.html", "لوحة الإدارة", `<b>لوحة الإدارة</b>`);
+
+setContent(`
+<div class="pagehead"><div><h2>نظرة عامة على المنصة</h2>
+  <p>حالة التشغيل اليومي — طابور المراجعة، نمو السوق، وجودة البيانات.</p></div>
+  <div class="rowf"><select class="btn btn-soft"><option>آخر 30 يومًا</option><option>آخر 7 أيام</option></select>
+   <button class="btn btn-soft" onclick="toast('تم تصدير تقرير الحالة')">⬇ تقرير الحالة</button></div></div>
+
+<div class="grid g5">
+  ${kpi("مزوّدون منشورون","148","▲ 6 هذا الأسبوع","up","🏢")}
+  ${kpi("بانتظار الاعتماد","12","3 متأخرة عن الـSLA","dn","⏳")}
+  ${kpi("طلبات تواصل","1,043","▲ 27%","up","📥")}
+  ${kpi("مستخدمون نشطون","2,914","▲ 11%","up","👤")}
+  ${kpi("تنبيهات جودة بيانات","5","تحتاج مراجعة","dn","⚠️")}
+</div>
+
+<div class="grid g2" style="margin-top:16px">
+ <div class="card"><div class="rowb"><h3>نمو الطلبات — 12 أسبوعًا</h3><span class="chip ok">+27%</span></div>
+  ${spark([310,352,340,410,398,470,455,560,540,690,780,1043],true)}
+  <div class="rowb muted" style="margin-top:8px"><span>يونيو</span><span>سبتمبر</span></div>
+  <div class="sep"></div>
+  <div class="grid g3">
+   <div><div class="muted">تحويل بحث ← طلب</div><b style="font-size:19px">4.3%</b></div>
+   <div><div class="muted">متوسط أول رد</div><b style="font-size:19px">2.6 ساعة</b></div>
+   <div><div class="muted">طلبات بلا رد &gt;24س</div><b style="font-size:19px;color:var(--err)">37</b></div>
+  </div>
+ </div>
+
+ <div class="card"><div class="rowb"><h3>طابور الاعتماد — الأقدم أولًا</h3>
+   <a href="a-approvals.html" class="btn btn-pri btn-sm">فتح الطابور ←</a></div>
+  <div style="margin-top:12px">${table(["العنصر","النوع","الحالة"],
+   A_APPROVALS.slice(0,5).map(a=>[`<b>${a.item}</b><div class="muted">${a.owner} • ${a.gov}</div>`,a.kind,
+     a.sla==="متأخر"?'<span class="chip err">متأخر</span>':a.risk!=="—"?`<span class="chip warn">${a.risk}</span>`:'<span class="chip ok">جاهز</span>']))}</div>
+ </div>
+</div>
+
+<div class="grid g3" style="margin-top:16px">
+ <div class="card"><h3>النشاط الجغرافي</h3>
+  <div style="margin-top:12px">${[["القاهرة",38],["الإسكندرية",31],["الجيزة",17],["البحيرة",8],["أخرى",6]].map(([g,v])=>barRow(g,v,100)).join("")}</div></div>
+ <div class="card"><h3>توزيع المزوّدين حسب النوع</h3>
+  <div style="margin-top:12px">${[["مكاتب مساحة",62],["شركات مساحة",29],["موردو أجهزة",24],["مراكز معايرة",18],["مراكز تدريب",15]]
+   .map(([g,v])=>barRow(g,v,62)).join("")}</div></div>
+ <div class="card"><h3>تنبيهات جودة البيانات</h3>
+  <div style="margin-top:12px">
+  ${[["ملفات مكررة محتملة",3,"err"],["أرقام هواتف غير مؤكدة",8,"warn"],["إدراجات بدون صور",21,"warn"],["سجلات معايرة منتهية",6,"err"],["ملفات بدون نشاط 90 يومًا",14,""]]
+   .map(([t,n,c])=>`<div class="rowb" style="padding:8px 0;border-bottom:1px solid var(--bd)">
+     <span style="font-size:13.5px">${t}</span><span class="chip ${c}">${n}</span></div>`).join("")}</div>
+  <a href="a-data.html" class="btn btn-soft btn-block btn-sm" style="margin-top:12px">مراجعة البيانات ←</a></div>
+</div>
+
+<div class="grid g2" style="margin-top:16px">
+ <div class="card"><div class="rowb"><h3>أحدث أحداث التدقيق</h3>
+   <a href="a-audit.html" class="btn btn-soft btn-sm">السجل الكامل ←</a></div>
+  <div style="margin-top:12px">${table(["الوقت","المستخدم","الإجراء","الكيان"],
+   A_AUDIT.slice(0,6).map(a=>[`<span class="muted">${a.t}</span>`,a.actor,a.act,`<code>${a.ent}</code>`]))}</div></div>
+ <div class="card"><h3>فجوات السوق — طلب بلا عرض كافٍ</h3>
+  <p class="muted" style="margin-top:6px">مناطق وفئات عليها بحث مرتفع وعدد مزوّدين منخفض — فرص استقطاب.</p>
+  <div style="margin-top:12px">${table(["المنطقة","الفئة","بحث","مزوّدون"],
+   [["مطروح","معايرة",64,1],["البحيرة","Laser Scanner",41,0],["الدقهلية","Drone Survey",37,1],["المنوفية","GNSS للإيجار",29,2]]
+   .map(r=>[r[0],r[1],r[2],`<span class="chip ${r[3]===0?"err":"warn"}">${r[3]}</span>`]))}</div></div>
+</div>
+`);
+
+</script>
+</body>
+</html>

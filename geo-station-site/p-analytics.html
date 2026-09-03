@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>التحليلات | Geo Station</title>
+<meta name="description" content="التحليلات">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("provider", "p-analytics.html", "التحليلات", `<a href="p-dashboard.html">بوابة المزوّد</a> / <b>التحليلات</b>`);
+
+setContent(`
+<div class="pagehead"><div><h2>تحليلات الأداء</h2>
+  <p>مؤشرات الظهور والتحويل خلال آخر 30 يومًا — استخدمها لتحسين ملفك وإدراجاتك.</p></div>
+  <div class="rowf"><select class="btn btn-soft"><option>آخر 30 يومًا</option><option>آخر 7 أيام</option><option>آخر 90 يومًا</option></select>
+   <button class="btn btn-soft" onclick="toast('تم تصدير التقرير PDF')">⬇ تصدير التقرير</button></div></div>
+
+<div class="grid g5">
+  ${kpi("ظهور في البحث","8,410","▲ 14%","up","🔍")}
+  ${kpi("زيارات الملف","1,284","▲ 22%","up","👁️")}
+  ${kpi("طلبات تواصل","36","▲ 33%","up","📥")}
+  ${kpi("معدل التحويل","2.8%","▲ 0.4 نقطة","up","🎯")}
+  ${kpi("ترتيبك في فئتك","#3","من 24 مكتب بالإسكندرية","up","🏆")}
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="rowb"><h3>الظهور مقابل الطلبات — 12 أسبوعًا</h3>
+    <div><span class="chip cy">ظهور</span><span class="chip warn">طلبات</span></div></div>
+  ${spark([420,510,470,600,580,690,660,780,740,880,920,1010],true)}
+  <div class="rowb muted" style="margin-top:8px"><span>يونيو</span><span>يوليو</span><span>أغسطس</span><span>سبتمبر</span></div>
+</div>
+
+<div class="grid g2" style="margin-top:16px">
+ <div class="card"><h3>مصادر الطلبات</h3>
+  <div style="margin-top:12px">${[["ملف الجهة",42],["صفحة جهاز",27],["طلب احتياج موجّه",18],["الخريطة",9],["نتائج البحث",4]].map(([t,v])=>barRow(t,v,100)).join("")}</div></div>
+ <div class="card"><h3>الكلمات التي توصل العملاء إليك</h3>
+  <div style="margin-top:12px">${table(["الكلمة","ظهور","نقرات","CTR"],
+   [["رفع مساحي الإسكندرية",2140,188,"8.8%"],["تأجير Total Station",1620,131,"8.1%"],
+    ["مكتب مساحة سموحة",980,96,"9.8%"],["تقسيم أراضي البحيرة",720,44,"6.1%"],["GIS مصر",540,37,"6.9%"]]
+   .map(r=>[r[0],num(r[1]),num(r[2]),`<span class="chip ok">${r[3]}</span>`]))}</div></div>
+</div>
+
+<div class="grid g2" style="margin-top:16px">
+ <div class="card"><h3>أداء إدراجاتك</h3>
+  <div style="margin-top:12px">${table(["الإدراج","مشاهدات","طلبات","تحويل"],
+   P_LISTINGS.filter(e=>e.views).map(e=>[e.t,num(e.views),e.leads,
+     `<span class="chip ${(e.leads/e.views*100)>1.4?"ok":"warn"}">${(e.leads/e.views*100).toFixed(1)}%</span>`]))}</div></div>
+ <div class="card"><h3>من أين يأتي عملاؤك جغرافيًا؟</h3>
+  <div style="margin-top:12px">${[["الإسكندرية",58],["البحيرة",17],["القاهرة",13],["مطروح",7],["أخرى",5]].map(([t,v])=>barRow(t,v,100)).join("")}</div>
+  <div class="sep"></div>
+  <div class="notice cy">64% من الطلبات تأتي من نطاق 40 كم حول مقرك — الاستجابة السريعة داخل هذا النطاق ترفع تقييمك.</div></div>
+</div>
+
+<div class="card" style="margin-top:16px"><h3>توصيات لتحسين أدائك</h3>
+ <div class="grid g3" style="margin-top:14px">
+ ${[["📷","أضف صورًا لإدراجاتك","3 من إدراجاتك بدون صور كافية — الإدراجات المصوّرة تحصل على طلبات أضعاف.","p-listings.html"],
+    ["⚡","قلّل زمن أول رد","متوسطك 2.4 ساعة. النزول تحت الساعة يرفع ترتيبك في نتائج البحث.","p-leads.html"],
+    ["🧭","أضف خدمات مطلوبة","«مسح ليزري» عليه 64 بحثًا في نطاقك ولم تُدرجه بعد.","p-services.html"]]
+  .map(([i,t,d,h])=>`<div class="card" style="background:#f9fcfd"><div style="font-size:22px">${i}</div>
+    <b style="display:block;margin-top:8px">${t}</b><p class="muted" style="margin-top:6px">${d}</p>
+    <a href="${h}" class="btn btn-soft btn-sm" style="margin-top:10px">تنفيذ ←</a></div>`).join("")}</div>
+</div>
+`);
+
+</script>
+</body>
+</html>

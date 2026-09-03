@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الخريطة التفاعلية | Geo Station</title>
+<meta name="description" content="استكشف مكاتب وشركات المساحة والأجهزة على الخريطة حسب موقعك ونطاق الخدمة.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main id="main">
+<section class="sec tight dark"><div class="wrap">
+  <div class="muted">الرئيسية / الخريطة</div>
+  <div class="sechead" style="margin-top:10px"><div><h2>مستكشف الخريطة</h2>
+    <p>نفس حالة البحث والفلاتر تُستخدم في القائمة والخريطة — اضغط أي علامة لعرض تفاصيل الجهة.</p></div>
+    <button class="btn btn-pri" onclick="nearMe()">📍 بالقرب مني</button></div>
+  <div class="layout">
+    <aside class="panel sticky">
+      <div class="fgroup"><h4>بحث</h4><input type="text" id="f-q" placeholder="اسم أو خدمة"></div>
+      <div class="fgroup"><h4>نوع الجهة</h4><select id="f-cat"><option value="">الكل</option></select></div>
+      <div class="fgroup"><h4>المحافظة</h4><select id="f-gov"><option value="">الكل</option></select></div>
+      <div class="fgroup"><h4>نطاق البحث</h4><select id="f-rad"><option>10 كم</option><option selected>25 كم</option><option>50 كم</option><option>100 كم</option></select></div>
+      <div class="fgroup"><h4>عرض</h4><label><input type="checkbox" checked> مكاتب وشركات</label>
+        <label><input type="checkbox"> أجهزة متاحة</label><label><input type="checkbox"> مراكز معايرة</label></div>
+      <select id="f-sort" class="hidden"></select>
+      <button class="btn btn-soft btn-block btn-sm" onclick="clearF()">مسح الفلاتر</button>
+    </aside>
+    <div><div id="map"></div><div class="grid g3" style="margin-top:18px" id="list"></div></div>
+  </div>
+</div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+mountShell("map.html");
+
+$("#f-cat").innerHTML += PROVIDER_TYPES.map(t=>`<option value="${t.slug}">${t.name}</option>`).join("");
+$("#f-gov").innerHTML += GOVS.map(g=>`<option>${g}</option>`).join("");
+function clearF(){["f-q","f-cat","f-gov"].forEach(i=>$("#"+i).value="");draw()}
+function nearMe(){$("#f-gov").value="الإسكندرية";draw();toast("📍 تم تفعيل البحث بالقرب منك — نطاق "+$("#f-rad").value)}
+function draw(){
+  const r=filterProviders(readFilters());
+  $("#map").innerHTML = `<div class="mapbox">
+    ${r.map(p=>`<button class="pin" style="top:${p.y}%;inset-inline-end:${p.x}%" onclick="location.href='provider.html?slug=${p.slug}'">${p.name.split(" ").slice(0,2).join(" ")} • ${p.rate}★</button>`).join("")}
+    <div class="maplegend"><b>${r.length}</b> جهة داخل النطاق<br><span class="muted">الترتيب: صلة + مسافة + توثيق</span></div></div>`;
+  $("#list").innerHTML = r.slice(0,6).map(providerCard).join("") || `<div class="empty">لا توجد جهات في هذا النطاق.</div>`;
+}
+["f-q","f-cat","f-gov","f-rad"].forEach(i=>{$("#"+i).addEventListener("input",draw);$("#"+i).addEventListener("change",draw)});
+draw(); $("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

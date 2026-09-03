@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دليل قطاع المساحة | Geo Station</title>
+<meta name="description" content="دليل مكاتب وشركات المساحة وموردي الأجهزة ومراكز المعايرة والتدريب والمسّاحين في مصر.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main id="main">
+<section class="hero"><div class="hero-bg"><img src="assets/img/office-gis-team.jpg" alt=""></div>
+<div class="wrap hero-in" style="padding:52px 0 54px">
+  <div class="muted" style="color:#9db2c6;font-size:13px">الرئيسية / الدليل</div>
+  <h1 style="font-size:clamp(26px,3.6vw,40px);margin:12px 0 10px">دليل قطاع المساحة في مصر</h1>
+  <p class="lead">تصفّح الجهات حسب النوع والتخصص والمحافظة — كل ملف يمر بمراجعة الإدارة قبل النشر.</p>
+</div></section><section class="sec"><div class="wrap">
+  <div class="grid g3" id="dirCats"></div>
+  <div class="sechead" style="margin-top:44px"><div><div class="kicker">الأعلى تقييمًا</div><h2>جهات موصى بها هذا الشهر</h2></div>
+    <a href="providers.html" class="btn btn-soft">تصفّح الكل ←</a></div>
+  <div class="grid g3" id="dirTop"></div>
+</div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+mountShell("directory.html");
+
+$("#dirCats").innerHTML = PROVIDER_TYPES.map(t=>{
+  const n=PROVIDERS.filter(p=>p.cat===t.slug).length;
+  return `<a class="card hov" href="providers.html?type=${t.slug}" style="display:block">
+    <div class="ico">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>
+    <div class="rowb" style="margin-top:14px"><span class="chip cy">${n} جهة</span><span class="muted">تصفّح ←</span></div></a>`}).join("");
+$("#dirTop").innerHTML = [...PROVIDERS].sort((a,b)=>b.rate-a.rate).slice(0,6).map(providerCard).join("");
+$("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

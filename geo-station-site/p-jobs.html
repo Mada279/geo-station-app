@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الوظائف المنشورة | Geo Station</title>
+<meta name="description" content="الوظائف المنشورة">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("provider", "p-jobs.html", "الوظائف المنشورة", `<a href="p-dashboard.html">بوابة المزوّد</a> / <b>الوظائف</b>`);
+
+const PJOBS=[["JB-208","مسّاح موقع — مشروع سكني","دوام كامل","الإسكندرية","منشور",14,3,"2026-09-01"],
+ ["JB-204","مساعد مسّاح","عقد مشروع","الإسكندرية","منشور",22,7,"2026-08-24"],
+ ["JB-211","رسّام أوتوكاد","دوام جزئي","الإسكندرية","قيد المراجعة",0,0,"2026-09-03"],
+ ["JB-197","مسّاح أول — طرق","دوام كامل","البحيرة","مغلق — ناجح",38,12,"2026-07-11"]];
+const APPS=[["م. كريم عبد الله","مسّاح موقع — مشروع سكني","6 سنوات","دعوة مقابلة","2026-09-02"],
+ ["م. عمرو شعبان","مسّاح موقع — مشروع سكني","4 سنوات","قيد المراجعة","2026-09-02"],
+ ["م. هدى سامي","مساعد مسّاح","سنتان","تمت المشاهدة","2026-09-01"],
+ ["م. محمود عيد","مساعد مسّاح","سنة","غير مناسب","2026-08-30"]];
+setContent(`
+<div class="pagehead"><div><h2>الوظائف المنشورة</h2>
+  <p>انشر فرصك ووصّلها لمسّاحين مؤهلين. كل وظيفة تمر بمراجعة الإدارة قبل الظهور.</p></div>
+  <button class="btn btn-pri" onclick="jobForm()">＋ نشر وظيفة</button></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  ${kpi("وظائف منشورة","2","","flat","💼")}
+  ${kpi("إجمالي التقديمات","22","▲ 7 هذا الأسبوع","up","📄")}
+  ${kpi("بانتظار مراجعتك","4","","dn","⏳")}
+  ${kpi("متوسط التقديمات للوظيفة","11","أعلى من متوسط السوق","up","📊")}
+</div>
+
+${table(["الرقم","الوظيفة","نوع التعاقد","الموقع","مشاهدات","تقديمات","تاريخ النشر","الحالة",""],
+ PJOBS.map(j=>[`<code>${j[0]}</code>`,`<b>${j[1]}</b>`,`<span class="chip cy">${j[2]}</span>`,j[3],
+   j[5]||"—",j[6]?`<b>${j[6]}</b>`:"—",`<span class="muted">${j[7]}</span>`,st(j[4]),
+   `<div class="acts"><button class="btn btn-soft btn-sm" onclick="jobForm('${j[1]}')">تعديل</button>
+    ${j[6]?`<button class="btn btn-pri btn-sm" onclick="toast('عرض ${j[6]} تقديمات')">التقديمات</button>`:""}</div>`]))}
+
+<div class="card" style="margin-top:18px"><div class="rowb"><h3>أحدث التقديمات</h3>
+  <button class="btn btn-soft btn-sm" onclick="toast('عرض كل التقديمات')">عرض الكل ←</button></div>
+ <div style="margin-top:12px">${table(["المتقدم","الوظيفة","الخبرة","تاريخ التقديم","الحالة",""],
+  APPS.map(a=>[userCell(a[0],"مسّاح"),a[1],a[2],`<span class="muted">${a[4]}</span>`,
+    `<span class="chip ${a[3]==="دعوة مقابلة"?"ok":a[3]==="غير مناسب"?"err":a[3]==="قيد المراجعة"?"warn":"pur"}">${a[3]}</span>`,
+    `<div class="acts"><button class="btn btn-soft btn-sm" onclick="toast('عرض السيرة الذاتية')">السيرة</button>
+     <button class="btn btn-ok btn-sm" onclick="toast('تم إرسال دعوة مقابلة')">دعوة</button></div>`]))}</div>
+</div>
+`);
+function jobForm(t){
+ openModal(`<button class="x" onclick="closeModal()">✕</button><h3>${t?"تعديل وظيفة":"نشر وظيفة جديدة"}</h3>
+  <p class="muted">تُراجع الإدارة الوظيفة قبل نشرها للتأكد من وضوح البيانات.</p>
+  <div class="formgrid" style="margin-top:14px">
+   <div class="field"><label>المسمى الوظيفي *</label><input value="${t||""}"></div>
+   <div class="field"><label>نوع التعاقد *</label><select><option>دوام كامل</option><option>دوام جزئي</option><option>عقد مشروع</option><option>تدريب</option></select></div>
+   <div class="field"><label>المحافظة *</label><select><option>الإسكندرية</option><option>البحيرة</option><option>القاهرة</option></select></div>
+   <div class="field"><label>مستوى الخبرة *</label><select><option>مبتدئ (0-2)</option><option>متوسط (3-5)</option><option>خبير (6+)</option></select></div>
+   <div class="field"><label>الراتب</label><input placeholder="يُحدد بعد المقابلة / نطاق"></div>
+   <div class="field"><label>عدد الشواغر</label><input value="1"></div>
+   <div class="field full"><label>الوصف الوظيفي *</label><textarea rows="3"></textarea></div>
+   <div class="field full"><label>المتطلبات *</label><textarea rows="3" placeholder="سطر لكل متطلب"></textarea></div>
+   <div class="field"><label>تاريخ انتهاء الإعلان</label><input type="date"></div>
+   <div class="field"><label>استقبال التقديمات عبر</label><select><option>المنصة فقط</option><option>المنصة + البريد</option></select></div>
+  </div>
+  <button class="btn btn-pri btn-block" style="margin-top:14px" onclick="closeModal();toast('✅ تم إرسال الوظيفة للمراجعة')">إرسال للمراجعة</button>`);
+}
+
+</script>
+</body>
+</html>

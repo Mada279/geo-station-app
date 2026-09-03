@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Geo Station Academy | Geo Station</title>
+<meta name="description" content="دورات تدريبية متخصصة في المساحة: Civil 3D، GNSS، QGIS، المسح الجوي والمساحة القانونية.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main id="main">
+<section class="hero"><div class="hero-bg"><img src="assets/img/office-gis-team.jpg" alt=""></div>
+<div class="wrap hero-in" style="padding:52px 0 54px">
+  <div style="color:#9db2c6;font-size:13px">الرئيسية / Academy</div>
+  <h1 style="font-size:clamp(26px,3.6vw,40px);margin:12px 0 10px">Geo Station Academy</h1>
+  <p class="lead">دورات تطبيقية من مراكز تدريب شريكة — تدريب عملي على أجهزة حقيقية ومشروعات واقعية.</p>
+</div></section><section class="sec dark"><div class="wrap">
+  <div class="toolbar"><span class="muted">تصفية:</span>
+    <select id="f-lvl"><option value="">كل المستويات</option><option>مبتدئ</option><option>متوسط</option><option>متقدم</option></select>
+    <select id="f-center"><option value="">كل المراكز</option></select>
+    <div style="flex:1"></div><a href="providers.html?type=training" class="btn btn-soft btn-sm">مراكز التدريب ←</a></div>
+  <div class="grid g3" id="out"></div>
+</div></section>
+<section class="sec alt"><div class="wrap">
+  <div class="sechead"><div><div class="kicker">لماذا Academy</div><h2>تدريب مرتبط بسوق العمل مباشرة</h2></div></div>
+  <div class="grid g4" id="why"></div>
+</div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+mountShell("academy.html");
+
+$("#f-center").innerHTML += [...new Set(COURSES.map(c=>c.center))].map(c=>`<option>${c}</option>`).join("");
+function draw(){
+  const l=$("#f-lvl").value, c=$("#f-center").value;
+  const r=COURSES.filter(x=>(!l||x.lvl===l)&&(!c||x.center===c));
+  $("#out").innerHTML = r.length? r.map(courseCard).join("") : `<div class="empty">لا توجد دورات مطابقة حاليًا.</div>`;
+}
+$("#f-lvl").onchange=draw;$("#f-center").onchange=draw;draw();
+$("#why").innerHTML=[["🛠️","تدريب عملي","التطبيق على أجهزة حقيقية ومشروعات مأخوذة من السوق."],
+ ["👤","مدربون ممارسون","مدربون يعملون فعليًا في مكاتب وشركات المساحة."],
+ ["📄","شهادة من المركز","شهادة حضور صادرة من مركز التدريب المنفّذ."],
+ ["💼","ربط بالوظائف","خريجو الدورات يظهرون لأصحاب العمل داخل طبقة الوظائف."]]
+ .map(([i,t,d])=>`<div class="card"><div class="ico">${i}</div><h3>${t}</h3><p>${d}</p></div>`).join("");
+$("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

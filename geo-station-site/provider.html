@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ملف المزوّد | Geo Station</title>
+<meta name="description" content="ملف تعريفي كامل لمزوّد خدمات المساحة: الخدمات والمعدات والتغطية والتقييمات.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main id="main">
+<section class="sec tight"><div class="wrap">
+  <div class="muted" id="crumb"></div>
+  <div style="margin-top:12px" id="head"></div>
+  <div class="layout rev" style="margin-top:20px">
+    <div id="body"></div>
+    <aside id="aside"></aside>
+  </div>
+  <div class="sechead" style="margin-top:44px"><div><h2>جهات مشابهة قد تناسبك</h2></div></div>
+  <div class="grid g3" id="similar"></div>
+</div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+mountShell("directory.html");
+
+const p = PROVIDERS.find(x=>x.slug===qs("slug")) || PROVIDERS[0];
+document.title = p.name + " | Geo Station";
+$("#crumb").innerHTML = `<a href="index.html">الرئيسية</a> / <a href="directory.html">الدليل</a> / <a href="providers.html?type=${p.cat}">${p.type}</a> / <b>${p.name}</b>`;
+$("#head").innerHTML = `
+ <div class="cover"><img src="${p.img}" alt="${p.name}"></div>
+ <div class="profhead"><div class="rowb">
+   <div class="rowf"><div class="avatar" style="width:66px;height:66px;font-size:21px">${p.name.slice(0,2)}</div>
+     <div><h1 style="font-size:26px">${p.name} ${p.featured?'<span class="chip spon">⭐ مميّز</span>':""}</h1>
+       <div class="muted" style="margin-top:5px">${p.type} • 📍 ${p.gov} — ${p.city} • يعمل منذ ${p.since} • ${p.staff}</div>
+       <div style="margin-top:7px"><span class="stars">${stars(p.rate)}</span> <b>${p.rate}</b> <span class="muted">من ${p.reviews} تقييم • ⏱ يرد ${p.resp}</span></div></div></div>
+   <div class="rowf">
+     <button class="btn btn-soft" onclick="toast('تم حفظ المزوّد في قائمتك')">♡ حفظ</button>
+     <button class="btn btn-soft" onclick="toast('تم نسخ رابط الملف')">🔗 مشاركة</button>
+     <button class="btn btn-pri btn-lg" onclick="openModal('contact','${p.name}')">طلب تواصل</button></div></div>
+   <div style="margin-top:14px">${p.ver.map(v=>`<span class="chip ok">✔ ${v}</span>`).join("")}<span class="chip">آخر تحديث: 2026-08-30</span></div>
+ </div>`;
+
+const eq = EQUIPMENT.filter(e=>e.pid===p.id);
+$("#body").innerHTML = `
+ <div class="panel"><h2 style="font-size:21px">نبذة عن الجهة</h2><p style="margin-top:10px;color:var(--ink2)">${p.about}</p>
+   <div class="sep"></div>
+   <h2 style="font-size:21px">الخدمات المقدّمة</h2>
+   <div class="grid g2" style="margin-top:12px">${p.svc.map(s=>`<div class="card" style="padding:14px"><div class="rowf"><div class="ico" style="width:38px;height:38px;font-size:18px">✔</div><b>${s}</b></div></div>`).join("")}</div>
+   <div class="sep"></div>
+   <h2 style="font-size:21px">نطاق التغطية</h2>
+   <p class="muted" style="margin-top:8px">المقر الرئيسي: ${p.city}، ${p.gov} — نطاق الخدمة المعلن: 60 كم، مع إمكانية تغطية إضافية بالاتفاق.</p>
+   <div class="mapbox" style="height:250px;margin-top:12px"><button class="pin on" style="top:45%;inset-inline-end:48%" onclick="location.href='map.html?gov='+encodeURIComponent(p.gov)" title="عرض على الخريطة التفاعلية">${p.city}</button>
+     <div class="maplegend">نطاق الخدمة المعلن ≈ 60 كم</div></div>
+ </div>
+
+ ${eq.length?`<div class="panel" style="margin-top:18px"><div class="rowb"><h2 style="font-size:21px">الأجهزة المُدرجة (${eq.length})</h2>
+   <a href="equipment.html" class="btn btn-soft btn-sm">كل السوق ←</a></div>
+   <div class="grid g2" style="margin-top:14px">${eq.map(equipmentCard).join("")}</div></div>`:""}
+
+ <div class="panel" style="margin-top:18px"><h2 style="font-size:21px">التقييمات (${p.reviews})</h2>
+   <div class="grid g2" style="margin-top:14px">
+     <div>${[["جودة التنفيذ",92],["الالتزام بالمواعيد",86],["التواصل والاستجابة",90],["القيمة مقابل السعر",81]]
+       .map(([t,v])=>`<div style="margin-bottom:12px"><div class="rowb"><span class="muted">${t}</span><b>${(v/20).toFixed(1)}</b></div>
+         <div style="height:8px;background:#eef2f6;border-radius:99px;overflow:hidden"><i style="display:block;height:100%;width:${v}%;background:var(--cyan)"></i></div></div>`).join("")}</div>
+     <div style="text-align:center;padding:14px;background:#fafcfe;border-radius:14px">
+       <div style="font-size:44px;font-weight:900">${p.rate}</div><div class="stars" style="font-size:19px">${stars(p.rate)}</div>
+       <div class="muted" style="margin-top:6px">${p.reviews} تقييم موثّق</div></div></div>
+   <div class="sep"></div>
+   ${[["م. طارق عبد الحميد","★★★★★","دقة ممتازة في الرفع وتسليم في الموعد المتفق عليه، والتعامل مهني جدًا مع الملاحظات."],
+      ["شركة أوركيد للتطوير","★★★★★","تعاملنا معهم في مشروعين، الالتزام والدقة على مستوى عالٍ."],
+      ["م. منى فؤاد","★★★★☆","خدمة جيدة، كان في تأخير بسيط بسبب ظروف الموقع لكن النتيجة النهائية ممتازة."]]
+    .map(([n,s,c])=>`<div style="padding:14px 0;border-bottom:1px solid var(--bd)"><div class="rowb"><b>${n}</b><span class="stars">${s}</span></div>
+      <p style="margin-top:6px">${c}</p></div>`).join("")}
+   <button class="btn btn-soft btn-sm" style="margin-top:14px" onclick="openModal('report')">🚩 الإبلاغ عن هذا الملف</button>
+ </div>`;
+
+$("#aside").innerHTML = `
+ <div class="panel sticky">
+   <h3 style="font-size:18px">تواصل مع الجهة</h3>
+   <p class="muted" style="margin-top:6px">تُنشئ المنصة طلبًا موثّقًا ويصل مباشرة لصندوق المزوّد.</p>
+   <button class="btn btn-pri btn-block btn-lg" style="margin-top:12px" onclick="openModal('contact','${p.name}')">طلب تواصل الآن</button>
+   <button class="btn btn-soft btn-block" style="margin-top:9px" onclick="openModal('need')">أرسل احتياجك بالتفصيل</button>
+   <div class="sep"></div>
+   <table class="spec"><tbody>
+     <tr><th>نوع الجهة</th><td>${p.type}</td></tr>
+     <tr><th>الموقع</th><td>${p.city}، ${p.gov}</td></tr>
+     <tr><th>سنة التأسيس</th><td>${p.since}</td></tr>
+     <tr><th>حجم الفريق</th><td>${p.staff}</td></tr>
+     <tr><th>متوسط زمن الرد</th><td>${p.resp}</td></tr>
+     <tr><th>حالة الملف</th><td><span class="chip ok">معتمد ومنشور</span></td></tr>
+   </tbody></table>
+   <div class="notice cy" style="margin-top:12px">شارات التوثيق تعكس ما تمّت مراجعته فعليًا فقط، ولا تُعدّ اعتمادًا فنيًا لنتائج الأعمال.</div>
+ </div>`;
+
+$("#similar").innerHTML = PROVIDERS.filter(x=>x.id!==p.id && (x.cat===p.cat||x.gov===p.gov)).slice(0,3).map(providerCard).join("");
+$("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مراجعة الوظائف | Geo Station</title>
+<meta name="description" content="مراجعة الوظائف">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-jobs.html", "مراجعة الوظائف", `<a href="a-dashboard.html">لوحة الإدارة</a> / <b>الوظائف</b>`);
+
+const AJ=[["JB-211","رسّام أوتوكاد","مكتب النخبة","الإسكندرية","دوام جزئي","2026-09-03","قيد المراجعة","—"],
+ ["JB-214","مسّاح أول — طرق","هورايزون جيو","الجيزة","دوام كامل","2026-09-02","قيد المراجعة","راتب غير محدد"],
+ ["JB-209","فني معايرة","مركز الدقة","الجيزة","دوام كامل","2026-09-01","منشور","—"],
+ ["JB-208","مسّاح موقع — مشروع سكني","مكتب النخبة","الإسكندرية","دوام كامل","2026-09-01","منشور","—"],
+ ["JB-205","محلل GIS","دلتا جيوماتكس","القاهرة","دوام كامل","2026-08-28","منشور","—"],
+ ["JB-202","مطلوب مسّاحين — تفاصيل ناقصة","جيو تك للتوريدات","الجيزة","غير محدد","2026-08-26","مرفوض","وصف غير كافٍ"]];
+setContent(`
+<div class="pagehead"><div><h2>مراجعة الوظائف</h2>
+  <p>الوظائف تُنشر بعد التأكد من وضوح المسمى والوصف والمتطلبات وعدم وجود شروط تمييزية.</p></div></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  ${kpi("قيد المراجعة","2","","flat","⏳")}
+  ${kpi("وظائف منشورة","41","▲ 7","up","💼")}
+  ${kpi("إجمالي التقديمات","512","▲ 23%","up","📄")}
+  ${kpi("مرفوضة هذا الشهر","5","بيانات غير كافية","dn","⛔")}
+</div>
+
+<div class="toolbar"><input placeholder="بحث بالوظيفة أو الجهة…" style="min-width:210px">
+ <select><option>كل الحالات</option><option>قيد المراجعة</option><option>منشور</option><option>مرفوض</option></select>
+ <select><option>كل المحافظات</option><option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option></select>
+ <div style="flex:1"></div><span class="muted">${AJ.length} وظيفة</span></div>
+
+${table(["الرقم","الوظيفة","الجهة","المحافظة","نوع التعاقد","التاريخ","تنبيه","الحالة","الإجراء"],
+ AJ.map(j=>[`<code>${j[0]}</code>`,`<b>${j[1]}</b>`,j[2],j[3],`<span class="chip cy">${j[4]}</span>`,
+  `<span class="muted">${j[5]}</span>`, j[7]==="—"?'<span class="muted">—</span>':`<span class="chip warn">${j[7]}</span>`,
+  j[6]==="مرفوض"?'<span class="chip err">مرفوض</span>':st(j[6]),
+  `<button class="btn btn-pri btn-sm" onclick="revJob('${j[0]}','${j[1]}')">مراجعة</button>`]))}
+`);
+function revJob(id,t){
+ openModal(`<button class="x" onclick="closeModal()">✕</button><h3>مراجعة وظيفة ${id}</h3><p class="muted">${t}</p>
+  <div class="sep"></div><h3 style="font-size:16px">قائمة التحقق</h3>
+  <div style="margin-top:9px">${["المسمى الوظيفي واضح ومحدد","الوصف الوظيفي كافٍ وليس سطرًا واحدًا","المتطلبات مذكورة وواقعية",
+    "لا توجد شروط تمييزية (سن/جنس/محل إقامة دون مبرر)","الجهة الناشرة معتمدة ونشطة","لا يوجد طلب رسوم من المتقدمين"]
+   .map((x,i)=>`<label class="check"><input type="checkbox" ${i<4?"checked":""}> ${x}</label>`).join("")}</div>
+  <div class="notice" style="margin-top:12px">يُرفض فورًا أي إعلان يطلب مبالغ مالية من المتقدمين أو يتضمن شروطًا تمييزية غير مبررة.</div>
+  <div class="field" style="margin-top:14px"><label>ملاحظة للجهة الناشرة</label><textarea rows="3"></textarea></div>
+  <div class="rowf" style="margin-top:14px;flex-wrap:wrap">
+   <button class="btn btn-ok" onclick="closeModal();toast('✅ ${id}: تم النشر')">اعتماد ونشر</button>
+   <button class="btn btn-org" onclick="closeModal();toast('📝 ${id}: طلب تعديلات')">طلب تعديلات</button>
+   <button class="btn btn-err" onclick="closeModal();toast('⛔ ${id}: تم الرفض')">رفض</button></div>`);
+}
+
+</script>
+</body>
+</html>

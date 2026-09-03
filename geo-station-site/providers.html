@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>المكاتب والشركات | Geo Station</title>
+<meta name="description" content="ابحث وقارن بين مكاتب وشركات المساحة وموردي الأجهزة ومراكز المعايرة والتدريب حسب المحافظة والتقييم.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main id="main">
+<section class="sec tight"><div class="wrap">
+  <div class="muted" id="crumb">الرئيسية / الدليل</div>
+  <div class="sechead" style="margin-top:10px"><div><h2 id="ttl">المكاتب والشركات</h2><p id="sub">نتائج مرتّبة حسب الصلة والتقييم ومستوى التوثيق.</p></div></div>
+
+  <div class="layout">
+    <aside class="panel sticky">
+      <h4 style="margin-bottom:14px">تصفية النتائج</h4>
+      <div class="fgroup"><h4>بحث بالاسم أو الخدمة</h4><input type="text" id="f-q" placeholder="مثال: رفع مساحي"></div>
+      <div class="fgroup"><h4>نوع الجهة</h4><select id="f-cat"><option value="">كل الأنواع</option></select></div>
+      <div class="fgroup"><h4>المحافظة</h4><select id="f-gov"><option value="">كل المحافظات</option></select></div>
+      <div class="fgroup"><h4>الثقة والجودة</h4>
+        <label><input type="checkbox" id="f-ver"> جهات بتوثيق متقدّم</label>
+        <label><input type="checkbox" id="f-top"> تقييم 4.5 فأعلى</label></div>
+      <div class="fgroup"><h4>الخدمات الشائعة</h4>
+        <label><input type="checkbox"> رفع مساحي</label>
+        <label><input type="checkbox"> تقسيم أراضي</label>
+        <label><input type="checkbox"> مسح ليزري</label>
+        <label><input type="checkbox"> Drone Survey</label></div>
+      <button class="btn btn-soft btn-block btn-sm" onclick="clearF()">مسح كل الفلاتر</button>
+    </aside>
+
+    <div>
+      <div class="toolbar">
+        <span class="muted" id="count"></span>
+        <div style="flex:1"></div>
+        <select id="f-sort">
+          <option value="relevance">الأكثر صلة</option>
+          <option value="rating">الأعلى تقييمًا</option>
+          <option value="reviews">الأكثر تقييمات</option>
+          <option value="featured">المميّز أولًا</option>
+          <option value="newest">الأحدث انضمامًا</option></select>
+        <div class="seg"><button class="on" id="v-list" onclick="setView('list')">قائمة</button><button id="v-map" onclick="setView('map')">خريطة</button></div>
+      </div>
+      <div id="out"></div>
+      <div class="pager" id="pager"></div>
+    </div>
+  </div>
+</div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+mountShell("directory.html");
+
+$("#f-cat").innerHTML += PROVIDER_TYPES.map(t=>`<option value="${t.slug}">${t.name}</option>`).join("");
+$("#f-gov").innerHTML += GOVS.map(g=>`<option>${g}</option>`).join("");
+if(qs("type")) $("#f-cat").value=qs("type");
+if(qs("gov"))  $("#f-gov").value=qs("gov");
+if(qs("q"))    $("#f-q").value=qs("q");
+let VIEW="list";
+function setView(v){VIEW=v;$("#v-list").classList.toggle("on",v==="list");$("#v-map").classList.toggle("on",v==="map");draw()}
+function clearF(){["f-q","f-gov","f-cat"].forEach(i=>$("#"+i).value="");$("#f-ver").checked=false;$("#f-top").checked=false;draw()}
+function draw(){
+  const f=readFilters(), r=filterProviders(f);
+  const t=PROVIDER_TYPES.find(x=>x.slug===f.cat);
+  $("#ttl").textContent = t?t.name:"كل المكاتب والشركات والجهات";
+  $("#crumb").textContent = "الرئيسية / الدليل"+(t?" / "+t.name:"");
+  $("#count").innerHTML = `<b>${r.length}</b> نتيجة${f.gov?" في "+f.gov:""}`;
+  if(!r.length){ $("#out").innerHTML=`<div class="empty"><h3>لا توجد نتائج مطابقة</h3>
+    <p>جرّب توسيع النطاق الجغرافي أو إزالة بعض الفلاتر — أو دع المزوّدين يصلوك.</p>
+    <button class="btn btn-org" onclick="openModal('need')">أضف احتياجك</button></div>`; $("#pager").innerHTML=""; return }
+  if(VIEW==="map"){
+    $("#out").innerHTML=`<div class="mapbox">${r.map(p=>`<button class="pin" style="top:${p.y}%;inset-inline-end:${p.x}%" onclick="location.href='provider.html?slug=${p.slug}'">${p.name.split(" ")[0]} • ${p.rate}★</button>`).join("")}
+      <div class="maplegend"><b>${r.length}</b> جهة داخل نطاق البحث<br><span class="muted">الترتيب: صلة + مسافة + توثيق</span></div></div>
+      <div class="grid g3" style="margin-top:16px">${r.slice(0,3).map(providerCard).join("")}</div>`;
+    $("#pager").innerHTML="";
+  } else {
+    $("#out").innerHTML=`<div class="grid g2">${r.map(providerCard).join("")}</div>`;
+    $("#pager").innerHTML=`<button class="on" onclick="toast('أنت في الصفحة الأولى')" aria-current="page">1</button><button onclick="toast('نموذج عرض — صفحة واحدة من البيانات التجريبية')">2</button><button onclick="toast('نموذج عرض')">3</button><button onclick="toast('نموذج عرض')">›</button>`;
+  }
+}
+["f-q","f-gov","f-cat","f-sort"].forEach(i=>{$("#"+i).addEventListener("input",draw);$("#"+i).addEventListener("change",draw)});
+["f-ver","f-top"].forEach(i=>$("#"+i).addEventListener("change",draw));
+draw(); $("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

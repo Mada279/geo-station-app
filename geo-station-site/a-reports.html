@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>البلاغات | Geo Station</title>
+<meta name="description" content="البلاغات">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-reports.html", "البلاغات", `<a href="a-dashboard.html">لوحة الإدارة</a> / <b>البلاغات</b>`);
+
+const RP=[["RP-241","بيانات غير صحيحة","ملف مزوّد","جيو تك للتوريدات","م. سامي عادل","2026-09-03","جديد","عالية"],
+ ["RP-240","الجهة غير موجودة","ملف مزوّد","مكتب النور للمساحة","مستخدم مجهول","2026-09-02","جديد","عالية"],
+ ["RP-238","محتوى مخالف","إدراج جهاز","EQ-142 Trimble R12i","م. هاني مرسي","2026-09-02","قيد المعالجة","متوسطة"],
+ ["RP-235","ملف مكرر","ملف مزوّد","شركة أبعاد للمساحة","نظام آلي","2026-09-01","قيد المعالجة","متوسطة"],
+ ["RP-231","سلوك غير مهني","تقييم","RV-899","مكتب النخبة","2026-08-30","جديد","منخفضة"],
+ ["RP-228","بيانات غير صحيحة","وظيفة","JB-197","مستخدم مسجّل","2026-08-27","مغلق — تم الحل","منخفضة"]];
+setContent(`
+<div class="pagehead"><div><h2>البلاغات الواردة</h2>
+  <p>بلاغات المستخدمين والفحص الآلي — تُعالج وفق الأولوية ويُسجَّل كل قرار.</p></div>
+  <button class="btn btn-soft" onclick="toast('تم تصدير البلاغات')">⬇ تصدير</button></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  ${kpi("بلاغات جديدة","3","","dn","🚩")}
+  ${kpi("قيد المعالجة","2","","flat","🔧")}
+  ${kpi("متوسط زمن المعالجة","19 ساعة","ضمن SLA 48 ساعة","up","⏱️")}
+  ${kpi("تم حلها هذا الشهر","31","▲ 8","up","✅")}
+</div>
+
+<div class="toolbar"><select><option>كل الحالات</option><option>جديد</option><option>قيد المعالجة</option><option>مغلق</option></select>
+ <select><option>كل الأنواع</option><option>ملف مزوّد</option><option>إدراج جهاز</option><option>تقييم</option><option>وظيفة</option></select>
+ <select><option>كل الأولويات</option><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select>
+ <div style="flex:1"></div><span class="muted">${RP.length} بلاغ</span></div>
+
+${table(["الرقم","سبب البلاغ","نوع الكيان","الكيان","المُبلِّغ","التاريخ","الأولوية","الحالة","الإجراء"],
+ RP.map(r=>[`<code>${r[0]}</code>`,`<b>${r[1]}</b>`,`<span class="chip">${r[2]}</span>`,r[3],
+   `<span class="muted">${r[4]}</span>`,`<span class="muted">${r[5]}</span>`,
+   `<span class="chip ${r[7]==="عالية"?"err":r[7]==="متوسطة"?"warn":""}">${r[7]}</span>`,
+   r[6]==="جديد"?'<span class="chip cy">جديد</span>':r[6].startsWith("مغلق")?'<span class="chip ok">'+r[6]+'</span>':'<span class="chip warn">'+r[6]+'</span>',
+   `<button class="btn btn-pri btn-sm" onclick="handleRep('${r[0]}','${r[1]}','${r[3]}')">معالجة</button>`]))}
+`);
+function handleRep(id,reason,ent){
+ openModal(`<button class="x" onclick="closeModal()">✕</button><h3>معالجة بلاغ ${id}</h3>
+  <p class="muted">${reason} — بخصوص: <b>${ent}</b></p>
+  <div class="sep"></div>
+  <div class="field"><label>نتيجة الفحص *</label>
+   <select><option>البلاغ صحيح — يستوجب إجراء</option><option>البلاغ صحيح جزئيًا — يكفي تنبيه</option><option>البلاغ غير صحيح — إغلاق</option><option>يحتاج تحقق إضافي</option></select></div>
+  <div class="field" style="margin-top:12px"><label>الإجراء المتخذ *</label>
+   <select><option>طلب تصحيح البيانات من المزوّد</option><option>إخفاء الكيان مؤقتًا</option><option>إيقاف الحساب</option><option>سحب شارة توثيق</option><option>لا إجراء</option></select></div>
+  <div class="field" style="margin-top:12px"><label>ملاحظة القرار (تُسجَّل في سجل التدقيق) *</label><textarea rows="3"></textarea></div>
+  <label class="check" style="margin-top:10px"><input type="checkbox" checked> إخطار المُبلِّغ بنتيجة البلاغ</label>
+  <div class="rowf" style="margin-top:14px">
+   <button class="btn btn-pri" onclick="closeModal();toast('✅ ${id}: تم تنفيذ الإجراء وإغلاق البلاغ')">تنفيذ وإغلاق</button>
+   <button class="btn btn-soft" onclick="closeModal();toast('تم حفظه كقيد المعالجة')">حفظ كقيد المعالجة</button></div>`);
+}
+
+</script>
+</body>
+</html>

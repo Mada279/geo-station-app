@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>انضم كشريك | Geo Station</title>
+<meta name="description" content="سجّل مكتبك أو شركتك أو مركزك على Geo Station واستقبل طلبات تواصل حقيقية.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<main id="main">
+<section class="hero"><div class="hero-bg"><img src="assets/img/team-total-station.jpg" alt=""></div>
+<div class="wrap hero-in" style="padding:52px 0 54px">
+  <div style="color:#9db2c6;font-size:13px">الرئيسية / انضم كشريك</div>
+  <h1 style="font-size:clamp(26px,3.6vw,40px);margin:12px 0 10px">انضم كشريك في Geo Station</h1>
+  <p class="lead">سجّل جهتك مجانًا، أضف خدماتك ومعداتك، واستقبل طلبات تواصل من عملاء داخل نطاق عملك.</p>
+</div></section><section class="sec"><div class="wrap">
+ <div class="grid g4" style="margin-bottom:34px">
+ <div class="card"><div class="ico">🎯</div><h3>عملاء يبحثون فعلًا</h3><p>ظهورك أمام من يبحث عن خدمتك في محافظتك تحديدًا.</p></div><div class="card"><div class="ico">📥</div><h3>صندوق طلبات منظّم</h3><p>كل طلب بحالة واضحة وسجل أحداث كامل.</p></div><div class="card"><div class="ico">📊</div><h3>لوحة تحليلات</h3><p>اعرف مصادر طلباتك وأكثر الكلمات التي توصلك للعملاء.</p></div><div class="card"><div class="ico">⭐</div><h3>ملف يبني ثقتك</h3><p>تقييمات وتوثيق ومعرض أعمال ومعدات في مكان واحد.</p></div>
+ </div>
+
+ <div class="layout rev">
+  <div class="panel">
+   <h2 style="font-size:23px">بيانات التسجيل</h2>
+   <p class="muted" style="margin-top:6px">التسجيل مجاني. تراجع الإدارة البيانات قبل النشر، وقد نتواصل معك للتأكيد.</p>
+   <form style="margin-top:18px" onsubmit="event.preventDefault();toast('✅ تم استلام طلب التسجيل — سيتواصل معك فريق الشركاء خلال 48 ساعة');this.reset()">
+    <div class="formgrid">
+     <div class="field"><label>نوع الجهة *</label><select id="ptype" required></select></div>
+     <div class="field"><label>الاسم التجاري *</label><input required placeholder="مثال: مكتب الأمانة للمساحة"></div>
+     <div class="field"><label>اسم المسؤول *</label><input required></div>
+     <div class="field"><label>الصفة</label><input placeholder="صاحب المكتب / مدير"></div>
+     <div class="field"><label>رقم الهاتف *</label><input required placeholder="01xxxxxxxxx"></div>
+     <div class="field"><label>واتساب</label><input placeholder="01xxxxxxxxx"></div>
+     <div class="field"><label>البريد الإلكتروني</label><input type="email"></div>
+     <div class="field"><label>الموقع الإلكتروني / صفحة فيسبوك</label><input placeholder="https://"></div>
+     <div class="field"><label>المحافظة *</label><select id="pgov" required></select></div>
+     <div class="field"><label>المدينة / الحي *</label><input required></div>
+     <div class="field"><label>سنة بدء النشاط</label><input placeholder="2015"></div>
+     <div class="field"><label>حجم الفريق</label><select><option>1-5</option><option>6-15</option><option>16-40</option><option>أكثر من 40</option></select></div>
+     <div class="field full"><label>الخدمات التي تقدّمها *</label><textarea required rows="2" placeholder="رفع مساحي، تقسيم أراضي، تأجير أجهزة، معايرة..."></textarea></div>
+     <div class="field full"><label>نبذة عن الجهة</label><textarea rows="3" placeholder="اكتب وصفًا مختصرًا يظهر في ملفك العام"></textarea></div>
+     <div class="field full"><label>ماذا تريد أن تضيف بعد التسجيل؟</label>
+       <div><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> خدمات</label><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> أجهزة للبيع</label><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> أجهزة للإيجار</label><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> دورات تدريبية</label><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> وظائف</label></div></div>
+    </div>
+    <label class="muted" style="display:flex;gap:9px;margin:16px 0"><input type="checkbox" required checked> أقر بصحة البيانات وأوافق على <a href="terms.html" style="color:var(--cyan-d)">شروط الاستخدام</a> و<a href="privacy.html" style="color:var(--cyan-d)">سياسة الخصوصية</a>.</label>
+    <button class="btn btn-pri btn-lg btn-block">إرسال طلب التسجيل</button>
+   </form>
+  </div>
+  <aside><div class="panel sticky">
+   <h3 style="font-size:18px">ماذا يحدث بعد الإرسال؟</h3>
+   <div class="steps" style="margin-top:14px">
+    <div class="step" style="padding:14px 14px 14px 14px;padding-inline-start:58px"><b>مراجعة أولية</b><p style="font-size:13.5px">خلال 48 ساعة عمل.</p></div>
+    <div class="step" style="padding-inline-start:58px"><b>تأكيد البيانات</b><p style="font-size:13.5px">مكالمة قصيرة أو رسالة للتحقق.</p></div>
+    <div class="step" style="padding-inline-start:58px"><b>تفعيل الحساب</b><p style="font-size:13.5px">تستلم بيانات الدخول للوحة المزوّد.</p></div>
+    <div class="step" style="padding-inline-start:58px"><b>النشر والظهور</b><p style="font-size:13.5px">يظهر ملفك في البحث والخريطة.</p></div>
+   </div>
+   <div class="sep"></div>
+   <div class="notice cy">التسجيل والظهور الأساسي مجاني بالكامل. الباقات المدفوعة اختيارية وتخص الظهور المميّز والإعلانات فقط.</div>
+   <div class="sep"></div>
+   <b>مسجّل بالفعل؟</b><p class="muted" style="margin-top:6px">ادخل إلى بوابة المزوّد لمتابعة طلباتك وإدراجاتك وأدائك.</p>
+   <a href="p-dashboard.html" class="btn btn-pri btn-block btn-sm">🔐 دخول بوابة المزوّد</a>
+   <a href="a-dashboard.html" class="btn btn-soft btn-block btn-sm" style="margin-top:8px">🛡️ لوحة إدارة المنصة</a>
+   <div class="sep"></div>
+   <b>محتاج مساعدة؟</b><p class="muted" style="margin-top:6px">فريق خدمة الشركاء متاح من السبت للخميس، 9ص — 5م.</p>
+   <a href="contact.html" class="btn btn-soft btn-block btn-sm">تواصل مع الفريق</a>
+  </div></aside>
+ </div>
+</div></section>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+mountShell("join.html");
+$("#ptype").innerHTML=PROVIDER_TYPES.map(t=>`<option value="${t.slug}">${t.single}</option>`).join("");$("#pgov").innerHTML=GOVS.map(g=>`<option>${g}</option>`).join("");
+</script>
+</body>
+</html>

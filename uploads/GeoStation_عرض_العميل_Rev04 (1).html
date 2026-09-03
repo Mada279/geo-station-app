@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geo Station — Business & Technical Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B1B2E;
+    --bg-alt:#0F243D;
+    --panel:#122B47;
+    --grid-line:rgba(143,168,194,0.14);
+    --grid-line-strong:rgba(143,168,194,0.28);
+    --accent:#FF6A3D;
+    --accent-dim:#c74f28;
+    --cyan:#35C4C9;
+    --green:#3FAE6B;
+    --violet:#8B6FD1;
+    --text:#EAF1F7;
+    --text-dim:#93A8BE;
+    --paper:#F6F3EC;
+    --paper-dim:#DCD6C7;
+    --ink:#152238;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans Arabic', sans-serif;
+    line-height:1.7;
+    overflow-x:hidden;
+  }
+  .ltr{direction:ltr; unicode-bidi:isolate; font-family:'IBM Plex Mono', monospace;}
+
+  /* Blueprint grid backdrop */
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 100% 60% at 50% 0%, black 40%, transparent 90%);
+  }
+  .grid-bg::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(var(--grid-line-strong) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line-strong) 1px, transparent 1px);
+    background-size: 240px 240px;
+  }
+
+  main{position:relative; z-index:1;}
+
+  .wrap{max-width:1100px; margin:0 auto; padding:0 28px;}
+
+  /* Benchmark marker (signature element) */
+  .bm{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px; letter-spacing:0.06em;
+    color:var(--cyan);
+    margin-bottom:18px;
+  }
+  .bm .reticle{
+    width:18px; height:18px; position:relative; flex:none;
+  }
+  .bm .reticle::before, .bm .reticle::after{
+    content:""; position:absolute; background:var(--cyan);
+  }
+  .bm .reticle::before{ width:100%; height:1.5px; top:50%; transform:translateY(-50%);}
+  .bm .reticle::after{ height:100%; width:1.5px; right:50%; transform:translateX(50%);}
+  .bm .reticle-circle{
+    position:absolute; inset:3px; border:1.5px solid var(--cyan); border-radius:50%;
+  }
+
+  /* BRANDING */
+  .brand-bar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 0 10px;border-bottom:1px solid var(--grid-line-strong);}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);}
+  .brand-mark{width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(53,196,201,.45);border-radius:12px;background:linear-gradient(145deg,#12375a,#0b1b2e);box-shadow:0 8px 25px rgba(0,0,0,.2);}
+  .brand-mark svg{width:30px;height:30px;}
+  .brand-name{font-family:'Cairo',sans-serif;font-weight:900;font-size:20px;letter-spacing:.03em;}
+  .brand-name small{display:block;font:600 9px 'IBM Plex Mono';letter-spacing:.16em;color:var(--cyan);margin-top:-4px;}
+  .app-brand{display:flex;align-items:center;gap:10px;color:var(--text-dim);font-size:13px;}
+  .app-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#ff6a3d,#35c4c9);display:grid;place-items:center;box-shadow:0 8px 18px rgba(0,0,0,.22);}
+  .app-logo svg{width:24px;height:24px;}
+
+  /* HERO */
+  .hero{
+    min-height:92vh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding-top:80px; padding-bottom:60px;
+    position:relative;
+  }
+  .hero-top{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--text-dim);
+    flex-wrap:wrap; gap:10px;
+    margin-bottom:60px;
+  }
+  .hero-top .tag{
+    border:1px solid var(--grid-line-strong); padding:6px 14px; border-radius:100px;
+  }
+  .hero-title{
+    font-family:'Cairo', sans-serif;
+    font-weight:900;
+    font-size:clamp(52px, 9vw, 118px);
+    line-height:0.95;
+    letter-spacing:-0.02em;
+    color:var(--text);
+    margin-bottom:22px;
+  }
+  .hero-title span{ color:var(--accent); }
+  .hero-sub{
+    font-size:clamp(18px, 2.4vw, 26px);
+    color:var(--text-dim);
+    max-width:640px;
+    font-weight:500;
+    margin-bottom:44px;
+  }
+  .hero-meta{
+    display:flex; gap:40px; flex-wrap:wrap;
+    border-top:1px solid var(--grid-line-strong);
+    padding-top:24px;
+  }
+  .hero-meta div{ font-size:14px; }
+  .hero-meta b{ display:block; font-family:'Cairo',sans-serif; font-weight:700; font-size:16px; color:var(--text); margin-bottom:2px;}
+  .hero-meta span{ color:var(--text-dim); }
+
+  /* Section shell */
+  section{ padding:120px 0; position:relative; }
+  .section-head{ max-width:720px; margin-bottom:64px; }
+  .section-head h2{
+    font-family:'Cairo', sans-serif; font-weight:800;
+    font-size:clamp(32px, 4vw, 48px);
+    color:var(--text);
+    margin-bottom:16px;
+    letter-spacing:-0.01em;
+  }
+  .section-head p{ color:var(--text-dim); font-size:18px; max-width:600px;}
+
+  /* Engine diagram */
+  .engine{
+    display:flex; align-items:center; gap:0; flex-wrap:wrap;
+    margin-top:50px;
+  }
+  .engine-node{
+    background:var(--panel);
+    border:1px solid var(--grid-line-strong);
+    border-radius:10px;
+    padding:22px 26px;
+    min-width:150px;
+    text-align:center;
+    position:relative;
+  }
+  .engine-node .n{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--cyan); display:block; margin-bottom:8px;
+  }
+  .engine-node .t{ font-family:'Cairo',sans-serif; font-weight:700; font-size:18px; color:var(--text);}
+  .engine-arrow{
+    flex:1; min-width:36px; height:1px; background:var(--grid-line-strong);
+    position:relative; margin:0 8px;
+  }
+  .engine-arrow::after{
+    content:""; position:absolute; left:0; top:-3px;
+    border:4px solid transparent; border-left-color:var(--accent); transform:rotate(180deg);
+  }
+  [dir="rtl"] .engine-arrow::after{ left:auto; right:0; transform:rotate(0deg); border-left-color:transparent; border-right-color:var(--accent);}
+
+  /* Category cards */
+  .cats{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+    gap:1px; background:var(--grid-line-strong);
+    border:1px solid var(--grid-line-strong);
+    margin-top:20px;
+  }
+  .cat{
+    background:var(--bg-alt);
+    padding:36px 28px;
+    transition:background .25s ease, transform .25s ease;
+  }
+  .cat:hover{ background:var(--panel); }
+  .cat .icon{
+    width:44px; height:44px; border:1.5px solid var(--accent); border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; margin-bottom:22px; color:var(--accent);
+  }
+  .cat h3{ font-family:'Cairo',sans-serif; font-weight:700; font-size:20px; margin-bottom:10px;}
+  .cat p{ color:var(--text-dim); font-size:15px; }
+
+  /* Phone mockups */
+  .phones{
+    display:flex; gap:36px; margin-top:60px; overflow-x:auto; padding-bottom:20px;
+    scrollbar-width:thin;
+  }
+  .phone{
+    flex:none; width:270px; background:#000; border-radius:34px; padding:10px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.6), 0 0 0 1px var(--grid-line-strong);
+  }
+  .phone-screen{
+    background:var(--paper); color:var(--ink); border-radius:26px; overflow:hidden;
+    height:540px; display:flex; flex-direction:column; position:relative;
+  }
+  .phone-notch{
+    width:90px; height:18px; background:#000; border-radius:0 0 14px 14px;
+    position:absolute; top:0; left:50%; transform:translateX(-50%); z-index:2;
+  }
+  .phone-status{
+    padding:16px 20px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink); opacity:.5;
+    text-align:left; direction:ltr;
+  }
+  .phone-body{ padding:8px 18px 18px; flex:1; display:flex; flex-direction:column; gap:14px; overflow:hidden;}
+  .phone-caption{
+    text-align:center; margin-top:16px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-dim);
+  }
+  .ph-loc{ font-size:12px; color:#7c8a9c; margin-bottom:4px;}
+  .ph-title{ font-family:'Cairo',sans-serif; font-weight:800; font-size:19px; margin-bottom:4px;}
+  .ph-search{
+    background:#fff; border:1.5px solid var(--paper-dim); border-radius:12px; padding:12px 14px;
+    font-size:13px; color:#8a8375;
+  }
+  .ph-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .ph-tile{
+    background:#fff; border-radius:12px; padding:14px 10px; text-align:center;
+    font-size:12.5px; font-weight:600; border:1px solid var(--paper-dim);
+  }
+  .ph-tile .e{ font-size:20px; display:block; margin-bottom:6px;}
+  .ph-list-item{
+    background:#fff; border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;
+    border:1px solid var(--paper-dim); font-size:13px;
+  }
+  .ph-list-item b{ display:block; font-size:14px; }
+  .ph-list-item .meta{ color:#8a8375; font-size:11.5px; margin-top:2px;}
+  .ph-price{ font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--accent-dim); font-size:13px;}
+  .ph-badge{
+    display:inline-block; background:#eef7f2; color:#1f7a4d; font-size:10.5px; padding:2px 8px; border-radius:100px; margin-top:4px;
+  }
+  .ph-cta{
+    margin-top:auto; background:var(--accent); color:#fff; text-align:center; padding:13px; border-radius:12px;
+    font-weight:700; font-size:14px; font-family:'Cairo',sans-serif;
+  }
+  .ph-divider{ height:1px; background:var(--paper-dim); margin:2px 0;}
+  .ph-pkg{ background:#fff; border:1px dashed var(--paper-dim); border-radius:12px; padding:14px; font-size:12.5px;}
+  .ph-pkg .row{ display:flex; justify-content:space-between; padding:4px 0;}
+  .ph-pkg .total{ font-weight:700; border-top:1px solid var(--paper-dim); margin-top:6px; padding-top:8px;}
+
+  /* Interactive simulator */
+  .sim-wrap{ display:flex; justify-content:center; margin-top:56px; }
+  .phone-screen.tall{ height:640px; }
+  .app-topbar{
+    display:flex; align-items:center; gap:10px; padding:16px 18px 4px; flex:none;
+  }
+  .app-topbar h3{ font-family:'Cairo',sans-serif; font-weight:700; font-size:15.5px; }
+  .app-back{
+    width:28px; height:28px; border-radius:50%; background:#fff; border:1px solid var(--paper-dim);
+    display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex:none; color:var(--ink);
+  }
+  .app-back:hover{ border-color:var(--accent); color:var(--accent); }
+  .view{ display:none; flex-direction:column; flex:1; min-height:0; }
+  .view.active{ display:flex; }
+  .view-scroll{ flex:1; overflow-y:auto; padding:6px 18px 18px; display:flex; flex-direction:column; gap:10px; }
+  .ph-tile{ cursor:pointer; transition:transform .15s ease, border-color .15s ease; }
+  .ph-tile:hover{ border-color:var(--accent); transform:translateY(-2px); }
+  .ph-list-item.clickable{ cursor:pointer; transition:border-color .15s ease; }
+  .ph-list-item.clickable:hover{ border-color:var(--accent); }
+  .skel{
+    height:58px; border-radius:12px;
+    background:linear-gradient(90deg, #ece8dd 25%, #f7f5ee 37%, #ece8dd 63%);
+    background-size:400% 100%; animation:shimmer 1.3s ease infinite;
+  }
+  @keyframes shimmer{ 0%{background-position:100% 0;} 100%{background-position:0 0;} }
+  .detail-hero{ background:#fff; border:1px solid var(--paper-dim); border-radius:14px; padding:22px; }
+  .icon-big{
+    width:50px; height:50px; border-radius:12px; background:var(--paper); border:1px solid var(--paper-dim);
+    display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:14px; color:var(--accent-dim);
+  }
+  .detail-rating{ font-size:12.5px; color:#7c8a9c; margin:6px 0 8px; }
+  .detail-price{ font-family:'IBM Plex Mono',monospace; font-size:24px; font-weight:600; color:var(--accent-dim); margin:12px 0 10px; }
+  .detail-desc{ font-size:12.5px; color:#5c6b7d; line-height:1.7; }
+  .toggle-row{
+    display:flex; justify-content:space-between; align-items:center; background:#fff;
+    border:1px solid var(--paper-dim); border-radius:10px; padding:12px 14px; font-size:12.5px; cursor:pointer; margin:8px 0;
+  }
+  .switch{ width:38px; height:21px; border-radius:100px; background:#ddd; position:relative; transition:background .2s; flex:none; }
+  .switch::after{
+    content:""; position:absolute; width:17px; height:17px; background:#fff; border-radius:50%;
+    top:2px; right:2px; transition:right .2s; box-shadow:0 1px 3px rgba(0,0,0,.3);
+  }
+  .switch.on{ background:var(--accent); }
+  .switch.on::after{ right:19px; }
+  .success-check{
+    width:56px; height:56px; border-radius:50%; background:#1f7a4d; color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:26px; margin:26px auto 10px;
+  }
+  .order-code{ text-align:center; font-family:'IBM Plex Mono',monospace; color:#8a97a6; font-size:12px; margin-bottom:24px; }
+  .stepper{ display:flex; flex-direction:column; }
+  .step{ display:flex; gap:12px; padding-bottom:22px; position:relative; }
+  .step:last-child{ padding-bottom:0; }
+  .step::before{ content:""; position:absolute; right:9px; top:22px; bottom:0; width:1.5px; background:var(--paper-dim); }
+  .step:last-child::before{ display:none; }
+  .step .dot{ width:20px; height:20px; border-radius:50%; border:2px solid var(--paper-dim); background:#fff; flex:none; z-index:1; }
+  .step.done .dot{ background:#1f7a4d; border-color:#1f7a4d; }
+  .step.active .dot{ background:var(--accent); border-color:var(--accent); }
+  .step .label{ font-size:12.5px; padding-top:1px; }
+  .step .label b{ display:block; font-size:13px; }
+  .step .label span{ color:#8a97a6; font-size:11px; }
+  .empty-state{ text-align:center; padding:70px 20px; color:#8a97a6; font-size:13px; }
+  .empty-state .e{ font-size:30px; display:block; margin-bottom:10px; }
+  .profile-card{ background:#fff; border:1px solid var(--paper-dim); border-radius:14px; padding:24px; text-align:center; }
+  .avatar{
+    width:56px; height:56px; border-radius:50%; background:var(--paper); border:1px solid var(--paper-dim);
+    display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 10px;
+  }
+  .profile-stats{ display:flex; justify-content:space-around; margin-top:18px; }
+  .profile-stats div b{ display:block; font-family:'Cairo',sans-serif; font-size:16px; }
+  .profile-stats div span{ font-size:10.5px; color:#8a97a6; }
+  .tabbar{ display:flex; border-top:1px solid var(--paper-dim); background:#fff; flex:none; }
+  .tab{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 4px 12px;
+    font-size:10px; color:#a7afba; cursor:pointer; border:none; background:none; font-family:'IBM Plex Sans Arabic', sans-serif;
+  }
+  .tab .e{ font-size:17px; }
+  .tab.active{ color:var(--accent); font-weight:700; }
+  .toast{
+    position:absolute; bottom:80px; left:16px; right:16px; background:#152238; color:#fff;
+    padding:10px 14px; border-radius:10px; font-size:12px; text-align:center;
+    opacity:0; transform:translateY(8px); transition:opacity .25s ease, transform .25s ease; pointer-events:none; z-index:5;
+  }
+  .toast.show{ opacity:1; transform:none; }
+
+  /* Map */
+  .map-controls{
+    flex:none; padding:10px 16px 8px; display:flex; flex-direction:column; gap:8px; background:var(--paper);
+  }
+  .loc-chips, .cat-chips, .city-picker{ display:flex; gap:6px; flex-wrap:wrap; }
+  .loc-chip, .cat-chip, .city-chip{
+    font-size:10.5px; padding:6px 10px; border-radius:100px; border:1px solid var(--paper-dim);
+    background:#fff; color:#5c6b7d; cursor:pointer; white-space:nowrap; font-family:'IBM Plex Sans Arabic', sans-serif;
+  }
+  .loc-chip.active, .cat-chip.active, .city-chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .city-chip.empty{ opacity:.55; }
+  .map-caption{
+    flex:none; padding:6px 16px; font-size:11px; color:#8a97a6; background:var(--paper);
+    border-bottom:1px solid var(--paper-dim); font-family:'IBM Plex Mono',monospace;
+  }
+  .map-stage{ position:relative; flex:1; min-height:0; display:flex; }
+  .map-canvas-wrap{
+    flex:1; position:relative; overflow:hidden; background:var(--bg);
+    background-image:
+      linear-gradient(rgba(143,168,194,0.18) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(143,168,194,0.18) 1px, transparent 1px);
+    background-size:22px 22px;
+  }
+  .pin{
+    position:absolute; transform:translate(-50%,-50%);
+    width:28px; height:28px; border-radius:50%; border:2px solid #fff;
+    display:flex; align-items:center; justify-content:center; font-size:12px;
+    cursor:pointer; color:#fff; box-shadow:0 3px 8px rgba(0,0,0,.45); transition:transform .15s ease; z-index:2;
+  }
+  .pin:hover{ transform:translate(-50%,-50%) scale(1.15); }
+  .pin.rental{ background:var(--accent); }
+  .pin.purchase{ background:var(--violet); }
+  .pin.calibration{ background:var(--cyan); }
+  .pin.surveyor{ background:var(--green); }
+  .pin.me{
+    background:var(--ink); border-color:var(--accent); width:22px; height:22px; font-size:10px; z-index:3;
+  }
+  .pin.me::after{
+    content:""; position:absolute; inset:-8px; border:2px solid var(--accent); border-radius:50%;
+    animation:pinPulse 1.8s ease-out infinite;
+  }
+  @keyframes pinPulse{ 0%{ transform:scale(.55); opacity:.8; } 100%{ transform:scale(1.8); opacity:0; } }
+  .map-empty{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:30px; color:var(--text-dim); background:var(--bg); z-index:1;
+  }
+  .map-empty .e{ font-size:28px; display:block; margin-bottom:10px; }
+  .map-empty b{ display:block; color:var(--text); font-family:'Cairo',sans-serif; font-size:14px; margin-bottom:6px; }
+  .map-empty span{ font-size:12px; line-height:1.6; display:block; }
+  .map-popup{
+    position:absolute; left:12px; right:12px; bottom:12px; background:#fff; border-radius:14px;
+    padding:14px 16px; box-shadow:0 10px 30px rgba(0,0,0,.4); z-index:6;
+  }
+  .map-popup-close{
+    position:absolute; top:8px; left:10px; width:22px; height:22px; border-radius:50%; border:1px solid var(--paper-dim);
+    background:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; color:#5c6b7d;
+  }
+  .map-popup .cat-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#8a97a6; margin-bottom:4px; }
+  .map-popup .name{ font-family:'Cairo',sans-serif; font-weight:700; font-size:15px; margin-bottom:4px; }
+  .map-popup .meta{ font-size:11.5px; color:#7c8a9c; margin-bottom:10px; }
+  .map-popup .price{ font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--accent-dim); font-size:15px; }
+
+  /* Table */
+  .tbl{ width:100%; border-collapse:collapse; margin-top:20px; }
+  .tbl th, .tbl td{
+    text-align:right; padding:16px 18px; border-bottom:1px solid var(--grid-line-strong); font-size:15px;
+  }
+  .tbl th{ font-family:'Cairo',sans-serif; color:var(--cyan); font-weight:700; font-size:14px; letter-spacing:.02em;}
+  .tbl td.num{ font-family:'IBM Plex Mono',monospace; color:var(--accent); direction:ltr; text-align:left;}
+  .tbl tr:hover td{ background:rgba(255,255,255,.02); }
+
+  /* Roadmap */
+  .road{ margin-top:50px; position:relative; }
+  .road::before{
+    content:""; position:absolute; top:0; bottom:0; right:23px; width:1px; background:var(--grid-line-strong);
+  }
+  .road-item{ position:relative; padding-right:64px; margin-bottom:48px; }
+  .road-item:last-child{ margin-bottom:0;}
+  .road-item .marker{
+    position:absolute; right:0; top:2px; width:48px; height:48px; border-radius:50%;
+    border:1.5px solid var(--accent); display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--accent); background:var(--bg);
+  }
+  .road-item h4{ font-family:'Cairo',sans-serif; font-weight:700; font-size:19px; margin-bottom:8px;}
+  .road-item p{ color:var(--text-dim); font-size:15px; max-width:600px;}
+
+  /* Footer / signature */
+  footer{
+    padding:90px 0 60px; border-top:1px solid var(--grid-line-strong); margin-top:60px;
+  }
+  .sig{
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:40px;
+    padding-top:40px;
+  }
+  .sig-block{ font-size:15px; }
+  .sig-block .role{ color:var(--text-dim); font-size:13px; margin-bottom:6px; font-family:'IBM Plex Mono',monospace;}
+  .sig-block .name{ font-family:'Cairo',sans-serif; font-weight:800; font-size:22px; }
+  .sig-arrow{ display:flex; align-items:center; color:var(--accent); font-size:24px; }
+  footer .foot-note{ color:var(--text-dim); font-size:13px; margin-top:60px; font-family:'IBM Plex Mono',monospace;}
+
+  .contact-block{
+    margin-top:44px; padding-top:24px; border-top:1px solid var(--grid-line);
+  }
+  .contact-block .role{ color:var(--text-dim); font-size:13px; margin-bottom:8px; font-family:'IBM Plex Mono',monospace;}
+  .contact-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .contact-name{ font-family:'Cairo',sans-serif; font-weight:800; font-size:18px; color:var(--text); }
+  .contact-dot{ color:var(--text-dim); }
+  .contact-phone{
+    font-family:'IBM Plex Mono',monospace; font-size:15px; color:var(--accent);
+    text-decoration:none; border-bottom:1px dashed var(--accent-dim); padding-bottom:1px;
+  }
+  .contact-phone:hover{ color:var(--cyan); border-color:var(--cyan); }
+
+  /* reveal animation */
+  .reveal{ opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ opacity:1; transform:none; transition:none; }
+    html{ scroll-behavior:auto; }
+    .pin.me::after{ animation:none; }
+  }
+
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; }
+
+  @media (max-width:720px){
+    section{ padding:80px 0; }
+    .hero{ min-height:auto; padding-top:50px; }
+    .hero-meta{ gap:24px; }
+    .engine{ flex-direction:column; align-items:stretch; }
+    .engine-arrow{ width:1px; height:28px; margin:0 auto; }
+    .engine-arrow::after{ display:none; }
+  }
+
+  .data-workbench{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;margin-top:28px;}
+  .data-panel{background:rgba(18,43,71,.88);border:1px solid var(--grid-line-strong);border-radius:20px;padding:22px;box-shadow:0 16px 45px rgba(0,0,0,.16);}
+  .data-panel h3{font-family:Cairo,sans-serif;font-size:20px;margin-bottom:8px;}
+  .data-panel p{color:var(--text-dim);font-size:14px;margin-bottom:16px;}
+  .data-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  .data-field{display:flex;flex-direction:column;gap:6px;}
+  .data-field.full{grid-column:1/-1;}
+  .data-field label{font-size:12px;color:var(--cyan);font-weight:700;}
+  .data-field input,.data-field select,.data-field textarea{width:100%;border:1px solid rgba(143,168,194,.25);background:#0b1b2e;color:var(--text);border-radius:10px;padding:10px;font:500 13px 'IBM Plex Sans Arabic',sans-serif;outline:none;}
+  .data-field textarea{min-height:72px;resize:vertical;}
+  .data-checks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;}
+  .data-check{display:flex;align-items:center;gap:8px;background:rgba(11,27,46,.65);padding:8px;border-radius:9px;color:var(--text-dim);font-size:12px;}
+  .data-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
+  .data-btn{border:0;border-radius:10px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer;}
+  .data-btn.alt{background:#173b5d;border:1px solid rgba(53,196,201,.35);}
+  .data-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px;}
+  .data-table th,.data-table td{padding:9px;border-bottom:1px solid var(--grid-line);text-align:right;}
+  .data-table th{color:var(--cyan);}
+  .storage-stack{display:grid;gap:12px;margin-top:14px;}
+  .storage-card{padding:14px;border-radius:14px;background:rgba(11,27,46,.7);border:1px solid rgba(143,168,194,.16);}
+  .storage-card b{display:block;color:var(--text);margin-bottom:4px;}
+  .storage-card span{font-size:12px;color:var(--text-dim);}
+  .flow-mini{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:18px;color:var(--text-dim);font-size:12px;}
+  .flow-mini span{padding:8px 10px;border-radius:9px;background:#102d49;border:1px solid rgba(53,196,201,.22);}
+  .flow-mini i{color:var(--cyan);font-style:normal;}
+  .hero-ad-card,.academy-card{margin-top:10px;padding:10px;border-radius:12px;background:linear-gradient(135deg,#102e4c,#173d61);border:1px solid rgba(255,106,61,.3);display:grid;gap:4px;font-size:11px;}
+  .hero-ad-card span,.academy-card span{color:var(--text-dim);}
+  .hero-ad-card button,.academy-card button{border:0;border-radius:8px;padding:6px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer;}
+  @media(max-width:820px){.data-workbench{grid-template-columns:1fr}.data-grid{grid-template-columns:1fr}.data-checks{grid-template-columns:1fr}}
+
+  .data-workbench{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;margin-top:28px;}
+  .data-panel{background:rgba(18,43,71,.88);border:1px solid var(--grid-line-strong);border-radius:20px;padding:22px;box-shadow:0 16px 45px rgba(0,0,0,.16);}
+  .data-panel h3{font-family:Cairo,sans-serif;font-size:20px;margin-bottom:8px;}
+  .data-panel p{color:var(--text-dim);font-size:14px;margin-bottom:16px;}
+  .data-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  .data-field{display:flex;flex-direction:column;gap:6px;} .data-field.full{grid-column:1/-1;}
+  .data-field label{font-size:12px;color:var(--cyan);font-weight:700;}
+  .data-field input,.data-field select,.data-field textarea{width:100%;border:1px solid rgba(143,168,194,.25);background:#0b1b2e;color:var(--text);border-radius:10px;padding:10px;font:500 13px 'IBM Plex Sans Arabic',sans-serif;outline:none;}
+  .data-field textarea{min-height:72px;resize:vertical;} .data-checks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;}
+  .data-check{display:flex;align-items:center;gap:8px;background:rgba(11,27,46,.65);padding:8px;border-radius:9px;color:var(--text-dim);font-size:12px;}
+  .data-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;} .data-btn{border:0;border-radius:10px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer;} .data-btn.alt{background:#173b5d;border:1px solid rgba(53,196,201,.35);}
+  .data-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px;} .data-table th,.data-table td{padding:9px;border-bottom:1px solid var(--grid-line);text-align:right;} .data-table th{color:var(--cyan);}
+  .storage-stack{display:grid;gap:12px;margin-top:14px;} .storage-card{padding:14px;border-radius:14px;background:rgba(11,27,46,.7);border:1px solid rgba(143,168,194,.16);} .storage-card b{display:block;color:var(--text);margin-bottom:4px;} .storage-card span{font-size:12px;color:var(--text-dim);}
+  .flow-mini{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:18px;color:var(--text-dim);font-size:12px;} .flow-mini span{padding:8px 10px;border-radius:9px;background:#102d49;border:1px solid rgba(53,196,201,.22);} .flow-mini i{color:var(--cyan);font-style:normal;}
+  .hero-ad-card,.academy-card{margin-top:10px;padding:10px;border-radius:12px;background:linear-gradient(135deg,#102e4c,#173d61);border:1px solid rgba(255,106,61,.3);display:grid;gap:4px;font-size:11px;} .hero-ad-card span,.academy-card span{color:var(--text-dim);} .hero-ad-card button,.academy-card button{border:0;border-radius:8px;padding:6px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer;}
+  @media(max-width:820px){.data-workbench{grid-template-columns:1fr}.data-grid{grid-template-columns:1fr}.data-checks{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<main>
+  <div class="wrap">
+
+    <div class="brand-bar">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 4 42 14.5v19L24 44 6 33.5v-19L24 4Z" stroke="#35C4C9" stroke-width="3"/><path d="m15 25 6-6 6 6 6-8 4 5" stroke="#FF6A3D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="18" r="3.5" fill="#EAF1F7"/></svg></div>
+        <div class="brand-name">COREVIAZONE<small>BUILD · CONNECT · INNOVATE</small></div>
+      </div>
+      <div class="app-brand"><span>التطبيق المقترح: Geo Station</span><div class="app-logo"><svg viewBox="0 0 48 48" fill="none"><path d="M8 36 18 24l6 6 8-10 8 16H8Z" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><circle cx="31" cy="14" r="6" stroke="#fff" stroke-width="3"/><path d="M31 8v12M25 14h12" stroke="#fff" stroke-width="2"/></svg></div></div>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-top">
+        <span class="tag">Business & Technical Proposal · Rev. 04</span>
+        <span class="ltr">GEO STATION · EGYPT</span>
+      </div>
+
+      <div class="bm">
+        <span class="reticle"><span class="reticle-circle"></span></span>
+        <span class="ltr">BM–00</span> · نقطة البداية
+      </div>
+
+      <h1 class="hero-title">Geo <span>Station</span></h1>
+      <p class="hero-sub">Geo Station منصة رقمية متخصصة تجمع مكاتب وشركات المساحة والأجهزة والمعايرة والتدريب والمساحين في مكان واحد، وتعمل كحلقة وصل وتسويق وLead Generation دون أن تكون طرفًا في عقد بيع أو تأجير الجهاز بين العميل والمكتب.</p>
+
+      <div class="hero-meta">
+        <div><b>إعداد</b><span>م. محمد فرج</span></div>
+        <div><b>مقدَّم إلى</b><span>م. أحمد سيد</span></div>
+        <div><b>الموضوع</b><span>تصور المنصة ونموذج التشغيل والبيانات ومراحل التطوير</span></div>
+        <div><b>التطوير والبرمجة</b><span class="ltr" style="font-family:'IBM Plex Sans Arabic',sans-serif;">coreviazone</span></div>
+      </div>
+    </section>
+
+    <!-- IDEA -->
+    <section id="idea">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–01</span> · الفكرة الأساسية</div>
+        <h2>من دليل متخصص إلى Marketplace يولّد عملاء للمكاتب</h2>
+        <p>Geo Station لا يمسك الجهاز ولا يستلم الأموال ولا يدير عقد الإيجار أو البيع بين الطرفين؛ دوره هو جمع السوق، عرض المكاتب والخدمات على الخريطة، إرسال العميل إلى المكتب، قياس الـLeads، ثم تحقيق الدخل من الاشتراكات والإعلانات والـLeads، مع إمكانية إضافة العمولة لاحقًا.</p>
+      </div>
+
+      <div class="engine reveal">
+        <div class="engine-node"><span class="n ltr">01 · DISCOVER</span><span class="t">بحث واكتشاف</span></div>
+        <div class="engine-arrow"></div>
+        <div class="engine-node"><span class="n ltr">02 · LEAD</span><span class="t">إرسال عميل</span></div>
+        <div class="engine-arrow"></div>
+        <div class="engine-node"><span class="n ltr">03 · CONTACT</span><span class="t">تواصل مباشر</span></div>
+        <div class="engine-arrow"></div>
+        <div class="engine-node"><span class="n ltr">04 · REVIEW</span><span class="t">تقييم</span></div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section id="cats">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–02</span> · الفئات الخمس</div>
+        <h2>واجهة واحدة، خمس بوابات + محتوى + إعلانات</h2>
+        <p>كل فئة تُبنى على سجل مزود خدمة واحد، مع خدمات وأجهزة وأسعار وروابط اتصال وموقع وتقييمات، بينما التدريب يرتبط بمحتوى YouTube وقناة المنصة.</p>
+      </div>
+
+      <div class="cats reveal">
+        <div class="cat">
+          <div class="icon">⚙</div>
+          <h3>تأجير المعدات</h3>
+          <p>Total Station، GNSS، أجهزة الليزر — من مكاتب تأجير قريبة، مع بيانات الجهاز والحالة والمعايرة وطرق التواصل.</p>
+        </div>
+        <div class="cat">
+          <div class="icon">⛁</div>
+          <h3>الشراء</h3>
+          <p>أجهزة جديدة أو مستعملة من بائعين موثقين، مع حالة الجهاز والضمان.</p>
+        </div>
+        <div class="cat">
+          <div class="icon">◎</div>
+          <h3>المعايرة</h3>
+          <p>العثور على مراكز المعايرة القريبة، عرض الخدمات وبيانات التواصل وطلب تواصل من العميل.</p>
+        </div>
+        <div class="cat">
+          <div class="icon">▤</div>
+          <h3>التدريب</h3>
+          <p>Geo Station Academy: دورات Total Station وGNSS وAutoCAD وCivil 3D وروابط مباشرة إلى YouTube بدل بناء نظام فيديو مستقل.</p>
+        </div>
+        <div class="cat">
+          <div class="icon">✎</div>
+          <h3>المساحون</h3>
+          <p>مساحون ومكاتب مساحة حسب التخصص والموقع والخبرة وبيانات الاتصال، مع إمكانية تحويل الزيارة إلى Lead.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE APP SIMULATION -->
+    <section id="screens">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–03</span> · نظرة داخل التطبيق</div>
+        <h2>محاكاة تفاعلية — جرّب التطبيق كأنه حقيقي</h2>
+        <p>اضغط على أي فئة من الرئيسية، افتح النتائج والتفاصيل، جرّب إرسال طلب تواصل، أو تصفّح الخريطة لرؤية المكاتب والمزودين حسب الموقع أو المدينة.</p>
+      </div>
+
+      <div class="sim-wrap reveal">
+        <div class="phone">
+          <div class="phone-screen tall">
+            <div class="phone-notch"></div>
+            <div class="phone-status ltr">9:41</div>
+
+            <!-- HOME -->
+            <div class="view active" data-view="home">
+              <div class="app-topbar"><h3>📍 أنت الآن في: الإسكندرية</h3></div>
+              <div class="view-scroll">
+                <div class="ph-title">Geo Station</div>
+                <div class="ph-search">🔎 ماذا تحتاج؟</div>
+                <div class="ph-grid">
+                  <div class="ph-tile" data-open-cat="rental"><span class="e">⚙</span>تأجير جهاز</div>
+                  <div class="ph-tile" data-open-cat="purchase"><span class="e">⛁</span>شراء جهاز</div>
+                  <div class="ph-tile" data-open-cat="calibration"><span class="e">◎</span>معايرة</div>
+                  <div class="ph-tile" data-open-cat="training"><span class="e">▤</span>تدريب</div>
+                  <div class="ph-tile" data-open-cat="surveyor"><span class="e">✎</span>مساح قريب</div>
+                  <div class="ph-tile" data-open-map="1"><span class="e">🗺️</span>الخريطة</div>
+                </div>
+                <div class="hero-ad-card"><b>📢 إعلان مكتب مميز</b><span>ظهور أعلى + أجهزة + خدمات + اتصال مباشر</span><button type="button" onclick="showToast('هذا موضع إعلان مدفوع للمكاتب والشركات')">عرض الإعلان</button></div>
+                <div class="academy-card"><b>🎓 Geo Station Academy</b><span>Total Station · GNSS · AutoCAD · Civil 3D</span><button type="button" onclick="showToast('روابط الدورات تفتح قناة YouTube')">شاهد الدورات</button></div>
+              </div>
+            </div>
+
+            <!-- RESULTS -->
+            <div class="view" data-view="results">
+              <div class="app-topbar">
+                <button class="app-back" data-back type="button">→</button>
+                <h3 id="resultsTitle">النتائج</h3>
+              </div>
+              <div class="view-scroll" id="resultsList"></div>
+            </div>
+
+            <!-- DETAIL -->
+            <div class="view" data-view="detail">
+              <div class="app-topbar">
+                <button class="app-back" data-back type="button">→</button>
+                <h3>التفاصيل</h3>
+              </div>
+              <div class="view-scroll" id="detailBody"></div>
+            </div>
+
+            <!-- CONFIRM -->
+            <div class="view" data-view="confirm">
+              <div class="app-topbar">
+                <button class="app-back" data-back type="button">→</button>
+                <h3>إرسال طلب التواصل</h3>
+              </div>
+              <div class="view-scroll" id="confirmBody"></div>
+            </div>
+
+            <!-- SUCCESS -->
+            <div class="view" data-view="success">
+              <div class="view-scroll" id="successBody"></div>
+            </div>
+
+            <!-- MAP -->
+            <div class="view" data-view="map">
+              <div class="app-topbar"><h3>🗺️ خريطة المزودين</h3></div>
+              <div class="map-controls">
+                <div class="loc-chips">
+                  <button class="loc-chip active" data-loc-mode="current" type="button">📍 موقعي</button>
+                  <button class="loc-chip" data-loc-mode="pick" type="button">🏙️ اختيار مدينة</button>
+                  <button class="loc-chip" data-loc-mode="all" type="button">🌍 الكل</button>
+                </div>
+                <div class="city-picker" id="cityPicker" hidden></div>
+                <div class="cat-chips" id="catChips"></div>
+              </div>
+              <div class="map-caption" id="mapCaption"></div>
+              <div class="map-stage">
+                <div class="map-canvas-wrap" id="mapCanvas"></div>
+                <div class="map-empty" id="mapEmpty" hidden></div>
+                <div class="map-popup" id="mapPopup" hidden></div>
+              </div>
+            </div>
+
+            <!-- ORDERS -->
+            <div class="view" data-view="orders">
+              <div class="app-topbar"><h3>طلباتي</h3></div>
+              <div class="view-scroll" id="ordersList"></div>
+            </div>
+
+            <!-- PROFILE -->
+            <div class="view" data-view="profile">
+              <div class="app-topbar"><h3>حسابي</h3></div>
+              <div class="view-scroll" id="profileBody"></div>
+            </div>
+
+            <div class="toast" id="toast"></div>
+
+            <div class="tabbar">
+              <button class="tab active" data-tab="home" type="button"><span class="e">🏠</span>الرئيسية</button>
+              <button class="tab" data-tab="map" type="button"><span class="e">🗺️</span>الخريطة</button>
+              <button class="tab" data-tab="orders" type="button"><span class="e">📋</span>طلباتي</button>
+              <button class="tab" data-tab="profile" type="button"><span class="e">👤</span>حسابي</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-caption ltr reveal">LIVE PROTOTYPE — TAP TO NAVIGATE</div>
+    </section>
+
+    <!-- MVP DEPTH -->
+    <section id="mvp">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–04</span> · عمق الإصدار الأول</div>
+        <h2>كل الفئات ظاهرة، لكن بعمق بسيط عمدًا</h2>
+        <p>الفريق يوسّع العمق لاحقًا فقط في الفئات التي تُظهر طلبًا حقيقيًا.</p>
+      </div>
+
+      <table class="tbl reveal">
+        <tr><th>الفئة</th><th>عمق الإصدار الأول</th></tr>
+        <tr><td>تأجير</td><td>عرض الأجهزة والمكاتب القريبة + تفاصيل الجهاز + طلب تواصل</td></tr>
+        <tr><td>شراء</td><td>عرض الأجهزة المتاحة + بيانات البائع + طلب تواصل</td></tr>
+        <tr><td>معايرة</td><td>عرض مراكز المعايرة والخدمات وبيانات الاتصال + طلب تواصل</td></tr>
+        <tr><td>تدريب</td><td>عرض الدورات وروابط YouTube والقناة + الانتقال للمحتوى</td></tr>
+        <tr><td>مساح</td><td>عرض المساحين والمكاتب حسب التخصص والموقع + طلب تواصل</td></tr>
+      </table>
+    </section>
+
+    <!-- REVENUE -->
+    <section id="revenue">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–05</span> · نموذج الربح الجديد</div>
+        <h2>المنصة توصل العميل بالمكتب — والمكتب يدفع مقابل الوصول والظهور</h2>
+        <p>بدل دخول Geo Station في استلام وتسليم الأجهزة أو التحصيل بين العميل والمكتب، يبدأ النموذج باشتراكات وإعلانات وLeads، وتبقى العمولة على الصفقات خيارًا متقدمًا بعد إثبات السوق. تفاصيل الباقات والتسعير تُحدد لاحقًا.</p>
+      </div>
+      <div class="cats reveal">
+        <div class="cat"><div class="icon">B</div><h3>Basic · مجاني</h3><p>ملف مكتب، الموقع، التخصص، الخدمات، الهاتف، WhatsApp وروابط التواصل. هدفه بناء قاعدة سوق كبيرة.</p></div>
+        <div class="cat"><div class="icon">P</div><h3>Professional</h3><p>ظهور أعلى، أجهزة وخدمات أكثر، إحصائيات، استقبال Leads وأولوية في نتائج البحث.</p></div>
+        <div class="cat"><div class="icon">V</div><h3>Premium</h3><p>ظهور مميز، Banner، أولوية، Badge، إحصائيات متقدمة وحضور في الصفحة الرئيسية.</p></div>
+        <div class="cat"><div class="icon">L</div><h3>Pay Per Lead</h3><p>المكتب يدفع مقابل عميل مهتم، مع تسجيل مصدر العميل وتقارير واضحة.</p></div>
+        <div class="cat"><div class="icon">%</div><h3>Commission · لاحقًا</h3><p>يمكن إضافة كود إحالة أو آلية إثبات عملية عند نضج السوق، لكن لا نعتمد عليها في البداية لأنها تحتاج تعاونًا من المكتب.</p></div>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section id="roadmap">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–06</span> · أول 90 يومًا</div>
+        <h2>نبدأ بمدينة واحدة، نجمع السوق، ثم نثبت أن الـLeads تتحول إلى قيمة</h2>
+        <p>الهدف في البداية ليس بناء نظام ضخم؛ الهدف هو بناء قاعدة بيانات قوية للمكاتب والشركات ثم إطلاق التطبيق على سوق موجود بالفعل.</p>
+      </div>
+      <div class="road reveal">
+        <div class="road-item"><div class="marker ltr">01</div><h4>جمع البيانات · 2–3 أسابيع</h4><p>تجميع المكاتب والشركات ومراكز المعايرة والتدريب والمساحين حسب المحافظات، مع ملف موحد لكل جهة.</p></div>
+        <div class="road-item"><div class="marker ltr">02</div><h4>تدقيق وإدخال · 1–2 أسبوع</h4><p>مراجعة أرقام الاتصال، المواقع، التخصصات، الأجهزة، الخدمات، الروابط وحالة التعاقد.</p></div>
+        <div class="road-item"><div class="marker ltr">03</div><h4>إطلاق MVP · 6–8 أسابيع</h4><p>تطبيق + Backend + Admin + خريطة + بحث + Profiles + Leads + Academy + إعلانات أساسية + قاعدة بيانات السوق.</p></div>
+        <div class="road-item"><div class="marker ltr">04</div><h4>أول 50 Lead</h4><p>قياس عدد العملاء الذين وصلوا للمكاتب، أكثر الخدمات طلبًا، ونسبة المكاتب التي تستمر في الاشتراك.</p></div>
+      </div>
+    </section>
+
+    <!-- OPERATIONAL MODEL -->
+    <section id="operation">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–07</span> · كيف يعمل التطبيق فعليًا</div>
+        <h2>التطبيق المنشور ليس قاعدة البيانات — هو بوابة إلى منصة تملكها أنت</h2>
+        <p>بعد النشر على Google Play وApp Store، يبقى التطبيق واجهة للمستخدم. البيانات، الحسابات، الطلبات، المواقع، العروض، الرسائل، الإشعارات والتقارير تُدار من Backend وقاعدة بيانات ولوحة تحكم مملوكة لصاحب المنصة.</p>
+      </div>
+      <div class="engine reveal">
+        <div class="engine-node"><span class="n ltr">01 · MOBILE</span><span class="t">Android + iPhone</span></div>
+        <div class="engine-arrow"></div>
+        <div class="engine-node"><span class="n ltr">02 · API</span><span class="t">Backend</span></div>
+        <div class="engine-arrow"></div>
+        <div class="engine-node"><span class="n ltr">03 · DATA</span><span class="t">Database</span></div>
+        <div class="engine-arrow"></div>
+        <div class="engine-node"><span class="n ltr">04 · CONTROL</span><span class="t">Admin Dashboard</span></div>
+      </div>
+      <table class="tbl reveal">
+        <tr><th>الجزء</th><th>وظيفته</th><th>من يملكه؟</th></tr>
+        <tr><td>Android / iPhone</td><td>واجهة العميل ومقدم الخدمة</td><td>صاحب المنصة</td></tr>
+        <tr><td>Backend / API</td><td>تنفيذ عمليات البحث والـLeads والصلاحيات وإدارة البيانات</td><td>صاحب المنصة</td></tr>
+        <tr><td>Database</td><td>المستخدمون، المكاتب، الأجهزة، الخدمات، الـLeads، التقييمات</td><td>صاحب المنصة</td></tr>
+        <tr><td>Admin Dashboard</td><td>إدارة وتشغيل ومراقبة المنصة</td><td>صاحب المنصة</td></tr>
+        <tr><td>Developer Access</td><td>صلاحية تقنية محددة للتطوير والصيانة</td><td>تُمنح للمبرمج وتُسحب عند الحاجة</td></tr>
+      </table>
+    </section>
+
+    <!-- LEAD FLOW -->
+    <section id="realtime">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–08</span> · رحلة العميل والـLead</div>
+        <h2>من البحث إلى التواصل المباشر — والمنصة تظل حلقة وصل</h2>
+        <p>Geo Station يعرض الخيارات المناسبة، يتيح للعميل طلب التواصل أو الاتصال بالمكتب، ويسجل مصدر الـLead وحالته داخل المنصة، بينما يتم الاتفاق والتنفيذ مباشرة بين العميل ومقدم الخدمة.</p>
+      </div>
+      <div class="road reveal">
+        <div class="road-item"><div class="marker ltr">01</div><h4>بحث واكتشاف</h4><p>يبحث العميل حسب الفئة، الموقع، التخصص، نوع الجهاز أو الخدمة.</p></div>
+        <div class="road-item"><div class="marker ltr">02</div><h4>عرض النتائج</h4><p>تظهر المكاتب والشركات والمزودون مع البيانات والصور والأجهزة والخدمات وطرق التواصل.</p></div>
+        <div class="road-item"><div class="marker ltr">03</div><h4>طلب تواصل</h4><p>يرسل العميل طلبًا للمكتب أو يختار الاتصال أو WhatsApp حسب البيانات المتاحة.</p></div>
+        <div class="road-item"><div class="marker ltr">04</div><h4>تسجيل الـLead</h4><p>يسجل النظام مصدر العميل والجهة التي وصل إليها الطلب وحالة التواصل والمتابعة.</p></div>
+        <div class="road-item"><div class="marker ltr">05</div><h4>اتفاق مباشر</h4><p>يتفق العميل والمكتب مباشرة على السعر والتنفيذ والاستلام والتسليم وشروط الخدمة.</p></div>
+        <div class="road-item"><div class="marker ltr">06</div><h4>التقييم والقياس</h4><p>يمكن تسجيل نتيجة التواصل والتقييم وقياس أداء المكاتب والـLeads من لوحة الإدارة.</p></div>
+      </div>
+    </section>
+
+    <!-- OWNERSHIP & CONTROL -->
+    <section id="ownership">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–09</span> · ملكية المنصة</div>
+        <h2>القاعدة الذهبية: كل الحسابات الحرجة باسم العميل</h2>
+        <p>المبرمج ينفذ ويطور، لكنه لا يكون مالكًا للبنية التجارية. يجب أن تكون حسابات المتاجر، السحابة، الدومين، المستودع البرمجي وقاعدة البيانات تحت سيطرة صاحب المشروع.</p>
+      </div>
+      <div class="cats reveal">
+        <div class="cat"><div class="icon">G</div><h3>Google Play Console</h3><p>الحساب باسم صاحب المنصة، والمبرمج يضاف كمستخدم بصلاحيات محددة.</p></div>
+        <div class="cat"><div class="icon">A</div><h3>Apple Developer</h3><p>الحساب باسم المالك/الشركة، مع إضافة فريق التطوير دون نقل الملكية.</p></div>
+        <div class="cat"><div class="icon">☁</div><h3>Cloud</h3><p>AWS أو Google Cloud أو مزود Backend باسم العميل مع صلاحيات Developer منفصلة.</p></div>
+        <div class="cat"><div class="icon">DB</div><h3>Database</h3><p>قاعدة البيانات والنسخ الاحتياطية وبيانات المستخدمين ملك للمنصة.</p></div>
+        <div class="cat"><div class="icon">⌘</div><h3>Source Code</h3><p>GitHub/GitLab Organization باسم المشروع، وليس مستودعًا شخصيًا للمبرمج.</p></div>
+      </div>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="admin">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–10</span> · لوحة التشغيل</div>
+        <h2>أنت ترى المنصة من لوحة الإدارة — لا تحتاج أن تدخل قاعدة البيانات</h2>
+        <p>هذه هي الشاشة التي تجعل المشروع Business Platform فعلية: المستخدمون، المكاتب، الـLeads، الإعلانات، الاشتراكات، المحتوى، الخرائط والتقارير.</p>
+      </div>
+      <table class="tbl reveal">
+        <tr><th>وحدة الإدارة</th><th>ما الذي يراه المالك؟</th></tr>
+        <tr><td>Users</td><td>العملاء، الحسابات، الحالة، آخر نشاط، الطلبات</td></tr>
+        <tr><td>Providers</td><td>المساحون، المكاتب، البائعون، مراكز المعايرة والتدريب</td></tr>
+        <tr><td>Equipment & Services</td><td>الأجهزة المتاحة للبيع/التأجير، الخدمات، الأسعار، الحالة والجهة المالكة</td></tr>
+        <tr><td>Leads</td><td>مصدر العميل، نوع الطلب، المكتب الذي استلم الـLead، حالة التواصل</td></tr>
+        <tr><td>Advertisements</td><td>البنرات، الحملات، مدة الظهور، عدد المشاهدات والنقرات</td></tr>
+        <tr><td>Subscriptions</td><td>الباقة، بداية الاشتراك، التجديد، حالة الدفع والظهور المميز</td></tr>
+        <tr><td>Academy</td><td>الدورات، روابط YouTube، التصنيفات، المشاهدات والنقرات</td></tr>
+        <tr><td>Analytics</td><td>التنزيلات، المستخدمون، الـLeads، الاتصالات، التحويل والإيرادات</td></tr>
+        <tr><td>Audit & Security</td><td>من غيّر ماذا ومتى، وسجل دخول المشرفين والصلاحيات</td></tr>
+      </table>
+    </section>
+
+    <!-- MARKET DATA -->
+    <section id="data-collection">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–10A</span> · بيانات السوق</div>
+        <h2>ملف موحّد لكل مكتب وشركة ومقدم خدمة</h2>
+        <p>يتم تجميع بيانات الجهات والخدمات والأجهزة ووسائل التواصل ونوع التعاقد في سجل موحّد يمكن استخدامه في التطبيق ولوحة الإدارة ونتائج البحث والإعلانات.</p>
+      </div>
+      <div class="data-workbench reveal">
+        <div class="data-panel">
+          <h3>نموذج بيانات مكتب / شركة</h3>
+          <p>نموذج موحّد لتسجيل بيانات الجهة مرة واحدة وإعادة استخدامها داخل المنصة.</p>
+          <div class="data-grid">
+            <div class="data-field"><label>اسم المكتب / الشركة</label><input id="dc_name" placeholder="مثال: مكتب النور للمساحة"></div>
+            <div class="data-field"><label>نوع الجهة</label><select id="dc_type"><option>مكتب مساحة</option><option>شركة تأجير أجهزة</option><option>شركة بيع أجهزة</option><option>مركز معايرة</option><option>مركز تدريب</option><option>مساح مستقل</option><option>شركة متعددة الخدمات</option></select></div>
+            <div class="data-field"><label>المحافظة</label><input id="dc_city" placeholder="الشرقية"></div>
+            <div class="data-field"><label>المنطقة / العنوان</label><input id="dc_address" placeholder="العنوان بالتفصيل"></div>
+            <div class="data-field"><label>التخصص</label><input id="dc_specialty" placeholder="رفع مساحي / أجهزة / معايرة..."></div>
+            <div class="data-field"><label>مجال العمل</label><input id="dc_scope" placeholder="تأجير، بيع، تدريب، معايرة..."></div>
+            <div class="data-field"><label>الهاتف الأساسي</label><input id="dc_phone" placeholder="01xxxxxxxxx"></div>
+            <div class="data-field"><label>WhatsApp</label><input id="dc_whatsapp" placeholder="رقم واتساب"></div>
+            <div class="data-field"><label>البريد الإلكتروني</label><input id="dc_email" placeholder="info@example.com"></div>
+            <div class="data-field"><label>الموقع الإلكتروني</label><input id="dc_website" placeholder="https://..."></div>
+            <div class="data-field"><label>Facebook</label><input id="dc_facebook" placeholder="رابط الصفحة"></div>
+            <div class="data-field"><label>Instagram / LinkedIn</label><input id="dc_social" placeholder="روابط التواصل"></div>
+            <div class="data-field full"><label>الأجهزة المتاحة للبيع / التأجير</label><textarea id="dc_equipment" placeholder="Total Station، GNSS RTK، Auto Level، Laser Scanner..."></textarea></div>
+            <div class="data-field full"><label>الخدمات / الدورات</label><textarea id="dc_courses" placeholder="معايرة، تدريب Total Station، GPS، AutoCAD، Civil 3D..."></textarea></div>
+            <div class="data-field"><label>نوع التعاقد</label><select id="dc_contract"><option>دليل أساسي</option><option>اشتراك</option><option>ظهور مميز</option><option>Pay Per Lead</option><option>عمولة لاحقة</option><option>قيد التفاوض</option></select></div>
+            <div class="data-field"><label>حالة التحقق</label><select id="dc_verified"><option>لم يتم التحقق</option><option>تم التحقق هاتفيًا</option><option>تم التحقق بالمستندات</option><option>موثّق</option></select></div>
+            <div class="data-field full"><label>ملاحظات</label><textarea id="dc_notes" placeholder="أوقات العمل، مناطق الخدمة، شروط التواصل، ملاحظات إضافية..."></textarea></div>
+          </div>
+          <div class="data-checks">
+            <label class="data-check"><input type="checkbox" id="dc_rent"> تأجير أجهزة</label>
+            <label class="data-check"><input type="checkbox" id="dc_sell"> بيع أجهزة</label>
+            <label class="data-check"><input type="checkbox" id="dc_cal"> معايرة</label>
+            <label class="data-check"><input type="checkbox" id="dc_train"> تدريب / دورات</label>
+          </div>
+          <div class="data-actions">
+            <button class="data-btn" type="button" onclick="saveProviderRecord()">حفظ السجل</button>
+            <button class="data-btn alt" type="button" onclick="exportProviderCSV()">تصدير Excel / CSV</button>
+            <button class="data-btn alt" type="button" onclick="clearProviderForm()">مسح النموذج</button>
+          </div>
+          <div id="dc_status" class="note" style="margin-top:14px">تم حفظ البيانات في سجل المنصة.</div>
+        </div>
+        <div class="data-panel">
+          <h3>حقول البيانات واستخدامها</h3>
+          <div class="storage-stack">
+            <div class="storage-card"><b>① بيانات الجهة</b><span>الاسم، النوع، العنوان، التخصص، مجال العمل وحالة التحقق.</span></div>
+            <div class="storage-card"><b>② الأجهزة والخدمات</b><span>أجهزة البيع والتأجير، المعايرة، التدريب والدورات وروابط المحتوى.</span></div>
+            <div class="storage-card"><b>③ وسائل التواصل</b><span>الهاتف، WhatsApp، البريد، الموقع وروابط صفحات التواصل الاجتماعي.</span></div>
+            <div class="storage-card"><b>④ التعاقد والظهور</b><span>نوع التعاقد، حالة الحساب، الظهور المميز وحالة الـLead.</span></div>
+          </div>
+          <div class="flow-mini"><span>إدخال</span><i>→</i><span>حفظ</span><i>→</i><span>مراجعة</span><i>→</i><span>تصدير / استيراد</span><i>→</i><span>Geo Station</span></div>
+          <table class="data-table"><tr><th>البيان</th><th>أين يستخدم؟</th></tr><tr><td>الاسم + التخصص</td><td>نتائج البحث والملف</td></tr><tr><td>الموقع</td><td>الخريطة والأقرب</td></tr><tr><td>الأجهزة</td><td>تأجير / بيع</td></tr><tr><td>الدورات</td><td>Academy + YouTube</td></tr><tr><td>الاتصال</td><td>Phone / WhatsApp / Social</td></tr><tr><td>نوع التعاقد</td><td>إدارة الظهور والـLeads</td></tr></table>
+          <div class="note" style="margin-top:18px"><b>التخزين والتبادل:</b> SQLite / Excel / CSV حسب بيئة التشغيل، مع إمكانية استيراد البيانات إلى قاعدة المنصة.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEVELOPMENT ROADMAP -->
+    <section id="costs">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–11</span> · مراحل التطوير</div>
+        <h2>تطوير مرحلي يبدأ بالنواة الأساسية ثم يتوسع حسب احتياج السوق</h2>
+        <p>يتم تنفيذ Geo Station على مراحل مستقلة، بحيث تكون كل مرحلة إضافة واضحة للمنصة ويمكن اعتماد المراحل التالية بعد ظهور الاحتياج الفعلي لها.</p>
+      </div>
+      <div class="cats reveal">
+        <div class="cat"><div class="icon">P1</div><h3>المرحلة 1 · Geo Station MVP</h3><p>Android + iPhone، الصفحة الرئيسية، البحث والخريطة، الفئات، ملفات المكاتب، الأجهزة والخدمات، طلبات التواصل، Reviews، Academy/YouTube، الإعلانات الأساسية، Backend، Database وAdmin.</p></div>
+        <div class="cat"><div class="icon">P2</div><h3>المرحلة 2 · Provider Portal</h3><p>المكتب أو الشركة يدير ملفه بنفسه، يضيف الأجهزة والخدمات والصور، يحدد التخصصات، يتابع الـLeads ويدير ظهوره وبياناته.</p></div>
+        <div class="cat"><div class="icon">P3</div><h3>المرحلة 3 · Lead Monetization</h3><p>اشتراكات، ظهور مميز، Pay Per Lead، أرصدة، Coupons/Referral وتقارير تحويل العميل.</p></div>
+        <div class="cat"><div class="icon">P4</div><h3>المرحلة 4 · Advanced Platform</h3><p>Chat، Live GPS عند الحاجة، Matching، Online Payment إذا قرر السوق، Commission Engine، BI، Multi-city وAutomation.</p></div>
+      </div>
+      <div class="note reveal" style="margin-top:28px"><b>منهج العمل:</b> لا يتم بناء الخصائص المتقدمة قبل ثبوت الحاجة إليها من خلال الاستخدام الفعلي للمنصة.</div>
+    </section>
+
+    <!-- OPERATING DEPENDENCIES -->
+    <section id="running-costs">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–12</span> · متطلبات التشغيل</div>
+        <h2>التبعيات اللازمة لتشغيل Geo Station من أول يوم</h2>
+        <p>هذه هي المكونات والخدمات التي تعتمد عليها المنصة بعد الإطلاق، ويتم اختيار مزود الخدمة وحجم الموارد وفق الاستخدام الفعلي.</p>
+      </div>
+      <table class="tbl reveal">
+        <tr><th>البند</th><th>وظيفته داخل المنصة</th></tr>
+        <tr><td>Cloud / Backend</td><td>تشغيل الـAPI والخدمات الخلفية وإدارة العمليات.</td></tr>
+        <tr><td>Database</td><td>حفظ المستخدمين والمكاتب والأجهزة والخدمات والـLeads والتقييمات.</td></tr>
+        <tr><td>Storage / Backup</td><td>حفظ الصور والشعارات والمستندات والنسخ الاحتياطية.</td></tr>
+        <tr><td>Push Notifications</td><td>إشعارات الطلبات والـLeads والتحديثات.</td></tr>
+        <tr><td>SMS / OTP</td><td>تأكيد أرقام الهواتف والتحقق من الحسابات عند الحاجة.</td></tr>
+        <tr><td>Maps / Geocoding / Places</td><td>الخريطة، تحديد الموقع، البحث القريب والعناوين.</td></tr>
+        <tr><td>Domain + Email</td><td>عنوان المنصة والبريد الرسمي وحسابات التواصل.</td></tr>
+        <tr><td>Google Play Console</td><td>نشر وإدارة نسخة Android.</td></tr>
+        <tr><td>Apple Developer / App Store Connect</td><td>نشر وإدارة نسخة iPhone.</td></tr>
+        <tr><td>Analytics / Monitoring</td><td>قياس الاستخدام والـLeads والأخطاء والأداء.</td></tr>
+      </table>
+      <div class="cats reveal" style="margin-top:28px">
+        <div class="cat"><div class="icon">START</div><h3>عند الإطلاق</h3><p>بنية تشغيل أساسية، قاعدة بيانات، نسخ احتياطية، خرائط، إشعارات، نطاق، حسابات المتاجر ومراقبة الأداء.</p></div>
+        <div class="cat"><div class="icon">GROW</div><h3>مع نمو الاستخدام</h3><p>تزيد الموارد تدريجيًا مع زيادة المستخدمين والصور والـLeads والبحث والخرائط.</p></div>
+        <div class="cat"><div class="icon">SCALE</div><h3>عند التوسع</h3><p>يمكن إضافة طبقات Cache وQueues وCDN وLoad Balancing ومراقبة متقدمة عند الحاجة.</p></div>
+      </div>
+    </section>
+
+    <!-- IMPLEMENTATION PHASES -->
+    <section id="implementation">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–13</span> · كيف سيتم التطوير</div>
+        <h2>نبدأ من البيانات نفسها — ثم نبني التطبيق فوقها</h2>
+        <p>هذا المشروع يعتمد على جودة قاعدة بيانات السوق بقدر اعتماده على الكود؛ لذلك نجعل جمع البيانات وتدقيقها جزءًا من الخطة وليس عملًا جانبيًا.</p>
+      </div>
+      <div class="road reveal">
+        <div class="road-item"><div class="marker ltr">P0</div><h4>Foundation · 1–2 أسبوع</h4><p>حسابات المشروع، Repository، Cloud، Domain، قاعدة البيانات، الصلاحيات، Backup، وبيئات الاختبار والنشر.</p></div>
+        <div class="road-item"><div class="marker ltr">D1</div><h4>بيانات السوق</h4><p>إدخال بيانات المكاتب والشركات والأجهزة والخدمات والتدريب والتواصل والمواقع ونوع التعاقد ضمن قاعدة بيانات المنصة.</p></div>
+        <div class="road-item"><div class="marker ltr">P1</div><h4>Geo Station MVP · 6–8 أسابيع</h4><p>تطبيق + API + Database + Admin + Map + Search + Profiles + Leads + Academy + Ads.</p></div>
+        <div class="road-item"><div class="marker ltr">P2</div><h4>Provider Portal</h4><p>نقل تحديث البيانات إلى المكاتب نفسها مع نظام اشتراكات وظهور مميز.</p></div>
+        <div class="road-item"><div class="marker ltr">P3</div><h4>Lead Monetization</h4><p>Pay Per Lead، أرصدة، تقارير وتحويلات، ثم العمولة عند الحاجة.</p></div>
+      </div>
+    </section>
+
+    <!-- CLIENT HANDOVER -->
+    <section id="handover">
+      <div class="section-head reveal">
+        <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–14</span> · تسليم المشروع للعميل</div>
+        <h2>ما الذي يجب أن يستلمه العميل في نهاية المشروع؟</h2>
+      </div>
+      <table class="tbl reveal">
+        <tr><th>التسليم</th><th>شرط القبول</th></tr>
+        <tr><td>Android Production</td><td>الحساب باسم العميل + التطبيق منشور + Build قابل لإعادة النشر</td></tr>
+        <tr><td>iOS Production</td><td>Apple Developer باسم العميل + App Store Connect + TestFlight</td></tr>
+        <tr><td>Backend</td><td>Source code + deployment scripts + secrets تحت حساب العميل</td></tr>
+        <tr><td>Database</td><td>Schema + migrations + backup/restore + بيانات ملك العميل</td></tr>
+        <tr><td>Admin</td><td>حساب Owner للعميل + صلاحيات منفصلة للموظفين</td></tr>
+        <tr><td>Source Code</td><td>Repository مملوك للعميل مع كامل تاريخ التطوير</td></tr>
+        <tr><td>Documentation</td><td>Architecture + API + deployment + operations manual</td></tr>
+        <tr><td>Exit Plan</td><td>إمكانية إنهاء وصول المبرمج وتشغيل المنصة دون الاعتماد عليه</td></tr>
+      </table>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div class="bm"><span class="reticle"><span class="reticle-circle"></span></span><span class="ltr">BM–99</span> · اعتماد التصور</div>
+      <div class="sig">
+        <div class="sig-block">
+          <div class="role">إعداد</div>
+          <div class="name">م. محمد فرج</div>
+        </div>
+        <div class="sig-arrow">←</div>
+        <div class="sig-block">
+          <div class="role">مقدَّم إلى</div>
+          <div class="name">م. أحمد سيد</div>
+        </div>
+      </div>
+
+      <div class="contact-block">
+        <div class="role">التطوير والبرمجة</div>
+        <div class="contact-row">
+          <span class="contact-name">coreviazone</span>
+          <span class="contact-dot">·</span>
+          <a class="contact-phone ltr" href="tel:+201015230445">00201015230445</a>
+        </div>
+      </div>
+
+      <div class="foot-note ltr">COREVIAZONE × GEO STATION — BUSINESS & TECHNICAL PROPOSAL — REV. 04</div>
+    </div>
+  </footer>
+</main>
+
+<script>
+  const els = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, {threshold:0.15});
+  els.forEach(el=>io.observe(el));
+</script>
+
+<script>
+(function(){
+  const CATS = {
+    rental: {
+      icon:'⚙', title:'تأجير جهاز', resultsTitle:'Total Station قريب منك', unit:'', cta:'طلب تواصل', bundle:false,
+      items:[
+        {name:'Leica TS16', distance:'1.2 كم', badge:'معايرة سارية', rating:'4.9'},
+        {name:'Sokkia SET630R', distance:'3.4 كم', badge:'موثّق', rating:'4.7'},
+        {name:'Topcon GM-52', distance:'5.1 كم', badge:'متاح الآن', rating:'4.8'}
+      ]
+    },
+    purchase: {
+      icon:'⛁', title:'شراء جهاز', resultsTitle:'أجهزة معروضة للبيع', unit:'', cta:'طلب تواصل', bundle:false,
+      items:[
+        {name:'GNSS Stonex S900A (مستعمل)', distance:'2.0 كم', badge:'ضمان 6 أشهر', rating:'4.6'},
+        {name:'Nikon Total Station (جديد)', distance:'4.5 كم', badge:'ضمان سنة', rating:'5.0'},
+        {name:'مستوى ليزر Bosch', distance:'1.0 كم', badge:'حالة ممتازة', rating:'4.5'}
+      ]
+    },
+    calibration: {
+      icon:'◎', title:'معايرة', resultsTitle:'مراكز معايرة قريبة', unit:'', cta:'طلب تواصل', bundle:false,
+      items:[
+        {name:'مركز المعايرة الأول', distance:'2.8 كم', badge:'أقرب موعد: غدًا 10ص', rating:'4.8'},
+        {name:'مركز الدقة للمعايرة', distance:'4.0 كم', badge:'أقرب موعد: بعد يومين', rating:'4.6'},
+        {name:'مركز إسكندرية للمعايرة', distance:'6.1 كم', badge:'معتمد ISO', rating:'4.9'}
+      ]
+    },
+    training: {
+      icon:'▤', title:'تدريب', resultsTitle:'دورات Geo Station Academy', unit:'', cta:'فتح المحتوى', bundle:false,
+      items:[
+        {name:'دورة Total Station', distance:'1.9 كم', badge:'تبدأ السبت · 3 أيام', rating:'4.7'},
+        {name:'دورة Civil 3D', distance:'3.3 كم', badge:'تبدأ الأحد · 5 أيام', rating:'4.8'},
+        {name:'دورة GNSS المتقدمة', distance:'2.2 كم', badge:'تبدأ الثلاثاء · يومان', rating:'4.6'}
+      ]
+    },
+    surveyor: {
+      icon:'✎', title:'مساح قريب', resultsTitle:'مساحون متاحون الآن', unit:'', cta:'اطلب المساح', bundle:false,
+      items:[
+        {name:'أحمد محمد', distance:'1.6 كم', badge:'خبير Total Station · 8 سنوات', rating:'4.9'},
+        {name:'محمود سعيد', distance:'2.4 كم', badge:'خبير GNSS · 5 سنوات', rating:'4.7'},
+        {name:'كريم عادل', distance:'3.1 كم', badge:'مبتدئ متمرّس · 2 سنة', rating:'4.4'}
+      ]
+    }
+  };
+
+  const DESC = {
+    rental:'بيانات الجهاز، حالته، الملحقات، حالة المعايرة، وبيانات المكتب ووسائل التواصل.',
+    purchase:'يتواصل معك البائع مباشرة بعد إرسال الطلب لتأكيد التفاصيل وطريقة الاستلام أو الشحن.',
+    calibration:'الخدمة، حالة الاعتماد، بيانات المركز، وطرق التواصل وطلب الخدمة.',
+    training:'وصف الدورة، محتوى التدريب، المدرب أو المركز، ورابط المحتوى عند توفره.',
+    surveyor:'التخصص، الخبرة، الموقع، الخدمات وبيانات التواصل مع المساح أو المكتب.'
+  };
+
+  let stack = ['home'];
+  let orders = [];
+  let orderSeq = 1;
+  let ctx = {};
+
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => root.querySelectorAll(sel);
+  const money = n => n.toLocaleString('en-US');
+
+  function showView(name){
+    $$('.view').forEach(v => v.classList.toggle('active', v.dataset.view === name));
+  }
+  function currentView(){ return stack[stack.length - 1]; }
+  function push(view){ stack.push(view); showView(view); }
+  function back(){
+    if(stack.length > 1){ stack.pop(); showView(currentView()); }
+  }
+  function setActiveTab(view){
+    $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === view));
+  }
+  function tabTo(view){ stack = [view]; showView(view); setActiveTab(view); }
+  function showToast(msg){
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=> t.classList.remove('show'), 2600);
+  }
+  function stepLabel(step){ return ['قيد المطابقة','مؤكد','تم التنفيذ'][step]; }
+
+  function openCategory(key){
+    ctx.cat = key;
+    const cat = CATS[key];
+    $('#resultsTitle').textContent = cat.resultsTitle;
+    const list = $('#resultsList');
+    list.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+    push('results');
+    setTimeout(()=>{
+      list.innerHTML = cat.items.map((it, idx) => `
+        <div class="ph-list-item clickable" data-idx="${idx}">
+          <div><b>${it.name}</b><div class="meta">${it.distance} · ${it.badge}</div></div>
+          <div class="ph-price">طلب تواصل</div>
+        </div>`).join('');
+      $$('[data-idx]', list).forEach(el=>{
+        const idx = parseInt(el.dataset.idx, 10);
+        el.addEventListener('click', ()=> openDetail(key, cat.items[idx]));
+      });
+    }, 550);
+  }
+
+  function openDetail(catKey, item){
+    ctx.cat = catKey;
+    const cat = CATS[catKey];
+    ctx.item = item;
+    $('#detailBody').innerHTML = `
+      <div class="detail-hero">
+        <div class="icon-big">${cat.icon}</div>
+        <div class="ph-title">${item.name}</div>
+        <div class="detail-rating">⭐ ${item.rating} · ${item.distance}</div>
+        <span class="ph-badge">${item.badge}</span>
+        <div class="detail-price" style="font-size:16px;">تواصل مع الجهة مباشرة</div>
+        <p class="detail-desc">${DESC[ctx.cat]}</p>
+      </div>
+      <div class="ph-cta" id="toConfirm">${cat.cta}</div>
+    `;
+    $('#toConfirm').addEventListener('click', openConfirm);
+    push('detail');
+  }
+
+  function openConfirm(){
+    const item = ctx.item;
+    $('#confirmBody').innerHTML = `
+      <div class="ph-pkg">
+        <div class="row"><span>الجهة</span><span>${item.name}</span></div>
+        <div class="row"><span>الخدمة</span><span>${CATS[ctx.cat].title}</span></div>
+        <div class="row total"><span>طريقة التواصل</span><span>طلب تواصل من Geo Station</span></div>
+      </div>
+      <div class="ph-cta" id="confirmBtn">إرسال طلب التواصل</div>
+    `;
+    $('#confirmBtn').addEventListener('click', createOrder);
+    push('confirm');
+  }
+
+  function createOrder(){
+    const cat = CATS[ctx.cat];
+    const item = ctx.item;
+    const order = {
+      id: 'GS-' + String(orderSeq++).padStart(4,'0'),
+      catIcon: cat.icon,
+      name: item.name,
+      total: 0,
+      step: 0
+    };
+    orders.unshift(order);
+    renderSuccess(order);
+    push('success');
+    setTimeout(()=>{
+      order.step = 1;
+      showToast('تم إرسال طلب التواصل ✅');
+      if(currentView() === 'success') renderSuccess(order);
+    }, 1800);
+  }
+
+  function renderSuccess(order){
+    $('#successBody').innerHTML = `
+      <div class="success-check">✓</div>
+      <div class="ph-title" style="text-align:center;">تم إرسال طلبك</div>
+      <div class="order-code ltr">${order.id}</div>
+      <div class="stepper">
+        ${[0,1,2].map(i=>{
+          const cls = i < order.step ? 'done' : (i === order.step ? 'active' : '');
+          const labels = [
+            ['تم إرسال الـLead','تم إرسال بيانات التواصل للجهة'],
+            ['تم التواصل','بدأ التواصل بين العميل والجهة'],
+            ['مكتمل','اكتملت عملية التواصل']
+          ];
+          return `<div class="step ${cls}"><div class="dot"></div><div class="label"><b>${labels[i][0]}</b><span>${labels[i][1]}</span></div></div>`;
+        }).join('')}
+      </div>
+      <div class="ph-cta" id="toOrders" style="margin-top:18px;">عرض طلباتي</div>
+    `;
+    $('#toOrders').addEventListener('click', ()=>{ renderOrders(); tabTo('orders'); });
+  }
+
+  function renderOrders(){
+    const list = $('#ordersList');
+    if(orders.length === 0){
+      list.innerHTML = `<div class="empty-state"><span class="e">📋</span>لا توجد طلبات بعد<br>ابدأ بطلب جهاز أو مساح من الرئيسية</div>`;
+      return;
+    }
+    list.innerHTML = orders.map(o => `
+      <div class="ph-list-item clickable" data-order="${o.id}">
+        <div><b>${o.catIcon} ${o.name}</b><div class="meta">${o.id} · ${stepLabel(o.step)}</div></div>
+        <div class="ph-price">Lead</div>
+      </div>`).join('');
+    $$('[data-order]', list).forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const o = orders.find(x => x.id === el.dataset.order);
+        renderSuccess(o);
+        push('success');
+      });
+    });
+  }
+
+  function renderProfile(){
+    $('#profileBody').innerHTML = `
+      <div class="profile-card">
+        <div class="avatar">👤</div>
+        <div class="ph-title">أحمد سيد</div>
+        <div class="detail-rating">⭐ 4.8 · عميل موثّق</div>
+        <div class="profile-stats">
+          <div><b>${orders.length}</b><span>الطلبات</span></div>
+          <div><b class="ltr" style="font-family:'Cairo',sans-serif;">إسكندرية</b><span>الموقع</span></div>
+          <div><b>Business</b><span>الباقة</span></div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ---- Map ----
+  const PROVIDERS = [
+    {id:'r1', cat:'rental', city:'alex', name:'Leica TS16', x:34, y:34, distance:'1.2 كم', unit:'', rating:'4.9', badge:'معايرة سارية'},
+    {id:'r2', cat:'rental', city:'alex', name:'Sokkia SET630R', x:64, y:66, distance:'3.4 كم', unit:'', rating:'4.7', badge:'موثّق'},
+    {id:'p1', cat:'purchase', city:'alex', name:'GNSS Stonex S900A', x:50, y:20, distance:'2.0 كم', unit:'', rating:'4.6', badge:'مستعمل · ضمان 6 أشهر'},
+    {id:'p2', cat:'purchase', city:'alex', name:'Nikon Total Station', x:80, y:48, distance:'4.5 كم', unit:'', rating:'5.0', badge:'جديد · ضمان سنة'},
+    {id:'c1', cat:'calibration', city:'alex', name:'مركز المعايرة الأول', x:42, y:58, distance:'2.8 كم', unit:'', rating:'4.8', badge:'أقرب موعد: غدًا'},
+    {id:'c2', cat:'calibration', city:'alex', name:'مركز إسكندرية للمعايرة', x:22, y:72, distance:'6.1 كم', unit:'', rating:'4.9', badge:'معتمد ISO'},
+    {id:'s1', cat:'surveyor', city:'alex', name:'أحمد محمد', x:60, y:82, distance:'1.6 كم', unit:'', rating:'4.9', badge:'خبير Total Station'},
+    {id:'s2', cat:'surveyor', city:'alex', name:'محمود سعيد', x:18, y:28, distance:'2.4 كم', unit:'', rating:'4.7', badge:'خبير GNSS'},
+    {id:'r3', cat:'rental', city:'cairo', name:'Leica TS07', x:40, y:36, distance:'2.1 كم', unit:'', rating:'4.8', badge:'معايرة سارية'},
+    {id:'p3', cat:'purchase', city:'cairo', name:'Sokkia iM-52', x:68, y:24, distance:'3.0 كم', unit:'', rating:'4.7', badge:'جديد · ضمان سنة'},
+    {id:'c3', cat:'calibration', city:'cairo', name:'مركز القاهرة للمعايرة', x:30, y:64, distance:'4.4 كم', unit:'', rating:'4.7', badge:'أقرب موعد: اليوم'},
+    {id:'s3', cat:'surveyor', city:'cairo', name:'عمر خالد', x:72, y:72, distance:'1.9 كم', unit:'', rating:'4.8', badge:'خبير GNSS · 6 سنوات'}
+  ];
+
+  const CITIES = {
+    alex:{label:'الإسكندرية', has:true},
+    cairo:{label:'القاهرة', has:true},
+    giza:{label:'الجيزة', has:false},
+    mansoura:{label:'المنصورة', has:false},
+    aswan:{label:'أسوان', has:false}
+  };
+
+  const CAT_FILTERS = [
+    {key:'all', label:'الكل'},
+    {key:'surveyor', label:'مساحون'},
+    {key:'rental', label:'تأجير'},
+    {key:'purchase', label:'بيع'},
+    {key:'calibration', label:'معايرة'}
+  ];
+
+  const CAT_LABEL = {rental:'تأجير', purchase:'بيع', calibration:'معايرة', surveyor:'مساح'};
+
+  let mapState = { locMode:'current', city:'alex', cat:'all' };
+
+  function initMapChips(){
+    $('#catChips').innerHTML = CAT_FILTERS.map(f =>
+      `<button class="cat-chip ${f.key==='all' ? 'active' : ''}" data-cat-filter="${f.key}" type="button">${f.label}</button>`
+    ).join('');
+    $$('[data-cat-filter]').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        mapState.cat = chip.dataset.catFilter;
+        $$('[data-cat-filter]').forEach(c => c.classList.toggle('active', c === chip));
+        renderMap();
+      });
+    });
+
+    $('#cityPicker').innerHTML = Object.entries(CITIES).map(([key, c]) =>
+      `<button class="city-chip ${c.has ? '' : 'empty'} ${key==='alex' ? 'active' : ''}" data-city="${key}" type="button">${c.label}${c.has ? '' : ' (قريبًا)'}</button>`
+    ).join('');
+    $$('[data-city]').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        mapState.city = chip.dataset.city;
+        $$('[data-city]').forEach(c => c.classList.toggle('active', c === chip));
+        renderMap();
+      });
+    });
+
+    $$('[data-loc-mode]').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        mapState.locMode = chip.dataset.locMode;
+        $$('[data-loc-mode]').forEach(c => c.classList.toggle('active', c === chip));
+        $('#cityPicker').hidden = mapState.locMode !== 'pick';
+        renderMap();
+      });
+    });
+  }
+
+  function renderMap(){
+    $('#mapPopup').hidden = true;
+    let list, captionLoc, cityKey;
+
+    if(mapState.locMode === 'all'){
+      list = PROVIDERS.slice();
+      captionLoc = 'كل المدن';
+    } else {
+      cityKey = mapState.locMode === 'current' ? 'alex' : mapState.city;
+      list = PROVIDERS.filter(p => p.city === cityKey);
+      captionLoc = CITIES[cityKey].label;
+    }
+    if(mapState.cat !== 'all'){
+      list = list.filter(p => p.cat === mapState.cat);
+    }
+
+    const canvas = $('#mapCanvas');
+    const empty = $('#mapEmpty');
+    canvas.innerHTML = '';
+
+    if(mapState.locMode !== 'all'){
+      const me = document.createElement('div');
+      me.className = 'pin me';
+      me.style.left = '50%';
+      me.style.top = '90%';
+      me.title = 'أنت هنا';
+      canvas.appendChild(me);
+    }
+
+    if(list.length === 0){
+      empty.hidden = false;
+      const noCityData = mapState.locMode === 'pick' && !CITIES[cityKey].has;
+      empty.innerHTML = noCityData
+        ? `<div><span class="e">🗺️</span><b>Geo Station لسه هيوصل هنا</b><span>لا يوجد مزودون مسجّلون في ${CITIES[cityKey].label} حتى الآن</span></div>`
+        : `<div><span class="e">🔍</span><b>لا نتائج لهذا الفلتر</b><span>جرّب فئة أخرى أو وسّع نطاق البحث</span></div>`;
+      $('#mapCaption').textContent = `0 مزود · ${captionLoc}`;
+      return;
+    }
+    empty.hidden = true;
+    $('#mapCaption').textContent = `${list.length} مزودًا · ${captionLoc}`;
+
+    list.forEach(p=>{
+      const pin = document.createElement('button');
+      pin.type = 'button';
+      pin.className = 'pin ' + p.cat;
+      pin.style.left = p.x + '%';
+      pin.style.top = p.y + '%';
+      pin.textContent = CATS[p.cat].icon;
+      pin.addEventListener('click', (e)=>{ e.stopPropagation(); openMapPopup(p); });
+      canvas.appendChild(pin);
+    });
+
+    canvas.onclick = ()=>{ $('#mapPopup').hidden = true; };
+  }
+
+  function openMapPopup(p){
+    const popup = $('#mapPopup');
+    popup.hidden = false;
+    popup.innerHTML = `
+      <button class="map-popup-close" id="popupClose" type="button">✕</button>
+      <div class="cat-label ltr">${CAT_LABEL[p.cat]} · ${CITIES[p.city].label}</div>
+      <div class="name">${p.name}</div>
+      <div class="meta">⭐ ${p.rating} · ${p.distance} · ${p.badge}</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <div class="price">تواصل مع الجهة</div>
+        <div class="ph-cta" id="popupDetail" style="padding:9px 16px; margin:0;">عرض التفاصيل</div>
+      </div>
+    `;
+    $('#popupClose').addEventListener('click', (e)=>{ e.stopPropagation(); popup.hidden = true; });
+    $('#popupDetail').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openDetail(p.cat, {name:p.name, badge:p.badge, rating:p.rating, distance:p.distance});
+    });
+  }
+
+  initMapChips();
+
+  // Home tiles
+  $$('[data-open-cat]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const cat = el.dataset.openCat;
+      if(cat === 'orders'){ renderOrders(); tabTo('orders'); }
+      else{ openCategory(cat); }
+    });
+  });
+  $$('[data-open-map]').forEach(el=>{
+    el.addEventListener('click', ()=>{ renderMap(); tabTo('map'); });
+  });
+
+  // Back buttons
+  $$('[data-back]').forEach(btn => btn.addEventListener('click', back));
+
+  // Tab bar
+  $$('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      const view = tab.dataset.tab;
+      if(view === 'orders') renderOrders();
+      if(view === 'profile') renderProfile();
+      if(view === 'map') renderMap();
+      tabTo(view);
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){const f=['name','type','city','address','specialty','scope','phone','whatsapp','email','website','facebook','social','equipment','courses','contract','verified','notes'];const v=k=>document.getElementById('dc_'+k)?.value||'';window.saveProviderRecord=function(){const r={};f.forEach(k=>r[k]=v(k));r.services={rent:!!document.getElementById('dc_rent')?.checked,sell:!!document.getElementById('dc_sell')?.checked,calibration:!!document.getElementById('dc_cal')?.checked,training:!!document.getElementById('dc_train')?.checked};r.createdAt=new Date().toISOString();const a=JSON.parse(localStorage.getItem('geo_station_provider_records')||'[]');a.push(r);localStorage.setItem('geo_station_provider_records',JSON.stringify(a));const st=document.getElementById('dc_status');if(st)st.innerHTML='<b>تم الحفظ:</b> '+a.length+' سجل محليًا في هذا المتصفح (Demo).'};window.exportProviderCSV=function(){const r={};f.forEach(k=>r[k]=v(k));r.rent=document.getElementById('dc_rent')?.checked?'نعم':'لا';r.sell=document.getElementById('dc_sell')?.checked?'نعم':'لا';r.calibration=document.getElementById('dc_cal')?.checked?'نعم':'لا';r.training=document.getElementById('dc_train')?.checked?'نعم':'لا';const h={name:'اسم المكتب/الشركة',type:'نوع الجهة',city:'المحافظة',address:'العنوان',specialty:'التخصص',scope:'مجال العمل',phone:'الهاتف',whatsapp:'WhatsApp',email:'البريد',website:'الموقع',facebook:'Facebook',social:'التواصل الاجتماعي',equipment:'الأجهزة',courses:'الخدمات/الدورات',contract:'نوع التعاقد',verified:'حالة التحقق',notes:'ملاحظات',rent:'تأجير',sell:'بيع',calibration:'معايرة',training:'تدريب'};const row=Object.keys(h).map(k=>'"'+String(r[k]||'').replace(/"/g,'""')+'"');const csv='\ufeff'+Object.values(h).map(x=>'"'+x+'"').join(',')+'\n'+row.join(',');const b=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='geo-station-provider-'+Date.now()+'.csv';a.click();URL.revokeObjectURL(a.href)};window.clearProviderForm=function(){f.forEach(k=>{const e=document.getElementById('dc_'+k);if(e)e.value=''});['rent','sell','cal','train'].forEach(k=>{const e=document.getElementById('dc_'+k);if(e)e.checked=false})}})();
+</script>
+</body>
+</html>

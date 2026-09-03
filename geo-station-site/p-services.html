@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الخدمات | Geo Station</title>
+<meta name="description" content="الخدمات">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("provider", "p-services.html", "الخدمات", `<a href="p-dashboard.html">بوابة المزوّد</a> / <b>الخدمات</b>`);
+
+const SVC=[["رفع مساحي طبوغرافي","منشور",24,"مساحة أرضية"],["تقسيم وفرز أراضي","منشور",18,"مساحة قانونية"],
+ ["حصر كميات وأعمال ترابية","منشور",11,"دعم التنفيذ"],["إعداد خرائط GIS","قيد المراجعة",0,"جيوماتكس"],
+ ["مراقبة هبوط المنشآت","مسودة",0,"مراقبة دورية"]];
+setContent(`
+<div class="pagehead"><div><h2>الخدمات التي تقدّمها</h2>
+  <p>أدرج ما تنفّذه فعليًا فقط — الخدمات المعلنة تُستخدم في مطابقة طلبات الاحتياج الواردة إليك.</p></div>
+  <button class="btn btn-pri" onclick="svcForm()">＋ إضافة خدمة</button></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  ${kpi("خدمات منشورة","3","","flat","🧭")}
+  ${kpi("طلبات عبر الخدمات","19","▲ 6","up","📥")}
+  ${kpi("قيد المراجعة","1","","flat","⏳")}
+  ${kpi("خدمات مقترحة عليك","4","حسب نشاط السوق","up","💡")}
+</div>
+
+${table(["الخدمة","التصنيف","طلبات واردة","الحالة",""],
+ SVC.map(([t,s,n,c])=>[`<b>${t}</b>`,c,n||"—",st(s),
+  `<div class="acts"><button class="btn btn-soft btn-sm" onclick="svcForm('${t}')">تعديل</button>
+   <button class="btn btn-err btn-sm" onclick="toast('تمت إزالة الخدمة من ملفك')">إزالة</button></div>`]))}
+
+<div class="card" style="margin-top:18px"><h3>خدمات مطلوبة في نطاقك ولم تُدرجها</h3>
+ <p class="muted" style="margin-top:6px">بناءً على عمليات بحث حقيقية في الإسكندرية خلال آخر 30 يومًا.</p>
+ <div class="grid g4" style="margin-top:14px">
+ ${[["مسح ليزري ثلاثي الأبعاد",64],["Drone Survey",41],["As-Built Documentation",29],["مراقبة هبوط",17]]
+  .map(([t,n])=>`<div class="card" style="background:#f9fcfd"><b style="font-size:14.5px">${t}</b>
+    <div class="muted" style="margin-top:5px">${n} عملية بحث</div>
+    <button class="btn btn-soft btn-sm" style="margin-top:10px" onclick="svcForm('${t}')">＋ إضافة</button></div>`).join("")}</div>
+</div>
+`);
+function svcForm(t){
+ openModal(`<button class="x" onclick="closeModal()">✕</button><h3>${t?"تعديل خدمة":"إضافة خدمة"}</h3>
+  <div class="formgrid" style="margin-top:14px">
+   <div class="field"><label>الخدمة *</label><input value="${t||""}" placeholder="مثال: رفع مساحي طبوغرافي"></div>
+   <div class="field"><label>التصنيف *</label><select><option>مساحة أرضية</option><option>مساحة قانونية</option><option>Reality Capture</option><option>Aerial Survey</option><option>جيوماتكس</option><option>خدمات فنية</option></select></div>
+   <div class="field full"><label>وصف قدرتك على تنفيذها *</label><textarea rows="3" placeholder="المخرجات التي تسلّمها، الأجهزة المستخدمة، حجم المشروعات التي تنفّذها"></textarea></div>
+   <div class="field"><label>الحد الأدنى لحجم المشروع</label><input placeholder="اختياري"></div>
+   <div class="field"><label>مدة التنفيذ التقريبية</label><input placeholder="مثال: 3-7 أيام"></div>
+  </div>
+  <button class="btn btn-pri btn-block" style="margin-top:14px" onclick="closeModal();toast('تم الإرسال للمراجعة')">إرسال للمراجعة</button>`);
+}
+
+</script>
+</body>
+</html>

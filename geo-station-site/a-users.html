@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة المستخدمين | Geo Station</title>
+<meta name="description" content="إدارة المستخدمين">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-users.html", "إدارة المستخدمين", `<a href="a-dashboard.html">لوحة الإدارة</a> / <b>المستخدمون</b>`);
+
+const COLL="users";
+const PERMS=[["عرض لوحة الإدارة",1,1,1,1],["اعتماد ورفض المحتوى",1,1,0,0],["إضافة وتعديل البيانات",1,1,1,0],
+ ["حذف نهائي للسجلات",1,0,0,0],["منح وسحب شارات التوثيق",1,1,0,0],["إدارة المستخدمين والصلاحيات",1,0,0,0],
+ ["تصدير بيانات شخصية",1,0,0,0],["تعديل إعدادات النظام",1,0,0,0],["الرد على البلاغات",1,1,0,1]];
+setContent(`
+<div class="pagehead"><div><h2>المستخدمون والصلاحيات</h2>
+  <p>إدارة فريق التشغيل وحسابات المزوّدين — إضافة وتعديل وإيقاف وحذف، وضبط ما يستطيع كل دور فعله.</p></div>
+  <div class="rowf">${CRUD.addBtn("users","إضافة مستخدم")}
+   <button class="btn btn-soft" onclick="GS.exportCSV('users')&&toast('⬇ تم تصدير CSV')">⬇ تصدير</button></div></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  <div class="kpi"><div class="ic">👤</div><div><div class="lab">مستخدمون نشطون</div><div class="n" id="uActive">0</div></div></div>
+  <div class="kpi"><div class="ic">📦</div><div><div class="lab">مؤرشفون</div><div class="n" id="uArch">0</div></div></div>
+  ${kpi("مديرو نظام","1","صلاحية كاملة","flat","🔑")}
+  ${kpi("محاولات دخول فاشلة","3","آخر 24 ساعة","dn","🚨")}
+</div>
+
+<div class="tabs" style="margin-bottom:14px">
+  <button class="on" data-v="active" onclick="setView('active')">النشطون</button>
+  <button data-v="archived" onclick="setView('archived')">المؤرشفون</button></div>
+
+<div class="toolbar"><input id="q" placeholder="بحث بالاسم أو البريد…" style="min-width:220px" oninput="onQ(this.value)">
+  <select class="fsel" onchange="onF('role',this.value)"><option value="">كل الأدوار</option>
+   <option>مدير النظام</option><option>مسؤول تشغيل</option><option>مُدخل بيانات</option>
+   <option>دعم العملاء</option><option>مزوّد</option><option>مراجع محتوى</option></select>
+  <select class="fsel" onchange="onF('status',this.value)"><option value="">كل الحالات</option>
+   <option>نشط</option><option>موقوف</option><option>بانتظار التفعيل</option></select>
+  <div style="flex:1"></div><span class="muted" id="cnt">0</span></div>
+
+<div id="tblhost"></div>
+
+<div class="card" style="margin-top:18px"><h3>مصفوفة الصلاحيات</h3>
+ <p class="muted" style="margin-top:6px">ما يستطيع كل دور فعله داخل لوحة الإدارة.</p>
+ <div style="margin-top:14px">${table(["الصلاحية","مدير النظام","مسؤول تشغيل","مُدخل بيانات","دعم العملاء"],
+  PERMS.map(p=>[`<b style="font-weight:600">${p[0]}</b>`].concat(p.slice(1).map(v=>
+   v?'<span class="chip ok">✔ مسموح</span>':'<span class="chip">✕ ممنوع</span>'))))}</div>
+ <div class="notice" style="margin-top:14px">الحذف النهائي وتصدير البيانات الشخصية وتعديل إعدادات النظام حكر على «مدير النظام»، وكل استخدام لها يُسجَّل في سجل التدقيق.</div>
+</div>
+`);
+
+function rowFilter(r){
+  if(FILT.role && r.role!==FILT.role) return false;
+  if(FILT.status && r.status!==FILT.status) return false;
+  if(Q && !((r.name||"")+(r.email||"")+(r.team||"")).includes(Q)) return false;
+  return true;
+}
+function buildTable(rows){
+  return table(["المستخدم","الدور","الفريق","آخر دخول","الحالة","الإجراءات"],
+   rows.map(r=>[
+    userCell(r.name, r.email, r.av||(r.name||"؟").slice(0,2)),
+    `<span class="chip ${r.role==="مدير النظام"?"pur":"cy"}">${r.role||"—"}</span>`,
+    r.team||"—", `<span class="muted">${r.last||"—"}</span>`,
+    r.status==="موقوف"?'<span class="chip err">موقوف</span>'
+     :r.status==="بانتظار التفعيل"?'<span class="chip warn">بانتظار التفعيل</span>':'<span class="chip ok">نشط</span>',
+    CRUD.actions("users", r.id, VIEW==="archived")]));
+}
+
+let VIEW="active", Q="", FILT={};
+function refreshTable(){ render(); }
+function render(){
+  const rows = (VIEW==="archived"?GS.archived(COLL):GS.active(COLL)).filter(rowFilter);
+  $("#tblhost").innerHTML = rows.length ? buildTable(rows)
+    : `<div class="empty">لا توجد سجلات مطابقة. <button class="btn btn-soft btn-sm" onclick="clearF()">مسح الفلاتر</button></div>`;
+  $("#cnt").textContent = rows.length + " سجل";
+  const a=$("#uActive"); if(a) a.textContent = GS.active(COLL).length;
+  const b=$("#uArch");  if(b) b.textContent = GS.archived(COLL).length;
+  const sb=$("#stbar"); if(sb){ const u=GS.usage(); sb.querySelector("i").style.width=u.pct+"%";
+    sb.classList.toggle("hi",u.pct>75); $("#stlab").textContent = u.label+" / 5 م.ب"; }
+}
+function clearF(){ Q=""; FILT={}; const q=$("#q"); if(q)q.value=""; $$(".fsel").forEach(s=>s.value=""); render(); }
+function setView(v){ VIEW=v; $$(".tabs button").forEach(b=>b.classList.toggle("on", b.dataset.v===v)); render(); }
+function onQ(v){ Q=v.trim(); render(); }
+function onF(k,v){ FILT[k]=v; render(); }
+GS.onChange(render);
+
+render();
+
+</script>
+</body>
+</html>

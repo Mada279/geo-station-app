@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الإعدادات | Geo Station</title>
+<meta name="description" content="الإعدادات">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("provider", "p-settings.html", "الإعدادات", `<a href="p-dashboard.html">بوابة المزوّد</a> / <b>الإعدادات</b>`);
+
+setContent(`
+<div class="pagehead"><div><h2>إعدادات الحساب</h2><p>تفضيلات الإشعارات والخصوصية وبيانات الدخول.</p></div>
+ <button class="btn btn-pri" onclick="toast('✅ تم حفظ الإعدادات')">حفظ التغييرات</button></div>
+
+<div class="split">
+ <div>
+  <div class="card"><h3>تفضيلات الإشعارات</h3>
+   <div style="margin-top:12px">${table(["النوع","داخل المنصة","بريد إلكتروني","واتساب"],
+    [["طلب تواصل جديد",1,1,1],["تغيير حالة طلب",1,0,0],["قرارات الإدارة على إدراجاتك",1,1,0],
+     ["تقييم جديد",1,1,0],["تقرير الأداء الشهري",0,1,0],["تحديثات المنصة والعروض",0,1,0]]
+    .map(r=>[`<b style="font-size:13.5px">${r[0]}</b>`,
+      ...r.slice(1).map(v=>`<input type="checkbox" ${v?"checked":""}>`)]))}</div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><h3>الخصوصية وكشف البيانات</h3>
+   <div style="margin-top:12px">
+    <label class="check"><input type="checkbox" checked> إظهار رقم الهاتف بعد إنشاء طلب التواصل</label>
+    <label class="check"><input type="checkbox" checked> إظهار متوسط زمن ردّي على الملف العام</label>
+    <label class="check"><input type="checkbox" checked> السماح بظهور جهتي في مطابقة طلبات الاحتياج</label>
+    <label class="check"><input type="checkbox"> إخفاء عدد الموظفين من الملف العام</label>
+    <label class="check"><input type="checkbox"> إيقاف استقبال الطلبات مؤقتًا (وضع الإجازة)</label>
+   </div>
+   <div class="notice cy" style="margin-top:12px">إيقاف استقبال الطلبات يبقي ملفك ظاهرًا لكن يعطّل أزرار التواصل، ولا يؤثر على تقييمك.</div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><h3>بيانات الدخول والأمان</h3>
+   <div class="formgrid" style="margin-top:14px">
+    <div class="field"><label>البريد الإلكتروني</label><input value="ahmed@elite-survey.eg"></div>
+    <div class="field"><label>رقم الهاتف للدخول</label><input value="01x xxxx xxxx"></div>
+    <div class="field"><label>كلمة المرور الحالية</label><input type="password" value="········"></div>
+    <div class="field"><label>كلمة المرور الجديدة</label><input type="password"></div>
+    <div class="field full"><label class="check"><input type="checkbox"> تفعيل التحقق بخطوتين عبر رسالة نصية</label></div>
+   </div>
+  </div>
+ </div>
+
+ <aside class="sticky">
+  <div class="card"><h3>معلومات الحساب</h3>
+   <div style="margin-top:12px">${table([],[["<b>رقم الحساب</b>","<code>PRV-1042</code>"],["<b>الباقة</b>","مجاني"],
+     ["<b>تاريخ الانضمام</b>","2024-03-11"],["<b>حالة الحساب</b>",st("نشط")]])}</div>
+   <button class="btn btn-soft btn-block btn-sm" style="margin-top:12px" onclick="toast('عرض باقات الظهور المميّز')">ترقية الباقة</button>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>اللغة والمنطقة</h3>
+   <div class="field" style="margin-top:12px"><label>لغة الواجهة</label><select><option>العربية</option><option>English</option></select></div>
+   <div class="field" style="margin-top:12px"><label>المنطقة الزمنية</label><select><option>القاهرة (GMT+2)</option></select></div>
+  </div>
+  <div class="card" style="margin-top:14px" ><h3 style="color:var(--err)">منطقة الخطر</h3>
+   <p class="muted" style="margin-top:6px">إيقاف الحساب يخفي ملفك وكل إدراجاتك من المنصة.</p>
+   <button class="btn btn-err btn-block btn-sm" style="margin-top:10px" onclick="confirmAction('إيقاف الحساب','سيختفي ملفك وإدراجاتك من نتائج البحث والخريطة. يمكن إعادة التفعيل لاحقًا بالتواصل مع الدعم.','تأكيد الإيقاف',()=>toast('تم إيقاف الحساب (محاكاة)'))">إيقاف الحساب مؤقتًا</button>
+  </div>
+ </aside>
+</div>
+`);
+
+</script>
+</body>
+</html>

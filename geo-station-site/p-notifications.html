@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الإشعارات | Geo Station</title>
+<meta name="description" content="الإشعارات">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("provider", "p-notifications.html", "الإشعارات", `<a href="p-dashboard.html">بوابة المزوّد</a> / <b>الإشعارات</b>`);
+
+const N=[["📥","طلب تواصل جديد من شركة أوركيد للتطوير","رفع مساحي 6 أفدنة — برج العرب","اليوم 09:12",0,"p-leads.html"],
+ ["📥","طلب تواصل جديد من م. أحمد سليم","تأجير GNSS RTK لمدة أسبوع","اليوم 08:40",0,"p-leads.html"],
+ ["⚠️","الإدارة طلبت تعديل إدراج South N7","سجل المعايرة منتهٍ — يلزم تحديث البيانات","أمس 16:20",0,"p-listings.html"],
+ ["✅","تم اعتماد إدراج Trimble R12i ونشره","الإدراج مرئي الآن في سوق الأجهزة","أمس 11:05",1,"p-listings.html"],
+ ["⭐","تقييم جديد بـ 5 نجوم","من م. طارق عبد الحميد","2026-08-25",1,"p-reviews.html"],
+ ["🏅","تم منح حسابك شارة «نشاط موثّق»","بعد مراجعة المستندات المقدّمة","2026-08-20",1,"p-profile.html"],
+ ["📈","تقرير أدائك الشهري جاهز","ظهورك ارتفع 14% وطلباتك 33%","2026-08-01",1,"p-analytics.html"]];
+setContent(`
+<div class="pagehead"><div><h2>الإشعارات</h2><p>كل ما يخص حسابك من طلبات وقرارات إدارية وتقييمات.</p></div>
+ <div class="rowf"><button class="btn btn-soft" onclick="toast('تم تعليم الكل كمقروء')">✓ تعليم الكل كمقروء</button>
+  <a href="p-settings.html" class="btn btn-soft">⚙️ تفضيلات الإشعارات</a></div></div>
+
+<div class="toolbar"><select><option>كل الإشعارات</option><option>غير المقروءة</option><option>الطلبات</option><option>القرارات الإدارية</option><option>التقييمات</option></select>
+ <div style="flex:1"></div><span class="muted">3 غير مقروءة</span></div>
+
+<div class="card">
+${N.map(([i,t,d,when,read,href])=>`<a href="${href}" style="display:block">
+ <div class="rowb" style="padding:13px 4px;border-bottom:1px solid var(--bd);${read?"":"background:#f4fbfd;margin:0 -17px;padding-inline:17px"}">
+  <div class="rowf"><div style="font-size:20px;width:34px;text-align:center">${i}</div>
+   <div><b style="font-size:14.5px">${t}</b><div class="muted">${d}</div></div></div>
+  <div class="rowf"><span class="muted">${when}</span>${read?"":'<span class="chip cy">جديد</span>'}</div></div></a>`).join("")}
+</div>
+`);
+
+</script>
+</body>
+</html>

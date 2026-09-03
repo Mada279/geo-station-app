@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Geo Station — Interactive Platform</title>
+<style>
+:root{--navy:#07111f;--navy2:#0d2034;--cyan:#28c7d8;--gold:#f4b84a;--ink:#152238;--muted:#718096;--bg:#f5f7fa;--line:#dfe6ed}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;border-bottom:1px solid #203650}
+.nav{max-width:1240px;margin:auto;height:72px;padding:0 22px;display:flex;align-items:center;gap:25px}.logo{font-size:22px;font-weight:900}.logo span{color:var(--cyan)}.links{display:flex;gap:22px;flex:1}.links a{color:#c7d5e2;text-decoration:none;font-size:14px}.links a:hover{color:#fff}
+.navbtn,.primary{background:var(--cyan);border:0;border-radius:10px;padding:11px 17px;font-weight:800;color:#05202a}.navbtn{background:#102a43;color:#fff;border:1px solid #31516f}
+.hero{background:radial-gradient(circle at 15% 20%,#194b65,#0a1b2d 42%,#07111f 80%);color:#fff;padding:72px 22px 85px}.heroIn{max-width:1240px;margin:auto;display:grid;grid-template-columns:1.08fr .92fr;gap:45px;align-items:center}
+.badge{display:inline-block;border:1px solid #32627d;background:#102d45;color:#a5eff5;padding:7px 12px;border-radius:99px;font-size:12px}
+h1{font-size:52px;line-height:1.1;margin:18px 0}.hero p{font-size:18px;line-height:1.8;color:#b9cad9;max-width:680px}.actions{display:flex;gap:10px;margin-top:24px}.secondary{background:transparent;color:#fff;border:1px solid #47667f;border-radius:10px;padding:11px 17px}
+.phone{background:#07111f;border:1px solid #2a455d;border-radius:30px;padding:14px;max-width:335px;margin:auto;box-shadow:0 25px 70px #0008}.screen{background:#f3f6f9;border-radius:22px;overflow:hidden;min-height:525px}.appbar{background:#0d2034;color:#fff;padding:18px}.appbar b{font-size:18px}.appbar small{display:block;color:#9fb3c5;margin-top:4px}.appbody{padding:14px}.mini{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px;color:#8796a5}.chips{display:flex;gap:7px;overflow:hidden;margin:10px 0}.chip{white-space:nowrap;background:#fff;border:1px solid var(--line);border-radius:99px;padding:7px 10px;font-size:11px}.map{height:160px;border-radius:14px;background:linear-gradient(145deg,#dbeaec,#eff5ef);position:relative;overflow:hidden}.map:before{content:"";position:absolute;inset:15px -30px;background:repeating-linear-gradient(20deg,transparent 0 22px,#b8cfd0 23px 25px),repeating-linear-gradient(110deg,transparent 0 35px,#c4d7d5 36px 38px);opacity:.7}.pin{position:absolute;width:18px;height:18px;background:#0d2034;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 7px #0006}.p1{top:35px;right:65px}.p2{top:95px;right:175px}.p3{top:62px;right:245px}.appcard{background:#fff;border:1px solid #e1e8ef;border-radius:12px;padding:11px;margin-top:9px}.appcard b{font-size:12px}.appcard small{color:#718196}
+.section{max-width:1240px;margin:auto;padding:58px 22px}.head{margin-bottom:24px}.head h2{font-size:31px;margin:0}.head p{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card{background:#fff;border:1px solid #e3e9ef;border-radius:16px;padding:18px;transition:.2s}.card:hover{transform:translateY(-3px);box-shadow:0 12px 35px #18293b12}.icon{width:45px;height:45px;border-radius:12px;background:#e9fbfd;color:#087f8b;display:grid;place-items:center;font-size:22px}.card h3{margin:12px 0 7px}.card p{font-size:13px;line-height:1.65;color:var(--muted)}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.filter{background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 13px}.list{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.tag{position:absolute;top:13px;left:13px;background:#e8fff5;color:#087a50;padding:5px 8px;border-radius:99px;font-size:11px}.listing{position:relative}.price{font-size:20px;font-weight:900;margin-top:12px}.muted{color:#78889a;font-size:12px}.company{display:flex;gap:12px;align-items:center}.avatar{width:48px;height:48px;border-radius:12px;background:#0d2034;color:#fff;display:grid;place-items:center;font-weight:800}.cta{background:#081827;color:#fff;border-radius:22px;padding:40px;display:flex;justify-content:space-between;align-items:center;gap:25px}.cta p{color:#a9bac9;line-height:1.7}.footer{background:#06101d;color:#8fa5bb;padding:34px 22px}.footerIn{max-width:1240px;margin:auto;display:flex;justify-content:space-between}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:50;align-items:center;justify-content:center;padding:20px}.modal.open{display:flex}.modalBox{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:25px}.close{float:left;border:0;background:#eef2f5;border-radius:8px;padding:7px 10px}.form{display:grid;gap:10px}.form input,.form select,.form textarea{border:1px solid var(--line);border-radius:9px;padding:11px}.notice{background:#fff8e8;border:1px solid #f0d28a;padding:12px;border-radius:10px;color:#76550c;line-height:1.6;font-size:13px}
+@media(max-width:900px){.heroIn{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.list{grid-template-columns:1fr 1fr}.links{display:none}h1{font-size:41px}}
+@media(max-width:600px){.grid,.list{grid-template-columns:1fr}.cta{display:block}.cta .primary{margin-top:15px}}
+</style>
+</head>
+<body>
+<header class="top"><nav class="nav">
+<div class="logo">GEO <span>STATION</span></div>
+<div class="links"><a href="#market">الأجهزة</a><a href="#companies">المكاتب والشركات</a><a href="#training">التدريب</a><a href="#jobs">الوظائف</a><a href="#partners">الشركاء</a></div>
+<button class="navbtn" onclick="openModal('join')">انضم كشريك</button>
+</nav></header>
+
+<section class="hero"><div class="heroIn"><div>
+<span class="badge">المنصة الرقمية المتخصصة لقطاع المساحة</span>
+<h1>كل ما تحتاجه في عالم المساحة، في مكان واحد.</h1>
+<p>اكتشف أجهزة المساحة للبيع والإيجار، المكاتب والشركات، المعايرة والخدمات، الدورات التدريبية وفرص العمل — وابحث عن الجهة المناسبة بالقرب منك.</p>
+<div class="actions"><button class="primary" onclick="document.getElementById('market').scrollIntoView({behavior:'smooth'})">استكشف المنصة</button><button class="secondary" onclick="openModal('join')">سجل شركتك</button></div>
+</div>
+<div class="phone"><div class="screen"><div class="appbar"><b>Geo Station</b><small>ابحث عن كل ما يخص المساحة</small></div><div class="appbody">
+<div class="mini">🔎 ابحث عن جهاز، مكتب، تدريب...</div><div class="chips"><span class="chip">أجهزة للإيجار</span><span class="chip">بيع</span><span class="chip">معايرة</span><span class="chip">تدريب</span></div>
+<div class="map"><i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i></div>
+<div class="appcard"><b>مكتب النخبة للمساحة</b><br><small>📍 الإسكندرية • Total Station • GNSS</small></div>
+<div class="appcard"><b>Leica TS16</b><br><small>تأجير • متاح الآن • 📍 3.2 كم</small></div>
+</div></div></div></div></section>
+
+<section class="section" id="market"><div class="head"><h2>استكشف Geo Station</h2><p>خدمات ومنتجات وفرص مصممة خصيصًا لقطاع المساحة.</p></div>
+<div class="grid">
+<div class="card"><div class="icon">📡</div><h3>أجهزة المساحة</h3><p>Total Station وGNSS و3D Scanner وLaser Scanner وDrones والملحقات للبيع أو الإيجار.</p></div>
+<div class="card"><div class="icon">🏢</div><h3>المكاتب والشركات</h3><p>اعثر على المكاتب والشركات المتخصصة حسب التخصص والموقع والخدمة.</p></div>
+<div class="card"><div class="icon">🛠️</div><h3>المعايرة والصيانة</h3><p>اكتشف مراكز المعايرة والصيانة والخدمات الفنية المتخصصة.</p></div>
+<div class="card"><div class="icon">🎓</div><h3>Academy</h3><p>دورات ومحتوى تعليمي للأجهزة والبرامج مثل AutoCAD وCivil 3D.</p></div>
+<div class="card"><div class="icon">💼</div><h3>Job Board</h3><p>وظائف للمساحين ومساعدي المساحة وفرص للمكاتب للوصول إلى الكفاءات.</p></div>
+<div class="card"><div class="icon">📍</div><h3>بالقرب منك</h3><p>نتائج مبنية على الموقع لتسهيل الوصول إلى الجهة الأقرب والمناسبة.</p></div>
+<div class="card"><div class="icon">📣</div><h3>الإعلانات والعروض</h3><p>مساحة للمكاتب والشركات لعرض الأجهزة والخدمات والعروض.</p></div>
+<div class="card"><div class="icon">🤝</div><h3>شبكة الشركاء</h3><p>شبكة تجمع المكاتب والموردين ومراكز التدريب والمعايرة والمتخصصين.</p></div>
+</div></section>
+
+<section class="section"><div class="head"><h2>Marketplace — أجهزة للبيع والإيجار</h2><p>نموذج عملي لشكل سوق الأجهزة داخل المنصة.</p></div>
+<div class="toolbar"><button class="filter" onclick="filterCards('all')">الكل</button><button class="filter" onclick="filterCards('rent')">إيجار</button><button class="filter" onclick="filterCards('sale')">بيع</button><button class="filter" onclick="filterCards('gnss')">GNSS</button></div>
+<div class="list" id="equipment">
+<div class="card listing equip rent"><span class="tag">متاح للإيجار</span><div class="icon">📐</div><h3>Leica TS16</h3><div class="muted">Total Station • الإسكندرية</div><div class="price">500 جنيه / يوم</div><button class="primary" style="margin-top:12px;width:100%" onclick="openModal('contact')">طلب تواصل</button></div>
+<div class="card listing equip sale"><span class="tag">للبيع</span><div class="icon">📡</div><h3>Topcon GT-1200</h3><div class="muted">Total Station • القاهرة</div><div class="price">حسب العرض</div><button class="primary" style="margin-top:12px;width:100%" onclick="openModal('contact')">تواصل مع المورد</button></div>
+<div class="card listing equip rent gnss"><span class="tag">متاح</span><div class="icon">🛰️</div><h3>GNSS RTK Set</h3><div class="muted">GNSS • الجيزة</div><div class="price">حسب المدة</div><button class="primary" style="margin-top:12px;width:100%" onclick="openModal('contact')">طلب تواصل</button></div>
+</div></section>
+
+<section class="section" id="companies"><div class="head"><h2>المكاتب والشركات</h2><p>ملفات تعريفية منظمة تشمل الخدمات والأجهزة وطرق التواصل.</p></div>
+<div class="list">
+<div class="card"><div class="company"><div class="avatar">NS</div><div><h3 style="margin:0">مكتب النخبة للمساحة</h3><div class="muted">الإسكندرية • خدمات مساحية</div></div></div><p>رفع مساحي • توقيع • Total Station • GNSS</p><button class="filter" onclick="openModal('contact')">📞 تواصل</button> <button class="filter" onclick="openModal('map')">📍 الموقع</button></div>
+<div class="card"><div class="company"><div class="avatar">GS</div><div><h3 style="margin:0">Geo Survey Solutions</h3><div class="muted">القاهرة • أجهزة وخدمات</div></div></div><p>بيع • إيجار • دعم فني • أجهزة مساحية</p><button class="filter" onclick="openModal('contact')">📞 تواصل</button> <button class="filter" onclick="openModal('map')">📍 الموقع</button></div>
+<div class="card"><div class="company"><div class="avatar">MC</div><div><h3 style="margin:0">مركز الدقة للمعايرة</h3><div class="muted">القاهرة • معايرة وصيانة</div></div></div><p>معايرة أجهزة • فحص • صيانة • دعم فني</p><button class="filter" onclick="openModal('contact')">📞 تواصل</button> <button class="filter" onclick="openModal('map')">📍 الموقع</button></div>
+</div></section>
+
+<section class="section" id="training"><div class="head"><h2>Geo Station Academy</h2><p>الدورات والمحتوى التعليمي المرتبط بالأجهزة والبرامج.</p></div>
+<div class="list"><div class="card"><div class="icon">📐</div><h3>Total Station</h3><p>أساسيات التشغيل والرفع والتوقيع والتطبيق العملي.</p><button class="filter" onclick="openModal('course')">عرض الدورة</button></div>
+<div class="card"><div class="icon">🛰️</div><h3>GNSS / GPS</h3><p>مقدمة في أنظمة GNSS والتطبيقات المساحية.</p><button class="filter" onclick="openModal('course')">عرض الدورة</button></div>
+<div class="card"><div class="icon">💻</div><h3>AutoCAD & Civil 3D</h3><p>البرامج المرتبطة بالأعمال المساحية والهندسية.</p><button class="filter" onclick="openModal('course')">مشاهدة المحتوى</button></div></div></section>
+
+<section class="section" id="jobs"><div class="head"><h2>Geo Station Jobs</h2><p>حلقة وصل بين الكفاءات والمكاتب والشركات.</p></div>
+<div class="list"><div class="card listing"><span class="tag">جديد</span><h3>مطلوب مساح</h3><p>مكتب مساحة — الإسكندرية<br>خبرة في Total Station وAutoCAD.</p><button class="primary" onclick="openModal('job')">التقديم</button></div>
+<div class="card"><h3>مطلوب مساعد مساح</h3><p>شركة مقاولات — القاهرة<br>يفضل خبرة ميدانية.</p><button class="primary" onclick="openModal('job')">التقديم</button></div>
+<div class="card"><h3>لأصحاب الأعمال</h3><p>انشر وظيفة أو ابحث في ملفات المرشحين.</p><button class="filter" onclick="openModal('join')">للشركات</button></div></div></section>
+
+<section class="section" id="partners"><div class="cta"><div><h2>هل أنت مكتب أو مورد أو مركز تدريب؟</h2><p>أنشئ ملفك على Geo Station واعرض خدماتك وأجهزتك ودوراتك أمام العملاء المهتمين بمجال المساحة.</p></div><button class="primary" onclick="openModal('join')">انضم إلى Geo Station</button></div></section>
+<footer class="footer"><div class="footerIn"><div><b style="color:#fff">GEO STATION</b><br>المنصة الرقمية المتخصصة لقطاع المساحة.</div><div>© 2026 Geo Station — Interactive Platform Mockup</div></div></footer>
+
+<div class="modal" id="modal"><div class="modalBox"><button class="close" onclick="closeModal()">✕</button><div id="modalContent"></div></div></div>
+<script>
+function openModal(type){let c=document.getElementById('modalContent');let d={
+join:`<h2>انضم كشريك</h2><p>سجل بيانات مكتبك أو شركتك أو مركز التدريب.</p><div class="form"><input placeholder="اسم المكتب / الشركة"><select><option>نوع الجهة</option><option>مكتب مساحة</option><option>مورد أجهزة</option><option>مركز معايرة</option><option>مركز تدريب</option></select><input placeholder="المحافظة والمدينة"><input placeholder="رقم الهاتف / WhatsApp"><input placeholder="رابط الموقع أو صفحات التواصل"><textarea rows="4" placeholder="التخصص والخدمات والأجهزة أو الدورات"></textarea><button class="primary" onclick="alert('تم تسجيل البيانات — Mockup')">إرسال البيانات</button></div>`,
+contact:`<h2>طلب تواصل</h2><p>في النسخة الفعلية يتم تسجيل الطلب وإحالته إلى الجهة المختارة.</p><div class="notice">Geo Station منصة ربط وتسويق. تفاصيل السعر والتنفيذ والتسليم تتم مباشرة بين العميل والجهة وفق الاتفاق بينهما.</div><br><button class="primary" onclick="alert('تم إرسال طلب التواصل — Mockup')">إرسال الطلب</button>`,
+map:`<h2>الموقع</h2><div class="map" style="height:260px"><i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i></div><p>خريطة تجريبية — النسخة الفعلية تربط بخدمة خرائط وموقع المستخدم.</p>`,
+course:`<h2>تفاصيل الدورة</h2><p>صفحة تجريبية تشمل وصف الدورة والمستوى والمركز والمدرب ورابط المحتوى الخارجي.</p><button class="primary" onclick="alert('سيتم فتح رابط YouTube / الدورة في النسخة الفعلية')">مشاهدة المحتوى</button>`,
+job:`<h2>التقديم على الوظيفة</h2><div class="form"><input placeholder="الاسم"><input placeholder="البريد الإلكتروني"><input placeholder="رقم الهاتف"><input type="file"><textarea rows="3" placeholder="نبذة مختصرة"></textarea><button class="primary" onclick="alert('تم إرسال الطلب — Mockup')">إرسال الطلب</button></div>`};c.innerHTML=d[type]||d.join;document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function filterCards(type){document.querySelectorAll('.equip').forEach(x=>x.style.display=(type==='all'||x.classList.contains(type))?'block':'none')}
+window.onclick=e=>{if(e.target.id==='modal')closeModal()}
+</script></body></html>
