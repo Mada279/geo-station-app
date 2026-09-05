@@ -21,7 +21,7 @@ const NAV = [
   ]},
   {t:"الخدمات", h:"services.html"},
   {t:"الخريطة", h:"map.html"},
-  {t:"Academy", h:"academy.html"},
+  {t:"Academy", h:"academy.html", badge:"قريباً"},
   {t:"الوظائف", h:"jobs.html"},
   {t:"عن المنصة", h:"about.html", sub:[
     {t:"كيف تعمل المنصة", h:"how-it-works.html", d:"رحلة العميل والمزوّد خطوة بخطوة"},
@@ -33,10 +33,11 @@ const NAV = [
 ];
 
 function buildHeader(active){
+  const badgeHtml = b => b ? ` <span class="badge-soon" style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:12px;border:1px solid #fde68a;margin-right:5px;vertical-align:middle;display:inline-block;line-height:1.2;">${b}</span>` : "";
   const link = n => n.sub
-    ? `<div class="dd"><button>${n.t} <span style="font-size:10px">▾</span></button>
-        <div class="dd-menu">${n.sub.map(s=>`<a href="${s.h}"><b>${s.t}</b>${s.d?`<small>${s.d}</small>`:""}</a>`).join("")}</div></div>`
-    : `<a href="${n.h}" class="${active===n.h?"active":""}">${n.t}</a>`;
+    ? `<div class="dd"><button>${n.t}${badgeHtml(n.badge)} <span style="font-size:10px">▾</span></button>
+        <div class="dd-menu">${n.sub.map(s=>`<a href="${s.h}"><b>${s.t}${badgeHtml(s.badge)}</b>${s.d?`<small>${s.d}</small>`:""}</a>`).join("")}</div></div>`
+    : `<a href="${n.h}" class="${active===n.h?"active":""}">${n.t}${badgeHtml(n.badge)}</a>`;
   return `
 <div class="utility"><div class="wrap">
   <div>📍 نخدم حاليًا: الإسكندرية والقاهرة والجيزة — التوسع تباعًا لباقي المحافظات</div>
@@ -76,7 +77,7 @@ function buildFooter(){
       <a href="equipment.html">سوق الأجهزة</a>
       <a href="services.html">الخدمات المساحية</a>
       <a href="map.html">الخريطة التفاعلية</a>
-      <a href="academy.html">Academy</a>
+      <a href="academy.html">Academy <span style="background:#fef3c7;color:#92400e;font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;">قريباً</span></a>
       <a href="jobs.html">الوظائف</a></div>
     <div><h4>للشركاء</h4>
       <a href="join.html">سجّل مكتبك أو شركتك</a>

@@ -42,12 +42,12 @@ $("#body").innerHTML=`
   <h3 style="font-size:19px">لمن هذه الدورة؟</h3>
   <ul style="margin-top:10px;color:var(--ink2)"><li>مسّاحون وحديثو التخرج في المساحة والهندسة المدنية</li>
    <li>فنيون يعملون في مواقع التنفيذ ويريدون رفع كفاءتهم</li><li>مهتمون بالتحول لمجال الجيوماتكس وGIS</li></ul>
-  <div class="notice" style="margin-top:16px">التسجيل والتنفيذ يتمّان لدى مركز التدريب؛ Geo Station توفّر طبقة الاكتشاف والتوجيه فقط.</div>
+  <div class="notice cy" style="margin-top:16px">🎓 <b>أكاديمية جيو ستيشن:</b> هذا القسم قيد التجهيز وسيكون التسجيل متاحاً قريباً جداً.</div>
  </div>`;
 $("#aside").innerHTML=`<div class="panel sticky">
   <div style="font-size:28px;font-weight:900">${c.price}</div><div class="muted">شامل المادة العلمية والتدريب العملي</div>
-  <button class="btn btn-pri btn-block btn-lg" style="margin-top:14px" onclick="openModal('enroll','${c.t}')">طلب التحاق بالدورة</button>
-  <button class="btn btn-soft btn-block" style="margin-top:9px" onclick="toast('تم حفظ الدورة')">♡ حفظ الدورة</button>
+  <button class="btn btn-pri btn-block btn-lg" style="margin-top:14px" onclick="toast('🎓 أكاديمية جيو ستيشن قيد التجهيز — سيُتاح التسجيل قريباً!')">طلب التحاق بالدورة (قريباً)</button>
+  <button class="btn btn-soft btn-block" style="margin-top:9px" onclick="toast('تم حفظ الدورة للمتابعة')">♡ حفظ الدورة</button>
   <div class="sep"></div>
   <table class="spec"><tbody><tr><th>المدة</th><td>${c.hours}</td></tr><tr><th>المستوى</th><td>${c.lvl}</td></tr>
    <tr><th>جهة التنفيذ</th><td>${c.center}</td></tr><tr><th>الشهادة</th><td>شهادة حضور من المركز</td></tr>

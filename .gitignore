@@ -40,3 +40,5 @@ pnpm-debug.log*
 # Vercel output & cache
 .vercel
 .output
+
+.vercel
