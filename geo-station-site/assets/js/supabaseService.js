@@ -237,6 +237,19 @@
     }
   }
 
+  async function signUp({ email, password, options = {} }) {
+    const supabase = await getClient();
+    if (!supabase) return { data: null, error: new Error("Supabase غير مهيأ") };
+
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password, options });
+      if (error) throw error;
+      return { data, error: null };
+    } catch (err) {
+      return { data: null, error: err };
+    }
+  }
+
   async function signOut() {
     const supabase = await getClient();
     if (!supabase) return { error: null };
@@ -373,7 +386,7 @@
     Leads,
     Reviews,
     Wallet,
-    Auth: { signIn, signOut, getSession, getUser, onAuthStateChange },
+    Auth: { signIn, signUp, signOut, getSession, getUser, onAuthStateChange },
     Storage: { uploadFile },
     unlockLeadAndCharge
   };

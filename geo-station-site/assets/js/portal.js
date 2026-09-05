@@ -1,6 +1,12 @@
 /* GEO STATION — Portal shell, data & shared components
    Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone */
 
+if (typeof window !== "undefined" && typeof window.AuthGuard === "undefined" && typeof document !== "undefined") {
+  const ag = document.createElement("script");
+  ag.src = "assets/js/authGuard.js";
+  document.head.appendChild(ag);
+}
+
 const $  = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
 const qs = k=>new URLSearchParams(location.search).get(k)||"";
@@ -75,7 +81,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
    <div class="backsite">
      <a class="nv" href="index.html"><span class="ic">🌐</span>عرض الموقع العام</a>
      <a class="nv" href="${mode==="admin"?"p-dashboard.html":"a-dashboard.html"}"><span class="ic">🔀</span>${mode==="admin"?"بوابة المزوّد":"لوحة الإدارة"}</a>
-     <a class="nv" href="index.html" onclick="toast('تم تسجيل الخروج (محاكاة)')"><span class="ic">🚪</span>تسجيل الخروج</a>
+     <a class="nv" href="javascript:void(0)" onclick="if(window.AuthGuard){AuthGuard.logout()}else{toast('تم تسجيل الخروج');location.href='login.html'}"><span class="ic">🚪</span>تسجيل الخروج</a>
    </div>
  </aside>
  <div class="main">
@@ -98,6 +104,23 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
 </div>
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 <div class="toast" id="toast"></div>`);
+
+  // تحديث بيانات المستخدم في شريط اللوحة ديناميكياً عند توفر الجلسة
+  setTimeout(async () => {
+    if (window.AuthGuard && window.AuthGuard.getUser) {
+      const u = await window.AuthGuard.getUser();
+      if (u) {
+        const whoEl = document.querySelector(".topbar .who");
+        if (whoEl) {
+          whoEl.innerHTML = `<div class="av">${u.av || "GS"}</div><div><b>${u.name}</b><small>${u.role === 'admin' || u.role === 'super_admin' ? 'مدير النظام' : (u.role === 'provider' ? 'مزوّد خدمات' : u.role)}</small></div>`;
+        }
+        const ctxEl = document.querySelector(".side .ctx");
+        if (ctxEl && u.org) {
+          ctxEl.innerHTML = `<b>${u.org}</b><small>${u.email}</small>`;
+        }
+      }
+    }
+  }, 50);
 }
 
 function setContent(html){ $("#content").innerHTML = html; }

@@ -23,6 +23,14 @@ if (typeof global.SupabaseService === "undefined" && typeof document !== "undefi
   document.head.appendChild(s);
 }
 
+/* ---------- Dynamic Loader for AuthGuard ---------- */
+if (typeof global.AuthGuard === "undefined" && typeof document !== "undefined") {
+  const ag = document.createElement("script");
+  ag.src = "assets/js/authGuard.js";
+  ag.async = true;
+  document.head.appendChild(ag);
+}
+
 /* ---------- collections managed by the store ---------- */
 const COLLECTIONS = {
   providers : { label:"المزوّدون",  labelEn:"Providers",  table:"providers", seed:()=>PROVIDERS, key:"id" },

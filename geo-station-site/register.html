@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إنشاء حساب جديد | Geo Station</title>
+<meta name="description" content="انضم إلى منصة Geo Station — أكبر شبكة مساحية وجيوماتكس في مصر.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+  .auth-wrap { max-width: 540px; margin: 36px auto; }
+  .auth-card { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); padding: 32px; box-shadow: var(--sh); }
+  .auth-card h1 { font-size: 24px; margin-bottom: 8px; }
+  .auth-alert { padding: 12px 14px; border-radius: 10px; font-size: 13.5px; margin-bottom: 16px; display: none; }
+  .auth-alert.err { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+  .auth-alert.ok { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+  .role-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .role-opt { border: 1px solid var(--bd); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: .15s; }
+  .role-opt.on { border-color: var(--cyan); background: #f0fdfa; font-weight: 700; color: #04202a; }
+</style>
+</head>
+<body>
+<main id="main">
+<section class="sec tight"><div class="wrap">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <span class="mark" style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),#0a7583);display:grid;place-items:center;color:#04202a;font-size:18px;font-weight:900;">◎</span>
+        <b style="font-size:19px;letter-spacing:.3px" dir="ltr">GEO <span style="color:var(--cyan)">STATION</span></b>
+      </div>
+
+      <h1>إنشاء حساب جديد</h1>
+      <p class="muted" style="margin-bottom:20px">ابدأ استقبال طلبات العملاء أو تصفح وطلب الأجهزة والخدمات.</p>
+
+      <div id="regAlert" class="auth-alert err"></div>
+
+      <form id="regForm" onsubmit="handleRegisterSubmit(event)">
+        <label style="display:block;font-size:13.5px;font-weight:600;margin-bottom:8px">نوع الحساب *</label>
+        <div class="role-toggle">
+          <div class="role-opt on" id="roleOptProvider" onclick="setRole('provider')">
+            <div style="font-size:18px;margin-bottom:4px">🏢</div>
+            <div>مزوّد خدمات ومعدات</div>
+            <small class="muted" style="font-size:11px">مكتب، شركة، أو مركز معايرة</small>
+          </div>
+          <div class="role-opt" id="roleOptClient" onclick="setRole('client')">
+            <div style="font-size:18px;margin-bottom:4px">👤</div>
+            <div>عميل / باحث عن خدمات</div>
+            <small class="muted" style="font-size:11px">مهندس، مقاول، أو شركة</small>
+          </div>
+        </div>
+        <input type="hidden" id="regRole" value="provider">
+
+        <div class="formgrid" style="margin-bottom:14px">
+          <div class="field full">
+            <label id="nameLabel">الاسم التجاري / اسم الجهة *</label>
+            <input type="text" id="regName" required placeholder="مثال: مكتب النخبة للمساحة الهندسية">
+          </div>
+          <div class="field">
+            <label>البريد الإلكتروني *</label>
+            <input type="email" id="regEmail" required placeholder="name@domain.com" autocomplete="email">
+          </div>
+          <div class="field">
+            <label>رقم الهاتف / واتساب *</label>
+            <input type="tel" id="regPhone" required placeholder="01xxxxxxxxx">
+          </div>
+          <div class="field">
+            <label>كلمة المرور *</label>
+            <input type="password" id="regPassword" required placeholder="6 أحرف على الأقل" minlength="6" autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label>تأكيد كلمة المرور *</label>
+            <input type="password" id="regConfirmPassword" required placeholder="إعادة كتابة كلمة المرور" minlength="6" autocomplete="new-password">
+          </div>
+        </div>
+
+        <label class="muted" style="display:flex;gap:9px;margin:16px 0;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="regTerms" required checked>
+          <span>أوافق على <a href="terms.html" style="color:var(--cyan-d)">شروط الاستخدام</a> و<a href="privacy.html" style="color:var(--cyan-d)">سياسة الخصوصية</a> لمنصة Geo Station.</span>
+        </label>
+
+        <button type="submit" id="regSubmitBtn" class="btn btn-pri btn-block btn-lg">إنشاء الحساب والانضمام</button>
+      </form>
+
+      <div class="sep" style="margin:24px 0"></div>
+      <div style="text-align:center;font-size:14px">
+        <span class="muted">لديك حساب مسجل بالفعل؟</span>
+        <a href="login.html" style="color:var(--cyan-d);font-weight:700;margin-inline-start:6px">تسجيل الدخول</a>
+      </div>
+    </div>
+  </div>
+</div></section>
+</main>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/supabaseService.js"></script>
+<script src="assets/js/authGuard.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+mountShell("register.html");
+
+function setRole(r) {
+  document.getElementById("regRole").value = r;
+  const pOpt = document.getElementById("roleOptProvider");
+  const cOpt = document.getElementById("roleOptClient");
+  const nLabel = document.getElementById("nameLabel");
+
+  if (r === "provider") {
+    pOpt.classList.add("on");
+    cOpt.classList.remove("on");
+    nLabel.textContent = "الاسم التجاري / اسم الجهة *";
+  } else {
+    cOpt.classList.add("on");
+    pOpt.classList.remove("on");
+    nLabel.textContent = "الاسم الكامل / اسم الشركة *";
+  }
+}
+
+async function handleRegisterSubmit(e) {
+  e.preventDefault();
+  const alertEl = document.getElementById("regAlert");
+  const btn = document.getElementById("regSubmitBtn");
+  const role = document.getElementById("regRole").value;
+  const fullName = document.getElementById("regName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+  const password = document.getElementById("regPassword").value;
+  const confirm = document.getElementById("regConfirmPassword").value;
+
+  alertEl.style.display = "none";
+  alertEl.className = "auth-alert err";
+
+  if (password !== confirm) {
+    alertEl.textContent = "كلمة المرور وتأكيد كلمة المرور غير متطابقين!";
+    alertEl.style.display = "block";
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "جاري إنشاء الحساب…";
+
+  try {
+    const res = await AuthGuard.signUp(email, password, {
+      full_name: fullName,
+      role: role,
+      phone: phone,
+      org_name: fullName
+    });
+
+    if (res.error) {
+      alertEl.textContent = res.error.message || "حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.";
+      alertEl.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "إنشاء الحساب والانضمام";
+      toast("❌ " + (res.error.message || "فشل التسجيل"));
+      return;
+    }
+
+    alertEl.className = "auth-alert ok";
+    alertEl.textContent = "تم إنشاء الحساب بنجاح! جاري إعداد لوحة التحكم…";
+    alertEl.style.display = "block";
+    toast("✅ تم إنشاء الحساب بنجاح!");
+
+    setTimeout(() => {
+      if (role === "provider") {
+        location.href = "p-dashboard.html";
+      } else {
+        location.href = "index.html";
+      }
+    }, 900);
+
+  } catch (err) {
+    alertEl.className = "auth-alert err";
+    alertEl.textContent = "حدث خطأ غير متوقع: " + err.message;
+    alertEl.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "إنشاء الحساب والانضمام";
+  }
+}
+</script>
+</body>
+</html>

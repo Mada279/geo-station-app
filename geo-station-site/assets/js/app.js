@@ -45,7 +45,7 @@ function buildHeader(active){
     <a href="mobile-app.html">📱 حمّل التطبيق</a>
     <a href="help.html">المساعدة</a>
     <a href="contact.html">تواصل معنا</a>
-    <a href="p-dashboard.html">🔐 دخول الشركاء</a>
+    <span id="nav-auth-util"><a href="login.html">🔐 دخول الشركاء</a></span>
     ${I18N.button()}
   </div>
 </div></div>
@@ -53,7 +53,7 @@ function buildHeader(active){
   <a href="index.html" class="brand"><span class="mark">◎</span><span class="bname" dir="ltr">GEO <span>STATION</span></span></a>
   <nav class="mainnav" id="mainnav">${NAV.map(link).join("")}</nav>
   <div class="head-actions">
-    <a href="join.html" class="btn btn-ghost btn-sm">انضم كشريك</a>
+    <span id="nav-auth-cta"><a href="join.html" class="btn btn-ghost btn-sm">انضم كشريك</a></span>
     <button class="btn btn-pri btn-sm" onclick="openModal('need')">أضف احتياجك</button>
     <button class="burger" onclick="$('#mainnav').classList.toggle('open')">☰</button>
   </div>
@@ -80,13 +80,13 @@ function buildFooter(){
       <a href="academy.html">Academy <span style="background:#fef3c7;color:#92400e;font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;">قريباً</span></a>
       <a href="jobs.html">الوظائف</a></div>
     <div><h4>للشركاء</h4>
+      <a href="login.html">🔐 تسجيل الدخول</a>
+      <a href="register.html">✨ فتح حساب جديد</a>
       <a href="join.html">سجّل مكتبك أو شركتك</a>
-      <a href="join.html">أضف أجهزتك للبيع أو الإيجار</a>
-      <a href="join.html">انشر وظيفة</a>
       <a href="how-it-works.html">كيف تعمل المنصة</a>
       <a href="contact.html">خدمة الشركاء</a>
-      <a href="p-dashboard.html">🔐 بوابة المزوّد</a>
-      <a href="a-dashboard.html">🛡️ لوحة الإدارة</a></div>
+      <a href="p-dashboard.html">لوحة المزوّد</a>
+      <a href="a-dashboard.html">لوحة الإدارة</a></div>
     <div><h4>المنصة</h4>
       <a href="about.html">من نحن</a>
       <a href="help.html">المساعدة والأسئلة</a>
@@ -106,6 +106,39 @@ function buildFooter(){
 function mountShell(active){
   document.body.insertAdjacentHTML("afterbegin", buildHeader(active));
   document.body.insertAdjacentHTML("beforeend", buildFooter());
+  updateNavbarAuth();
+}
+
+async function updateNavbarAuth(){
+  const utilEl = document.getElementById("nav-auth-util");
+  const ctaEl = document.getElementById("nav-auth-cta");
+  if (!utilEl && !ctaEl) return;
+
+  let user = null;
+  if (typeof window.AuthGuard !== "undefined" && window.AuthGuard.getUser) {
+    user = await window.AuthGuard.getUser();
+  } else if (localStorage.getItem("GS_AUTH_USER") && localStorage.getItem("GS_LOGGED_OUT") !== "1") {
+    try { user = JSON.parse(localStorage.getItem("GS_AUTH_USER")); } catch(e){}
+  }
+
+  if (user) {
+    const isAdm = user.role === "admin" || user.role === "super_admin";
+    const dashHref = isAdm ? "a-dashboard.html" : "p-dashboard.html";
+    const dashLabel = isAdm ? "لوحة الإدارة" : "لوحة التحكم";
+
+    if (utilEl) {
+      utilEl.innerHTML = `
+        <a href="${dashHref}" style="color:var(--cyan);font-weight:700">👤 ${user.name || "حسابي"}</a>
+        <a href="javascript:void(0)" onclick="if(window.AuthGuard){AuthGuard.logout()}else{localStorage.removeItem('GS_AUTH_USER');location.reload()}" style="color:#f87171;margin-inline-start:10px">🚪 خروج</a>
+      `;
+    }
+    if (ctaEl) {
+      ctaEl.innerHTML = `
+        <a href="${dashHref}" class="btn btn-ghost btn-sm" style="border-color:var(--cyan);color:var(--cyan)">📊 ${dashLabel}</a>
+        <button class="btn btn-soft btn-sm" onclick="if(window.AuthGuard){AuthGuard.logout()}else{localStorage.removeItem('GS_AUTH_USER');location.reload()}" style="color:#ef4444" title="تسجيل الخروج">خروج</button>
+      `;
+    }
+  }
 }
 
 /* ---------------- ui helpers ---------------- */
