@@ -1,0 +1,9 @@
+{
+  "name": "geo-station-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Geo Station Marketplace Platform",
+  "devDependencies": {
+    "vercel": "^59.11.7"
+  }
+}
