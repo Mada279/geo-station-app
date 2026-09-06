@@ -147,8 +147,8 @@ html[dir="ltr"] .stars{letter-spacing:0}
 .stars{color:#b8860b;text-shadow:0 0 1px rgba(90,64,4,.35)}
 
 /* ============ brand lockup: keep Latin name LTR inside RTL page ============ */
-.brand{direction:ltr}
-.brand .bname{direction:ltr;unicode-bidi:isolate;display:inline-flex;gap:.32em;white-space:nowrap}
+.brand{direction:ltr;display:inline-flex;align-items:center}
+.brand img.survsta-logo, .brand .survsta-logo{display:block !important;height:40px !important;max-height:40px !important;width:auto !important;opacity:1 !important;visibility:visible !important}
 html[dir="rtl"] .brand{flex-direction:row}
 
 /* ============ official store badges ============ */

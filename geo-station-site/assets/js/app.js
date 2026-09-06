@@ -32,38 +32,9 @@ const NAV = [
   ]}
 ];
 
-function survstaLogo(idSuffix = "nav"){
-  return `<svg class="survsta-logo" viewBox="0 0 250 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Survsta">
-  <defs>
-    <linearGradient id="survsta-bg-${idSuffix}" x1="5" y1="5" x2="55" y2="55" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#081827"/>
-      <stop offset="100%" stop-color="#0f2f4a"/>
-    </linearGradient>
-    <linearGradient id="survsta-gold-${idSuffix}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#fbbf24"/>
-      <stop offset="100%" stop-color="#d97706"/>
-    </linearGradient>
-  </defs>
-  <g class="survsta-emblem">
-    <rect x="5" y="5" width="50" height="50" rx="13" fill="url(#survsta-bg-${idSuffix})" stroke="#00d2ff" stroke-width="1.4" stroke-opacity="0.4"/>
-    <circle cx="30" cy="30" r="19" stroke="#00d2ff" stroke-width="0.8" stroke-dasharray="2.5 3" stroke-opacity="0.3"/>
-    <path d="M22 35L14 48" stroke="url(#survsta-gold-${idSuffix})" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M30 35V48" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-    <path d="M38 35L46 48" stroke="url(#survsta-gold-${idSuffix})" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M19 35H41" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-    <path d="M23 22C23 20.3 24.3 19 26 19H34C35.7 19 37 20.3 37 22V35H23V22Z" fill="#00d2ff" fill-opacity="0.2" stroke="#00d2ff" stroke-width="1.7" stroke-linejoin="round"/>
-    <line x1="16" y1="26.5" x2="44" y2="26.5" stroke="#00d2ff" stroke-width="1.4" stroke-linecap="round"/>
-    <line x1="30" y1="13" x2="30" y2="35" stroke="#00d2ff" stroke-width="1.4" stroke-linecap="round"/>
-    <circle cx="30" cy="26.5" r="5.8" stroke="#ffffff" stroke-width="1.5" fill="#081827"/>
-    <circle cx="30" cy="26.5" r="2.3" fill="#f59e0b"/>
-    <circle cx="30" cy="11" r="2" fill="#00d2ff"/>
-    <path d="M25 8C27.5 6.5 32.5 6.5 35 8" stroke="url(#survsta-gold-${idSuffix})" stroke-width="1.4" stroke-linecap="round"/>
-  </g>
-  <text x="68" y="41" font-family="'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="36" font-weight="800" letter-spacing="-0.5" fill="currentColor">Surv<tspan fill="#00d2ff">sta</tspan></text>
-  <circle cx="218" cy="23" r="3" fill="#f59e0b"/>
-  <circle cx="218" cy="23" r="6" stroke="#00d2ff" stroke-width="1.2" stroke-opacity="0.7"/>
-  <path d="M218 14V17M218 29V32M209 23H212M224 23H227" stroke="#00d2ff" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.8"/>
-</svg>`;
+function survstaLogo(idSuffix = "nav", isDark = false){
+  const logoFile = isDark ? "assets/img/survsta-logo-dark.svg" : "assets/img/survsta-logo.svg";
+  return `<img src="${logoFile}" alt="Survsta" class="survsta-logo" height="40" style="height:40px;width:auto;display:block;max-height:40px;">`;
 }
 window.survstaLogo = survstaLogo;
 
