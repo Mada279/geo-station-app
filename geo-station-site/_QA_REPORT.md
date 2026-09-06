@@ -151,4 +151,4 @@
 
 ---
 
-*Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone*
+*Survsta — All Rights Reserved*

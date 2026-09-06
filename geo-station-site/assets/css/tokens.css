@@ -1,7 +1,7 @@
 /* ============================================================
    Survsta — Design Tokens (single source of truth)
    Industrial Dark Luxury + Geospatial Tech
-   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
+   Survsta — All Rights Reserved
    ============================================================ */
 
 :root{
@@ -152,16 +152,63 @@ html[dir="ltr"] .stars{letter-spacing:0}
 html[dir="rtl"] .brand{flex-direction:row}
 
 /* ============ official store badges ============ */
-.appbtns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
-.storebtn{display:inline-flex;align-items:center;gap:10px;direction:ltr;
-  border:1px solid rgba(255,255,255,.30);border-radius:11px;padding:8px 14px 8px 12px;
-  background:#000;color:#fff;transition:.16s;text-decoration:none;min-width:158px}
-.storebtn:hover{border-color:rgba(255,255,255,.62);background:#0b0b0b;transform:translateY(-1px);
-  box-shadow:0 8px 22px rgba(0,0,0,.42)}
-.storebtn svg{width:26px;height:26px;flex:none}
-.storebtn .txt{display:flex;flex-direction:column;line-height:1.15;text-align:left}
-.storebtn .txt small{font-size:9.5px;letter-spacing:.4px;text-transform:uppercase;color:#d8d8d8;font-weight:500}
-.storebtn .txt b{font-size:15px;font-weight:700;letter-spacing:.1px;color:#fff}
-.storebtn.lite{background:#fff;color:#0f1c2e;border-color:var(--bd2)}
-.storebtn.lite .txt small{color:#5d6e84}
-.storebtn.lite .txt b{color:#0f1c2e}
+.appbtns{display:inline-flex;gap:12px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.app-store-badge, .storebtn{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  direction:ltr !important;
+  unicode-bidi:isolate !important;
+  padding:8px 16px !important;
+  background:#000000 !important;
+  color:#ffffff !important;
+  border-radius:8px !important;
+  border:1px solid #222222 !important;
+  text-decoration:none !important;
+  box-sizing:border-box !important;
+  height:48px !important;
+  transition:transform .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease !important;
+  cursor:pointer !important;
+}
+.app-store-badge:hover, .storebtn:hover{
+  background:#111111 !important;
+  border-color:#333333 !important;
+  transform:translateY(-1px) !important;
+  box-shadow:0 4px 14px rgba(0,0,0,.45) !important;
+  color:#ffffff !important;
+}
+.app-store-badge svg, .storebtn svg{
+  width:24px !important;
+  height:24px !important;
+  flex-shrink:0 !important;
+  display:block !important;
+}
+.app-store-badge .txt, .app-store-badge .badge-txt,
+.storebtn .txt, .storebtn .badge-txt{
+  display:flex !important;
+  flex-direction:column !important;
+  text-align:left !important;
+  line-height:1.2 !important;
+  justify-content:center !important;
+}
+.app-store-badge .txt small, .app-store-badge .badge-txt small,
+.storebtn .txt small, .storebtn .badge-txt small{
+  font-size:10px !important;
+  color:#cccccc !important;
+  letter-spacing:0.2px !important;
+  font-weight:400 !important;
+  margin:0 !important;
+  padding:0 !important;
+  line-height:1.1 !important;
+}
+.app-store-badge .txt b, .app-store-badge .badge-txt b,
+.storebtn .txt b, .storebtn .badge-txt b{
+  font-size:16px !important;
+  font-weight:600 !important;
+  color:#ffffff !important;
+  letter-spacing:0.1px !important;
+  margin:0 !important;
+  padding:0 !important;
+  line-height:1.2 !important;
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
+}

@@ -1,5 +1,5 @@
 /* Survsta — demo dataset (Egypt market)
-   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone */
+   Survsta — All Rights Reserved */
 
 var IMG = {
   heroOffice:     "assets/img/hero-engineering-office.jpg",

@@ -2,7 +2,7 @@
  * ============================================================
  *   Survsta — AUTH GUARD & RBAC SESSION MANAGER
  *   Role-Based Access Control (RBAC) for Provider & Admin Portals
- *   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
+ *   Survsta — All Rights Reserved
  * ============================================================
  */
 

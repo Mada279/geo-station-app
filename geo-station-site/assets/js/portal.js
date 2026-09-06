@@ -1,5 +1,5 @@
 /* Survsta — Portal shell, data & shared components
-   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone */
+   Survsta — All Rights Reserved */
 
 if (typeof window !== "undefined" && typeof window.AuthGuard === "undefined" && typeof document !== "undefined") {
   const ag = document.createElement("script");
@@ -124,7 +124,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
   <div class="body" id="pbody">
     <div class="crumb">${crumbHtml||""}</div>
     <div id="content"></div>
-    <div class="pcredit">Survsta — نموذج تشغيلي · Concept, UX/UI &amp; Platform Architecture by <b>Eng. Mohamed Farag — CoreviaZone</b></div>
+    <div class="pcredit" style="display:flex;justify-content:space-between;align-items:center;padding:18px 4px 6px;color:#64748b;font-size:11.5px"><span>© 2026 Survsta — جميع الحقوق محفوظة.</span><span style="font-size:11px;color:#64748b">Powered by <a href="#" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">Coreviazone</a></span></div>
   </div>
  </div>
 </div>

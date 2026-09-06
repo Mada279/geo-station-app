@@ -2,7 +2,7 @@
  * ============================================================
  *   Survsta — SUPABASE SERVICE LAYER
  *   Production Data Access Layer (DAL), Auth, Storage, and RPC
- *   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
+ *   Survsta — All Rights Reserved
  * ============================================================
  */
 

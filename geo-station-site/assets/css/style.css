@@ -2,7 +2,7 @@
 @import url("tokens.css");
 /* ============================================================
    Survsta — Platform Website
-   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
+   Survsta — All Rights Reserved
    ============================================================ */
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -197,12 +197,10 @@ ul{margin:0;padding-inline-start:20px}
 .footer h4{color:#fff;font-size:15px;margin-bottom:12px}
 .footer a{display:block;padding:5px 0;font-size:13.5px}
 .footer a:hover{color:var(--cyan)}
-.fbot{border-top:1px solid #16293f;margin-top:30px;padding-top:18px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px}
-.credit{color:var(--cyan)}
-.appbtns{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
-.appbtn{display:flex;gap:9px;align-items:center;border:1px solid #2b445e;border-radius:12px;padding:9px 14px;background:#0c1c2e}
-.appbtn b{color:#fff;font-size:13.5px;display:block;line-height:1.2}
-.appbtn span{font-size:11px;color:#8ba1b7}
+.fbot{border-top:1px solid #16293f;margin-top:30px;padding-top:18px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:13px}
+.fbot-powered{font-size:11px;color:#64748b;direction:ltr;unicode-bidi:isolate}
+.fbot-powered a{color:#8aa0b8;text-decoration:none;transition:color .15s}
+.fbot-powered a:hover{color:#00d2ff;text-decoration:underline}
 
 /* ---------- modal / toast ---------- */
 .modal{display:none;position:fixed;inset:0;background:rgba(7,17,31,.78);z-index:100;align-items:center;justify-content:center;padding:18px}

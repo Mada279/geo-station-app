@@ -1,7 +1,7 @@
 /* ============================================================
    Survsta — Bilingual engine (AR / EN)
    Live DOM translation with RTL⇄LTR flip, no reload, no build step.
-   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
+   Survsta — All Rights Reserved
    ============================================================ */
 (function(global){
 "use strict";
@@ -818,7 +818,7 @@ const D = {
 "الشروط":"Terms",
 
 /* ---------- sentences & templates ---------- */
-"Survsta — نموذج تشغيلي · Concept, UX/UI & Platform Architecture by":"Survsta — operating prototype · Concept, UX/UI & Platform Architecture by",
+"جميع الحقوق محفوظة":"All rights reserved",
 "⏱ يرد خلال ساعة":"⏱ Replies within an hour",
 "⏱ يرد خلال ساعتين":"⏱ Replies within 2 hours",
 "⏱ يرد خلال 3 ساعات":"⏱ Replies within 3 hours",
@@ -977,7 +977,7 @@ const SHORT = {
 "عملاء":"clients",
 "مزوّد":"provider",
 "ملف":"Profile",
-"نموذج تشغيلي":"operating prototype",
+"منصة معتمدة":"Certified Platform",
 };
 const SHORT_KEYS = Object.keys(SHORT).sort((a,b)=>b.length-a.length);
 

@@ -2,7 +2,7 @@
    Survsta — Live Data Store (SWR & Cloud-Sync Enabled)
    Hybrid Store: In-memory/LocalStorage cache for instant UI rendering,
    seamlessly synchronized in the background with Supabase PostgreSQL.
-   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
+   Survsta — All Rights Reserved
    ============================================================ */
 (function(global){
 "use strict";

@@ -1,5 +1,5 @@
 /* Survsta — shared shell, components & interactions
-   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone */
+   Survsta — All Rights Reserved */
 
 const $  = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
@@ -94,8 +94,8 @@ function buildFooter(){
       <div class="brand" style="color:#fff">${survstaLogo("foot")}</div>
       <p style="margin-top:12px;font-size:13.5px;max-width:330px">المنصة الرقمية المتخصصة لقطاع المساحة والجيوماتكس في مصر — دليل، سوق أجهزة، خدمات، تدريب ووظائف في مكان واحد.</p>
       <div class="appbtns">
-        <a class="storebtn" href="mobile-app.html" aria-label="Google Play"><svg viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M47.6 12.5C42.6 17.8 39.7 26 39.7 36.6v438.8c0 10.6 2.9 18.8 7.9 24.1l1.5 1.4L295 255.9v-5.8L49.1 11.1z"/><path fill="#FBBC04" d="m377 337.8-82-82v-5.8l82.1-82.1 1.8 1.1 97.2 55.2c27.8 15.8 27.8 41.6 0 57.4l-97.2 55.2z"/><path fill="#EA4335" d="m378.9 336.7-83.9-83.9L47.6 499.5c9.2 9.7 24.3 10.9 41.4 1.2l289.9-164"/><path fill="#34A853" d="M378.9 168.9 89 5C71.9-4.7 56.8-3.5 47.6 6.2L295 252.8z"/></svg><span class="txt"><small>متاح قريبًا على</small><b>Google Play</b></span></a>
-        <a class="storebtn" href="mobile-app.html" aria-label="App Store"><svg viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg><span class="txt"><small>متاح قريبًا على</small><b>App Store</b></span></a>
+        <a class="app-store-badge" href="mobile-app.html" aria-label="Google Play"><svg viewBox="0 0 512 512" width="24" height="24" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M47.6 12.5C42.6 17.8 39.7 26 39.7 36.6v438.8c0 10.6 2.9 18.8 7.9 24.1l1.5 1.4L295 255.9v-5.8L49.1 11.1z"/><path fill="#FBBC04" d="m377 337.8-82-82v-5.8l82.1-82.1 1.8 1.1 97.2 55.2c27.8 15.8 27.8 41.6 0 57.4l-97.2 55.2z"/><path fill="#EA4335" d="m378.9 336.7-83.9-83.9L47.6 499.5c9.2 9.7 24.3 10.9 41.4 1.2l289.9-164"/><path fill="#34A853" d="M378.9 168.9 89 5C71.9-4.7 56.8-3.5 47.6 6.2L295 252.8z"/></svg><span class="txt"><small>متاح قريبًا على</small><b>Google Play</b></span></a>
+        <a class="app-store-badge" href="mobile-app.html" aria-label="App Store"><svg viewBox="0 0 384 512" width="24" height="24" aria-hidden="true" focusable="false"><path fill="#ffffff" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg><span class="txt"><small>متاح قريبًا على</small><b>App Store</b></span></a>
       </div>
     </div>
     <div><h4>استكشف</h4>
@@ -121,8 +121,8 @@ function buildFooter(){
       <a href="privacy.html">سياسة الخصوصية</a></div>
   </div>
   <div class="fbot">
-    <div>© ${new Date().getFullYear()} Survsta — جميع الحقوق محفوظة.</div>
-    <div class="credit">Concept, UX/UI &amp; Platform Architecture by Eng. Mohamed Farag — CoreviaZone</div>
+    <div>© 2026 Survsta — جميع الحقوق محفوظة.</div>
+    <div class="fbot-powered">Powered by <a href="#" target="_blank" rel="noopener">Coreviazone</a></div>
   </div>
 </div></footer>
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
