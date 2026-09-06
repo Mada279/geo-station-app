@@ -9,7 +9,8 @@ html{scroll-behavior:smooth}
 body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);font-size:15.5px;line-height:1.6}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
-button,input,select,textarea{font:inherit;color:inherit}
+button,input,textarea{font:inherit;color:inherit}
+select{font:inherit;color:#1e293b;background-color:#ffffff}
 button{cursor:pointer;border:0;background:none}
 h1,h2,h3,h4,h5{margin:0;line-height:1.25}
 ul{margin:0;padding-inline-start:20px}
@@ -81,8 +82,8 @@ ul{margin:0;padding-inline-start:20px}
 .searchtabs button{padding:9px 15px;border-radius:99px;font-size:13.5px;color:var(--muted);background:#f1f5f9}
 .searchtabs button.on{background:var(--navy2);color:#fff}
 .searchrow{display:grid;grid-template-columns:1.5fr 1fr 1fr auto;gap:9px}
-.searchrow input,.searchrow select{border:1px solid var(--bd);border-radius:11px;padding:13px 14px;background:#fbfdff;width:100%}
-.searchrow input:focus,.searchrow select:focus{outline:2px solid var(--cyan2);border-color:var(--cyan)}
+.searchrow input,.searchrow select{border:1px solid var(--bd);border-radius:11px;padding:13px 14px;background:#ffffff;color:#1e293b;width:100%}
+.searchrow input:focus,.searchrow select:focus{outline:2px solid var(--cyan2);border-color:var(--cyan);background:#ffffff;color:#0f172a}
 .searchhints{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;color:#a9c2d6;font-size:13px}
 .searchhints a{color:#8fe7f2;border-bottom:1px dashed #3f7c92}
 
@@ -365,4 +366,58 @@ html[dir="ltr"] h1,html[dir="ltr"] h2{letter-spacing:-.6px}
 .map-popup-card .btn{display:block;width:100%;text-align:center;padding:5px 10px;font-size:12px;text-decoration:none}
 .custom-map-marker{background:var(--navy2);color:#fff;border:2.5px solid #fff;border-radius:99px;padding:4px 10px;font-size:11.5px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;white-space:nowrap;transition:transform .15s}
 .custom-map-marker:hover{background:var(--orange);color:#301500;transform:scale(1.08)}
+
+/* ---------- 10. Dropdowns & Form Visibility Protection ---------- */
+select,
+select option,
+select optgroup,
+.searchrow select,
+.searchrow select option,
+.searchrow input,
+.fgroup select,
+.fgroup select option,
+.fgroup input,
+.toolbar select,
+.toolbar select option,
+.field select,
+.field select option,
+.field input,
+.field textarea,
+.fsel,
+.fsel option {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
+}
+
+select:focus,
+.searchrow select:focus,
+.fgroup select:focus,
+.toolbar select:focus,
+.field select:focus {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border-color: var(--c500, #00d2ff) !important;
+}
+
+/* Custom navigation dropdowns */
+.dd-menu {
+  background: #ffffff !important;
+  color: #1e293b !important;
+}
+.dd-menu a, .dd-menu b, .dd-menu small {
+  color: #1e293b !important;
+}
+.dd-menu a:hover, .dd-menu a:hover b, .dd-menu a:hover small {
+  background: #eff6fa !important;
+  color: #0088a8 !important;
+}
+
+/* Placeholder styling */
+input::placeholder, textarea::placeholder {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+  opacity: 1 !important;
+}
 

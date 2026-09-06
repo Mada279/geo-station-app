@@ -212,3 +212,11 @@ html[dir="rtl"] .brand{flex-direction:row}
   line-height:1.2 !important;
   font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
 }
+
+/* ============ Force high-contrast dropdowns & inputs ============ */
+select, select option, select optgroup{
+  background-color:#ffffff !important;
+  color:#1e293b !important;
+  -webkit-text-fill-color:#1e293b !important;
+}
+

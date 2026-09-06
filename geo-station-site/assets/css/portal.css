@@ -8,7 +8,8 @@
 body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
-button,input,select,textarea{font:inherit;color:inherit}
+button,input,textarea{font:inherit;color:inherit}
+select{font:inherit;color:#1e293b;background-color:#ffffff}
 button{cursor:pointer;border:0;background:none}
 h1,h2,h3,h4{margin:0;line-height:1.25}
 ul{margin:0;padding-inline-start:20px}
@@ -230,3 +231,34 @@ td .acts{display:flex;gap:6px;flex-wrap:wrap}
 .chip.spon{background:linear-gradient(135deg,var(--g100),var(--g200));border-color:var(--g300);color:var(--g800)}
 .stars{color:var(--g600)}
 .pcredit{color:var(--muted);border-top:1px solid var(--bd)}
+
+/* ---------- Form & Dropdown High-Contrast Rules ---------- */
+select,
+select option,
+select optgroup,
+.toolbar select,
+.toolbar select option,
+.toolbar input,
+.field select,
+.field select option,
+.field input,
+.field textarea {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
+}
+
+select:focus,
+.toolbar select:focus,
+.field select:focus {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border-color: var(--c500, #00d2ff) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+  opacity: 1 !important;
+}
