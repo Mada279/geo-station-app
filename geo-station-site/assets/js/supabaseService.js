@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *   GEO STATION — SUPABASE SERVICE LAYER
+ *   Survsta — SUPABASE SERVICE LAYER
  *   Production Data Access Layer (DAL), Auth, Storage, and RPC
  *   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
  * ============================================================
@@ -31,7 +31,7 @@
     initPromise = (async () => {
       // إذا لم يتم ملء المفاتيح بعد، نُرجع كائن وهمي آمن لتفادي توقف الموقع
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        console.warn("⚠️ Geo Station [SupabaseService]: لم يتم تعيين SUPABASE_URL و SUPABASE_ANON_KEY بعد. سيعمل النظام في وضع التخزين المحلي المؤقت (Fallback Mode).");
+        console.warn("⚠️ Survsta [SupabaseService]: لم يتم تعيين SUPABASE_URL و SUPABASE_ANON_KEY بعد. سيعمل النظام في وضع التخزين المحلي المؤقت (Fallback Mode).");
         return null;
       }
 
@@ -44,10 +44,10 @@
             detectSessionInUrl: true
           }
         });
-        console.log("✅ Geo Station [SupabaseService]: تم الاتصال بنجاح مع Supabase Client.");
+        console.log("✅ Survsta [SupabaseService]: تم الاتصال بنجاح مع Supabase Client.");
         return clientInstance;
       } catch (err) {
-        console.error("❌ Geo Station [SupabaseService]: تعذر استيراد عميل Supabase من CDN:", err);
+        console.error("❌ Survsta [SupabaseService]: تعذر استيراد عميل Supabase من CDN:", err);
         return null;
       }
     })();

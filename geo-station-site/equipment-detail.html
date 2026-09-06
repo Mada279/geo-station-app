@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تفاصيل الجهاز | Geo Station</title>
+<title>تفاصيل الجهاز | Survsta</title>
 <meta name="description" content="تفاصيل جهاز المساحة: المواصفات والحالة وحالة المعايرة والمزوّد.">
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
-<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<!-- Survsta Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -29,7 +29,7 @@ mountShell("equipment.html");
 
 const e = EQUIPMENT.find(x=>x.slug===qs("slug")) || EQUIPMENT[0];
 const p = pv(e.pid);
-document.title = e.title + " | Geo Station";
+document.title = e.title + " | Survsta";
 $("#crumb").innerHTML = `<a href="index.html">الرئيسية</a> / <a href="equipment.html">سوق الأجهزة</a> / <a href="equipment.html?cat=${encodeURIComponent(e.cat)}">${e.cat}</a> / <b>${e.title}</b>`;
 $("#body").innerHTML = `
  <div class="panel">

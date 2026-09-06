@@ -1,4 +1,4 @@
-/* GEO STATION — shared shell, components & interactions
+/* Survsta — shared shell, components & interactions
    Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone */
 
 const $  = (s,r=document)=>r.querySelector(s);
@@ -32,6 +32,32 @@ const NAV = [
   ]}
 ];
 
+function survstaLogo(idSuffix = "nav"){
+  return `<svg class="survsta-logo" viewBox="0 0 152 36" height="34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Survsta">
+  <g class="logo-mark">
+    <rect width="36" height="36" rx="10" fill="url(#survsta-grad-${idSuffix})" stroke="#00d2ff" stroke-width="1.2" stroke-opacity="0.35"/>
+    <path d="M12 23.5L6.5 31.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M18 23.5V31.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M24 23.5L29.5 31.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M10.5 23.5H25.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M13 13.5C13 12.4 13.9 11.5 15 11.5H21C22.1 11.5 23 12.4 23 13.5V23.5H13V13.5Z" fill="#00d2ff" fill-opacity="0.25" stroke="#00d2ff" stroke-width="1.4"/>
+    <path d="M9 16.5H27" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="18" cy="16.5" r="4.2" stroke="#0a2033" stroke-width="1.4" fill="#0a2033" fill-opacity="0.3"/>
+    <circle cx="18" cy="16.5" r="1.6" fill="#f59e0b"/>
+    <circle cx="18" cy="7.5" r="1.6" fill="#00d2ff"/>
+    <path d="M18 9.5V11.5" stroke="#00d2ff" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+  <text x="45" y="26" font-family="'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif" font-weight="900" font-size="23" letter-spacing="-0.4" fill="currentColor">Surv<tspan fill="#00d2ff">sta</tspan></text>
+  <defs>
+    <linearGradient id="survsta-grad-${idSuffix}" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0a2033"/>
+      <stop offset="1" stop-color="#12455f"/>
+    </linearGradient>
+  </defs>
+</svg>`;
+}
+window.survstaLogo = survstaLogo;
+
 function buildHeader(active){
   const badgeHtml = b => b ? ` <span class="badge-soon" style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:12px;border:1px solid #fde68a;margin-right:5px;vertical-align:middle;display:inline-block;line-height:1.2;">${b}</span>` : "";
   const link = n => n.sub
@@ -50,7 +76,7 @@ function buildHeader(active){
   </div>
 </div></div>
 <header class="header"><div class="wrap">
-  <a href="index.html" class="brand"><span class="mark">◎</span><span class="bname" dir="ltr">GEO <span>STATION</span></span></a>
+  <a href="index.html" class="brand" aria-label="Survsta">${survstaLogo("nav")}</a>
   <nav class="mainnav" id="mainnav">${NAV.map(link).join("")}</nav>
   <div class="head-actions">
     <span id="nav-auth-cta"><a href="join.html" class="btn btn-ghost btn-sm">انضم كشريك</a></span>
@@ -65,7 +91,7 @@ function buildFooter(){
 <footer class="footer"><div class="wrap">
   <div class="fgrid">
     <div>
-      <div class="brand" style="color:#fff"><span class="mark">◎</span><span class="bname" dir="ltr">GEO <span>STATION</span></span></div>
+      <div class="brand" style="color:#fff">${survstaLogo("foot")}</div>
       <p style="margin-top:12px;font-size:13.5px;max-width:330px">المنصة الرقمية المتخصصة لقطاع المساحة والجيوماتكس في مصر — دليل، سوق أجهزة، خدمات، تدريب ووظائف في مكان واحد.</p>
       <div class="appbtns">
         <a class="storebtn" href="mobile-app.html" aria-label="Google Play"><svg viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M47.6 12.5C42.6 17.8 39.7 26 39.7 36.6v438.8c0 10.6 2.9 18.8 7.9 24.1l1.5 1.4L295 255.9v-5.8L49.1 11.1z"/><path fill="#FBBC04" d="m377 337.8-82-82v-5.8l82.1-82.1 1.8 1.1 97.2 55.2c27.8 15.8 27.8 41.6 0 57.4l-97.2 55.2z"/><path fill="#EA4335" d="m378.9 336.7-83.9-83.9L47.6 499.5c9.2 9.7 24.3 10.9 41.4 1.2l289.9-164"/><path fill="#34A853" d="M378.9 168.9 89 5C71.9-4.7 56.8-3.5 47.6 6.2L295 252.8z"/></svg><span class="txt"><small>متاح قريبًا على</small><b>Google Play</b></span></a>
@@ -95,7 +121,7 @@ function buildFooter(){
       <a href="privacy.html">سياسة الخصوصية</a></div>
   </div>
   <div class="fbot">
-    <div>© ${new Date().getFullYear()} Geo Station — جميع الحقوق محفوظة.</div>
+    <div>© ${new Date().getFullYear()} Survsta — جميع الحقوق محفوظة.</div>
     <div class="credit">Concept, UX/UI &amp; Platform Architecture by Eng. Mohamed Farag — CoreviaZone</div>
   </div>
 </div></footer>
@@ -232,7 +258,7 @@ const MODALS = {
     <div class="field full"><label>تفاصيل الطلب</label><textarea rows="3" placeholder="اشرح احتياجك باختصار: نوع العمل، المساحة، المدة..."></textarea></div>
   </div>
   <label class="muted" style="display:flex;gap:9px;margin:14px 0"><input type="checkbox" checked required> أوافق على مشاركة بياناتي مع الجهة المختارة وفق شروط المنصة.</label>
-  <div class="notice">Geo Station منصة ربط وتوليد طلبات؛ الاتفاق والتنفيذ والسداد تتم مباشرة بين الطرفين.</div>
+  <div class="notice">Survsta منصة ربط وتوليد طلبات؛ الاتفاق والتنفيذ والسداد تتم مباشرة بين الطرفين.</div>
   <button class="btn btn-pri btn-block btn-lg" style="margin-top:14px">إرسال الطلب</button></form>`,
 
  need:()=>`<button class="x" onclick="closeModal()">✕</button>
@@ -339,7 +365,7 @@ function trustBand(){
 function ctaBand(){
   return `<section class="sec"><div class="wrap"><div class="band">
     <div><h2>عندك احتياج محدد؟ خلّي المزوّدين يوصلوك</h2>
-      <p>اكتب احتياجك مرة واحدة، وتوجّهه Geo Station للمكاتب والشركات المؤهلة في نطاقك الجغرافي — مجانًا وبدون التزام.</p></div>
+      <p>اكتب احتياجك مرة واحدة، وتوجّهه Survsta للمكاتب والشركات المؤهلة في نطاقك الجغرافي — مجانًا وبدون التزام.</p></div>
     <div class="rowf">
       <button class="btn btn-org btn-lg" onclick="openModal('need')">أضف احتياجك</button>
       <a href="join.html" class="btn btn-ghost btn-lg">انضم كشريك</a></div>

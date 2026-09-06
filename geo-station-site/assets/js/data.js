@@ -1,4 +1,4 @@
-/* GEO STATION — demo dataset (Egypt market)
+/* Survsta — demo dataset (Egypt market)
    Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone */
 
 var IMG = {

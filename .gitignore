@@ -43,3 +43,5 @@ pnpm-debug.log*
 
 # Local raw image assets source folder
 All images/
+
+.vercel

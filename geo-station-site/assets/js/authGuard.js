@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *   GEO STATION — AUTH GUARD & RBAC SESSION MANAGER
+ *   Survsta — AUTH GUARD & RBAC SESSION MANAGER
  *   Role-Based Access Control (RBAC) for Provider & Admin Portals
  *   Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
  * ============================================================
@@ -14,10 +14,10 @@
 
   const DEFAULT_ADMIN = {
     id: "admin-demo-1",
-    email: "admin@geostation.eg",
+    email: "admin@survsta.com",
     name: "م. محمد فرج",
     role: "super_admin",
-    org: "Geo Station Admin",
+    org: "Survsta Admin",
     av: "مف"
   };
 
@@ -55,7 +55,7 @@
               email: u.email,
               name: meta.full_name || meta.name || u.email.split("@")[0],
               role: role,
-              org: meta.org_name || (role === "admin" || role === "super_admin" ? "Geo Station Admin" : "مكتب شريك"),
+              org: meta.org_name || (role === "admin" || role === "super_admin" ? "Survsta Admin" : "مكتب شريك"),
               av: (meta.full_name || u.email).substring(0, 2).toUpperCase()
             };
             localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userObj));
@@ -188,7 +188,7 @@
         email,
         name: metadata.full_name || email.split("@")[0],
         role: role,
-        org: metadata.org_name || (role === "admin" ? "Geo Station Admin" : "مكتب مساحة"),
+        org: metadata.org_name || (role === "admin" ? "Survsta Admin" : "مكتب مساحة"),
         av: (metadata.full_name || email).substring(0, 2).toUpperCase()
       };
       localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));

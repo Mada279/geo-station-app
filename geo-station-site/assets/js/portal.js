@@ -1,4 +1,4 @@
-/* GEO STATION — Portal shell, data & shared components
+/* Survsta — Portal shell, data & shared components
    Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone */
 
 if (typeof window !== "undefined" && typeof window.AuthGuard === "undefined" && typeof document !== "undefined") {
@@ -60,9 +60,35 @@ const ADMIN_NAV = [
 const CTX = {
   provider:{ title:"بوابة المزوّد", org:"مكتب النخبة للمساحة", sub:"مكتب مساحة • الإسكندرية",
              user:"م. أحمد النجار", role:"مدير الحساب", av:"أن", nav:PROVIDER_NAV, home:"p-dashboard.html" },
-  admin:{    title:"لوحة الإدارة", org:"Geo Station Admin", sub:"بيئة التشغيل — الإصدار 1.0",
+  admin:{    title:"لوحة الإدارة", org:"Survsta Admin", sub:"بيئة التشغيل — الإصدار 1.0",
              user:"م. محمد فرج", role:"مدير النظام", av:"مف", nav:ADMIN_NAV, home:"a-dashboard.html" }
 };
+
+function survstaLogo(idSuffix = "side"){
+  return `<svg class="survsta-logo" viewBox="0 0 152 36" height="32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Survsta">
+  <g class="logo-mark">
+    <rect width="36" height="36" rx="10" fill="url(#survsta-grad-${idSuffix})" stroke="#00d2ff" stroke-width="1.2" stroke-opacity="0.35"/>
+    <path d="M12 23.5L6.5 31.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M18 23.5V31.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M24 23.5L29.5 31.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M10.5 23.5H25.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M13 13.5C13 12.4 13.9 11.5 15 11.5H21C22.1 11.5 23 12.4 23 13.5V23.5H13V13.5Z" fill="#00d2ff" fill-opacity="0.25" stroke="#00d2ff" stroke-width="1.4"/>
+    <path d="M9 16.5H27" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="18" cy="16.5" r="4.2" stroke="#0a2033" stroke-width="1.4" fill="#0a2033" fill-opacity="0.3"/>
+    <circle cx="18" cy="16.5" r="1.6" fill="#f59e0b"/>
+    <circle cx="18" cy="7.5" r="1.6" fill="#00d2ff"/>
+    <path d="M18 9.5V11.5" stroke="#00d2ff" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+  <text x="45" y="26" font-family="'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif" font-weight="900" font-size="23" letter-spacing="-0.4" fill="currentColor">Surv<tspan fill="#00d2ff">sta</tspan></text>
+  <defs>
+    <linearGradient id="survsta-grad-${idSuffix}" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0a2033"/>
+      <stop offset="1" stop-color="#12455f"/>
+    </linearGradient>
+  </defs>
+</svg>`;
+}
+if(typeof window !== "undefined") window.survstaLogo = window.survstaLogo || survstaLogo;
 
 function mountPortal(mode, active, pageTitle, crumbHtml){
   const c = CTX[mode];
@@ -75,7 +101,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
   document.body.insertAdjacentHTML("afterbegin", `
 <div class="shell">
  <aside class="side" id="side">
-   <a class="brand" href="${c.home}"><span class="mark">◎</span><span class="bname" dir="ltr">GEO <span>STATION</span></span></a>
+   <a class="brand" href="${c.home}" aria-label="Survsta">${(window.survstaLogo||survstaLogo)("side")}</a>
    <div class="ctx"><b>${c.org}</b><small>${c.sub}</small></div>
    ${nav}
    <div class="backsite">
@@ -98,7 +124,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
   <div class="body" id="pbody">
     <div class="crumb">${crumbHtml||""}</div>
     <div id="content"></div>
-    <div class="pcredit">Geo Station — نموذج تشغيلي · Concept, UX/UI &amp; Platform Architecture by <b>Eng. Mohamed Farag — CoreviaZone</b></div>
+    <div class="pcredit">Survsta — نموذج تشغيلي · Concept, UX/UI &amp; Platform Architecture by <b>Eng. Mohamed Farag — CoreviaZone</b></div>
   </div>
  </div>
 </div>
@@ -197,14 +223,14 @@ const A_APPROVALS = [
   {id:"AP-301",item:"مكتب الأمانة للمساحة",kind:"ملف مزوّد",owner:"م. إبراهيم زكي",gov:"الدقهلية",date:"2026-08-30",risk:"هاتف غير مؤكد",sla:"متأخر"}
 ];
 const A_AUDIT = [
-  {t:"2026-09-03 09:41",actor:"admin@geostation",role:"مدير النظام",act:"اعتماد ملف مزوّد",ent:"providers#42",before:"pending",after:"published",ip:"a1f9…"},
-  {t:"2026-09-03 09:12",actor:"ops@geostation",role:"مشرف محتوى",act:"طلب تعديلات",ent:"equipment#131",before:"pending",after:"changes_requested",ip:"c7d2…"},
-  {t:"2026-09-03 08:55",actor:"data@geostation",role:"مسؤول بيانات",act:"استيراد سجلات",ent:"import#17",before:"—",after:"120 record",ip:"9b31…"},
-  {t:"2026-09-02 17:05",actor:"admin@geostation",role:"مدير النظام",act:"إخفاء تقييم مشبوه",ent:"reviews#903",before:"visible",after:"hidden",ip:"a1f9…"},
-  {t:"2026-09-02 15:22",actor:"ops@geostation",role:"مشرف محتوى",act:"رفض إدراج",ent:"equipment#127",before:"pending",after:"rejected",ip:"c7d2…"},
-  {t:"2026-09-02 11:48",actor:"admin@geostation",role:"مدير النظام",act:"منح شارة توثيق",ent:"providers#2",before:"basic",after:"business_verified",ip:"a1f9…"},
-  {t:"2026-09-01 16:30",actor:"support@geostation",role:"دعم",act:"تعليم طلب كمكرر",ent:"leads#1019",before:"new",after:"duplicate",ip:"5e88…"},
-  {t:"2026-09-01 10:04",actor:"admin@geostation",role:"مدير النظام",act:"تعديل إعدادات النظام",ent:"settings#lead_sla",before:"48h",after:"24h",ip:"a1f9…"}
+  {t:"2026-09-03 09:41",actor:"admin@survsta.com",role:"مدير النظام",act:"اعتماد ملف مزوّد",ent:"providers#42",before:"pending",after:"published",ip:"a1f9…"},
+  {t:"2026-09-03 09:12",actor:"ops@survsta.com",role:"مشرف محتوى",act:"طلب تعديلات",ent:"equipment#131",before:"pending",after:"changes_requested",ip:"c7d2…"},
+  {t:"2026-09-03 08:55",actor:"data@survsta.com",role:"مسؤول بيانات",act:"استيراد سجلات",ent:"import#17",before:"—",after:"120 record",ip:"9b31…"},
+  {t:"2026-09-02 17:05",actor:"admin@survsta.com",role:"مدير النظام",act:"إخفاء تقييم مشبوه",ent:"reviews#903",before:"visible",after:"hidden",ip:"a1f9…"},
+  {t:"2026-09-02 15:22",actor:"ops@survsta.com",role:"مشرف محتوى",act:"رفض إدراج",ent:"equipment#127",before:"pending",after:"rejected",ip:"c7d2…"},
+  {t:"2026-09-02 11:48",actor:"admin@survsta.com",role:"مدير النظام",act:"منح شارة توثيق",ent:"providers#2",before:"basic",after:"business_verified",ip:"a1f9…"},
+  {t:"2026-09-01 16:30",actor:"support@survsta.com",role:"دعم",act:"تعليم طلب كمكرر",ent:"leads#1019",before:"new",after:"duplicate",ip:"5e88…"},
+  {t:"2026-09-01 10:04",actor:"admin@survsta.com",role:"مدير النظام",act:"تعديل إعدادات النظام",ent:"settings#lead_sla",before:"48h",after:"24h",ip:"a1f9…"}
 ];
 const A_PROVIDERS = [
   {id:1,name:"مكتب النخبة للمساحة",type:"مكتب مساحة",gov:"الإسكندرية",owner:"م. أحمد النجار",listings:7,leads:36,rate:4.8,status:"منشور",ver:"نشاط موثّق"},
@@ -224,5 +250,5 @@ const A_USERS = [
   {id:"U-1355",name:"شركة أوركيد للتطوير",email:"projects@orchid.eg",role:"عميل",org:"أوركيد",joined:"2025-04-07",status:"نشط"},
   {id:"U-1402",name:"م. وليد عصام",email:"walid@abaad.eg",role:"مدير مزوّد",org:"أبعاد للمساحة",joined:"2026-09-01",status:"قيد المراجعة"},
   {id:"U-1408",name:"أ. باسم راضي",email:"bassem@geotech.eg",role:"مدير مزوّد",org:"جيو تك",joined:"2025-11-23",status:"موقوف"},
-  {id:"U-0001",name:"م. محمد فرج",email:"admin@geostation.eg",role:"مدير النظام",org:"Geo Station",joined:"2024-01-01",status:"نشط"}
+  {id:"U-0001",name:"م. محمد فرج",email:"admin@survsta.com",role:"مدير النظام",org:"Survsta",joined:"2024-01-01",status:"نشط"}
 ];

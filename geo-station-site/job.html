@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تفاصيل الوظيفة | Geo Station</title>
+<title>تفاصيل الوظيفة | Survsta</title>
 <meta name="description" content="تفاصيل الوظيفة والمتطلبات وجهة العمل.">
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
-<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<!-- Survsta Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -27,7 +27,7 @@ mountShell("jobs.html");
 
 const j = JOBS.find(x=>x.slug===qs("slug")) || JOBS[0];
 const cp = pv(j.pid);
-document.title=j.t+" | Geo Station";
+document.title=j.t+" | Survsta";
 $("#crumb").innerHTML=`<a href="index.html">الرئيسية</a> / <a href="jobs.html">الوظائف</a> / <b>${j.t}</b>`;
 $("#body").innerHTML=`<div class="panel">
   <div class="rowb"><h1 style="font-size:27px">${j.t}</h1><span class="chip cy">${j.type}</span></div>

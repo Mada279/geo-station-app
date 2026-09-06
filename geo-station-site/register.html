@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>إنشاء حساب جديد | Geo Station</title>
-<meta name="description" content="انضم إلى منصة Geo Station — أكبر شبكة مساحية وجيوماتكس في مصر.">
+<title>إنشاء حساب جديد | Survsta</title>
+<meta name="description" content="انضم إلى منصة Survsta — أكبر شبكة مساحية وجيوماتكس في مصر.">
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
-<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<!-- Survsta Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
 <link rel="stylesheet" href="assets/css/style.css">
 <style>
   .auth-wrap { max-width: 540px; margin: 36px auto; }
@@ -25,9 +25,31 @@
 <section class="sec tight"><div class="wrap">
   <div class="auth-wrap">
     <div class="auth-card">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <span class="mark" style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),#0a7583);display:grid;place-items:center;color:#04202a;font-size:18px;font-weight:900;">◎</span>
-        <b style="font-size:19px;letter-spacing:.3px" dir="ltr">GEO <span style="color:var(--cyan)">STATION</span></b>
+      <div style="display:flex;align-items:center;margin-bottom:20px;">
+        <a href="index.html" class="brand" aria-label="Survsta" style="color:var(--navy)">
+          <svg class="survsta-logo" viewBox="0 0 152 36" height="34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="logo-mark">
+              <rect width="36" height="36" rx="10" fill="url(#survsta-grad-reg)" stroke="#00d2ff" stroke-width="1.2" stroke-opacity="0.35"/>
+              <path d="M12 23.5L6.5 31.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+              <path d="M18 23.5V31.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M24 23.5L29.5 31.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+              <path d="M10.5 23.5H25.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+              <path d="M13 13.5C13 12.4 13.9 11.5 15 11.5H21C22.1 11.5 23 12.4 23 13.5V23.5H13V13.5Z" fill="#00d2ff" fill-opacity="0.25" stroke="#00d2ff" stroke-width="1.4"/>
+              <path d="M9 16.5H27" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+              <circle cx="18" cy="16.5" r="4.2" stroke="#0a2033" stroke-width="1.4" fill="#0a2033" fill-opacity="0.3"/>
+              <circle cx="18" cy="16.5" r="1.6" fill="#f59e0b"/>
+              <circle cx="18" cy="7.5" r="1.6" fill="#00d2ff"/>
+              <path d="M18 9.5V11.5" stroke="#00d2ff" stroke-width="1.2" stroke-linecap="round"/>
+            </g>
+            <text x="45" y="26" font-family="'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif" font-weight="900" font-size="23" letter-spacing="-0.4" fill="currentColor">Surv<tspan fill="#00d2ff">sta</tspan></text>
+            <defs>
+              <linearGradient id="survsta-grad-reg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#0a2033"/>
+                <stop offset="1" stop-color="#12455f"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </a>
       </div>
 
       <h1>إنشاء حساب جديد</h1>
@@ -76,7 +98,7 @@
 
         <label class="muted" style="display:flex;gap:9px;margin:16px 0;font-size:13px;cursor:pointer">
           <input type="checkbox" id="regTerms" required checked>
-          <span>أوافق على <a href="terms.html" style="color:var(--cyan-d)">شروط الاستخدام</a> و<a href="privacy.html" style="color:var(--cyan-d)">سياسة الخصوصية</a> لمنصة Geo Station.</span>
+          <span>أوافق على <a href="terms.html" style="color:var(--cyan-d)">شروط الاستخدام</a> و<a href="privacy.html" style="color:var(--cyan-d)">سياسة الخصوصية</a> لمنصة Survsta.</span>
         </label>
 
         <button type="submit" id="regSubmitBtn" class="btn btn-pri btn-block btn-lg">إنشاء الحساب والانضمام</button>

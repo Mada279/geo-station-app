@@ -1,5 +1,5 @@
 /* ============================================================
-   GEO STATION — Live Data Store (SWR & Cloud-Sync Enabled)
+   Survsta — Live Data Store (SWR & Cloud-Sync Enabled)
    Hybrid Store: In-memory/LocalStorage cache for instant UI rendering,
    seamlessly synchronized in the background with Supabase PostgreSQL.
    Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
@@ -97,17 +97,17 @@ const SEED_REVIEWS = [
 ];
 
 const SEED_USERS = [
-  {id:1, name:"م. محمد فرج", email:"admin@geostation.eg", role:"مدير النظام", team:"الإدارة",
+  {id:1, name:"م. محمد فرج", email:"admin@survsta.com", role:"مدير النظام", team:"الإدارة",
    status:"نشط", last:"2026-09-03 09:41", av:"مف"},
-  {id:2, name:"أ. سارة منير", email:"ops@geostation.eg", role:"مسؤول تشغيل", team:"التشغيل",
+  {id:2, name:"أ. سارة منير", email:"ops@survsta.com", role:"مسؤول تشغيل", team:"التشغيل",
    status:"نشط", last:"2026-09-03 08:20", av:"سم"},
-  {id:3, name:"أ. كريم عادل", email:"data@geostation.eg", role:"مُدخل بيانات", team:"البيانات",
+  {id:3, name:"أ. كريم عادل", email:"data@survsta.com", role:"مُدخل بيانات", team:"البيانات",
    status:"نشط", last:"2026-09-03 09:05", av:"كع"},
-  {id:4, name:"أ. نهى صابر", email:"support@geostation.eg", role:"دعم العملاء", team:"الدعم",
+  {id:4, name:"أ. نهى صابر", email:"support@survsta.com", role:"دعم العملاء", team:"الدعم",
    status:"نشط", last:"2026-09-02 16:52", av:"نص"},
   {id:5, name:"م. أحمد النجار", email:"elite@provider.eg", role:"مزوّد", team:"مكتب النخبة",
    status:"نشط", last:"2026-09-03 07:30", av:"أن"},
-  {id:6, name:"أ. ياسر لطفي", email:"y.lotfy@geostation.eg", role:"مُدخل بيانات", team:"البيانات",
+  {id:6, name:"أ. ياسر لطفي", email:"y.lotfy@survsta.com", role:"مُدخل بيانات", team:"البيانات",
    status:"موقوف", last:"2026-07-18 12:10", av:"يل"}
 ];
 
@@ -256,7 +256,7 @@ async function syncCloud(){
   if (!global.SupabaseService || !global.SupabaseService.isConfigured()) return;
 
   isSyncing = true;
-  console.log("☁️ Geo Station [Store]: بدء المزامنة الخلفية مع Supabase (SWR)...");
+  console.log("☁️ Survsta [Store]: بدء المزامنة الخلفية مع Supabase (SWR)...");
 
   try {
     const db = load();
@@ -289,10 +289,10 @@ async function syncCloud(){
     if (updatedCount > 0) {
       persist();
       emit("*", "sync", null);
-      console.log(`✅ Geo Station [Store]: تمت المزامنة السحابية بنجاح (${updatedCount} جداول).`);
+      console.log(`✅ Survsta [Store]: تمت المزامنة السحابية بنجاح (${updatedCount} جداول).`);
     }
   } catch (err) {
-    console.warn("⚠️ Geo Station [Store]: حدث خطأ أثناء المزامنة السحابية:", err);
+    console.warn("⚠️ Survsta [Store]: حدث خطأ أثناء المزامنة السحابية:", err);
   } finally {
     isSyncing = false;
   }
@@ -526,7 +526,7 @@ const GS = {
 
   /* --- export / import whole DB --- */
   exportJSON(){
-    const ok = download(`geo-station-db-${new Date().toISOString().slice(0,10)}.json`,
+    const ok = download(`survsta-db-${new Date().toISOString().slice(0,10)}.json`,
                         JSON.stringify(load(),null,2), "application/json");
     logAudit("تصدير", "قاعدة البيانات", "—", "ملف JSON"); persist();
     return ok;
@@ -538,7 +538,7 @@ const GS = {
     const esc = v => { v = v==null ? "" : (typeof v==="object" ? JSON.stringify(v) : String(v));
                        return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
     const csv = "\uFEFF" + [cols.join(","), ...rows.map(r=>cols.map(c=>esc(r[c])).join(","))].join("\n");
-    download(`geo-station-${coll}-${new Date().toISOString().slice(0,10)}.csv`, csv, "text/csv");
+    download(`survsta-${coll}-${new Date().toISOString().slice(0,10)}.csv`, csv, "text/csv");
     logAudit("تصدير", coll, "—", `CSV — ${rows.length} سجل`); persist();
     return true;
   },

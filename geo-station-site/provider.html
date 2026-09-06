@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ملف المزوّد | Geo Station</title>
+<title>ملف المزوّد | Survsta</title>
 <meta name="description" content="ملف تعريفي كامل لمزوّد خدمات المساحة: الخدمات والمعدات والتغطية والتقييمات.">
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
-<!-- Geo Station Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<!-- Survsta Platform — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -30,7 +30,7 @@
 mountShell("directory.html");
 
 const p = PROVIDERS.find(x=>x.slug===qs("slug")) || PROVIDERS[0];
-document.title = p.name + " | Geo Station";
+document.title = p.name + " | Survsta";
 $("#crumb").innerHTML = `<a href="index.html">الرئيسية</a> / <a href="directory.html">الدليل</a> / <a href="providers.html?type=${p.cat}">${p.type}</a> / <b>${p.name}</b>`;
 $("#head").innerHTML = `
  <div class="cover"><img src="${p.img}" alt="${p.name}"></div>

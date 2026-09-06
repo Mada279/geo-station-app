@@ -1,7 +1,7 @@
 @import url("font.css");
 @import url("tokens.css");
 /* ============================================================
-   GEO STATION — Platform Website
+   Survsta — Platform Website
    Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
    ============================================================ */
 *{box-sizing:border-box}
@@ -30,9 +30,8 @@ ul{margin:0;padding-inline-start:20px}
 /* ---------- header ---------- */
 .header{position:sticky;top:0;z-index:70;background:rgba(7,17,31,.97);backdrop-filter:blur(8px);color:#fff;border-bottom:1px solid #1d3350}
 .header .wrap{display:flex;align-items:center;gap:20px;height:72px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:21px;letter-spacing:.3px;white-space:nowrap}
-.brand .mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),#0a7583);display:grid;place-items:center;color:#04202a;font-size:19px}
-.brand span{color:var(--cyan)}
+.brand{display:inline-flex;align-items:center;text-decoration:none;line-height:1;gap:10px}
+.brand .survsta-logo{display:block;height:34px;width:auto;overflow:visible}
 .mainnav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
 .mainnav>a,.dd>button{color:#c3d3e2;font-size:14.5px;padding:9px 12px;border-radius:9px;display:inline-flex;align-items:center;gap:5px}
 .mainnav>a:hover,.dd>button:hover{background:#14293f;color:#fff}

@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>الاستيراد والتصدير | Geo Station</title>
+<title>الاستيراد والتصدير | Survsta</title>
 <meta name="description" content="الاستيراد والتصدير">
 <meta name="robots" content="noindex">
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
-<!-- Geo Station Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
+<!-- Survsta Portal — Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone -->
 <link rel="stylesheet" href="assets/css/portal.css">
 </head>
 <body>
@@ -55,10 +55,10 @@ setContent(`
 
 <div class="card" style="margin-top:16px"><h3>سجل عمليات النقل</h3>
  <div style="margin-top:14px">${table(["الرقم","النوع","العملية","السجلات","نجح","فشل","المستخدم","التاريخ","الحالة"],
-  [["IM-017","مزوّدون","استيراد",120,114,6,"data@geostation","2026-09-03 08:55","مكتمل"],
-   ["EX-042","طلبات تواصل","تصدير",1043,1043,0,"admin@geostation","2026-09-02 17:20","مكتمل"],
-   ["IM-016","إدراجات أجهزة","استيراد",340,298,42,"data@geostation","2026-08-29 11:02","مكتمل بأخطاء"],
-   ["IM-015","مواقع وإحداثيات","استيراد",88,88,0,"data@geostation","2026-08-24 14:45","مكتمل"]]
+  [["IM-017","مزوّدون","استيراد",120,114,6,"data@survsta.com","2026-09-03 08:55","مكتمل"],
+   ["EX-042","طلبات تواصل","تصدير",1043,1043,0,"admin@survsta.com","2026-09-02 17:20","مكتمل"],
+   ["IM-016","إدراجات أجهزة","استيراد",340,298,42,"data@survsta.com","2026-08-29 11:02","مكتمل بأخطاء"],
+   ["IM-015","مواقع وإحداثيات","استيراد",88,88,0,"data@survsta.com","2026-08-24 14:45","مكتمل"]]
   .map(r=>[`<code>${r[0]}</code>`,r[1],`<span class="chip ${r[2]==="استيراد"?"cy":"pur"}">${r[2]}</span>`,
     num(r[3]),`<span class="chip ok">${num(r[4])}</span>`,r[5]?`<span class="chip err">${r[5]}</span>`:'—',
     r[6],`<span class="muted">${r[7]}</span>`,

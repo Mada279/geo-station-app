@@ -1,5 +1,5 @@
 /* ============================================================
-   GEO STATION — Bilingual engine (AR / EN)
+   Survsta — Bilingual engine (AR / EN)
    Live DOM translation with RTL⇄LTR flip, no reload, no build step.
    Concept, UX/UI & Platform Architecture by Eng. Mohamed Farag — CoreviaZone
    ============================================================ */
@@ -32,7 +32,7 @@ const D = {
 "متاح على":"Available on", "حمّل من":"Download on", "بحث سريع…":"Quick search…",
 "عرض الموقع العام":"View public site", "بوابة المزوّد":"Provider portal",
 "لوحة الإدارة":"Admin panel", "تسجيل الخروج":"Sign out",
-"© 2026 Geo Station — جميع الحقوق محفوظة.":"© 2026 Geo Station — All rights reserved.",
+"© 2026 Survsta — جميع الحقوق محفوظة.":"© 2026 Survsta — All rights reserved.",
 "المنصة الرقمية المتخصصة لقطاع المساحة والجيوماتكس في مصر — دليل، سوق أجهزة، خدمات، تدريب ووظائف في مكان واحد.":
  "The dedicated digital platform for Egypt's surveying and geomatics sector — directory, equipment marketplace, services, training and jobs in one place.",
 "📍 نخدم حاليًا: الإسكندرية والقاهرة والجيزة — التوسع تباعًا لباقي المحافظات":
@@ -161,8 +161,8 @@ const D = {
 
 /* ---------- CTA & marketing ---------- */
 "عندك احتياج محدد؟ خلّي المزوّدين يوصلوك":"Have a specific need? Let providers reach you",
-"اكتب احتياجك مرة واحدة، وتوجّهه Geo Station للمكاتب والشركات المؤهلة في نطاقك الجغرافي — مجانًا وبدون التزام.":
- "Describe your need once and Geo Station routes it to qualified offices and companies in your area — free and with no obligation.",
+"اكتب احتياجك مرة واحدة، وتوجّهه Survsta للمكاتب والشركات المؤهلة في نطاقك الجغرافي — مجانًا وبدون التزام.":
+ "Describe your need once and Survsta routes it to qualified offices and companies in your area — free and with no obligation.",
 "الأعلى تقييمًا":"Top rated", "جهات موصى بها هذا الشهر":"Recommended providers this month",
 "دليل قطاع المساحة في مصر":"Egypt's surveying sector directory",
 "تصفّح الجهات حسب النوع والتخصص والمحافظة — كل ملف يمر بمراجعة الإدارة قبل النشر.":
@@ -818,7 +818,7 @@ const D = {
 "الشروط":"Terms",
 
 /* ---------- sentences & templates ---------- */
-"Geo Station — نموذج تشغيلي · Concept, UX/UI & Platform Architecture by":"Geo Station — operating prototype · Concept, UX/UI & Platform Architecture by",
+"Survsta — نموذج تشغيلي · Concept, UX/UI & Platform Architecture by":"Survsta — operating prototype · Concept, UX/UI & Platform Architecture by",
 "⏱ يرد خلال ساعة":"⏱ Replies within an hour",
 "⏱ يرد خلال ساعتين":"⏱ Replies within 2 hours",
 "⏱ يرد خلال 3 ساعات":"⏱ Replies within 3 hours",
