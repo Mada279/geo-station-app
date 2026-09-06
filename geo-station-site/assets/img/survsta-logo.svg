@@ -1,29 +1,31 @@
-<svg class="survsta-logo" viewBox="0 0 152 36" height="34" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g class="logo-mark">
-    <rect width="36" height="36" rx="10" fill="url(#survsta-grad)" stroke="#00d2ff" stroke-width="1.2" stroke-opacity="0.35"/>
-    <!-- Tripod Legs -->
-    <path d="M12 23.5L6.5 31.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
-    <path d="M18 23.5V31.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-    <path d="M24 23.5L29.5 31.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
-    <!-- Base Tribrach -->
-    <path d="M10.5 23.5H25.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-    <!-- Total Station Instrument Body -->
-    <path d="M13 13.5C13 12.4 13.9 11.5 15 11.5H21C22.1 11.5 23 12.4 23 13.5V23.5H13V13.5Z" fill="#00d2ff" fill-opacity="0.25" stroke="#00d2ff" stroke-width="1.4"/>
-    <!-- Optical Telescope / Reticle Axis -->
-    <path d="M9 16.5H27" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-    <!-- Reticle Target Circle & Center Pin -->
-    <circle cx="18" cy="16.5" r="4.2" stroke="#0a2033" stroke-width="1.4" fill="#0a2033" fill-opacity="0.3"/>
-    <circle cx="18" cy="16.5" r="1.6" fill="#f59e0b"/>
-    <!-- Top Geodetic Target Pin -->
-    <circle cx="18" cy="7.5" r="1.6" fill="#00d2ff"/>
-    <path d="M18 9.5V11.5" stroke="#00d2ff" stroke-width="1.2" stroke-linecap="round"/>
-  </g>
-  <!-- Wordmark -->
-  <text x="45" y="26" font-family="'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif" font-weight="900" font-size="23" letter-spacing="-0.4" fill="currentColor">Surv<tspan fill="#00d2ff">sta</tspan></text>
+<svg class="survsta-logo" viewBox="0 0 250 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Survsta">
   <defs>
-    <linearGradient id="survsta-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0a2033"/>
-      <stop offset="1" stop-color="#12455f"/>
+    <linearGradient id="survsta-bg" x1="5" y1="5" x2="55" y2="55" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#081827"/>
+      <stop offset="100%" stop-color="#0f2f4a"/>
+    </linearGradient>
+    <linearGradient id="survsta-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
     </linearGradient>
   </defs>
+  <g class="survsta-emblem">
+    <rect x="5" y="5" width="50" height="50" rx="13" fill="url(#survsta-bg)" stroke="#00d2ff" stroke-width="1.4" stroke-opacity="0.4"/>
+    <circle cx="30" cy="30" r="19" stroke="#00d2ff" stroke-width="0.8" stroke-dasharray="2.5 3" stroke-opacity="0.3"/>
+    <path d="M22 35L14 48" stroke="url(#survsta-gold)" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M30 35V48" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M38 35L46 48" stroke="url(#survsta-gold)" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M19 35H41" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M23 22C23 20.3 24.3 19 26 19H34C35.7 19 37 20.3 37 22V35H23V22Z" fill="#00d2ff" fill-opacity="0.2" stroke="#00d2ff" stroke-width="1.7" stroke-linejoin="round"/>
+    <line x1="16" y1="26.5" x2="44" y2="26.5" stroke="#00d2ff" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="30" y1="13" x2="30" y2="35" stroke="#00d2ff" stroke-width="1.4" stroke-linecap="round"/>
+    <circle cx="30" cy="26.5" r="5.8" stroke="#ffffff" stroke-width="1.5" fill="#081827"/>
+    <circle cx="30" cy="26.5" r="2.3" fill="#f59e0b"/>
+    <circle cx="30" cy="11" r="2" fill="#00d2ff"/>
+    <path d="M25 8C27.5 6.5 32.5 6.5 35 8" stroke="url(#survsta-gold)" stroke-width="1.4" stroke-linecap="round"/>
+  </g>
+  <text x="68" y="41" font-family="'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="36" font-weight="800" letter-spacing="-0.5" fill="currentColor">Surv<tspan fill="#00d2ff">sta</tspan></text>
+  <circle cx="218" cy="23" r="3" fill="#f59e0b"/>
+  <circle cx="218" cy="23" r="6" stroke="#00d2ff" stroke-width="1.2" stroke-opacity="0.7"/>
+  <path d="M218 14V17M218 29V32M209 23H212M224 23H227" stroke="#00d2ff" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.8"/>
 </svg>
