@@ -32,7 +32,7 @@ ul{margin:0;padding-inline-start:20px}
 .header{position:sticky;top:0;z-index:70;background:rgba(7,17,31,.97);backdrop-filter:blur(8px);color:#fff;border-bottom:1px solid #1d3350}
 .header .wrap{display:flex;align-items:center;gap:20px;height:72px}
 .brand{display:inline-flex;align-items:center;text-decoration:none;line-height:1;gap:10px}
-.brand img.survsta-logo, .brand .survsta-logo{display:block !important;height:40px !important;max-height:40px !important;width:auto !important;opacity:1 !important;visibility:visible !important}
+.brand img.survsta-logo, .brand .survsta-logo{display:block !important;height:32px !important;max-height:32px !important;width:auto !important;min-width:110px !important;opacity:1 !important;visibility:visible !important}
 .mainnav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
 .mainnav>a,.dd>button{color:#c3d3e2;font-size:14.5px;padding:9px 12px;border-radius:9px;display:inline-flex;align-items:center;gap:5px}
 .mainnav>a:hover,.dd>button:hover{background:#14293f;color:#fff}

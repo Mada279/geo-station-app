@@ -34,7 +34,7 @@ const NAV = [
 
 function survstaLogo(idSuffix = "nav", isDark = false){
   const logoFile = isDark ? "assets/img/survsta-logo-dark.svg" : "assets/img/survsta-logo.svg";
-  return `<img src="${logoFile}" alt="Survsta" class="survsta-logo" height="40" style="height:40px;width:auto;display:block;max-height:40px;">`;
+  return `<img src="${logoFile}" alt="Survsta" class="survsta-logo" height="32" style="height:32px;width:auto;display:block;max-height:32px;min-width:110px;">`;
 }
 window.survstaLogo = survstaLogo;
 

@@ -66,7 +66,7 @@ const CTX = {
 
 function survstaLogo(idSuffix = "side", isDark = false){
   const logoFile = isDark ? "assets/img/survsta-logo-dark.svg" : "assets/img/survsta-logo.svg";
-  return `<img src="${logoFile}" alt="Survsta" class="survsta-logo" height="36" style="height:36px;width:auto;display:block;max-height:36px;">`;
+  return `<img src="${logoFile}" alt="Survsta" class="survsta-logo" height="30" style="height:30px;width:auto;display:block;max-height:30px;min-width:100px;">`;
 }
 if(typeof window !== "undefined") window.survstaLogo = survstaLogo;
 

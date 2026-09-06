@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SURVSTA_OPERATIONS_MANUAL.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="دليل-العمليات-والتشغيل-الفني-لمنصة-سورفستا">دليل العمليات والتشغيل الفني لمنصة سورفستا</h1>
+<h1 id="survsta-platform--enterprise-operations-manual--technical-runbook">Survsta Platform — Enterprise Operations Manual &amp; Technical Runbook</h1>
+<blockquote>
+<p><strong>الإصدار:</strong> 2.3 Production Ready<br>
+<strong>تاريخ التحديث:</strong> سبتمبر 2026<br>
+<strong>الجهة:</strong> الفريق الهندسي — منصة Survsta الرقمية<br>
+<strong>الموقع المباشر:</strong> <a href="https://geo-station-app.vercel.app">Survsta Platform</a></p>
+</blockquote>
+<hr>
+<h2 id="1-بنية-النظام-ومجموعة-التقنيات-system-architecture--tech-stack">1. بنية النظام ومجموعة التقنيات (System Architecture &amp; Tech Stack)</h2>
+<p>تعتمد منصة <strong>Survsta</strong> على معمارية هجينة وخفيفة فائقة السرعة (<strong>High-Performance Hybrid Architecture</strong>) تجمع بين كفاءة الواجهات الأمامية بدون أطر عمل ثقيلة (<strong>Vanilla Enterprise Stack</strong>) وقوة قواعد البيانات السحابية العلائقية مع أنظمة الأمان على مستوى الصفوف (<strong>Supabase PostgreSQL + RLS</strong>).</p>
+<h3 id="أ-الهيكل-التكنولوجي-الأساسي-technology-stack">أ. الهيكل التكنولوجي الأساسي (Technology Stack)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">الطبقة</th>
+<th style="text-align:left">التقنية المستخدمة</th>
+<th style="text-align:left">الوظيفة والدور</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Frontend Framework</strong></td>
+<td style="text-align:left">Vanilla JavaScript (ES6+ Modules)</td>
+<td style="text-align:left">أداء فائق، انعدام تام لأخطاء الـ Hydration، وزمن تحميل صفري للحزم البرمجية</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Design System &amp; Styling</strong></td>
+<td style="text-align:left">CSS3 Custom Properties (Design Tokens)</td>
+<td style="text-align:left">نظام تصميم موحد بملفات tokens.css و style.css و portal.css يدعم RTL/LTR والسمات المتباينة</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>State &amp; Cache Management</strong></td>
+<td style="text-align:left">Custom SWR In-Memory + LocalStorage Store</td>
+<td style="text-align:left">نمط Stale-While-Revalidate لتوفير واجهات فورية التفاعل (0ms latency) مع مزامنة خلفية</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Spatial / Maps Engine</strong></td>
+<td style="text-align:left">Leaflet.js (v1.9.4) + OpenStreetMap</td>
+<td style="text-align:left">خرائط تفاعلية لتحديد مواقع المكاتب ومراكز الأجهزة وحساب النطاقات الجغرافية</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Backend &amp; Database</strong></td>
+<td style="text-align:left">Supabase (PostgreSQL 15+)</td>
+<td style="text-align:left">قاعدة بيانات علائقية كاملة، تدعم المعاملات الذرية (ACID Transactions) والامتدادات المكانية</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Security &amp; Authorization</strong></td>
+<td style="text-align:left">PostgreSQL Row-Level Security (RLS) + RBAC</td>
+<td style="text-align:left">عزل بيانات كل مزود تلقائياً على مستوى المحرك، مع حراسة مسارات عبر authGuard.js</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Monetization Engine</strong></td>
+<td style="text-align:left">Stored Procedures / PLpgSQL RPC</td>
+<td style="text-align:left">دالة ذرية open_lead_and_charge لتطبيق نموذج Pay-Per-Lead عبر محافظ المزودين</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Cloud Hosting &amp; CDN</strong></td>
+<td style="text-align:left">Vercel Edge Network</td>
+<td style="text-align:left">استضافة سحابية موزعة عالمياً للملفات الساكنة مع توزيع فوري عبر الـ CDN</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="ب-مخطط-المعمارية-الهندسية-وتدفق-البيانات-architecture-diagram">ب. مخطط المعمارية الهندسية وتدفق البيانات (Architecture Diagram)</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    subgraph Client["الواجهة الأمامية (Client Browser)"]
+        PublicPages["الصفحات العامة (Public Pages)
+index, providers, equipment, map"]
+        ProviderPortal["بوابة المزوّد (Provider Portal)
+p-dashboard, p-leads, p-listings"]
+        AdminPortal["لوحة الإدارة (Admin Panel)
+a-dashboard, a-approvals, a-users"]
+        
+        AuthGuard["حارس الصلاحيات (AuthGuard.js)
+RBAC & Session Manager"]
+        DataStore["مخزن البيانات الحي (Store.js)
+SWR In-Memory & LocalStorage"]
+        DAL["طبقة الوصول للبيانات (SupabaseService.js)
+Data Access Layer (DAL)"]
+    end
+
+    subgraph Cloud["الطبقة السحابية (Vercel & Supabase)"]
+        VercelCDN["شبكة Vercel Edge CDN
+Static Assets, Caching & Routing"]
+        SupaAuth["Supabase Auth
+JWT Sessions & Providers"]
+        SupaDB[("قاعدة بيانات PostgreSQL
+RLS Policies Enabled")]
+        SupaRPC["إجراءات PL/pgSQL المخزنة
+open_lead_and_charge (Atomic Tx)"]
+        SupaStorage["حاويات الملفات (Supabase Storage)
+Equipment, Documents, Logos"]
+    end
+
+    PublicPages --> AuthGuard
+    ProviderPortal --> AuthGuard
+    AdminPortal --> AuthGuard
+    
+    AuthGuard --> DataStore
+    DataStore --> DAL
+    
+    DAL -->|REST Query / Mutation| SupaDB
+    DAL -->|JWT Auth| SupaAuth
+    DAL -->|Execute RPC| SupaRPC
+    DAL -->|Uploads| SupaStorage
+    
+    VercelCDN -.->|توزيع الأصول| Client
+</div></code></pre>
+<hr>
+<h2 id="2-خريطة-الهيكل-التنظيمي-للمشروع-directory-structure-map">2. خريطة الهيكل التنظيمي للمشروع (Directory Structure Map)</h2>
+<p>تم تنظيم المشروع بدقة ليفصل بين بيئة العرض السحابية، المخططات الهندسية، والبيانات التجريبية:</p>
+<pre class="hljs"><code><div>d:\geo_station web site├── SURVSTA_OPERATIONS_MANUAL.md     # دليل العمليات والتشغيل الفني الحالي
+├── vercel.json                      # تكوين النشر السحابي لـ Vercel
+├── supabase_rls_and_triggers.sql    # سكريبتات الـ SQL لسياسات الأمان والدوال والمحفظة
+├── geo_station_schema.dbml          # المخطط الهيكلي الكامل لقاعدة البيانات (DBML)
+│
+├── All images/                      # مكتبة الصور الهندسية المعتمدة عالية الدقة
+│   └── (41 صورة منتقاة بعناية للأجهزة والمواقع والمكاتب الهندسية)
+│
+├── uploads/                         # نماذج أولية سابقة للعرض (Prototypes)
+│   ├── index.html                   # صفحة عرض سابقة
+│   └── GeoStation_عرض_العميل_...   # ملف العرض التقديمي للعملاء
+│
+└── geo-station-site/                # المجلد الإنتاجي الفعلي (Root للموقع المنشور)
+    ├── assets/                      # أصول التصميم والبرمجة
+    │   ├── css/
+    │   │   ├── tokens.css           # متغيرات التصميم: الألوان، الخطوط، الظلال، وحماية التباين
+    │   │   ├── font.css             # خط Cairo مدمج بصيغة Base64 WOFF2 للعمل أوفلاين
+    │   │   ├── style.css            # التنسيقات الرئيسية للموقع العام والبطاقات
+    │   │   └── portal.css           # تنسيقات لوحات الإدارة وبوابات المزوّدين
+    │   ├── js/
+    │   │   ├── data.js              # البيانات البذرية الأولية (Providers, Equipment, Services)
+    │   │   ├── store.js             # مدير الحالة العام بنمط SWR والمزامنة السحابية
+    │   │   ├── supabaseService.js   # طبقة الاتصال بقاعدة بيانات Supabase و Auth و Storage
+    │   │   ├── authGuard.js         # محرك فحص الصلاحيات وعزل بوابات الأدمن والمزوّدين
+    │   │   ├── portal.js            # شل الواجهات الجانبية والهيدر للبوابات الداخلية
+    │   │   ├── crud.js              # واجهات التحكم بالنماذج والجداول للمدير والمزوّد
+    │   │   ├── app.js               # تفاعلات الموقع العام، الفلاتر، وبناء البطاقات
+    │   │   └── i18n.js              # محرك الترجمة ودعم اللغتين العربية والإنجليزية
+    │   └── img/
+    │       ├── survsta-logo.svg     # الشعار الرسمي الفاتح للمنصة
+    │       ├── survsta-logo-dark.svg# الشعار المخصص للخلفيات الفاتحة وشاشات الدخول
+    │       └── *.jpg                # الصور المخصصة للبطاقات والـ Hero Section
+    │
+    ├── (الصفحات العامة - Public Pages):
+    │   ├── index.html               # الصفحة الرئيسية للمنصة
+    │   ├── providers.html           # دليل مكاتب وشركات المساحة
+    │   ├── provider.html            # ملف المكتب / الشركة التفصيلي
+    │   ├── equipment.html           # سوق الأجهزة المساحية (بيع وإيجار)
+    │   ├── equipment-detail.html    # تفاصيل الجهاز المساحي وطلب الاستئجار/الشراء
+    │   ├── services.html            # دليل الخدمات الهندسية والميدانية
+    │   ├── service.html             # صفحة تفاصيل الخدمة
+    │   ├── map.html                 # الخريطة الجغرافية التفاعلية
+    │   ├── jobs.html / job.html     # وظائف قطاع المساحة وتفاصيل الوظيفة
+    │   ├── academy.html/course.html # الأكاديمية والدورات (مقفلة مؤقتاً بحالة &quot;قريباً&quot;)
+    │   ├── join.html                # نموذج انضمام شركاء الخدمة والمكاتب
+    │   ├── login.html/register.html # بوابات تسجيل الدخول وإنشاء الحساب
+    │   ├── about.html/contact.html  # من نحن وصفحة التواصل
+    │   ├── how-it-works.html        # كيف تعمل المنصة للعملاء والشركات
+    │   ├── mobile-app.html          # صفحة تطبيق الهاتف المحمول
+    │   ├── privacy.html/terms.html  # سياسة الخصوصية والشروط والأحكام
+    │   └── help.html / directory.html# مركز المساعدة والدليل الشامل
+    │
+    ├── (بوابة المزوّد - Provider Portal p-*.html):
+    │   ├── p-dashboard.html         # لوحة القيادة والمؤشرات الرقمية للمكتب
+    │   ├── p-leads.html             # صندوق الوارد للطلبات وفتح بيانات العملاء
+    │   ├── p-listings.html          # إدارة الأجهزة المعروضة للإيجار والبيع
+    │   ├── p-services.html          # الخدمات المساحية المقدمة وأسعارها
+    │   ├── p-profile.html           # الملف التجاري، التراخيص، وبيانات الاتصال
+    │   ├── p-locations.html         # الفروع والنطاق الجغرافي للتغطية
+    │   ├── p-team.html              # إدارة المهندسين والمساحين التابعين للمكتب
+    │   ├── p-analytics.html         # تقارير المشاهدات ومعدلات التحويل
+    │   ├── p-jobs.html              # إدارة إعلانات التوظيف التابعة للجهة
+    │   ├── p-reviews.html           # تقييمات العملاء والرد عليها
+    │   ├── p-ads.html               # خيارات الرعاية والإعلانات المميزة
+    │   ├── p-notifications.html     # مركز الإشعارات الفورية
+    │   └── p-settings.html          # إعدادات الحساب والمحفظة وكلمة المرور
+    │
+    └── (لوحة الإدارة العليا - Super Admin Portal a-*.html):
+        ├── a-dashboard.html         # مؤشرات المنصة الشاملة وحجم التداول
+        ├── a-analytics.html         # تحليلات النمو الإقليمي وتوزيع الطلبات
+        ├── a-approvals.html         # مركز مراجعة واعتماد المكاتب والأجهزة الجديدة
+        ├── a-equipment.html         # المراجعة الفنية للأجهزة والمواصفات
+        ├── a-verification.html      # توثيق السجلات التجارية والمؤهلات الهندسية
+        ├── a-reviews.html           # الرقابة على تقييمات العملاء واعتمادها
+        ├── a-reports.html           # إدارة بلاغات المستخدمين والنزاعات
+        ├── a-providers.html         # الإدارة المركزية لبيانات المكاتب
+        ├── a-clients.html           # سجل العملاء وأصحاب المشروعات
+        ├── a-users.html             # إدارة حسابات المستخدمين وصلاحيات المشرفين
+        ├── a-content.html           # إدارة مقالات ومحتوى المنصة
+        ├── a-media.html             # مكتبة الوسائط المركزية
+        ├── a-jobs.html              # المراقبة على عروض التوظيف المنشورة
+        ├── a-data.html              # أداة فحص سلامة البيانات المجمعة
+        ├── a-import.html            # استيراد وتصدير البيانات بصيغة CSV/JSON
+        ├── a-leads.html             # الإشراف المالي على حركة الطلبات
+        ├── a-audit.html             # سجل التدقيق الأمني (Security Audit Log)
+        └── a-settings.html          # إعدادات النظام، أسعار الليد، وعمولات المنصة
+</div></code></pre>
+<hr>
+<h2 id="3-دليل-إدارة-وتحديث-البيانات-data-management-guide">3. دليل إدارة وتحديث البيانات (Data Management Guide)</h2>
+<p>يعمل مخزن البيانات عبر ثلاث طبقات متناسقة تحقق مرونة كاملة للمشغل:</p>
+<h3 id="أ-الطبقات-الثلاث-للبيانات-data-hierarchy">أ. الطبقات الثلاث للبيانات (Data Hierarchy)</h3>
+<ol>
+<li><strong>البيانات الأولية (Seed Data):</strong><br>
+موجودة داخل <code>assets/js/data.js</code> (للمكاتب، الأجهزة، والخدمات) و <code>assets/js/store.js</code> (للعملاء، الطلبات، والمستخدمين). تُستخدم لملء المنصة بالبيانات فوراً في حالة عدم اتصال المتصفح بالإنترنت أو عدم ربط Supabase.</li>
+<li><strong>المخزن المحلي السريع (LocalStorage SWR Store):</strong><br>
+يتم حفظ البيانات تحت المفتاح <code>SURVSTA_DB_v2</code>. عند تشغيل أي صفحة، تُقرأ البيانات من هذا المخزن في زمن <strong>0ms</strong>، وتُعرض الواجهات فوراً.</li>
+<li><strong>قاعدة البيانات السحابية (Supabase PostgreSQL):</strong><br>
+تتصل بها المنصة عبر <code>assets/js/supabaseService.js</code>. أي عملية إضافة أو تعديل أو حذف تُنفذ محلياً ثم تُرسل سحابياً في الخلفية.</li>
+</ol>
+<hr>
+<h3 id="ب-كيفية-إضافة-مكتب-مساحي-جديد-provider">ب. كيفية إضافة مكتب مساحي جديد (Provider)</h3>
+<h4 id="الطريقة-الأولى-من-خلال-لوحة-الإدارة-a-providershtml">الطريقة الأولى: من خلال لوحة الإدارة (<code>a-providers.html</code>)</h4>
+<ol>
+<li>ادخل إلى الرابط: <code>https://geo-station-app.vercel.app/a-providers.html</code></li>
+<li>اضغط على زر <strong>&quot;إضافة مزوّد جديد&quot;</strong>.</li>
+<li>املأ الحقول الإلزامية:
+<ul>
+<li><strong>الاسم:</strong> اسم المكتب أو الشركة (مثال: &quot;مكتب القاهرة للاستشارات المساحية&quot;).</li>
+<li><strong>النوع:</strong> اختر بين (مكتب مساحة، شركة مساحة، مركز معايرة، مركز تدريب، وكيل توريدات).</li>
+<li><strong>المحافظة والمدينة:</strong> (مثال: القاهرة • التجمع الخامس).</li>
+<li><strong>بيانات الاتصال:</strong> الهاتف، البريد الإلكتروني، ورقم الواتساب.</li>
+<li><strong>التخصصات:</strong> حدد مجالات العمل (رفع مساحي، مسح ليزري 3D، تأجير، بيع، معايرة).</li>
+</ul>
+</li>
+<li>اضغط <strong>&quot;حفظ واعتماد&quot;</strong>. سيظهر المكتب فوراً في صفحة <code>providers.html</code> والخريطة <code>map.html</code>.</li>
+</ol>
+<h4 id="الطريقة-الثانية-عبر-ملف-الأكواد-assetsjsdatajs">الطريقة الثانية: عبر ملف الأكواد <code>assets/js/data.js</code></h4>
+<p>أضف كائن المزود داخل مصفوفة <code>PROVIDERS</code>:</p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">id</span>: <span class="hljs-number">11</span>,
+  <span class="hljs-attr">slug</span>: <span class="hljs-string">&quot;cairo-survey-consult&quot;</span>,
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;مكتب القاهرة للاستشارات المساحية&quot;</span>,
+  <span class="hljs-attr">nameEn</span>: <span class="hljs-string">&quot;Cairo Survey Consult&quot;</span>,
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;مكتب مساحة&quot;</span>,
+  <span class="hljs-attr">gov</span>: <span class="hljs-string">&quot;القاهرة&quot;</span>,
+  <span class="hljs-attr">city</span>: <span class="hljs-string">&quot;التجمع الخامس&quot;</span>,
+  <span class="hljs-attr">badge</span>: <span class="hljs-string">&quot;موثّق&quot;</span>,
+  <span class="hljs-attr">plan</span>: <span class="hljs-string">&quot;pro&quot;</span>,
+  <span class="hljs-attr">rating</span>: <span class="hljs-number">4.9</span>,
+  <span class="hljs-attr">reviewsCount</span>: <span class="hljs-number">14</span>,
+  <span class="hljs-attr">phone</span>: <span class="hljs-string">&quot;01001234999&quot;</span>,
+  <span class="hljs-attr">wa</span>: <span class="hljs-string">&quot;201001234999&quot;</span>,
+  <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;info@cairo-survey.example&quot;</span>,
+  <span class="hljs-attr">lat</span>: <span class="hljs-number">30.0131</span>,
+  <span class="hljs-attr">lng</span>: <span class="hljs-number">31.4989</span>,
+  <span class="hljs-attr">img</span>: <span class="hljs-string">&quot;assets/img/office-cad-workstation.jpg&quot;</span>,
+  <span class="hljs-attr">services</span>: [<span class="hljs-string">&quot;رفع طوبوغرافي&quot;</span>, <span class="hljs-string">&quot;حساب كميات&quot;</span>, <span class="hljs-string">&quot;أعمال As-Built&quot;</span>, <span class="hljs-string">&quot;نظام BIM&quot;</span>],
+  <span class="hljs-attr">equipment</span>: [<span class="hljs-string">&quot;Total Station Leica TS16&quot;</span>, <span class="hljs-string">&quot;GNSS Trimble R12i&quot;</span>],
+  <span class="hljs-attr">verified</span>: <span class="hljs-literal">true</span>
+}
+</div></code></pre>
+<hr>
+<h3 id="ج-كيفية-إضافة-جهاز-مساحي-جديد-equipment">ج. كيفية إضافة جهاز مساحي جديد (Equipment)</h3>
+<h4 id="الطريقة-المباشرة-من-لوحة-تحكم-المزوّد-p-listingshtml">الطريقة المباشرة: من لوحة تحكم المزوّد (<code>p-listings.html</code>)</h4>
+<ol>
+<li>يفتح المزوّد صفحته الخاصة بالأجهزة.</li>
+<li>يضغط <strong>&quot;إضافة جهاز جديد&quot;</strong>.</li>
+<li>يحدد:
+<ul>
+<li><strong>عنوان الجهاز والموديل:</strong> (مثال: <code>Total Station Leica TS16 - 1&quot;</code>).</li>
+<li><strong>النوع والفئة:</strong> (Total Station / GNSS RTK / Digital Level / 3D Scanner).</li>
+<li><strong>نوع العرض:</strong> (للإيجار اليومي/الشهري، أو للبيع جديد/مستعمل).</li>
+<li><strong>السعر المقدر:</strong> (مثال: <code>1,200 ج.م / يوم</code>).</li>
+<li><strong>المحافظة وحالة الجهاز:</strong> (معاير حديثاً، مرفق الشهادة).</li>
+</ul>
+</li>
+<li>رفع صورة الجهاز، ثم الضغط على <strong>&quot;إرسال للاعتماد&quot;</strong>.</li>
+</ol>
+<hr>
+<h2 id="4-مصفوفة-الصلاحيات-وتدفق-المستخدمين-user-roles--flows">4. مصفوفة الصلاحيات وتدفق المستخدمين (User Roles &amp; Flows)</h2>
+<p>تعتمد المنصة محرك تدقيق للصلاحيات داخل ملف authGuard.js يفصل بين ثلاث فئات رئيسية من المستخدمين:</p>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+    class User {
+        +UUID id
+        +String email
+        +String role
+        +String status
+    }
+    class SuperAdmin {
+        +accessAdminPortal()
+        +approveProviders()
+        +manageWalletBalances()
+        +viewAuditLogs()
+    }
+    class Provider {
+        +UUID provider_id
+        +Decimal wallet_balance
+        +unlockLead(lead_id)
+        +manageListings()
+        +viewAnalytics()
+    }
+    class PublicClient {
+        +browseDirectory()
+        +filterEquipment()
+        +submitLeadRFQ()
+        +submitReview()
+    }
+    User <|-- SuperAdmin
+    User <|-- Provider
+    User <|-- PublicClient
+</div></code></pre>
+<h3 id="أ-تدفق-فتح-الليد-وخصم-الرصيد-pay-per-lead-flow">أ. تدفق فتح الليد وخصم الرصيد (Pay-Per-Lead Flow)</h3>
+<p>يعتبر هذا التدفق هو جوهر النموذج التجاري الرقمي لمنصة <strong>Survsta</strong>:</p>
+<ol>
+<li>يدخل العميل لطلب جهاز أو خدمة أو تسعير مشروع من صفحة مزود أو جهاز.</li>
+<li>ينشئ النظام سجلاً جديداً في جدول <code>leads</code> بحالة <code>status = 'new'</code> ويُخفي رقم هاتف وبريد العميل عن المزوّد وتظهر شارة <strong>&quot;طلب مغلق — يتطلب فتح&quot;</strong>.</li>
+<li>يدخل المزوّد إلى صفحة صندوق الطلبات (<code>p-leads.html</code>) ويضغط <strong>&quot;فتح بيانات التواصل&quot;</strong>.</li>
+<li>يستدعي النظام دالة الـ RPC السحابية المكتوبة بـ PostgreSQL: <code>open_lead_and_charge(p_lead_id)</code>.</li>
+<li>تقوم قاعدة البيانات بإجراء ذري مشفر:
+<ul>
+<li>التحقق من أن المزوّد هو صاحب الطلب أو Super Admin.</li>
+<li>التحقق من كفاية رصيد المحفظة (<code>wallet_balance &gt;= fee_amount</code>).</li>
+<li>خصم التكلفة من المحفظة وتوليد سجل مالي في جدول <code>wallet_transactions</code>.</li>
+<li>تحديث حالة الطلب إلى <code>opened</code> وإرجاع بيانات الهاتف والواتساب والبريد كاملة للمزوّد.</li>
+</ul>
+</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    autonumber
+    actor C as العميل (Client)
+    participant UI as منصة Survsta
+    participant DB as قاعدة بيانات Supabase
+    actor P as المزوّد (Provider)
+
+    C->>UI: إرسال طلب استئجار جهاز أو تسعير مشروع
+    UI->>DB: إنشاء سجل طلب جديد (Status: new, Phone: hidden)
+    DB-->>P: إشعار فوري بورود طلب جديد في المحافظة
+    P->>UI: فتح صفحة الطلبات (p-leads.html)
+    P->>UI: الضغط على "فتح بيانات التواصل"
+    UI->>DB: استدعاء open_lead_and_charge(lead_id)
+    Note over DB: التحقق الذري من الرصيد والخصم التلقائي
+    DB-->>UI: تأكيد الخصم وفتح بيانات الهاتف والبريد
+    UI-->>P: كشف بيانات العميل وأزرار الاتصال والواتساب الفوري
+</div></code></pre>
+<hr>
+<h2 id="5-دليل-النشر-والعمليات-والصيانة-deployment--devops-guide">5. دليل النشر والعمليات والصيانة (Deployment &amp; DevOps Guide)</h2>
+<h3 id="أ-متطلبات-بيئة-العمل-prerequisites">أ. متطلبات بيئة العمل (Prerequisites)</h3>
+<ul>
+<li><strong>Node.js:</strong> الإصدار 18.x أو أعلى (للتشغيل والـ CLI).</li>
+<li><strong>Git:</strong> الإصدار 2.30+ لإدارة المستودعات.</li>
+<li><strong>Vercel CLI:</strong> أداة النشر الرسمية (<code>npm i -g vercel</code> أو استخدام <code>npx vercel</code>).</li>
+<li><strong>حساب Supabase:</strong> مشروع مفعل مع إعداد قواعد الجداول.</li>
+</ul>
+<hr>
+<h3 id="ب-النشر-إلى-vercel-production-deployment-workflow">ب. النشر إلى Vercel (Production Deployment Workflow)</h3>
+<p>يتم النشر السحابي في منصة Survsta عبر خطوتين بسيطتين:</p>
+<h4 id="الخطوة-1-دفع-التحديثات-إلى-المستودع-الرئيسي-github">الخطوة 1: دفع التحديثات إلى المستودع الرئيسي (GitHub)</h4>
+<pre class="hljs"><code><div><span class="hljs-comment"># 1. التحقق من حالة الملفات</span>
+git status
+
+<span class="hljs-comment"># 2. إضافة كافة التعديلات</span>
+git add .
+
+<span class="hljs-comment"># 3. إنشاء Commit احترافي يوضح التغييرات</span>
+git commit -m <span class="hljs-string">&quot;feat: your descriptive commit message&quot;</span>
+
+<span class="hljs-comment"># 4. الرفع إلى فرع main</span>
+git push origin main
+</div></code></pre>
+<h4 id="الخطوة-2-النشر-المباشر-والفوري-للإنتاج-vercel-cli">الخطوة 2: النشر المباشر والفوري للإنتاج (Vercel CLI)</h4>
+<p>يتم تنفيذ الأمر التالي من المجلد الرئيسي للمشروع:</p>
+<pre class="hljs"><code><div>npx vercel --prod --<span class="hljs-built_in">yes</span>
+</div></code></pre>
+<ul>
+<li><strong>ملف التكوين:</strong> يقرأ Vercel تلقائياً ملف <code>vercel.json</code> الذي يحدد مجلد الإخراج:<pre class="hljs"><code><div><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;cleanUrls&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;outputDirectory&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;geo-station-site&quot;</span>
+<span class="hljs-punctuation">}</span>
+</div></code></pre>
+</li>
+<li>بمجرد انتهاء الرفع، تظهر رسالة التأكيد برابط النشر الرسمي وحالة <code>READY</code> (HTTP 200).</li>
+</ul>
+<hr>
+<h3 id="ج-تفعيل-الاتصال-بقاعدة-بيانات-supabase-production-activation">ج. تفعيل الاتصال بقاعدة بيانات Supabase (Production Activation)</h3>
+<p>عند الرغبة في الانتقال من وضع المحاكاة الداخلي (Offline/Demo Fallback) إلى بيئة الإنتاج السحابية الحية:</p>
+<ol>
+<li>افتح مشروعك في لوحة تحكم Supabase.</li>
+<li>انسخ <strong>Project URL</strong> و <strong>Project API anon / public key</strong> من: <code>Settings</code> &gt; <code>API</code></li>
+<li>افتح الملف: <code>assets/js/supabaseService.js</code>.</li>
+<li>ضع القيم في الأسطر 15 و 16:<pre class="hljs"><code><div><span class="hljs-keyword">const</span> <span class="hljs-variable constant_">SUPABASE_URL</span> = <span class="hljs-string">&quot;https://your-project-id.supabase.co&quot;</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">SUPABASE_ANON_KEY</span> = <span class="hljs-string">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&quot;</span>;
+</div></code></pre>
+</li>
+<li>افتح محرر SQL في Supabase والصق محتويات الملف <code>supabase_rls_and_triggers.sql</code> ونفذ الاستعلام لتجهيز الجداول وسياسات الـ RLS ودوال المحفظة بنقرة واحدة.</li>
+</ol>
+<hr>
+<h3 id="د-إعداد-النطاق-المخصص-custom-domain-setup">د. إعداد النطاق المخصص (Custom Domain Setup)</h3>
+<p>لربط منصة Survsta بنطاق رسمي (مثل <code>survsta.com</code> أو <code>app.survsta.com</code>):</p>
+<ol>
+<li>في لوحة تحكم Vercel: ادخل إلى المشروع &gt; <code>Settings</code> &gt; <code>Domains</code>.</li>
+<li>أدخل اسم النطاق <code>survsta.com</code> و <code>www.survsta.com</code>.</li>
+<li>قم بتحديث سجلات الـ DNS لدى مزود النطاق (Cloudflare / GoDaddy / Namecheap):
+<ul>
+<li><strong>A Record:</strong> <code>@</code> يوجه إلى <code>76.76.21.21</code></li>
+<li><strong>CNAME Record:</strong> <code>www</code> يوجه إلى <code>cname.vercel-dns.com</code></li>
+</ul>
+</li>
+<li>يقوم Vercel تلقائياً بإصدار وتجديد شهادة الأمان SSL/TLS المجانية عبر Let's Encrypt.</li>
+</ol>
+<hr>
+<h3 id="هـ-دليل-استكشاف-الأعطال-الشائعة-وحلها-troubleshooting-runbook">هـ. دليل استكشاف الأعطال الشائعة وحلها (Troubleshooting Runbook)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">العَرَض / المشكلة</th>
+<th style="text-align:left">السبب المحتمل</th>
+<th style="text-align:left">الحل العلاجي السريع</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>عدم ظهور التنسيقات الحديثة في المتصفح</strong></td>
+<td style="text-align:left">احتفاظ المتصفح بذاكرة التخزين المؤقت (Cache)</td>
+<td style="text-align:left">تم اعتماد Cache Buster (<code>?v=2.3</code>). إذا استمرت المشكلة، اضغط Ctrl + Shift + R للتحديث الإجباري</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>ظهور شارة Fallback Mode في وحدة التحكم (Console)</strong></td>
+<td style="text-align:left">عدم تعيين مفاتيح Supabase في supabaseService.js</td>
+<td style="text-align:left">النظام مصمم للعمل بسلاسة عبر LocalStorage افتراضياً. أضف المفاتيح السحابية لتفعيل المزامنة المباشرة</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>إعادة توجيه مفاجئة إلى صفحة الدخول (login.html)</strong></td>
+<td style="text-align:left">محاولة الدخول إلى صفحة p-<em>.html أو a-</em>.html بعد تسجيل خروج صريح</td>
+<td style="text-align:left">سجل الدخول بالحساب التجريبي أو أنشئ حساباً بصلاحية provider أو admin</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>عدم ظهور الخريطة في map.html</strong></td>
+<td style="text-align:left">بطء استجابة خوادم OpenStreetMap للـ Tiles</td>
+<td style="text-align:left">تأكد من الاتصال بالإنترنت، حيث يتم استدعاء مكتبة Leaflet وسيرفر البلاطات الجغرافية من CDN موثوق</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<blockquote>
+<p><strong>ملاحظة سرية ومسؤولية قانونية:</strong><br>
+هذا الدليل الفني مخصص لفرق العمليات الهندسية والإدارة التقنية لمنصة Survsta. يمنع مشاركة مفاتيح قواعد البيانات الحساسة أو بيانات الخدمة المشفرة خارج القنوات الآمنة للمنصة.</p>
+</blockquote>
+
+</body>
+</html>
