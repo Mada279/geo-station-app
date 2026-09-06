@@ -112,12 +112,18 @@ const SEED_USERS = [
 ];
 
 const SEED_MEDIA = [
-  {id:1, name:"مكتب وفريق GIS", file:"assets/img/office-gis-team.jpg", type:"صورة", usedIn:"الهيرو، ملف مزوّد", size:"—", date:"2026-06-01"},
-  {id:2, name:"فريق ميداني — Total Station", file:"assets/img/team-total-station.jpg", type:"صورة", usedIn:"دلتا جيوماتكس، الخدمات", size:"—", date:"2026-06-01"},
-  {id:3, name:"جهاز Total Station في الموقع", file:"assets/img/total-station-field.jpg", type:"صورة", usedIn:"سوق الأجهزة", size:"—", date:"2026-06-01"},
-  {id:4, name:"GNSS في موقع إنشاءات", file:"assets/img/gnss-construction.jpg", type:"صورة", usedIn:"سوق الأجهزة", size:"—", date:"2026-06-01"},
-  {id:5, name:"GNSS مع تابلت ميداني", file:"assets/img/gnss-tablet.jpg", type:"صورة", usedIn:"الخدمات، Academy", size:"—", date:"2026-06-01"},
-  {id:6, name:"أجهزة مساحة — صورة منتج", file:"assets/img/instruments-product.jpg", type:"صورة", usedIn:"مراكز المعايرة", size:"—", date:"2026-06-01"}
+  {id:1, name:"مكتب النخبة للاستشارات المساحية", file:"assets/img/hero-engineering-office.jpg", type:"صورة", usedIn:"الهيرو الرئيسي، ملف النخبة، عن المنصة", size:"1.2 MB", date:"2026-06-01"},
+  {id:2, name:"محطة CAD وأعمال الخرائط", file:"assets/img/office-cad-workstation.jpg", type:"صورة", usedIn:"الدورات، اتصل بنا، لوحة التحكم", size:"980 KB", date:"2026-06-01"},
+  {id:3, name:"مكتب تخطيط وهندسة مساحية", file:"assets/img/office-survey-team.jpg", type:"صورة", usedIn:"دلتا جيوماتكس، الوظائف", size:"1.1 MB", date:"2026-06-01"},
+  {id:4, name:"مركز تحليل وتخطيط GIS", file:"assets/img/gis-planning-center.jpg", type:"صورة", usedIn:"خدمات GIS، دورات QGIS", size:"1.4 MB", date:"2026-06-01"},
+  {id:5, name:"مختبر معايرة أجهزة المساحة (كوليماتور)", file:"assets/img/calibration-lab-collimators.jpg", type:"صورة", usedIn:"مركز الدقة، خدمات المعايرة", size:"850 KB", date:"2026-06-01"},
+  {id:6, name:"فحص إلكتروني ومعايرة دقيقة", file:"assets/img/calibration-bench-setup.jpg", type:"صورة", usedIn:"مركز الميزان للمعايرة", size:"780 KB", date:"2026-06-01"},
+  {id:7, name:"Leica TS16 Robotic Total Station", file:"assets/img/leica-ts16-product.jpg", type:"صورة", usedIn:"سوق الأجهزة — إيجار/بيع", size:"920 KB", date:"2026-06-01"},
+  {id:8, name:"Topcon GT-1200 روبوتيك", file:"assets/img/topcon-gt1200-product.jpg", type:"صورة", usedIn:"سوق الأجهزة — توريد", size:"890 KB", date:"2026-06-01"},
+  {id:9, name:"Stonex S900 GNSS RTK Set", file:"assets/img/stonex-s900-product.jpg", type:"صورة", usedIn:"سوق الأجهزة — بيع وإيجار", size:"760 KB", date:"2026-06-01"},
+  {id:10, name:"استوديو أجهزة ومعدات المساحة", file:"assets/img/survey-instruments-studio.jpg", type:"صورة", usedIn:"موردو الأجهزة، النيل للأجهزة", size:"1.3 MB", date:"2026-06-01"},
+  {id:11, name:"طائرة مسح جوي وأورثوفوتو", file:"assets/img/drone-orthophoto-site.jpg", type:"صورة", usedIn:"DJI M300، خدمات المسح الجوي", size:"1.5 MB", date:"2026-06-01"},
+  {id:12, name:"محطة رصد Total Station بموقع إنشاءات", file:"assets/img/totalstation-construction-crane.jpg", type:"صورة", usedIn:"الخدمات، كيف تعمل المنصة", size:"1.1 MB", date:"2026-06-01"}
 ];
 
 /* ---------- download helper ---------- */
