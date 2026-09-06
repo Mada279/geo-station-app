@@ -138,9 +138,23 @@ function buildFooter(){
 <div class="toast" id="toast"></div>`;
 }
 
+function populateDropdowns(){
+  if (typeof GOVS === "undefined") return;
+  $$("select").forEach(sel => {
+    const id = sel.id || "";
+    if((id.includes("gov") || sel.name === "gov") && sel.options.length <= 1){
+      const currentVal = sel.value;
+      const placeholder = sel.options[0] ? sel.options[0].textContent : "كل المحافظات";
+      sel.innerHTML = `<option value="">${placeholder}</option>` + GOVS.map(g => `<option value="${g}">${g}</option>`).join("");
+      if(currentVal) sel.value = currentVal;
+    }
+  });
+}
+
 function mountShell(active){
   document.body.insertAdjacentHTML("afterbegin", buildHeader(active));
   document.body.insertAdjacentHTML("beforeend", buildFooter());
+  populateDropdowns();
   updateNavbarAuth();
 }
 
@@ -152,8 +166,12 @@ async function updateNavbarAuth(){
   let user = null;
   if (typeof window.AuthGuard !== "undefined" && window.AuthGuard.getUser) {
     user = await window.AuthGuard.getUser();
-  } else if (localStorage.getItem("GS_AUTH_USER") && localStorage.getItem("GS_LOGGED_OUT") !== "1") {
-    try { user = JSON.parse(localStorage.getItem("GS_AUTH_USER")); } catch(e){}
+  } else {
+    const raw = localStorage.getItem("SURVSTA_AUTH_USER") || localStorage.getItem("GS_AUTH_USER");
+    const loggedOut = localStorage.getItem("SURVSTA_LOGGED_OUT") === "1" || localStorage.getItem("GS_LOGGED_OUT") === "1";
+    if (raw && !loggedOut) {
+      try { user = JSON.parse(raw); } catch(e){}
+    }
   }
 
   if (user) {
@@ -161,16 +179,18 @@ async function updateNavbarAuth(){
     const dashHref = isAdm ? "a-dashboard.html" : "p-dashboard.html";
     const dashLabel = isAdm ? "لوحة الإدارة" : "لوحة التحكم";
 
+    const logoutAction = "if(window.AuthGuard){AuthGuard.logout()}else{localStorage.removeItem('SURVSTA_AUTH_USER');localStorage.removeItem('GS_AUTH_USER');localStorage.setItem('SURVSTA_LOGGED_OUT','1');location.reload()}";
+
     if (utilEl) {
       utilEl.innerHTML = `
         <a href="${dashHref}" style="color:var(--cyan);font-weight:700">👤 ${user.name || "حسابي"}</a>
-        <a href="javascript:void(0)" onclick="if(window.AuthGuard){AuthGuard.logout()}else{localStorage.removeItem('GS_AUTH_USER');location.reload()}" style="color:#f87171;margin-inline-start:10px">🚪 خروج</a>
+        <a href="javascript:void(0)" onclick="${logoutAction}" style="color:#f87171;margin-inline-start:10px">🚪 خروج</a>
       `;
     }
     if (ctaEl) {
       ctaEl.innerHTML = `
         <a href="${dashHref}" class="btn btn-ghost btn-sm" style="border-color:var(--cyan);color:var(--cyan)">📊 ${dashLabel}</a>
-        <button class="btn btn-soft btn-sm" onclick="if(window.AuthGuard){AuthGuard.logout()}else{localStorage.removeItem('GS_AUTH_USER');location.reload()}" style="color:#ef4444" title="تسجيل الخروج">خروج</button>
+        <button class="btn btn-soft btn-sm" onclick="${logoutAction}" style="color:#ef4444" title="تسجيل الخروج">خروج</button>
       `;
     }
   }

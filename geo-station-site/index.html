@@ -150,12 +150,44 @@ $("#homeJobs").innerHTML = JOBS.slice(0,3).map(jobCard).join("");
 $("#trust").innerHTML = trustBand();
 $("#cta").innerHTML = ctaBand();
 let TARGET="providers.html";
-$$("#stabs button").forEach(b=>b.onclick=()=>{$$("#stabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");TARGET=b.dataset.target});
+
+function updateHomeCatOptions(target){
+  const catEl = $("#h-cat");
+  if(!catEl) return;
+  if(target === "equipment.html"){
+    catEl.innerHTML = `<option value="">كل فئات الأجهزة</option>` + EQUIP_CATS.map(c=>`<option value="${c}">${c}</option>`).join("");
+  } else if(target === "services.html"){
+    catEl.innerHTML = `<option value="">كل الخدمات</option>` + SERVICES.map(s=>`<option value="${s.t}">${s.t}</option>`).join("");
+  } else if(target === "jobs.html"){
+    catEl.innerHTML = `<option value="">كل أنواع الوظائف</option>` + ["دوام كامل", "دوام جزئي", "عقد مشروع", "تدريب"].map(j=>`<option value="${j}">${j}</option>`).join("");
+  } else if(target === "academy.html"){
+    catEl.innerHTML = `<option value="">كل الدورات</option>` + COURSES.map(c=>`<option value="${c.t}">${c.t}</option>`).join("");
+  } else {
+    catEl.innerHTML = `<option value="">كل الفئات</option>` + PROVIDER_TYPES.map(t=>`<option value="${t.slug}">${t.name}</option>`).join("");
+  }
+}
+
+$$("#stabs button").forEach(b=>b.onclick=()=>{
+  $$("#stabs button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  TARGET=b.dataset.target;
+  updateHomeCatOptions(TARGET);
+});
+
 function runHomeSearch(){
   const p=new URLSearchParams();
-  if($("#h-q").value.trim())p.set("q",$("#h-q").value.trim());
-  if($("#h-gov").value)p.set("gov",$("#h-gov").value);
-  if($("#h-cat").value && TARGET==="providers.html")p.set("type",$("#h-cat").value);
+  const q=$("#h-q").value.trim();
+  const g=$("#h-gov").value;
+  const c=$("#h-cat").value;
+  if(q) p.set("q", q);
+  if(g) p.set("gov", g);
+  if(c){
+    if(TARGET==="providers.html") p.set("type", c);
+    else if(TARGET==="equipment.html") p.set("cat", c);
+    else if(TARGET==="jobs.html") p.set("type", c);
+    else if(TARGET==="services.html") p.set("q", c);
+    else p.set("cat", c);
+  }
   location.href=TARGET+(p.toString()?"?"+p:"");
 }
 

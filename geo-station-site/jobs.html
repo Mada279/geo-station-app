@@ -41,7 +41,9 @@
 mountShell("jobs.html");
 
 $("#j-gov").innerHTML += GOVS.map(g=>`<option>${g}</option>`).join("");
-if(qs("gov")) $("#j-gov").value=qs("gov");
+if(qs("gov"))  $("#j-gov").value=qs("gov");
+if(qs("type")) $("#j-type").value=qs("type");
+if(qs("q"))    $("#j-q").value=qs("q");
 function drawJ(){
   const q=$("#j-q").value.trim(), g=$("#j-gov").value, t=$("#j-type").value;
   const r=JOBS.filter(j=>(!q||j.t.includes(q)||j.company.includes(q))&&(!g||j.gov===g)&&(!t||j.type===t));

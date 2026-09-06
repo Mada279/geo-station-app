@@ -51,50 +51,62 @@ var PROVIDER_TYPES = [
 var PROVIDERS = [
   {id:1, slug:"elite-survey", name:"مكتب النخبة للمساحة", type:"مكتب مساحة", cat:"offices",
    gov:"الإسكندرية", city:"سموحة", rate:4.8, reviews:64, since:2012, staff:"12 موظف", resp:"خلال ساعة",
-   ver:["ملف موثّق","نشاط موثّق"], featured:true, img:IMG.heroOffice, x:64, y:28,
+   ver:["ملف موثّق","نشاط موثّق"], featured:true, img:IMG.heroOffice, x:64, y:28, lat:31.2156, lng:29.9553,
    svc:["رفع مساحي طبوغرافي","تقسيم وفرز أراضي","حصر كميات","إعداد خرائط GIS"],
    about:"مكتب متخصص في أعمال المساحة الأرضية والتقسيم وأعمال GIS، يخدم الإسكندرية والمحافظات المجاورة بفريق ميداني وأجهزة Leica وTopcon."},
   {id:2, slug:"delta-geomatics", name:"دلتا جيوماتكس", type:"شركة مساحة", cat:"companies",
    gov:"القاهرة", city:"مدينة نصر", rate:4.6, reviews:118, since:2008, staff:"38 موظف", resp:"خلال 3 ساعات",
-   ver:["ملف موثّق","نشاط موثّق","معدات موثّقة"], featured:true, img:IMG.officeTeam, x:36, y:50,
+   ver:["ملف موثّق","نشاط موثّق","معدات موثّقة"], featured:true, img:IMG.officeTeam, x:36, y:50, lat:30.0626, lng:31.3468,
    svc:["مسح ليزري ثلاثي الأبعاد","As-Built Documentation","مسح بالطائرات بدون طيار","نمذجة BIM"],
    about:"شركة جيوماتكس متكاملة تعمل في مشروعات البنية التحتية والمنشآت الصناعية، بقدرات Reality Capture ومسح جوي معتمد."},
   {id:3, slug:"nile-instruments", name:"النيل لأجهزة المساحة", type:"مورد أجهزة", cat:"suppliers",
    gov:"القاهرة", city:"وسط البلد", rate:4.4, reviews:87, since:2015, staff:"9 موظفين", resp:"خلال يوم",
-   ver:["ملف موثّق"], featured:false, img:IMG.productStudio, x:43, y:42,
+   ver:["ملف موثّق"], featured:false, img:IMG.productStudio, x:43, y:42, lat:30.0444, lng:31.2357,
    svc:["بيع أجهزة جديدة","تأجير قصير وطويل المدى","قطع غيار وملحقات","دعم فني"],
    about:"مورد معتمد لأجهزة Total Station وGNSS والملحقات، مع خدمات تأجير مرنة ودعم فني للعملاء داخل القاهرة والجيزة."},
   {id:4, slug:"precision-cal", name:"مركز الدقة للمعايرة", type:"مركز معايرة", cat:"calibration",
    gov:"الجيزة", city:"الهرم", rate:4.9, reviews:39, since:2017, staff:"6 فنيين", resp:"خلال يوم",
-   ver:["ملف موثّق","نشاط موثّق"], featured:false, img:IMG.calCollimators, x:27, y:64,
+   ver:["ملف موثّق","نشاط موثّق"], featured:false, img:IMG.calCollimators, x:27, y:64, lat:29.9972, lng:31.1518,
    svc:["معايرة Total Station","معايرة أجهزة الميزان","صيانة وإصلاح","شهادات فنية"],
    about:"مركز فني متخصص في معايرة وصيانة أجهزة المساحة وفق إجراءات موثقة، مع إصدار تقرير فني لكل جهاز."},
   {id:5, slug:"geo-academy-eg", name:"جيو أكاديمي مصر", type:"مركز تدريب", cat:"training",
    gov:"الإسكندرية", city:"العصافرة", rate:4.7, reviews:52, since:2019, staff:"7 مدربين", resp:"خلال ساعتين",
-   ver:["ملف موثّق"], featured:false, img:IMG.calLab, x:72, y:20,
+   ver:["ملف موثّق"], featured:false, img:IMG.calLab, x:72, y:20, lat:31.2721, lng:30.0074,
    svc:["Civil 3D","AutoCAD للمساحين","GNSS الميداني","QGIS وأساسيات GIS"],
    about:"مركز تدريب تطبيقي يقدم برامج ميدانية ومعملية للمساحين وحديثي التخرج، بتدريب عملي على أجهزة حقيقية."},
   {id:6, slug:"west-survey", name:"الغرب للخدمات المساحية", type:"مكتب مساحة", cat:"offices",
    gov:"البحيرة", city:"دمنهور", rate:4.2, reviews:23, since:2020, staff:"5 موظفين", resp:"خلال يومين",
-   ver:["ملف موثّق"], featured:false, img:IMG.gnssEarthworks, x:55, y:38,
+   ver:["ملف موثّق"], featured:false, img:IMG.gnssEarthworks, x:55, y:38, lat:31.0364, lng:30.4694,
    svc:["رفع مساحي","حصر كميات","توقيع محاور"],
    about:"مكتب مساحة يخدم محافظة البحيرة والمناطق الزراعية المحيطة، بخبرة في أعمال التقسيم والرفع الزراعي."},
   {id:7, slug:"horizon-geo", name:"هورايزون جيو للمساحة", type:"شركة مساحة", cat:"companies",
    gov:"الجيزة", city:"6 أكتوبر", rate:4.5, reviews:71, since:2014, staff:"24 موظف", resp:"خلال 4 ساعات",
-   ver:["ملف موثّق","نشاط موثّق"], featured:false, img:IMG.tsHighway, x:22, y:56,
+   ver:["ملف موثّق","نشاط موثّق"], featured:false, img:IMG.tsHighway, x:22, y:56, lat:29.9723, lng:30.9419,
    svc:["مسح طرق ومحاور","مراقبة هبوط المنشآت","Drone Survey","GIS"],
    about:"شركة تعمل في مشروعات الطرق والمجتمعات العمرانية الجديدة، مع فرق مراقبة دورية للمنشآت."},
   {id:8, slug:"alex-instruments", name:"الإسكندرية للأجهزة الهندسية", type:"مورد أجهزة", cat:"suppliers",
    gov:"الإسكندرية", city:"المنشية", rate:4.3, reviews:44, since:2011, staff:"11 موظف", resp:"خلال يوم",
-   ver:["ملف موثّق","معدات موثّقة"], featured:false, img:IMG.productMontage, x:68, y:34,
+   ver:["ملف موثّق","معدات موثّقة"], featured:false, img:IMG.productMontage, x:68, y:34, lat:31.2001, lng:29.8972,
    svc:["بيع وتأجير","صيانة","ملحقات وحوامل","استيراد حسب الطلب"],
    about:"مورد أجهزة ومعدات مساحة في الإسكندرية مع مخزون تأجير دائم وخدمة توصيل داخل المحافظة."},
   {id:9, slug:"mizan-cal", name:"مركز الميزان للمعايرة والصيانة", type:"مركز معايرة", cat:"calibration",
    gov:"القاهرة", city:"العباسية", rate:4.6, reviews:31, since:2018, staff:"8 فنيين", resp:"خلال يومين",
-   ver:["ملف موثّق"], featured:false, img:IMG.calBench, x:47, y:47,
+   ver:["ملف موثّق"], featured:false, img:IMG.calBench, x:47, y:47, lat:30.0673, lng:31.2828,
    svc:["معايرة شاملة","إصلاح لوحات إلكترونية","ضبط دقة الزوايا","عقود صيانة سنوية"],
    about:"مركز صيانة متقدم يتعامل مع الأعطال الإلكترونية والميكانيكية لأجهزة المساحة مع عقود صيانة دورية."}
 ];
+
+function providersToGeoJSON(list = PROVIDERS){
+  return {
+    type: "FeatureCollection",
+    features: list.map(p=>({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [p.lng, p.lat] },
+      properties: { id: p.id, name: p.name, type: p.type, gov: p.gov, city: p.city, rate: p.rate, slug: p.slug, img: p.img }
+    }))
+  };
+}
+if(typeof window !== "undefined") window.providersToGeoJSON = providersToGeoJSON;
 
 var EQUIP_CATS = ["Total Station","GNSS / RTK","Laser Scanner","Drone","أجهزة ميزان","ملحقات وقطع غيار"];
 var BRANDS = ["Leica","Topcon","Trimble","Stonex","Nikon","Spectra","FARO","DJI","South"];

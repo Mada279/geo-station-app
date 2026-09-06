@@ -8,6 +8,8 @@
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
 <!-- Survsta Platform — All Rights Reserved -->
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
 <main id="main">
@@ -40,15 +42,113 @@ mountShell("map.html");
 
 $("#f-cat").innerHTML += PROVIDER_TYPES.map(t=>`<option value="${t.slug}">${t.name}</option>`).join("");
 $("#f-gov").innerHTML += GOVS.map(g=>`<option>${g}</option>`).join("");
-function clearF(){["f-q","f-cat","f-gov"].forEach(i=>$("#"+i).value="");draw()}
-function nearMe(){$("#f-gov").value="الإسكندرية";draw();toast("📍 تم تفعيل البحث بالقرب منك — نطاق "+$("#f-rad").value)}
+
+let leafletMap = null;
+let geoJsonLayer = null;
+let userMarker = null;
+
+function initLeafletMap(){
+  if(typeof L === "undefined") return null;
+  if(leafletMap) return leafletMap;
+  const container = document.getElementById("map");
+  if(!container) return null;
+  leafletMap = L.map("map", { scrollWheelZoom: false }).setView([30.5, 31.0], 8);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(leafletMap);
+  return leafletMap;
+}
+
+function clearF(){
+  ["f-q","f-cat","f-gov"].forEach(i=>$("#"+i).value="");
+  if(userMarker && leafletMap){ leafletMap.removeLayer(userMarker); userMarker=null; }
+  draw();
+}
+
+function nearMe(){
+  if (navigator.geolocation) {
+    toast("📍 جارٍ تحديد موقعك الجغرافي...");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        toast("📍 تم تحديد موقعك الجغرافي بنجاح");
+        const lMap = initLeafletMap();
+        if (lMap) {
+          const radKm = parseInt($("#f-rad").value) || 25;
+          lMap.setView([latitude, longitude], 12);
+          if (userMarker) lMap.removeLayer(userMarker);
+          userMarker = L.circle([latitude, longitude], {
+            color: '#00d2ff',
+            fillColor: '#00d2ff',
+            fillOpacity: 0.18,
+            radius: radKm * 1000
+          }).addTo(lMap);
+          userMarker.bindPopup("<b>📍 موقعك الحالي</b><br><small>نطاق البحث: " + radKm + " كم</small>").openPopup();
+        }
+      },
+      (err) => {
+        console.warn("Geolocation fallback:", err);
+        $("#f-gov").value = "الإسكندرية";
+        draw();
+        toast("📍 تعذر تحديد موقعك بدقة — تم تعيين المحافظة: الإسكندرية (" + $("#f-rad").value + ")");
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  } else {
+    $("#f-gov").value = "الإسكندرية";
+    draw();
+    toast("📍 خاصية تحديد الموقع غير مدعومة");
+  }
+}
+
 function draw(){
-  const r=filterProviders(readFilters());
-  $("#map").innerHTML = `<div class="mapbox">
-    ${r.map(p=>`<button class="pin" style="top:${p.y}%;inset-inline-end:${p.x}%" onclick="location.href='provider.html?slug=${p.slug}'">${p.name.split(" ").slice(0,2).join(" ")} • ${p.rate}★</button>`).join("")}
-    <div class="maplegend"><b>${r.length}</b> جهة داخل النطاق<br><span class="muted">الترتيب: صلة + مسافة + توثيق</span></div></div>`;
+  const r = filterProviders(readFilters());
+  const lMap = initLeafletMap();
+  
+  if (lMap) {
+    if (geoJsonLayer) lMap.removeLayer(geoJsonLayer);
+    const geojson = window.providersToGeoJSON ? window.providersToGeoJSON(r) : {type:"FeatureCollection", features:[]};
+    
+    geoJsonLayer = L.geoJSON(geojson, {
+      pointToLayer: (feature, latlng) => {
+        const p = feature.properties;
+        const icon = L.divIcon({
+          className: "custom-leaflet-marker",
+          html: `<button class="custom-map-marker">${p.name.split(" ").slice(0,2).join(" ")} • ${p.rate}★</button>`,
+          iconSize: [120, 30],
+          iconAnchor: [60, 15]
+        });
+        return L.marker(latlng, { icon: icon });
+      },
+      onEachFeature: (feature, layer) => {
+        const p = feature.properties;
+        layer.bindPopup(`
+          <div class="map-popup-card">
+            <h4>${p.name}</h4>
+            <p>📍 ${p.gov} — ${p.city} • ${p.rate}★ (${p.reviews} تقييم)</p>
+            <span class="chip">${p.type}</span>
+            <a href="provider.html?slug=${p.slug}" class="btn btn-pri">عرض تفاصيل الجهة ←</a>
+          </div>
+        `);
+      }
+    }).addTo(lMap);
+
+    if (r.length > 0 && !userMarker) {
+      const bounds = geoJsonLayer.getBounds();
+      if (bounds.isValid()) {
+        lMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+      }
+    }
+  } else {
+    $("#map").innerHTML = `<div class="mapbox">
+      ${r.map(p=>`<button class="pin" style="top:${p.y}%;inset-inline-end:${p.x}%" onclick="location.href='provider.html?slug=${p.slug}'">${p.name.split(" ").slice(0,2).join(" ")} • ${p.rate}★</button>`).join("")}
+      <div class="maplegend"><b>${r.length}</b> جهة داخل النطاق<br><span class="muted">الترتيب: صلة + مسافة + توثيق</span></div></div>`;
+  }
+  
   $("#list").innerHTML = r.slice(0,6).map(providerCard).join("") || `<div class="empty">لا توجد جهات في هذا النطاق.</div>`;
 }
+
 ["f-q","f-cat","f-gov","f-rad"].forEach(i=>{$("#"+i).addEventListener("input",draw);$("#"+i).addEventListener("change",draw)});
 draw(); $("#cta").innerHTML=ctaBand();
 </script>

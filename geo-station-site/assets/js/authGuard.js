@@ -9,8 +9,10 @@
 (function(global) {
   "use strict";
 
-  const STORAGE_KEY_USER = "GS_AUTH_USER";
-  const STORAGE_KEY_LOGGED_OUT = "GS_LOGGED_OUT";
+  const STORAGE_KEY_USER = "SURVSTA_AUTH_USER";
+  const LEGACY_STORAGE_KEY_USER = "GS_AUTH_USER";
+  const STORAGE_KEY_LOGGED_OUT = "SURVSTA_LOGGED_OUT";
+  const LEGACY_STORAGE_KEY_LOGGED_OUT = "GS_LOGGED_OUT";
 
   const DEFAULT_ADMIN = {
     id: "admin-demo-1",
@@ -59,7 +61,9 @@
               av: (meta.full_name || u.email).substring(0, 2).toUpperCase()
             };
             localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userObj));
+            localStorage.setItem(LEGACY_STORAGE_KEY_USER, JSON.stringify(userObj));
             localStorage.removeItem(STORAGE_KEY_LOGGED_OUT);
+            localStorage.removeItem(LEGACY_STORAGE_KEY_LOGGED_OUT);
             return userObj;
           }
         } catch (e) {
@@ -68,16 +72,17 @@
       }
 
       // 2. وضع المحاكاة / التخزين المحلي (Fallback Mode)
-      if (localStorage.getItem(STORAGE_KEY_LOGGED_OUT) === "1") {
+      if (localStorage.getItem(STORAGE_KEY_LOGGED_OUT) === "1" || localStorage.getItem(LEGACY_STORAGE_KEY_LOGGED_OUT) === "1") {
         return null;
       }
 
-      const cached = localStorage.getItem(STORAGE_KEY_USER);
+      const cached = localStorage.getItem(STORAGE_KEY_USER) || localStorage.getItem(LEGACY_STORAGE_KEY_USER);
       if (cached) {
         try {
           return JSON.parse(cached);
         } catch (e) {
           localStorage.removeItem(STORAGE_KEY_USER);
+          localStorage.removeItem(LEGACY_STORAGE_KEY_USER);
         }
       }
 
@@ -208,7 +213,9 @@
       }
 
       localStorage.removeItem(STORAGE_KEY_USER);
+      localStorage.removeItem(LEGACY_STORAGE_KEY_USER);
       localStorage.setItem(STORAGE_KEY_LOGGED_OUT, "1");
+      localStorage.setItem(LEGACY_STORAGE_KEY_LOGGED_OUT, "1");
 
       const page = this.getCurrentPage();
       if (page.startsWith("p-") || page.startsWith("a-")) {

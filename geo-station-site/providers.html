@@ -8,6 +8,8 @@
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
 <!-- Survsta Platform — All Rights Reserved -->
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
 <main id="main">
@@ -62,24 +64,91 @@ $("#f-gov").innerHTML += GOVS.map(g=>`<option>${g}</option>`).join("");
 if(qs("type")) $("#f-cat").value=qs("type");
 if(qs("gov"))  $("#f-gov").value=qs("gov");
 if(qs("q"))    $("#f-q").value=qs("q");
+
 let VIEW="list";
-function setView(v){VIEW=v;$("#v-list").classList.toggle("on",v==="list");$("#v-map").classList.toggle("on",v==="map");draw()}
-function clearF(){["f-q","f-gov","f-cat"].forEach(i=>$("#"+i).value="");$("#f-ver").checked=false;$("#f-top").checked=false;draw()}
+let provLeafletMap = null;
+
+function setView(v){
+  VIEW=v;
+  $("#v-list").classList.toggle("on",v==="list");
+  $("#v-map").classList.toggle("on",v==="map");
+  if(v==="list" && provLeafletMap){
+    provLeafletMap.remove();
+    provLeafletMap = null;
+  }
+  draw();
+}
+
+function clearF(){
+  ["f-q","f-gov","f-cat"].forEach(i=>$("#"+i).value="");
+  $("#f-ver").checked=false;
+  $("#f-top").checked=false;
+  draw();
+}
+
 function draw(){
   const f=readFilters(), r=filterProviders(f);
   const t=PROVIDER_TYPES.find(x=>x.slug===f.cat);
   $("#ttl").textContent = t?t.name:"كل المكاتب والشركات والجهات";
   $("#crumb").textContent = "الرئيسية / الدليل"+(t?" / "+t.name:"");
   $("#count").innerHTML = `<b>${r.length}</b> نتيجة${f.gov?" في "+f.gov:""}`;
-  if(!r.length){ $("#out").innerHTML=`<div class="empty"><h3>لا توجد نتائج مطابقة</h3>
-    <p>جرّب توسيع النطاق الجغرافي أو إزالة بعض الفلاتر — أو دع المزوّدين يصلوك.</p>
-    <button class="btn btn-org" onclick="openModal('need')">أضف احتياجك</button></div>`; $("#pager").innerHTML=""; return }
+  if(!r.length){
+    if(provLeafletMap){ provLeafletMap.remove(); provLeafletMap = null; }
+    $("#out").innerHTML=`<div class="empty"><h3>لا توجد نتائج مطابقة</h3>
+      <p>جرّب توسيع النطاق الجغرافي أو إزالة بعض الفلاتر — أو دع المزوّدين يصلوك.</p>
+      <button class="btn btn-org" onclick="openModal('need')">أضف احتياجك</button></div>`;
+    $("#pager").innerHTML="";
+    return;
+  }
   if(VIEW==="map"){
-    $("#out").innerHTML=`<div class="mapbox">${r.map(p=>`<button class="pin" style="top:${p.y}%;inset-inline-end:${p.x}%" onclick="location.href='provider.html?slug=${p.slug}'">${p.name.split(" ")[0]} • ${p.rate}★</button>`).join("")}
-      <div class="maplegend"><b>${r.length}</b> جهة داخل نطاق البحث<br><span class="muted">الترتيب: صلة + مسافة + توثيق</span></div></div>
+    $("#out").innerHTML=`<div id="prov-map" class="leaflet-map-view"></div>
       <div class="grid g3" style="margin-top:16px">${r.slice(0,3).map(providerCard).join("")}</div>`;
     $("#pager").innerHTML="";
+
+    if(typeof L !== "undefined"){
+      if(provLeafletMap) provLeafletMap.remove();
+      provLeafletMap = L.map("prov-map", { scrollWheelZoom: false }).setView([30.5, 31.0], 8);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(provLeafletMap);
+
+      const geojson = window.providersToGeoJSON ? window.providersToGeoJSON(r) : {type:"FeatureCollection", features:[]};
+      const geoLayer = L.geoJSON(geojson, {
+        pointToLayer: (feature, latlng) => {
+          const p = feature.properties;
+          const icon = L.divIcon({
+            className: "custom-leaflet-marker",
+            html: `<button class="custom-map-marker">${p.name.split(" ")[0]} • ${p.rate}★</button>`,
+            iconSize: [110, 28],
+            iconAnchor: [55, 14]
+          });
+          return L.marker(latlng, { icon: icon });
+        },
+        onEachFeature: (feature, layer) => {
+          const p = feature.properties;
+          layer.bindPopup(`
+            <div class="map-popup-card">
+              <h4>${p.name}</h4>
+              <p>📍 ${p.gov} — ${p.city} • ${p.rate}★</p>
+              <span class="chip">${p.type}</span>
+              <a href="provider.html?slug=${p.slug}" class="btn btn-pri">عرض التفاصيل ←</a>
+            </div>
+          `);
+        }
+      }).addTo(provLeafletMap);
+
+      const bounds = geoLayer.getBounds();
+      if(bounds.isValid()){
+        provLeafletMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+      }
+    } else {
+      $("#out").innerHTML=`<div class="mapbox">${r.map(p=>`<button class="pin" style="top:${p.y}%;inset-inline-end:${p.x}%" onclick="location.href='provider.html?slug=${p.slug}'">${p.name.split(" ")[0]} • ${p.rate}★</button>`).join("")}
+        <div class="maplegend"><b>${r.length}</b> جهة داخل نطاق البحث<br><span class="muted">الترتيب: صلة + مسافة + توثيق</span></div></div>
+        <div class="grid g3" style="margin-top:16px">${r.slice(0,3).map(providerCard).join("")}</div>`;
+    }
   } else {
+    if(provLeafletMap){ provLeafletMap.remove(); provLeafletMap = null; }
     $("#out").innerHTML=`<div class="grid g2">${r.map(providerCard).join("")}</div>`;
     $("#pager").innerHTML=`<button class="on" onclick="toast('أنت في الصفحة الأولى')" aria-current="page">1</button><button onclick="toast('نموذج عرض — صفحة واحدة من البيانات التجريبية')">2</button><button onclick="toast('نموذج عرض')">3</button><button onclick="toast('نموذج عرض')">›</button>`;
   }

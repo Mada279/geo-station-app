@@ -7,8 +7,9 @@
 (function(global){
 "use strict";
 
-const KEY = "GS_DB_v1";
-const SCHEMA_VERSION = 1;
+const KEY = "SURVSTA_DB_v2";
+const LEGACY_KEY = "GS_DB_v1";
+const SCHEMA_VERSION = 2;
 
 /* ---------- Dynamic Loader for Supabase Service Layer ---------- */
 if (typeof global.SupabaseService === "undefined" && typeof document !== "undefined") {
@@ -156,7 +157,7 @@ function nowISO(){
 }
 
 function currentActor(){
-  try{ return JSON.parse(localStorage.getItem("GS_ACTOR")) || {name:"م. محمد فرج", role:"مدير النظام"}; }
+  try{ return JSON.parse(localStorage.getItem("SURVSTA_ACTOR") || localStorage.getItem("GS_ACTOR")) || {name:"م. محمد فرج", role:"مدير النظام"}; }
   catch(e){ return {name:"م. محمد فرج", role:"مدير النظام"}; }
 }
 
@@ -182,8 +183,15 @@ function load(){
         for(const k in COLLECTIONS) if(!Array.isArray(DB[k])) DB[k] = freshDB()[k];
         return DB;
       }
-    }catch(e){ console.warn("GS store: corrupt data, reseeding"); }
+    }catch(e){ console.warn("Survsta store: corrupt data, reseeding"); }
   }
+  try{
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if(legacy){
+      console.info("Survsta store: migrating from legacy schema");
+      localStorage.removeItem(LEGACY_KEY);
+    }
+  }catch(e){}
   DB = freshDB();
   persist();
   return DB;
@@ -196,15 +204,16 @@ function persist(){
   }catch(e){
     if(e && /quota/i.test(e.name+e.message)){
       GS._quotaHit = true;
-      console.error("GS store: localStorage quota exceeded");
+      console.error("Survsta store: localStorage quota exceeded");
       if(global.toast) global.toast("⚠ مساحة التخزين ممتلئة — احذف صورًا كبيرة أو صدّر البيانات ثم أعد التعيين");
-    }else{ console.error("GS store: save failed", e); }
+    }else{ console.error("Survsta store: save failed", e); }
     return false;
   }
 }
 
 function emit(coll, action, record){
   listeners.forEach(fn=>{ try{ fn({coll, action, record}); }catch(e){ console.error(e); } });
+  try{ global.dispatchEvent(new CustomEvent("survsta:change",{detail:{coll,action,record}})); }catch(e){}
   try{ global.dispatchEvent(new CustomEvent("gs:change",{detail:{coll,action,record}})); }catch(e){}
 }
 
@@ -572,13 +581,19 @@ const GS = {
   audit(){ return GS.all("audit"); },
   logAudit,
   nowISO,
-  setActor(name, role){ try{ localStorage.setItem("GS_ACTOR", JSON.stringify({name,role})); }catch(e){} },
+  setActor(name, role){
+    try{
+      localStorage.setItem("SURVSTA_ACTOR", JSON.stringify({name,role}));
+      localStorage.setItem("GS_ACTOR", JSON.stringify({name,role}));
+    }catch(e){}
+  },
   actor: currentActor,
   _load: load
 };
 
 load();
 global.GS = GS;
+global.SURVSTA = GS;
 
 /* مزامنة البيانات تلقائياً في الخلفية فور تحميل المتصفح */
 if (typeof window !== "undefined") {
