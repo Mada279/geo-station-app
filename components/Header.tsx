@@ -27,8 +27,8 @@ export default function Navbar({ user }: NavbarProps) {
         >
           <Image
             alt="Survsta"
-            className="object-contain w-[150px] md:w-[160px] h-auto"
-            height={45}
+            className="object-contain w-[150px] sm:w-[160px] h-auto"
+            height={48}
             priority
             src="/images/Designer.png"
             width={160}

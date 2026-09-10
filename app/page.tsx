@@ -6,8 +6,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#081933] text-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section className="relative overflow-hidden pt-28 pb-16">
+        <div className="container mx-auto px-6 lg:px-12">
           
           {/* Two-Column Hero Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[75vh]">
@@ -105,57 +105,16 @@ export default function HomePage() {
 
             </div>
 
-            {/* Left Column: lg:col-span-5 (Visual Anchor with Radial Glow) */}
-            <div className="lg:col-span-5 relative flex justify-center items-center">
-              {/* Neon Radial Glow */}
-              <div className="absolute -inset-6 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1CA7FF]/25 via-cyan-500/10 to-transparent blur-3xl pointer-events-none"></div>
-
-              {/* High-Tech Container */}
-              <div className="relative z-10 w-full max-w-lg rounded-3xl border border-cyan-500/30 bg-gradient-to-b from-[#0F253E]/90 to-[#081933]/95 p-6 backdrop-blur-xl shadow-2xl shadow-cyan-950/50">
-                
-                {/* Live Sensor Stream Header */}
-                <div className="flex items-center justify-between text-xs text-gray-400 mb-4 pb-3 border-b border-white/10">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span className="font-semibold text-emerald-300">Live Sensor Stream</span>
-                  </div>
-                  <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-[11px] text-cyan-300">
-                    RTK FIXED: ±1mm
-                  </span>
-                </div>
-
-                {/* 3D Hologram Surveying Asset */}
-                <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-[#0E2A47]/80 to-[#040E1C]/90 p-4 flex items-center justify-center overflow-hidden">
-                  <Image
-                    alt="Survsta 3D Hologram Surveying Platform"
-                    className="w-full h-auto object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.8)]"
-                    height={260}
-                    priority
-                    src="/images/Designer.png"
-                    width={450}
-                  />
-                  <div className="absolute bottom-3 right-3 rounded-lg border border-cyan-500/30 bg-[#081933]/90 px-2.5 py-1 text-[11px] text-gray-200 backdrop-blur-md flex items-center gap-1.5">
-                    <span className="text-cyan-400">📡</span> Total Station + Drone 3D
-                  </div>
-                </div>
-
-                {/* Telemetry Sub-metrics */}
-                <div className="grid grid-cols-3 gap-2.5 mt-4">
-                  <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2 text-center">
-                    <div className="text-[11px] text-gray-400">دقة القياس</div>
-                    <div className="text-sm font-bold text-cyan-400 mt-0.5">Sub-cm</div>
-                  </div>
-                  <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2 text-center">
-                    <div className="text-[11px] text-gray-400">تغطية الأقمار</div>
-                    <div className="text-sm font-bold text-emerald-400 mt-0.5">Full GNSS</div>
-                  </div>
-                  <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2 text-center">
-                    <div className="text-[11px] text-gray-400">المسح السحابي</div>
-                    <div className="text-sm font-bold text-amber-400 mt-0.5">LiDAR 3D</div>
-                  </div>
-                </div>
-
-              </div>
+            {/* Left Column: lg:col-span-5 (Task 2: Clean, Transparent Visual Anchor with ONLY the Large Survsta Image) */}
+            <div className="lg:col-span-5 flex items-center justify-center relative">
+              <Image
+                alt="Survsta Platform"
+                className="w-full max-w-[500px] object-contain drop-shadow-2xl"
+                height={350}
+                priority
+                src="/images/Designer.png"
+                width={500}
+              />
             </div>
 
           </div>

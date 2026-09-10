@@ -7,7 +7,7 @@
 <meta name="description" content="Survsta — ابحث عن مكاتب وشركات المساحة، أجهزة للبيع والإيجار، مراكز المعايرة والتدريب، الخدمات المساحية وفرص العمل في مصر.">
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
 <!-- Survsta Platform — All Rights Reserved -->
-<link rel="stylesheet" href="assets/css/style.css?v=3.4">
+<link rel="stylesheet" href="assets/css/style.css?v=3.5">
 </head>
 <body>
 <main id="main">
@@ -16,7 +16,7 @@
   <div class="hero-bg">
     <img src="assets/img/hero-engineering-office.jpg" alt="مكتب استشارات مساحية وهندسية متقدم">
   </div>
-  <div class="wrap hero-in">
+  <div class="container mx-auto px-6 lg:px-12 wrap hero-in" style="max-width:1340px;margin:auto;padding:24px 28px;">
     <!-- Two-Column Architecture (RTL: col-span-7 right, col-span-5 left) -->
     <div class="hero-layout">
       
@@ -85,48 +85,9 @@
         </div>
       </div>
 
-      <!-- Left Column: Visual Anchor with 3D Surveying Asset & Radial Glow -->
-      <div class="hero-visual-col" style="position:relative;display:flex;justify-content:center;align-items:center;">
-        <!-- Neon Radial Glow -->
-        <div style="position:absolute;width:125%;height:125%;background:radial-gradient(circle at 50% 50%, rgba(28,167,255,0.28) 0%, rgba(28,167,255,0.08) 50%, transparent 75%);filter:blur(40px);pointer-events:none;z-index:1;"></div>
-        
-        <!-- High-Tech 3D Surveying Container -->
-        <div class="hero-3d-card" style="position:relative;z-index:2;width:100%;max-width:480px;background:linear-gradient(165deg, rgba(15,37,62,0.85) 0%, rgba(8,25,51,0.95) 100%);border:1px solid rgba(28,167,255,0.35);border-radius:24px;padding:24px;box-shadow:0 30px 60px -12px rgba(0,0,0,0.6), 0 0 35px rgba(28,167,255,0.2);backdrop-filter:blur(20px);">
-          
-          <!-- Sensor Stream Indicator -->
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:12px;color:#94a3b8;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;"></span>
-              <span style="color:#6ee7b7;font-weight:700;">Live Sensor Stream</span>
-            </div>
-            <span style="background:rgba(28,167,255,0.15);color:#38bdf8;padding:3px 10px;border-radius:99px;border:1px solid rgba(28,167,255,0.3);font-family:monospace;font-size:11px;">RTK FIXED: ±1mm</span>
-          </div>
-
-          <!-- 3D Surveying Hologram Visual -->
-          <div style="position:relative;border-radius:18px;overflow:hidden;background:radial-gradient(ellipse at center, rgba(14,42,71,0.9) 0%, rgba(4,14,28,0.95) 100%);border:1px solid rgba(255,255,255,0.08);padding:20px;display:flex;justify-content:center;align-items:center;">
-            <img src="assets/img/Designer.png" alt="Survsta 3D Hologram Surveying" style="width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 15px 30px rgba(0,0,0,0.7));" />
-            
-            <div style="position:absolute;bottom:12px;right:12px;background:rgba(8,25,51,0.85);backdrop-filter:blur(8px);border:1px solid rgba(0,210,255,0.3);border-radius:10px;padding:6px 12px;font-size:11.5px;color:#e2e8f0;display:flex;align-items:center;gap:6px;">
-              <span style="color:#00d2ff;">📡</span> Total Station + Drone 3D
-            </div>
-          </div>
-
-          <!-- Interactive Sub-metrics -->
-          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-top:16px;">
-            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px 8px;text-align:center;">
-              <div style="font-size:10.5px;color:#94a3b8;">دقة القياس</div>
-              <div style="font-size:14px;font-weight:800;color:#00d2ff;margin-top:2px;">Sub-cm</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px 8px;text-align:center;">
-              <div style="font-size:10.5px;color:#94a3b8;">تغطية الأقمار</div>
-              <div style="font-size:14px;font-weight:800;color:#10b981;margin-top:2px;">Full GNSS</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px 8px;text-align:center;">
-              <div style="font-size:10.5px;color:#94a3b8;">المسح السحابي</div>
-              <div style="font-size:14px;font-weight:800;color:#f59e0b;margin-top:2px;">LiDAR 3D</div>
-            </div>
-          </div>
-        </div>
+      <!-- Left Column: Clean Transparent Visual Anchor with ONLY the Large Survsta Image -->
+      <div class="hero-visual-col" style="position:relative;display:flex;align-items:center;justify-content:center;padding:12px;">
+        <img src="assets/img/Designer.png" alt="Survsta Platform" class="w-full max-w-[500px] object-contain drop-shadow-2xl" style="width:100%;max-width:500px;height:auto;object-fit:contain;filter:drop-shadow(0 25px 45px rgba(0,0,0,0.65));display:block;" />
       </div>
 
     </div>
@@ -239,7 +200,7 @@
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/store.js"></script>
-<script src="assets/js/app.js?v=3.4"></script>
+<script src="assets/js/app.js?v=3.5"></script>
 <script>
 mountShell("index.html");
 

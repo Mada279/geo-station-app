@@ -33,7 +33,7 @@ const NAV = [
 ];
 
 function survstaLogo(idSuffix = "nav", isDark = false){
-  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 155px; height: auto; max-height: 42px; display: block;" />`;
+  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 160px !important; max-width: 160px !important; height: auto !important; max-height: 48px !important; display: block;" />`;
 }
 window.survstaLogo = survstaLogo;
 
@@ -44,7 +44,7 @@ function buildHeader(active){
         <div class="dd-menu">${n.sub.map(s=>`<a href="${s.h}"><b>${s.t}${badgeHtml(s.badge)}</b>${s.d?`<small>${s.d}</small>`:""}</a>`).join("")}</div></div>`
     : `<a href="${n.h}" class="whitespace-nowrap ${active===n.h?"active":""}" style="white-space:nowrap;">${n.t}${badgeHtml(n.badge)}</a>`;
   return `
-<div class="utility"><div class="wrap">
+<div class="utility" style="background:#0F253E;color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,0.08);"><div class="wrap">
   <div>📍 نخدم حاليًا: الإسكندرية والقاهرة والجيزة — التوسع تباعًا لباقي المحافظات</div>
   <div class="u-right">
     <a href="mobile-app.html">📱 حمّل التطبيق</a>
