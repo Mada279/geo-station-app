@@ -22,21 +22,22 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      // 1. Authenticate with mock user service
+      // 1. Authenticate user
       const user = await authenticateUser(email, password);
 
-      // 2. Set Session Cookie expected by RBAC Middleware
-      const sessionData = {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      };
+      // 2. Set Session Cookie EXACTLY as specified
       document.cookie =
-        'survsta_session=' +
-        encodeURIComponent(JSON.stringify(sessionData)) +
-        '; path=/; max-age=86400';
+        "survsta_session=" +
+        encodeURIComponent(
+          JSON.stringify({
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+          })
+        ) +
+        "; path=/; max-age=86400";
 
-      // Redundant user_role cookie for auxiliary guards
+      // Also set user_role for redundant middleware verification
       document.cookie = `user_role=${user.role}; path=/; max-age=86400`;
 
       // 3. Smart Redirection
@@ -60,7 +61,7 @@ function LoginForm() {
       setError(
         err instanceof Error
           ? err.message
-          : 'تعذر تسجيل الدخول. يرجى مراجعة بيانات الاعتماد.'
+          : 'تعذر تسجيل الدخول. يرجى التحقق من بيانات الاعتماد.'
       );
     } finally {
       setIsLoading(false);
@@ -74,24 +75,22 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-gray-800 bg-gray-900/90 p-8 shadow-2xl backdrop-blur-md text-right">
+    <div className="w-full max-w-md rounded-2xl border border-gray-800 bg-gray-900/95 p-8 shadow-2xl backdrop-blur-md text-right">
       {/* Brand Header */}
       <div className="text-center mb-8">
         <Link href="/" className="inline-block transition-opacity hover:opacity-90">
-          <div className="relative mx-auto h-12 w-44">
-            <Image
-              src="/images/Designer.png"
-              alt="Survsta Logo"
-              fill
-              priority
-              sizes="176px"
-              className="object-contain"
-            />
-          </div>
+          <Image
+            alt="Survsta"
+            className="object-contain mx-auto"
+            height={45}
+            priority
+            src="/images/Designer.png"
+            width={160}
+          />
         </Link>
         <h1 className="mt-4 text-2xl font-black text-white">تسجيل الدخول</h1>
         <p className="mt-1 text-xs text-gray-400">
-          ادخل إلى منصة مساحي والجيوماتكس الرقمية
+          منصة المساحة والجيوماتكس الرقمية — بوابة الشركاء والعملاء
         </p>
       </div>
 
@@ -121,16 +120,7 @@ function LoginForm() {
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('في المرحلة التجريبية، استخدم أي كلمة مرور مع الإيميلات المتاحة بالأسفل.');
-              }}
-              className="text-xs text-cyan-400 hover:underline"
-            >
-              نسيت كلمة المرور؟
-            </a>
+            <span className="text-[11px] text-gray-500">(أي كلمة مرور مقبولة في التجربة)</span>
             <label className="block text-xs font-semibold text-gray-300">
               كلمة المرور *
             </label>
@@ -154,7 +144,7 @@ function LoginForm() {
           {isLoading ? (
             <span className="inline-flex items-center justify-center gap-2">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-950 border-t-transparent" />
-              <span>جاري التحقق...</span>
+              <span>جاري تسجيل الدخول...</span>
             </span>
           ) : (
             'دخول المنصة'
@@ -166,35 +156,35 @@ function LoginForm() {
       <div className="mt-8 rounded-xl border border-dashed border-gray-800 bg-gray-950/60 p-4 text-xs">
         <div className="font-semibold text-gray-400 mb-2 flex items-center justify-between">
           <span className="text-[11px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-            تجربة الصلاحيات (RBAC Demo)
+            حسابات الاختبار (RBAC Mock)
           </span>
-          <span>بيانات الاختبار السريع:</span>
+          <span>بيانات التجربة السريعة:</span>
         </div>
         <div className="space-y-1.5 text-gray-400">
           <div
             onClick={() => handleQuickFill('admin@survsta.com')}
-            className="cursor-pointer rounded-lg px-2.5 py-1.5 bg-gray-900/80 hover:bg-gray-800 hover:text-white flex items-center justify-between transition"
+            className="cursor-pointer rounded-lg px-2.5 py-1.5 bg-gray-900 hover:bg-gray-800 hover:text-white flex items-center justify-between transition"
           >
-            <span className="text-red-400 text-[11px]">Admin (مدير)</span>
+            <span className="text-red-400 text-[11px]">Admin (مدير النظام)</span>
             <code className="text-cyan-300 font-mono text-[11px]">admin@survsta.com</code>
           </div>
           <div
             onClick={() => handleQuickFill('ahmed@elitesurvey.eg')}
-            className="cursor-pointer rounded-lg px-2.5 py-1.5 bg-gray-900/80 hover:bg-gray-800 hover:text-white flex items-center justify-between transition"
+            className="cursor-pointer rounded-lg px-2.5 py-1.5 bg-gray-900 hover:bg-gray-800 hover:text-white flex items-center justify-between transition"
           >
-            <span className="text-cyan-400 text-[11px]">Provider (مزوّد)</span>
+            <span className="text-cyan-400 text-[11px]">Provider (مزوّد خدمة)</span>
             <code className="text-cyan-300 font-mono text-[11px]">ahmed@elitesurvey.eg</code>
           </div>
           <div
             onClick={() => handleQuickFill('procurement@orchid.com')}
-            className="cursor-pointer rounded-lg px-2.5 py-1.5 bg-gray-900/80 hover:bg-gray-800 hover:text-white flex items-center justify-between transition"
+            className="cursor-pointer rounded-lg px-2.5 py-1.5 bg-gray-900 hover:bg-gray-800 hover:text-white flex items-center justify-between transition"
           >
             <span className="text-emerald-400 text-[11px]">Customer (عميل)</span>
             <code className="text-cyan-300 font-mono text-[11px]">procurement@orchid.com</code>
           </div>
         </div>
         <p className="mt-2 text-[10px] text-gray-500 text-center">
-          * اضغط على أي حساب لتعبئته تلقائياً واختبار التوجيه حسب الدور.
+          * اضغط على أي حساب لتعبئته تلقائياً وتجربة التوجيه حسب الدور.
         </p>
       </div>
 
@@ -202,7 +192,7 @@ function LoginForm() {
       <div className="mt-6 text-center text-xs text-gray-400">
         ليس لديك حساب بعد؟{' '}
         <Link href="/join" className="text-cyan-400 font-semibold hover:underline">
-          انضم كشريك أو أنشئ حساباً جديداً
+          انضم كشريك أو سجّل حساباً جديداً
         </Link>
       </div>
     </div>
@@ -211,7 +201,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4 py-12">
+    <div className="flex min-h-[85vh] items-center justify-center bg-gray-950 px-4 py-12">
       <Suspense fallback={<div className="text-gray-400 text-xs">جاري التحميل...</div>}>
         <LoginForm />
       </Suspense>

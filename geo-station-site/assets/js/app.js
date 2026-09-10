@@ -33,21 +33,7 @@ const NAV = [
 ];
 
 function survstaLogo(idSuffix = "nav", isDark = false){
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 36" width="130" height="30" class="survsta-logo">
-  <!-- Precision/Survey Prism & Crosshair Icon -->
-  <g transform="translate(0, 2)">
-    <path d="M16 2L30 16L16 30L2 16Z" fill="#00d2ff" opacity="0.15"/>
-    <path d="M16 6L26 16L16 26L6 16Z" fill="#00d2ff" opacity="0.9"/>
-    <circle cx="16" cy="16" r="3.5" fill="#f59e0b"/>
-    <!-- Crosshair lines -->
-    <line x1="16" y1="-2" x2="16" y2="34" stroke="#ffffff" stroke-width="1.5" opacity="0.4"/>
-    <line x1="-2" y1="16" x2="34" y2="16" stroke="#ffffff" stroke-width="1.5" opacity="0.4"/>
-  </g>
-  <!-- Premium Typography -->
-  <text x="42" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="24" font-weight="900" fill="#ffffff" letter-spacing="-0.5">
-    Surv<tspan fill="#00d2ff">sta</tspan>
-  </text>
-</svg>`;
+  return `<img src="assets/img/Designer.png" alt="Survsta" class="survsta-logo object-contain" width="160" height="45" style="height:45px;width:auto;display:block;max-height:45px;object-fit:contain;">`;
 }
 window.survstaLogo = survstaLogo;
 

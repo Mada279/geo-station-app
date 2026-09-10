@@ -1,7 +1,7 @@
 import { User, CreateUserInput, UpdateUserInput } from '@/types/user';
 
 // Mock in-memory store for demo / development fallback
-let MOCK_USERS: User[] = [
+export let MOCK_USERS: User[] = [
   {
     id: 'usr_01',
     name: 'م. محمد فرج',
@@ -43,6 +43,20 @@ let MOCK_USERS: User[] = [
     createdAt: '2026-09-05T14:40:00Z',
   },
 ];
+
+/**
+ * Mock authenticate user by email (ignores password for now)
+ */
+export async function authenticateUser(email: string, password?: string): Promise<User> {
+  await new Promise((res) => setTimeout(res, 200));
+  const user = MOCK_USERS.find(
+    (u) => u.email.toLowerCase().trim() === email.toLowerCase().trim()
+  );
+  if (!user) {
+    throw new Error('البريد الإلكتروني غير مسجل في النظام. يرجى مراجعة البريد المدخل.');
+  }
+  return { ...user };
+}
 
 /**
  * Fetch all users (filterable by role/query)
@@ -93,18 +107,4 @@ export async function deleteUser(id: string): Promise<boolean> {
   await new Promise((res) => setTimeout(res, 250));
   MOCK_USERS = MOCK_USERS.filter((u) => u.id !== id);
   return true;
-}
-
-/**
- * Mock authenticate user by email (ignores password for mock phase)
- */
-export async function authenticateUser(email: string, password?: string): Promise<User> {
-  await new Promise((res) => setTimeout(res, 300));
-  const user = MOCK_USERS.find(
-    (u) => u.email.toLowerCase().trim() === email.toLowerCase().trim()
-  );
-  if (!user) {
-    throw new Error('البريد الإلكتروني غير مسجل في النظام. يرجى التحقق من صحة البريد.');
-  }
-  return { ...user };
 }
