@@ -78,14 +78,14 @@ function LoginForm() {
     <div className="w-full max-w-md rounded-2xl border border-gray-800 bg-gray-900/95 p-8 shadow-2xl backdrop-blur-md text-right">
       {/* Brand Header */}
       <div className="text-center mb-8">
-        <Link href="/" className="inline-block transition-opacity hover:opacity-90">
+        <Link href="/" className="inline-flex items-center justify-center w-40 sm:w-48 md:w-56 mx-auto transition-opacity hover:opacity-90">
           <Image
             alt="Survsta"
-            className="object-contain mx-auto"
-            height={45}
+            className="object-contain w-auto h-12 sm:h-16 mx-auto"
+            height={80}
             priority
             src="/images/Designer.png"
-            width={160}
+            width={240}
           />
         </Link>
         <h1 className="mt-4 text-2xl font-black text-white">تسجيل الدخول</h1>

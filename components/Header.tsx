@@ -22,16 +22,16 @@ export default function Navbar({ user }: NavbarProps) {
         {/* Brand Logo - Required exact code */}
         <Link 
           href="/" 
-          className="flex items-center gap-3 transition-opacity hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded-lg"
+          className="flex items-center w-40 sm:w-48 md:w-56 transition-opacity hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded-lg"
           aria-label="Survsta Home"
         >
           <Image
             alt="Survsta"
-            className="object-contain"
-            height={45}
+            className="object-contain w-auto h-12 sm:h-16"
+            height={80}
             priority
             src="/images/Designer.png"
-            width={160}
+            width={240}
           />
         </Link>
 

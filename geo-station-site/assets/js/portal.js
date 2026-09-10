@@ -65,7 +65,7 @@ const CTX = {
 };
 
 function survstaLogo(idSuffix = "side", isDark = false){
-  return `<img src="assets/img/Designer.png" alt="Survsta" class="survsta-logo object-contain" width="160" height="40" style="height:40px;width:auto;display:block;max-height:40px;object-fit:contain;">`;
+  return `<img alt="Survsta" src="assets/img/Designer.png" class="h-12 w-auto object-contain survsta-logo" width="200" height="65" style="height:48px;max-height:54px;width:auto;display:block;object-fit:contain;">`;
 }
 if(typeof window !== "undefined") window.survstaLogo = survstaLogo;
 
