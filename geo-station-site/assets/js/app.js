@@ -54,12 +54,12 @@ function buildHeader(active){
     ${I18N.button()}
   </div>
 </div></div>
-<header class="header"><div class="wrap flex items-center justify-between flex-nowrap" style="min-height: 90px; padding: 10px 0; max-width: 1400px; width: 95%;">
-  <a href="index.html" class="brand flex items-center w-auto shrink-0" style="min-width: 250px;" aria-label="Survsta">${survstaLogo("nav")}</a>
-  <nav class="mainnav flex items-center flex-nowrap" id="mainnav" style="flex-wrap: nowrap; gap: 3px;">${NAV.map(link).join("")}</nav>
-  <div class="head-actions flex items-center shrink-0" style="gap: 8px; flex-shrink: 0; white-space: nowrap;">
-    <span id="nav-auth-cta"><a href="join.html" class="btn btn-ghost btn-sm">انضم كشريك</a></span>
-    <button class="btn btn-pri btn-sm" onclick="openModal('need')">أضف احتياجك</button>
+<header class="header"><div class="wrap">
+  <a href="index.html" class="brand" aria-label="Survsta">${survstaLogo("nav")}</a>
+  <nav class="mainnav" id="mainnav">${NAV.map(link).join("")}</nav>
+  <div class="head-actions">
+    <a href="join.html" class="btn btn-gold btn-sm" style="background:#F4B400;color:#000;font-weight:700;padding:8px 20px;border-radius:8px;">انضم الآن</a>
+    <span id="nav-auth-cta"><a href="login.html" class="btn btn-ghost btn-sm">دخول</a></span>
     <button class="burger" onclick="$('#mainnav').classList.toggle('open')">☰</button>
   </div>
 </div></header>`;
