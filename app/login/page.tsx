@@ -78,13 +78,14 @@ function LoginForm() {
     <div className="w-full max-w-md rounded-2xl border border-gray-800 bg-gray-900/95 p-8 shadow-2xl backdrop-blur-md text-right">
       {/* Brand Header */}
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center justify-center w-40 sm:w-48 md:w-56 mx-auto transition-opacity hover:opacity-90">
+        <Link href="/" className="inline-flex items-center justify-center w-auto shrink-0 mx-auto transition-opacity hover:opacity-90" style={{ minWidth: '220px' }}>
           <Image
             alt="Survsta"
-            className="object-contain w-auto h-12 sm:h-16 mx-auto"
-            height={80}
+            className="object-contain w-[220px] md:w-[240px] h-auto mx-auto"
+            height={70}
             priority
             src="/images/Designer.png"
+            style={{ maxHeight: '70px' }}
             width={240}
           />
         </Link>

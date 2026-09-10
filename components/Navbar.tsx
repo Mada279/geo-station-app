@@ -22,15 +22,17 @@ export default function Navbar({ user }: NavbarProps) {
         {/* Brand Logo - Required exact code */}
         <Link 
           href="/" 
-          className="flex items-center w-40 sm:w-48 md:w-56 transition-opacity hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded-lg"
+          className="flex items-center w-auto shrink-0 transition-opacity hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded-lg"
+          style={{ minWidth: '220px' }}
           aria-label="Survsta Home"
         >
           <Image
             alt="Survsta"
-            className="object-contain w-auto h-12 sm:h-16"
-            height={80}
+            className="object-contain w-[220px] md:w-[240px] h-auto"
+            height={70}
             priority
             src="/images/Designer.png"
+            style={{ maxHeight: '70px' }}
             width={240}
           />
         </Link>
