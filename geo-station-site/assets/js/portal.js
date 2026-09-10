@@ -65,7 +65,7 @@ const CTX = {
 };
 
 function survstaLogo(idSuffix = "side", isDark = false){
-  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 200px !important; min-width: 200px !important; height: auto !important; max-height: 65px !important; display: block;" />`;
+  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 250px !important; min-width: 250px !important; height: auto !important; max-height: 80px !important; display: block;" />`;
 }
 if(typeof window !== "undefined") window.survstaLogo = survstaLogo;
 
@@ -80,7 +80,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
   document.body.insertAdjacentHTML("afterbegin", `
 <div class="shell">
  <aside class="side" id="side">
-   <a class="brand flex items-center w-auto shrink-0" style="min-width: 200px;" href="${c.home}" aria-label="Survsta">${(window.survstaLogo||survstaLogo)("side")}</a>
+   <a class="brand flex items-center w-auto shrink-0" style="min-width: 250px;" href="${c.home}" aria-label="Survsta">${(window.survstaLogo||survstaLogo)("side")}</a>
    <div class="ctx"><b>${c.org}</b><small>${c.sub}</small></div>
    ${nav}
    <div class="backsite">

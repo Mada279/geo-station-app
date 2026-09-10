@@ -38,7 +38,9 @@ pnpm-debug.log*
 *.sw?
 
 # Vercel output & cache
-.vercel
+# Next.js and build outputs
+.next/
+*.tsbuildinfo
 .output
 
 # Local raw image assets source folder

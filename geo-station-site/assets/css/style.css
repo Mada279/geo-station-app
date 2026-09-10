@@ -30,9 +30,9 @@ ul{margin:0;padding-inline-start:20px}
 
 /* ---------- header ---------- */
 .header{position:sticky;top:0;z-index:70;background:rgba(7,17,31,.97);backdrop-filter:blur(8px);color:#fff;border-bottom:1px solid #1d3350}
-.header .wrap{display:flex;align-items:center;gap:20px;min-height:76px;height:auto;padding:6px 0}
-.brand{display:inline-flex;align-items:center;text-decoration:none;line-height:1;gap:10px;min-width:220px;flex-shrink:0}
-.brand img.survsta-logo, .brand .survsta-logo{display:block !important;width:220px !important;min-width:220px !important;height:auto !important;max-height:70px !important;opacity:1 !important;visibility:visible !important;object-fit:contain !important}
+.header .wrap{display:flex;align-items:center;gap:20px;min-height:100px;height:auto;padding:12px 0}
+.brand{display:inline-flex;align-items:center;text-decoration:none;line-height:1;gap:10px;min-width:300px;flex-shrink:0}
+.brand img.survsta-logo, .brand .survsta-logo{display:block !important;width:300px !important;min-width:300px !important;height:auto !important;max-height:100px !important;opacity:1 !important;visibility:visible !important;object-fit:contain !important}
 .mainnav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
 .mainnav>a,.dd>button{color:#c3d3e2;font-size:14.5px;padding:9px 12px;border-radius:9px;display:inline-flex;align-items:center;gap:5px}
 .mainnav>a:hover,.dd>button:hover{background:#14293f;color:#fff}
