@@ -17,56 +17,59 @@ export default function Navbar({ user }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-800/80 bg-gray-950/80 backdrop-blur-md py-4">
-      <div className="mx-auto flex min-h-[90px] md:min-h-[100px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[90px] md:min-h-[100px] max-w-[1400px] w-full items-center justify-between px-4 sm:px-6 lg:px-8 flex-nowrap gap-4">
         
         {/* Brand Logo - Required exact code */}
         <Link 
           href="/" 
           className="flex items-center w-auto shrink-0 transition-opacity hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded-lg"
-          style={{ minWidth: '220px' }}
+          style={{ minWidth: '250px' }}
           aria-label="Survsta Home"
         >
           <Image
             alt="Survsta"
-            className="object-contain w-[220px] md:w-[240px] h-auto"
-            height={70}
+            className="object-contain w-[240px] md:w-[260px] h-auto"
+            height={75}
             priority
             src="/images/Designer.png"
-            style={{ maxHeight: '70px' }}
-            width={240}
+            style={{ maxHeight: '80px', minWidth: '240px' }}
+            width={260}
           />
         </Link>
 
         {/* Desktop Navigation Links (Arabic) */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
-          <Link href="/" className="transition-colors hover:text-cyan-400">
+        <nav className="hidden md:flex items-center gap-3 lg:gap-4 text-sm font-medium text-gray-300 flex-nowrap shrink-0">
+          <Link href="/" className="whitespace-nowrap transition-colors hover:text-cyan-400 px-1.5 py-1">
             الرئيسية
           </Link>
-          <Link href="/directory" className="transition-colors hover:text-cyan-400">
+          <Link href="/directory" className="whitespace-nowrap transition-colors hover:text-cyan-400 px-1.5 py-1">
             الدليل
           </Link>
-          <Link href="/equipment" className="transition-colors hover:text-cyan-400">
+          <Link href="/equipment" className="whitespace-nowrap transition-colors hover:text-cyan-400 px-1.5 py-1">
             الأجهزة
           </Link>
-          <Link href="/services" className="transition-colors hover:text-cyan-400">
+          <Link href="/services" className="whitespace-nowrap transition-colors hover:text-cyan-400 px-1.5 py-1">
             الخدمات
           </Link>
-          <Link href="/map" className="transition-colors hover:text-cyan-400">
+          <Link href="/map" className="whitespace-nowrap transition-colors hover:text-cyan-400 px-1.5 py-1">
             الخريطة
           </Link>
-          <Link href="/academy" className="transition-colors hover:text-cyan-400 flex items-center gap-1.5">
+          <Link href="/academy" className="whitespace-nowrap transition-colors hover:text-cyan-400 flex items-center gap-1 px-1.5 py-1">
             <span>Academy</span>
             <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/30">
               قريباً
             </span>
           </Link>
-          <Link href="/jobs" className="transition-colors hover:text-cyan-400">
+          <Link href="/jobs" className="whitespace-nowrap transition-colors hover:text-cyan-400 px-1.5 py-1">
             الوظائف
+          </Link>
+          <Link href="/about" className="whitespace-nowrap transition-colors hover:text-cyan-400 px-1.5 py-1">
+            عن المنصة
           </Link>
         </nav>
 
         {/* User Actions / Auth Controls */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3 shrink-0 flex-nowrap">
           {user ? (
             <div className="flex items-center gap-3">
               {user.role === 'admin' && (
@@ -101,13 +104,13 @@ export default function Navbar({ user }: NavbarProps) {
             <>
               <Link
                 href="/login"
-                className="text-sm font-medium text-gray-300 hover:text-white transition"
+                className="whitespace-nowrap text-sm font-medium text-gray-300 hover:text-white transition"
               >
                 تسجيل الدخول
               </Link>
               <Link
                 href="/join"
-                className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-gray-950 shadow-sm shadow-cyan-500/20 hover:bg-cyan-400 transition"
+                className="whitespace-nowrap rounded-lg bg-cyan-500 px-3.5 py-2 text-sm font-semibold text-gray-950 shadow-sm shadow-cyan-500/20 hover:bg-cyan-400 transition"
               >
                 انضم كشريك
               </Link>

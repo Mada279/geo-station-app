@@ -30,11 +30,11 @@ ul{margin:0;padding-inline-start:20px}
 
 /* ---------- header ---------- */
 .header{position:sticky;top:0;z-index:70;background:rgba(7,17,31,.97);backdrop-filter:blur(8px);color:#fff;border-bottom:1px solid #1d3350}
-.header .wrap{display:flex;align-items:center;gap:20px;min-height:100px;height:auto;padding:12px 0}
-.brand{display:inline-flex;align-items:center;text-decoration:none;line-height:1;gap:10px;min-width:300px;flex-shrink:0}
-.brand img.survsta-logo, .brand .survsta-logo{display:block !important;width:300px !important;min-width:300px !important;height:auto !important;max-height:100px !important;opacity:1 !important;visibility:visible !important;object-fit:contain !important}
-.mainnav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
-.mainnav>a,.dd>button{color:#c3d3e2;font-size:14.5px;padding:9px 12px;border-radius:9px;display:inline-flex;align-items:center;gap:5px}
+.header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:90px;height:auto;padding:10px 0;max-width:1400px;width:95%;margin:auto;flex-wrap:nowrap}
+.brand{display:inline-flex;align-items:center;text-decoration:none;line-height:1;gap:10px;min-width:250px;flex-shrink:0}
+.brand img.survsta-logo, .brand .survsta-logo{display:block !important;width:250px !important;min-width:250px !important;height:auto !important;max-height:80px !important;opacity:1 !important;visibility:visible !important;object-fit:contain !important}
+.mainnav{display:flex;gap:3px;flex:1;flex-wrap:nowrap;align-items:center;white-space:nowrap}
+.mainnav>a,.dd>button{color:#c3d3e2;font-size:13.5px;padding:6px 9px;border-radius:8px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
 .mainnav>a:hover,.dd>button:hover{background:#14293f;color:#fff}
 .mainnav>a.active{color:#fff;background:#173553}
 .dd{position:relative}
@@ -43,7 +43,7 @@ ul{margin:0;padding-inline-start:20px}
 .dd-menu a{display:block;padding:9px 11px;border-radius:9px;font-size:14px}
 .dd-menu a:hover{background:#eff6fa;color:var(--cyan-d)}
 .dd-menu small{display:block;color:var(--muted);font-size:12px}
-.head-actions{display:flex;gap:8px;align-items:center}
+.head-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;white-space:nowrap}
 .burger{display:none;font-size:22px;color:#fff;padding:6px 10px;border-radius:9px;background:#173553}
 
 /* ---------- buttons ---------- */
