@@ -370,3 +370,16 @@ function ctaBand(){
       <a href="join.html" class="btn btn-ghost btn-lg">انضم كشريك</a></div>
   </div></div></section>`;
 }
+
+if (typeof window !== "undefined") {
+  window.addEventListener("scroll", () => {
+    const hdr = document.querySelector(".header");
+    if (hdr) {
+      if (window.scrollY > 20) {
+        hdr.classList.add("scrolled");
+      } else {
+        hdr.classList.remove("scrolled");
+      }
+    }
+  }, { passive: true });
+}
