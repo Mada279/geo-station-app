@@ -16,7 +16,7 @@ export default function Navbar({ user }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 z-50 w-full border-b border-white/10 bg-black/10 backdrop-blur-md transition-colors">
+    <header className="fixed top-0 left-0 z-50 w-full border-b border-cyan-500/15 bg-[#081933]/90 backdrop-blur-md transition-colors">
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
         {/* Brand Logo - Required exact code */}
@@ -68,6 +68,12 @@ export default function Navbar({ user }: NavbarProps) {
 
         {/* User Actions / Auth Controls */}
         <div className="hidden md:flex items-center gap-3">
+          <Link
+            href="/join"
+            className="rounded-lg bg-[#F4B400] px-5 py-2 text-sm font-bold text-black hover:brightness-110 shadow-sm transition"
+          >
+            انضم الآن
+          </Link>
           {user ? (
             <div className="flex items-center gap-3">
               {user.role === 'admin' && (
@@ -99,20 +105,12 @@ export default function Navbar({ user }: NavbarProps) {
               </button>
             </div>
           ) : (
-            <>
-              <Link
-                href="/login"
-                className="whitespace-nowrap text-sm font-medium text-gray-300 hover:text-white transition"
-              >
-                تسجيل الدخول
-              </Link>
-              <Link
-                href="/join"
-                className="whitespace-nowrap rounded-lg bg-cyan-500 px-3.5 py-2 text-sm font-semibold text-gray-950 shadow-sm shadow-cyan-500/20 hover:bg-cyan-400 transition"
-              >
-                انضم كشريك
-              </Link>
-            </>
+            <Link
+              href="/login"
+              className="whitespace-nowrap text-sm font-medium text-gray-300 hover:text-white transition px-3 py-1.5"
+            >
+              تسجيل الدخول
+            </Link>
           )}
         </div>
 
