@@ -33,7 +33,7 @@ const NAV = [
 ];
 
 function survstaLogo(idSuffix = "nav", isDark = false){
-  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 250px !important; min-width: 250px !important; height: auto !important; max-height: 80px !important; display: block;" />`;
+  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 155px; height: auto; max-height: 42px; display: block;" />`;
 }
 window.survstaLogo = survstaLogo;
 
@@ -70,7 +70,7 @@ function buildFooter(){
 <footer class="footer"><div class="wrap">
   <div class="fgrid">
     <div>
-      <div class="brand flex items-center w-auto shrink-0" style="color:#fff; min-width: 250px;">${survstaLogo("foot")}</div>
+      <div class="brand" style="color:#fff">${survstaLogo("foot")}</div>
       <p style="margin-top:12px;font-size:13.5px;max-width:330px">المنصة الرقمية المتخصصة لقطاع المساحة والجيوماتكس في مصر — دليل، سوق أجهزة، خدمات، تدريب ووظائف في مكان واحد.</p>
       <div class="appbtns">
         <a class="app-store-badge" href="mobile-app.html" aria-label="Google Play"><svg viewBox="0 0 512 512" width="24" height="24" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M47.6 12.5C42.6 17.8 39.7 26 39.7 36.6v438.8c0 10.6 2.9 18.8 7.9 24.1l1.5 1.4L295 255.9v-5.8L49.1 11.1z"/><path fill="#FBBC04" d="m377 337.8-82-82v-5.8l82.1-82.1 1.8 1.1 97.2 55.2c27.8 15.8 27.8 41.6 0 57.4l-97.2 55.2z"/><path fill="#EA4335" d="m378.9 336.7-83.9-83.9L47.6 499.5c9.2 9.7 24.3 10.9 41.4 1.2l289.9-164"/><path fill="#34A853" d="M378.9 168.9 89 5C71.9-4.7 56.8-3.5 47.6 6.2L295 252.8z"/></svg><span class="txt"><small>متاح قريبًا على</small><b>Google Play</b></span></a>

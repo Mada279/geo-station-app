@@ -80,7 +80,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
   document.body.insertAdjacentHTML("afterbegin", `
 <div class="shell">
  <aside class="side" id="side">
-   <a class="brand flex items-center w-auto shrink-0" style="min-width: 250px;" href="${c.home}" aria-label="Survsta">${(window.survstaLogo||survstaLogo)("side")}</a>
+   <a class="brand" href="${c.home}" aria-label="Survsta">${(window.survstaLogo||survstaLogo)("side")}</a>
    <div class="ctx"><b>${c.org}</b><small>${c.sub}</small></div>
    ${nav}
    <div class="backsite">

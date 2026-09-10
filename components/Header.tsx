@@ -17,28 +17,26 @@ export default function Navbar({ user }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-800/80 bg-gray-950/80 backdrop-blur-md py-4">
-      <div className="mx-auto flex min-h-[90px] md:min-h-[100px] max-w-[1400px] w-full items-center justify-between px-4 sm:px-6 lg:px-8 flex-nowrap gap-4">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
         {/* Brand Logo - Required exact code */}
         <Link 
           href="/" 
-          className="flex items-center w-auto shrink-0 transition-opacity hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded-lg"
-          style={{ minWidth: '250px' }}
+          className="flex items-center transition-opacity hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded-lg"
           aria-label="Survsta Home"
         >
           <Image
             alt="Survsta"
-            className="object-contain w-[240px] md:w-[260px] h-auto"
-            height={75}
+            className="object-contain w-[150px] md:w-[160px] h-auto"
+            height={45}
             priority
             src="/images/Designer.png"
-            style={{ maxHeight: '80px', minWidth: '240px' }}
-            width={260}
+            width={160}
           />
         </Link>
 
         {/* Desktop Navigation Links (Arabic) */}
-        <nav className="hidden md:flex items-center gap-3 lg:gap-4 text-sm font-medium text-gray-300 flex-nowrap shrink-0">
+        <nav className="hidden md:flex items-center gap-5 lg:gap-6 text-sm font-medium text-gray-300">
           <Link href="/" className="whitespace-nowrap transition-colors hover:text-cyan-400 px-1.5 py-1">
             الرئيسية
           </Link>
@@ -69,7 +67,7 @@ export default function Navbar({ user }: NavbarProps) {
         </nav>
 
         {/* User Actions / Auth Controls */}
-        <div className="hidden md:flex items-center gap-3 shrink-0 flex-nowrap">
+        <div className="hidden md:flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
               {user.role === 'admin' && (
