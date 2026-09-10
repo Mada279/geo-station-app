@@ -94,3 +94,17 @@ export async function deleteUser(id: string): Promise<boolean> {
   MOCK_USERS = MOCK_USERS.filter((u) => u.id !== id);
   return true;
 }
+
+/**
+ * Mock authenticate user by email (ignores password for mock phase)
+ */
+export async function authenticateUser(email: string, password?: string): Promise<User> {
+  await new Promise((res) => setTimeout(res, 300));
+  const user = MOCK_USERS.find(
+    (u) => u.email.toLowerCase().trim() === email.toLowerCase().trim()
+  );
+  if (!user) {
+    throw new Error('البريد الإلكتروني غير مسجل في النظام. يرجى التحقق من صحة البريد.');
+  }
+  return { ...user };
+}
