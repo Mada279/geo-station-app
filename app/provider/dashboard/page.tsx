@@ -2,7 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import ProviderOnboardingTour from '@/components/ProviderOnboardingTour';
+import dynamic from 'next/dynamic';
+
+const ProviderOnboardingTour = dynamic(
+  () => import('@/components/ProviderOnboardingTour'),
+  { ssr: false }
+);
 
 interface EquipmentItem {
   id: string;

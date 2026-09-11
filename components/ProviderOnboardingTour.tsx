@@ -16,6 +16,11 @@ export default function ProviderOnboardingTour({
 }: ProviderOnboardingTourProps) {
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Define the tour steps precisely targeting specific UI elements as requested
   const steps: Step[] = [
@@ -84,6 +89,8 @@ export default function ProviderOnboardingTour({
       if (onTourEnd) onTourEnd();
     }
   };
+
+  if (!mounted) return null;
 
   return (
     <Joyride
