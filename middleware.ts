@@ -39,40 +39,46 @@ function getSessionUser(request: NextRequest): SessionPayload | null {
 }
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const user = getSessionUser(request);
+  try {
+    const { pathname } = request.nextUrl;
+    const user = getSessionUser(request);
 
-  const isAdminRoute = pathname.startsWith('/admin');
-  const isProviderRoute = pathname.startsWith('/provider');
+    const isAdminRoute = pathname.startsWith('/admin');
+    const isProviderRoute = pathname.startsWith('/provider');
 
-  // Guard protected routes
-  if (isAdminRoute || isProviderRoute) {
-    // 1. Unauthenticated -> Redirect to Login with callbackUrl using request.nextUrl.clone()
-    if (!user) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = '/login';
-      loginUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(loginUrl);
+    // Guard protected routes
+    if (isAdminRoute || isProviderRoute) {
+      const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.host || 'survsta.vercel.app';
+      const proto = request.headers.get('x-forwarded-proto') || 'https';
+      const baseUrl = `${proto}://${host}`;
+
+      // 1. Unauthenticated -> Redirect to Login with callbackUrl
+      if (!user) {
+        const loginUrl = new URL('/login', baseUrl);
+        loginUrl.searchParams.set('callbackUrl', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+
+      // 2. Role Check: /admin/* strictly restricted to 'admin'
+      if (isAdminRoute && user.role !== 'admin') {
+        const unauthorizedUrl = new URL('/unauthorized', baseUrl);
+        unauthorizedUrl.searchParams.set('reason', 'admin_only');
+        return NextResponse.redirect(unauthorizedUrl);
+      }
+
+      // 3. Role Check: /provider/* strictly restricted to 'provider'
+      if (isProviderRoute && user.role !== 'provider') {
+        const unauthorizedUrl = new URL('/unauthorized', baseUrl);
+        unauthorizedUrl.searchParams.set('reason', 'provider_only');
+        return NextResponse.redirect(unauthorizedUrl);
+      }
     }
 
-    // 2. Role Check: /admin/* strictly restricted to 'admin'
-    if (isAdminRoute && user.role !== 'admin') {
-      const unauthorizedUrl = request.nextUrl.clone();
-      unauthorizedUrl.pathname = '/unauthorized';
-      unauthorizedUrl.searchParams.set('reason', 'admin_only');
-      return NextResponse.redirect(unauthorizedUrl);
-    }
-
-    // 3. Role Check: /provider/* strictly restricted to 'provider'
-    if (isProviderRoute && user.role !== 'provider') {
-      const unauthorizedUrl = request.nextUrl.clone();
-      unauthorizedUrl.pathname = '/unauthorized';
-      unauthorizedUrl.searchParams.set('reason', 'provider_only');
-      return NextResponse.redirect(unauthorizedUrl);
-    }
+    return NextResponse.next();
+  } catch (err) {
+    console.error('Middleware execution error:', err);
+    return NextResponse.next();
   }
-
-  return NextResponse.next();
 }
 
 export const config = {
