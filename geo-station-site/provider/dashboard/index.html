@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>بوابة المزوّد — لوحة التحكم | Survsta</title>
+<meta name="description" content="لوحة تحكم مزودي الخدمات والمعدات المساحية على Survsta">
+<base href="/">
+<!-- Survsta Midnight & Electric Blue Theme -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+<style>
+:root {
+  --pri-blue: #1CA7FF;
+  --bg-dark: #081933;
+  --card-dark: #0F253E;
+  --text-white: #FFFFFF;
+  --overlay-bg: rgba(0, 0, 0, 0.7);
+}
+body {
+  background: var(--bg-dark);
+  color: var(--text-white);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+.shell-header {
+  border-bottom: 1px solid rgba(28, 167, 255, 0.2);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 37, 62, 0.8);
+  backdrop-filter: blur(12px);
+}
+.dash-content {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--card-dark);
+  border: 1px solid rgba(28, 167, 255, 0.25);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.kpi-card .num {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--pri-blue);
+  margin: 8px 0 4px;
+}
+.btn-electric {
+  background: linear-gradient(135deg, #06b6d4, var(--pri-blue));
+  color: #081933;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 13.5px;
+  box-shadow: 0 4px 14px rgba(28, 167, 255, 0.35);
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-electric:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+.table-box {
+  background: rgba(15, 37, 62, 0.6);
+  border: 1px solid rgba(28, 167, 255, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13px; }
+th, td { padding: 14px 18px; border-bottom: 1px solid rgba(28, 167, 255, 0.1); }
+th { background: rgba(8, 25, 51, 0.9); color: #94a3b8; font-weight: 600; }
+tr:hover { background: rgba(28, 167, 255, 0.05); }
+
+/* TOUR MODAL / OVERLAY / SPOTLIGHT */
+.tour-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg);
+  z-index: 9998;
+  transition: opacity 0.3s;
+}
+.tour-overlay.show { display: block; }
+.spotlight-active {
+  position: relative !important;
+  z-index: 9999 !important;
+  box-shadow: 0 0 0 4px var(--pri-blue), 0 0 25px rgba(28, 167, 255, 0.6) !important;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+.tour-tooltip {
+  position: absolute;
+  z-index: 10000;
+  background: var(--card-dark);
+  color: var(--text-white);
+  border: 1px solid rgba(28, 167, 255, 0.4);
+  border-radius: 16px;
+  padding: 20px;
+  width: 320px;
+  box-shadow: 0 20px 30px rgba(0,0,0,0.8), 0 0 20px rgba(28, 167, 255, 0.2);
+  text-align: right;
+  font-size: 13.5px;
+  line-height: 1.6;
+  display: none;
+  animation: tooltipFade 0.25s ease;
+}
+@keyframes tooltipFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.tour-tooltip.show { display: block; }
+.tour-tooltip h4 { margin: 0 0 8px; color: var(--pri-blue); font-size: 15px; }
+.tour-tooltip-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+
+/* ADD MODAL */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 5000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-backdrop.open { display: flex; }
+.modal-card {
+  background: var(--card-dark);
+  border: 1px solid rgba(28, 167, 255, 0.4);
+  border-radius: 20px;
+  padding: 28px;
+  max-width: 580px;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+}
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 12.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px; }
+.form-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: #081933;
+  border: 1px solid rgba(28, 167, 255, 0.3);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+}
+.form-input:focus { border-color: var(--pri-blue); }
+.upload-dropzone {
+  border: 2px dashed rgba(28, 167, 255, 0.4);
+  background: rgba(8, 25, 51, 0.7);
+  padding: 20px;
+  text-align: center;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.upload-dropzone:hover { border-color: var(--pri-blue); background: rgba(8, 25, 51, 0.95); }
+</style>
+</head>
+<body>
+
+<!-- SPOTLIGHT OVERLAY -->
+<div class="tour-overlay" id="tourOverlay" onclick="nextTourStep()"></div>
+
+<!-- FLOATING JOYRIDE TOOLTIP -->
+<div class="tour-tooltip" id="tourTooltip">
+  <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;" id="tourStepBadge">الخطوة 1 من 4</div>
+  <h4 id="tourStepTitle">إضافة الأجهزة والخدمات</h4>
+  <p id="tourStepContent" style="margin: 0; color: #e2e8f0;"></p>
+  <div class="tour-tooltip-actions">
+    <button style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:12px;" onclick="skipTour()">تخطي الجولة</button>
+    <div style="display:flex;gap:8px;">
+      <button style="background:none;border:1px solid #475569;color:#94a3b8;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;" id="tourPrevBtn" onclick="prevTourStep()">السابق</button>
+      <button class="btn-electric" style="padding:6px 16px;font-size:12px;" id="tourNextBtn" onclick="nextTourStep()">التالي ←</button>
+    </div>
+  </div>
+</div>
+
+<header class="shell-header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <!-- Step 1 Target -->
+    <button id="tour-add-button" class="btn-electric" onclick="openAddModal()">
+      <span>＋</span>
+      <span>إضافة جهاز أو خدمة جديدة</span>
+    </button>
+    
+    <button class="btn-electric" style="background:#0F253E;border:1px solid rgba(28,167,255,0.3);color:var(--pri-blue);" onclick="restartTour()">
+      <span>🧭</span>
+      <span>جولة تعريفية (Tour)</span>
+    </button>
+  </div>
+
+  <div style="text-align:left;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="background:rgba(16,185,129,0.2);color:#34d399;border:1px solid rgba(16,185,129,0.3);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:bold;">✓ مزوّد معتمد وموثّق</span>
+      <h2 style="margin:0;font-size:18px;">بوابة المزوّد — لوحة التحكم</h2>
+    </div>
+    <span style="font-size:12px;color:#94a3b8;">مكتب النخبة للمساحة • م. أحمد النجار (الإسكندرية)</span>
+  </div>
+</header>
+
+<main class="dash-content">
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div style="color:#94a3b8;font-size:12px;">الأجهزة والخدمات النشطة</div>
+      <div class="num">8 أجهزة</div>
+      <div style="font-size:11px;color:#64748b;">معروضة للإيجار والبيع المباشر</div>
+    </div>
+    <div class="kpi-card">
+      <div style="color:#94a3b8;font-size:12px;">طلبات التواصل الواردة</div>
+      <div class="num" style="color:#f59e0b;">14 طلب</div>
+      <div style="font-size:11px;color:#64748b;">▲ 4 طلبات جديدة هذا الأسبوع</div>
+    </div>
+    <div class="kpi-card">
+      <div style="color:#94a3b8;font-size:12px;">مشاهدات الملف والمعدات</div>
+      <div class="num" style="color:#a855f7;">1,420</div>
+      <div style="font-size:11px;color:#64748b;">من مهندسين ومكاتب استشارية</div>
+    </div>
+    <div class="kpi-card">
+      <div style="color:#94a3b8;font-size:12px;">تقييم المزوّد</div>
+      <div class="num" style="color:#eab308;">4.9 ★</div>
+      <div style="font-size:11px;color:#64748b;">بناءً على 24 تقييم عملاء موثق</div>
+    </div>
+  </div>
+
+  <div class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th>الكود</th>
+          <th>اسم الجهاز / المعدة</th>
+          <th>الفئة</th>
+          <th>السعر اليومي</th>
+          <th>السعر الشهري</th>
+          <th>الحالة</th>
+          <th>الإجراء</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--pri-blue);font-family:monospace;font-weight:bold;">EQ-301</td>
+          <td><b>محطة رصد متكاملة Leica TS07 (1 ثانية)</b><div style="font-size:11px;color:#94a3b8;">📷 Leica_TS07_HD.jpg • معايرة سارية</div></td>
+          <td><span style="background:rgba(28,167,255,0.1);color:var(--pri-blue);padding:3px 8px;border-radius:6px;font-size:11px;">توتال ستيشن</span></td>
+          <td style="color:#34d399;font-weight:bold;">1,500 ج.م</td>
+          <td style="color:#fbbf24;font-weight:bold;">28,000 ج.م</td>
+          <td><span style="color:#34d399;">متاح للإيجار</span></td>
+          <td><button style="background:#081933;border:1px solid rgba(28,167,255,0.3);color:var(--pri-blue);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;">تعديل السعر</button></td>
+        </tr>
+        <tr>
+          <td style="color:var(--pri-blue);font-family:monospace;font-weight:bold;">EQ-302</td>
+          <td><b>طقم مستقبل أقمار صناعية CHC i73 GNSS RTK Base & Rover</b><div style="font-size:11px;color:#94a3b8;">📷 chc_i73_gnss.png • ضمان شامل</div></td>
+          <td><span style="background:rgba(28,167,255,0.1);color:var(--pri-blue);padding:3px 8px;border-radius:6px;font-size:11px;">أجهزة GNSS/RTK</span></td>
+          <td style="color:#34d399;font-weight:bold;">1,800 ج.م</td>
+          <td style="color:#fbbf24;font-weight:bold;">32,000 ج.م</td>
+          <td><span style="color:#34d399;">متاح للإيجار</span></td>
+          <td><button style="background:#081933;border:1px solid rgba(28,167,255,0.3);color:var(--pri-blue);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;">تعديل السعر</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- ADD DEVICE MODAL (STEP 2, 3, 4 TARGETS) -->
+<div class="modal-backdrop" id="addModalBackdrop">
+  <div class="modal-card" id="addModalCard">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(28,167,255,0.2);padding-bottom:14px;margin-bottom:18px;">
+      <button style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;" onclick="closeAddModal()">✕</button>
+      <h3 style="margin:0;font-size:18px;color:#fff;">إضافة جهاز أو خدمة جديدة للمنصة</h3>
+    </div>
+
+    <form onsubmit="event.preventDefault();submitDevice();">
+      <div class="form-group">
+        <label>اسم الجهاز والموديل *</label>
+        <input type="text" class="form-input" id="devName" required value="محطة رصد متكاملة Leica FlexLine TS07">
+      </div>
+
+      <!-- Step 2 Target: Upload Photo -->
+      <div class="form-group">
+        <label>صور الأجهزة والمعدات *</label>
+        <div id="tour-upload-area" class="upload-dropzone" onclick="alert('تم إرفاق صورة الجهاز بنجاح')">
+          <div style="font-size:32px;">📸</div>
+          <b style="color:var(--pri-blue);font-size:13px;display:block;margin-top:6px;">اضغط هنا لرفع صور حقيقية للجهاز</b>
+          <span style="font-size:11.5px;color:#94a3b8;">الصور الواضحة تزيد من ثقة العملاء وفرص التأجير. ارفع صوراً حقيقية للأجهزة.</span>
+        </div>
+      </div>
+
+      <!-- Step 3 Target: Price input -->
+      <div class="form-group" id="tour-price-input" style="background:#081933;padding:12px;border-radius:12px;border:1px solid rgba(28,167,255,0.3);">
+        <label style="color:#fff;font-size:13px;">تحديد سعر التأجير / البيع *</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
+          <div>
+            <span style="font-size:11px;color:#94a3b8;display:block;margin-bottom:3px;">السعر اليومي (ج.م)</span>
+            <input type="number" class="form-input" value="1200" placeholder="1200">
+          </div>
+          <div>
+            <span style="font-size:11px;color:#94a3b8;display:block;margin-bottom:3px;">السعر الشهري (ج.م)</span>
+            <input type="number" class="form-input" value="22000" placeholder="22000">
+          </div>
+        </div>
+        <small style="color:var(--pri-blue);font-size:11px;display:block;margin-top:4px;">حدد السعر بدقة. يمكنك إضافة سعر يومي أو شهري لزيادة فرصك.</small>
+      </div>
+
+      <!-- Step 4 Target: Save/Publish button -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+        <button type="button" style="background:#1e293b;color:#94a3b8;border:none;padding:10px 18px;border-radius:10px;cursor:pointer;" onclick="closeAddModal()">إلغاء</button>
+        <button type="submit" id="tour-save-button" class="btn-electric" style="padding:10px 24px;">
+          حفظ ونشر العرض فوراً 🚀
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const TOUR_STEPS = [
+  {
+    targetId: 'tour-add-button',
+    title: 'إضافة الأجهزة والخدمات',
+    text: 'أهلاً بك في منصتك! ابدأ من هنا لإضافة أول جهاز أو خدمة لك.',
+    pos: 'bottom',
+    openModal: false
+  },
+  {
+    targetId: 'tour-upload-area',
+    title: 'رفع صور المعدات',
+    text: 'الصور الواضحة تزيد من ثقة العملاء وفرص التأجير. ارفع صوراً حقيقية للأجهزة.',
+    pos: 'top',
+    openModal: true
+  },
+  {
+    targetId: 'tour-price-input',
+    title: 'تحديد أسعار التأجير أو البيع',
+    text: 'حدد السعر بدقة. يمكنك إضافة سعر يومي أو شهري لزيادة فرصك.',
+    pos: 'top',
+    openModal: true
+  },
+  {
+    targetId: 'tour-save-button',
+    title: 'النشر المباشر على Survsta',
+    text: 'بمجرد الحفظ، سيظهر عرضك لآلاف المهندسين والشركات على المنصة!',
+    pos: 'top',
+    openModal: true
+  }
+];
+
+let currentTourIndex = 0;
+let isTourRunning = false;
+
+function openAddModal() {
+  document.getElementById('addModalBackdrop').classList.add('open');
+}
+function closeAddModal() {
+  document.getElementById('addModalBackdrop').classList.remove('open');
+}
+function submitDevice() {
+  closeAddModal();
+  alert('🎉 تم حفظ ونشر الجهاز بنجاح!');
+}
+
+function showTourStep(index) {
+  if (index < 0 || index >= TOUR_STEPS.length) {
+    endTour();
+    return;
+  }
+  currentTourIndex = index;
+  const s = TOUR_STEPS[index];
+
+  if (s.openModal) {
+    openAddModal();
+  } else {
+    closeAddModal();
+  }
+
+  // Remove spotlight from previous elements
+  document.querySelectorAll('.spotlight-active').forEach(el => el.classList.remove('spotlight-active'));
+
+  setTimeout(() => {
+    const el = document.getElementById(s.targetId);
+    if (!el) return;
+
+    el.classList.add('spotlight-active');
+    document.getElementById('tourOverlay').classList.add('show');
+
+    const tooltip = document.getElementById('tourTooltip');
+    document.getElementById('tourStepBadge').textContent = `الخطوة ${index + 1} من 4`;
+    document.getElementById('tourStepTitle').textContent = s.title;
+    document.getElementById('tourStepContent').textContent = s.text;
+
+    document.getElementById('tourPrevBtn').style.display = index === 0 ? 'none' : 'inline-block';
+    document.getElementById('tourNextBtn').textContent = index === TOUR_STEPS.length - 1 ? 'إنهاء الجولة ✓' : 'التالي ←';
+
+    // Position tooltip near element
+    const rect = el.getBoundingClientRect();
+    tooltip.classList.add('show');
+
+    if (s.pos === 'bottom') {
+      tooltip.style.top = (rect.bottom + window.scrollY + 12) + 'px';
+      tooltip.style.left = Math.max(16, rect.left + window.scrollX) + 'px';
+    } else {
+      tooltip.style.top = Math.max(20, rect.top + window.scrollY - 180) + 'px';
+      tooltip.style.left = Math.max(16, rect.left + window.scrollX) + 'px';
+    }
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 120);
+}
+
+function nextTourStep() {
+  if (currentTourIndex >= TOUR_STEPS.length - 1) {
+    endTour();
+  } else {
+    showTourStep(currentTourIndex + 1);
+  }
+}
+
+function prevTourStep() {
+  if (currentTourIndex > 0) {
+    showTourStep(currentTourIndex - 1);
+  }
+}
+
+function skipTour() {
+  endTour();
+}
+
+function endTour() {
+  isTourRunning = false;
+  document.getElementById('tourOverlay').classList.remove('show');
+  document.getElementById('tourTooltip').classList.remove('show');
+  document.querySelectorAll('.spotlight-active').forEach(el => el.classList.remove('spotlight-active'));
+  localStorage.setItem('survsta_provider_tour_seen', 'true');
+}
+
+function restartTour() {
+  localStorage.setItem('survsta_provider_tour_seen', 'manual_run');
+  isTourRunning = true;
+  showTourStep(0);
+}
+
+// Auto-run once for new providers
+window.addEventListener('DOMContentLoaded', () => {
+  const hasSeen = localStorage.getItem('survsta_provider_tour_seen');
+  if (!hasSeen) {
+    setTimeout(() => {
+      isTourRunning = true;
+      showTourStep(0);
+    }, 600);
+  }
+});
+</script>
+</body>
+</html>

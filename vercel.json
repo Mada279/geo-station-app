@@ -28,5 +28,23 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/provider/dashboard",
+      "destination": "/provider/dashboard/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/a-dashboard.html"
+    },
+    {
+      "source": "/admin/users",
+      "destination": "/a-users.html"
+    },
+    {
+      "source": "/join",
+      "destination": "/join.html"
+    }
   ]
 }
