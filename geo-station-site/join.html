@@ -3,71 +3,176 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>انضم كشريك | Survsta</title>
-<meta name="description" content="سجّل مكتبك أو شركتك أو مركزك على Survsta واستقبل طلبات تواصل حقيقية.">
+<title>انضم كشريك — معالج تسجيل المزوّد | Survsta</title>
+<meta name="description" content="سجّل مكتبك أو شركتك أو مركزك على Survsta في 3 خطوات سهلة واستقبل طلبات تواصل حقيقية.">
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
 <!-- Survsta Platform — All Rights Reserved -->
-<link rel="stylesheet" href="assets/css/style.css?v=3.6">
+<link rel="stylesheet" href="assets/css/style.css?v=3.7">
+<style>
+.wizard-steps { display: flex; align-items: center; justify-content: space-between; position: relative; margin-bottom: 24px; }
+.wizard-line { position: absolute; top: 18px; left: 0; right: 0; height: 3px; background: #e2e8f0; z-index: 1; }
+.wizard-line-progress { position: absolute; top: 18px; right: 0; height: 3px; background: #0891b2; z-index: 2; transition: width 0.3s; }
+.step-item { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.step-circle { width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #64748b; transition: all 0.3s; }
+.step-item.active .step-circle { background: #0891b2; border-color: #0891b2; color: #fff; box-shadow: 0 0 0 4px rgba(8,145,178,0.2); }
+.step-item.completed .step-circle { background: #10b981; border-color: #10b981; color: #fff; }
+.step-label { font-size: 12px; font-weight: 600; color: #64748b; }
+.step-item.active .step-label { color: #0891b2; font-weight: 700; }
+.wizard-panel { display: none; }
+.wizard-panel.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.srv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 10px; }
+.srv-box { padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; }
+.srv-box input { margin-top: 3px; }
+.srv-box:hover { border-color: #0891b2; }
+.upload-zone { border: 2px dashed #94a3b8; padding: 22px; text-align: center; border-radius: 12px; background: #f8fafc; cursor: pointer; }
+.upload-zone:hover { border-color: #0891b2; background: #f0fdfa; }
+.chip-photo { display: inline-flex; align-items: center; gap: 6px; background: #e2e8f0; padding: 4px 10px; border-radius: 8px; font-size: 12px; margin: 4px; }
+</style>
 </head>
 <body>
 <main id="main">
 <section class="hero"><div class="hero-bg"><img src="assets/img/hero-engineering-office.jpg" alt="انضم كشريك في المنصة"></div>
-<div class="wrap hero-in" style="padding:52px 0 54px">
+<div class="wrap hero-in" style="padding:46px 0 48px">
   <div style="color:#9db2c6;font-size:13px">الرئيسية / انضم كشريك</div>
-  <h1 style="font-size:clamp(26px,3.6vw,40px);margin:12px 0 10px">انضم كشريك في Survsta</h1>
-  <p class="lead">سجّل جهتك مجانًا، أضف خدماتك ومعداتك، واستقبل طلبات تواصل من عملاء داخل نطاق عملك.</p>
-</div></section><section class="sec"><div class="wrap">
- <div class="grid g4" style="margin-bottom:34px">
- <div class="card"><div class="ico">🎯</div><h3>عملاء يبحثون فعلًا</h3><p>ظهورك أمام من يبحث عن خدمتك في محافظتك تحديدًا.</p></div><div class="card"><div class="ico">📥</div><h3>صندوق طلبات منظّم</h3><p>كل طلب بحالة واضحة وسجل أحداث كامل.</p></div><div class="card"><div class="ico">📊</div><h3>لوحة تحليلات</h3><p>اعرف مصادر طلباتك وأكثر الكلمات التي توصلك للعملاء.</p></div><div class="card"><div class="ico">⭐</div><h3>ملف يبني ثقتك</h3><p>تقييمات وتوثيق ومعرض أعمال ومعدات في مكان واحد.</p></div>
- </div>
+  <h1 style="font-size:clamp(26px,3.6vw,38px);margin:12px 0 10px">معالج تسجيل المزوّد الجديد (3 خطوات)</h1>
+  <p class="lead">سجّل مكتبك أو شركتك في أكبر شبكة للمساحة والجيوماتكس في مصر، واستقبل طلبات المشاريع والأجهزة مباشرة.</p>
+</div></section>
 
+<section class="sec"><div class="wrap">
  <div class="layout rev">
-  <div class="panel">
-   <h2 style="font-size:23px">بيانات التسجيل</h2>
-   <p class="muted" style="margin-top:6px">التسجيل مجاني. تراجع الإدارة البيانات قبل النشر، وقد نتواصل معك للتأكيد.</p>
-   <form style="margin-top:18px" onsubmit="event.preventDefault();toast('✅ تم استلام طلب التسجيل — سيتواصل معك فريق الشركاء خلال 48 ساعة');this.reset()">
-    <div class="formgrid">
-     <div class="field"><label>نوع الجهة *</label><select id="ptype" required></select></div>
-     <div class="field"><label>الاسم التجاري *</label><input required placeholder="مثال: مكتب الأمانة للمساحة"></div>
-     <div class="field"><label>اسم المسؤول *</label><input required></div>
-     <div class="field"><label>الصفة</label><input placeholder="صاحب المكتب / مدير"></div>
-     <div class="field"><label>رقم الهاتف *</label><input type="tel" required placeholder="01xxxxxxxxx" pattern="^01[0125][0-9]{8}$" maxlength="11" minlength="11" style="direction:ltr;text-align:right;"></div>
-     <div class="field"><label>واتساب</label><input type="tel" placeholder="01xxxxxxxxx" pattern="^01[0125][0-9]{8}$" maxlength="11" minlength="11" style="direction:ltr;text-align:right;"></div>
-     <div class="field"><label>البريد الإلكتروني</label><input type="email"></div>
-     <div class="field"><label>الموقع الإلكتروني / صفحة فيسبوك</label><input placeholder="https://"></div>
-     <div class="field"><label>المحافظة *</label><select id="pgov" required></select></div>
-      <div class="field"><label>المقر / العنوان (اختياري)</label><input placeholder="المقر الرئيسي (اختياري للمكاتب الافتراضية والميدانية)"></div>
-      <div class="field"><label>المدينة / الحي (اختياري)</label><input placeholder="المدينة أو المنطقة"></div>
-      <div class="field"><label>مواعيد العمل</label><input value="24 ساعة" placeholder="24 ساعة"></div>
-     <div class="field"><label>سنة بدء النشاط</label><input placeholder="2015"></div>
-     <div class="field"><label>حجم الفريق</label><select><option>1-5</option><option>6-15</option><option>16-40</option><option>أكثر من 40</option></select></div>
-     <div class="field full"><label>الخدمات التي تقدّمها *</label><textarea required rows="2" placeholder="رفع مساحي، تقسيم أراضي، تأجير أجهزة، معايرة..."></textarea></div>
-     <div class="field full"><label>نبذة عن الجهة</label><textarea rows="3" placeholder="اكتب وصفًا مختصرًا يظهر في ملفك العام"></textarea></div>
-     <div class="field full"><label>ماذا تريد أن تضيف بعد التسجيل؟</label>
-       <div><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> خدمات</label><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> أجهزة للبيع</label><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> أجهزة للإيجار</label><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> دورات تدريبية</label><label style="display:inline-flex;gap:7px;margin:6px 12px 0 0"><input type="checkbox"> وظائف</label></div></div>
-    </div>
-    <label class="muted" style="display:flex;gap:9px;margin:16px 0"><input type="checkbox" required checked> أقر بصحة البيانات وأوافق على <a href="terms.html" style="color:var(--cyan-d)">شروط الاستخدام</a> و<a href="privacy.html" style="color:var(--cyan-d)">سياسة الخصوصية</a>.</label>
-    <button class="btn btn-pri btn-lg btn-block">إرسال طلب التسجيل</button>
-   </form>
+  <div class="panel" style="padding:28px">
+   
+   <!-- WIZARD STEP INDICATORS -->
+   <div class="wizard-steps" id="wizardSteps">
+     <div class="wizard-line"></div>
+     <div class="wizard-line-progress" id="wizardProgress" style="width: 15%;"></div>
+     
+     <div class="step-item active" id="stepIndicator1">
+       <div class="step-circle">١</div>
+       <span class="step-label">البيانات الأساسية</span>
+     </div>
+     
+     <div class="step-item" id="stepIndicator2">
+       <div class="step-circle">٢</div>
+       <span class="step-label">بيانات النشاط</span>
+     </div>
+     
+     <div class="step-item" id="stepIndicator3">
+       <div class="step-circle">٣</div>
+       <span class="step-label">الخدمات والمعدات</span>
+     </div>
+   </div>
+
+   <!-- STEP 1: BASIC INFO -->
+   <div class="wizard-panel active" id="wizardStep1">
+     <h3 style="font-size:18px;margin-bottom:4px">الخطوة الأولى: البيانات الأساسية</h3>
+     <p class="muted" style="font-size:12.5px">أدخل بيانات المسؤول وحساب الدخول الخاص بك على المنصة.</p>
+     
+     <div class="formgrid" style="margin-top:16px">
+       <div class="field full"><label>الاسم بالكامل / اسم المسؤول *</label><input type="text" id="w_name" required placeholder="مثال: المهندس أحمد النجار"></div>
+       <div class="field"><label>البريد الإلكتروني المهني *</label><input type="email" id="w_email" required placeholder="contact@company.com"></div>
+       <div class="field">
+         <label>رقم الهاتف (موبايل مصري) *</label>
+         <input type="tel" id="w_phone" required placeholder="01xxxxxxxxx" maxlength="11" minlength="11" pattern="^01[0125][0-9]{8}$" style="direction:ltr;text-align:right;">
+         <small id="w_phone_err" style="display:none;color:#ef4444;font-size:11px;font-weight:bold;margin-top:3px">⚠️ يجب إدخال 11 رقمًا يبدأ بـ 010 أو 011 أو 012 أو 015</small>
+       </div>
+       <div class="field full"><label>كلمة المرور *</label><input type="password" id="w_pass" required placeholder="••••••••"></div>
+     </div>
+
+     <div class="rowf" style="margin-top:24px;justify-content:flex-end">
+       <button type="button" class="btn btn-pri btn-lg" onclick="goToStep(2)">متابعة الخطوة التالية ←</button>
+     </div>
+   </div>
+
+   <!-- STEP 2: BUSINESS DETAILS -->
+   <div class="wizard-panel" id="wizardStep2">
+     <h3 style="font-size:18px;margin-bottom:4px">الخطوة الثانية: بيانات النشاط التجاري</h3>
+     <p class="muted" style="font-size:12.5px">تفاصيل الكيان الهندسي ونطاق تغطيتك الجغرافية ومواعيد العمل.</p>
+     
+     <div class="formgrid" style="margin-top:16px">
+       <div class="field full"><label>الاسم التجاري للمكتب أو الشركة</label><input type="text" id="w_org" placeholder="مثال: مكتب النخبة للحلول المساحية والهندسية"></div>
+       <div class="field"><label>المحافظة (نطاق العمل الأساسي)</label><select id="pgov"></select></div>
+       <div class="field"><label>مواعيد العمل</label><input type="text" id="w_hours" value="24 ساعة" placeholder="24 ساعة"></div>
+       <div class="field full"><label>المقر / العنوان (اختياري)</label><input type="text" id="w_loc" placeholder="المقر الرئيسي (اختياري للمكاتب الافتراضية والميدانية)"></div>
+     </div>
+
+     <div class="rowf" style="margin-top:24px;justify-content:space-between">
+       <button type="button" class="btn btn-soft" onclick="goToStep(1)">→ السابق</button>
+       <button type="button" class="btn btn-pri btn-lg" onclick="goToStep(3)">متابعة الخطوة التالية ←</button>
+     </div>
+   </div>
+
+   <!-- STEP 3: SERVICES & EQUIPMENT MEDIA -->
+   <div class="wizard-panel" id="wizardStep3">
+     <h3 style="font-size:18px;margin-bottom:4px">الخطوة الثالثة: الخدمات المساحية وصور المعدات</h3>
+     <p class="muted" style="font-size:12.5px">حدد الخدمات المتاحة لديك وارفع صور أجهزتك لتوثيق الحساب سريعاً.</p>
+
+     <div style="margin-top:16px">
+       <label style="font-weight:bold;font-size:13px">الخدمات التي تقدمها:</label>
+       <div class="srv-grid">
+         <label class="srv-box"><input type="checkbox" checked value="إيجار أجهزة"> <div><b>إيجار أجهزة ومعدات</b><div class="muted" style="font-size:11px">محطات رصد، توتال ستيشن، GPS</div></div></label>
+         <label class="srv-box"><input type="checkbox" checked value="بيع أجهزة"> <div><b>بيع وتوريد أجهزة</b><div class="muted" style="font-size:11px">أجهزة جديدة ومستعملة مع الضمان</div></div></label>
+         <label class="srv-box"><input type="checkbox" value="معايرة وصيانة"> <div><b>معايرة وصيانة معتمدة</b><div class="muted" style="font-size:11px">مختبر فحص وشهادات معايرة دورية</div></div></label>
+         <label class="srv-box"><input type="checkbox" value="خدمات مساحية"> <div><b>خدمات رفع ومساحة</b><div class="muted" style="font-size:11px">رفع طوبوغرافي وتوقيع محاور</div></div></label>
+         <label class="srv-box"><input type="checkbox" value="تدريب هندسي"> <div><b>تدريب وكورسات</b><div class="muted" style="font-size:11px">دورات عملية على الأجهزة المساحية</div></div></label>
+         <label class="srv-box"><input type="checkbox" value="طائرات درون"> <div><b>مسح جوي ودرون</b><div class="muted" style="font-size:11px">تصوير جوي ومعالجة سحب النقط</div></div></label>
+       </div>
+     </div>
+
+     <div style="margin-top:20px">
+       <label style="font-weight:bold;font-size:13px">صور الأجهزة والمعدات (Equipment Photos):</label>
+       <div class="upload-zone" style="margin-top:8px" onclick="$('#photoUploadInput').click()">
+         <input type="file" id="photoUploadInput" multiple accept="image/*" style="display:none" onchange="handleMockUpload(this)">
+         <div style="font-size:32px">📸</div>
+         <b style="color:#0891b2;font-size:13px;display:block;margin-top:6px">اضغط لرفع صور المعدات (Mock File Upload)</b>
+         <span class="muted" style="font-size:11.5px">أرفق صور المحطات والأجهزة والمختبر لتسريع الاعتماد</span>
+       </div>
+       <div id="photoChips" style="margin-top:10px">
+         <span class="chip-photo">📷 TotalStation_Leica.jpg</span>
+         <span class="chip-photo">📷 GNSS_RTK_Receiver.png</span>
+       </div>
+     </div>
+
+     <div class="rowf" style="margin-top:24px;justify-content:space-between">
+       <button type="button" class="btn btn-soft" onclick="goToStep(2)">→ السابق</button>
+       <button type="button" class="btn btn-org btn-lg" onclick="finishRegistration()">إرسال طلب الانضمام الآن 🚀</button>
+     </div>
+   </div>
+
+   <!-- SUCCESS STATE (Exact requested Arabic text) -->
+   <div class="wizard-panel" id="wizardSuccess" style="text-align:center;padding:24px 0">
+     <div style="width:68px;height:68px;border-radius:50%;background:#ecfdf5;border:2px solid #10b981;color:#10b981;font-size:36px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">✓</div>
+     <h2 style="font-size:22px;color:#0f172a;margin-bottom:8px">تم استلام طلبك بنجاح. سيتم مراجعة البيانات وإرسال كود التفعيل قريباً.</h2>
+     <p class="muted" style="font-size:13.5px;max-width:500px;margin:0 auto 20px;line-height:1.6">
+       يقوم فريق إدارة Survsta بمراجعة صور الأجهزة والبيانات المدخلة، وتوليد كود التفعيل المباشر وتزويدك به عبر الواتساب أو البريد الإلكتروني.
+     </p>
+     <div style="display:inline-block;padding:12px 24px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;font-size:12.5px;text-align:right">
+       <div><b>حالة الطلب:</b> <span style="color:#f59e0b">قيد المراجعة الفورية</span></div>
+       <div style="margin-top:4px"><b>رقم المرجع:</b> <code id="refId">SRV-854921</code></div>
+     </div>
+     <div style="margin-top:24px">
+       <a href="index.html" class="btn btn-pri">العودة للصفحة الرئيسية</a>
+       <a href="login.html" class="btn btn-soft" style="margin-right:8px">صفحة تسجيل الدخول</a>
+     </div>
+   </div>
+
   </div>
+
   <aside><div class="panel sticky">
-   <h3 style="font-size:18px">ماذا يحدث بعد الإرسال؟</h3>
+   <h3 style="font-size:18px">دورة تفعيل حساب الشريك</h3>
    <div class="steps" style="margin-top:14px">
-    <div class="step" style="padding:14px 14px 14px 14px;padding-inline-start:58px"><b>مراجعة أولية</b><p style="font-size:13.5px">خلال 48 ساعة عمل.</p></div>
-    <div class="step" style="padding-inline-start:58px"><b>تأكيد البيانات</b><p style="font-size:13.5px">مكالمة قصيرة أو رسالة للتحقق.</p></div>
-    <div class="step" style="padding-inline-start:58px"><b>تفعيل الحساب</b><p style="font-size:13.5px">تستلم بيانات الدخول للوحة المزوّد.</p></div>
-    <div class="step" style="padding-inline-start:58px"><b>النشر والظهور</b><p style="font-size:13.5px">يظهر ملفك في البحث والخريطة.</p></div>
+    <div class="step" style="padding:14px 14px 14px 14px;padding-inline-start:58px"><b>الخطوة ١: تقديم الطلب</b><p style="font-size:13px">عبر المعالج السريع في 3 خطوات.</p></div>
+    <div class="step" style="padding-inline-start:58px"><b>الخطوة ٢: مراجعة صور الأجهزة</b><p style="font-size:13px">مطابقة المعدات والبيانات.</p></div>
+    <div class="step" style="padding-inline-start:58px"><b>الخطوة ٣: كود التفعيل OTP</b><p style="font-size:13px">استلام الرمز عبر الواتساب أو الإيميل.</p></div>
+    <div class="step" style="padding-inline-start:58px"><b>الخطوة ٤: النشر والظهور</b><p style="font-size:13px">الانضمام لقائمة المزودين المعتمدين.</p></div>
    </div>
    <div class="sep"></div>
-   <div class="notice cy">التسجيل والظهور الأساسي مجاني بالكامل. الباقات المدفوعة اختيارية وتخص الظهور المميّز والإعلانات فقط.</div>
+   <div class="notice cy">التسجيل والظهور الأساسي مجاني بالكامل لجميع مكاتب وشركات المساحة والموردين في مصر.</div>
    <div class="sep"></div>
     <b>مسجّل بالفعل؟</b><p class="muted" style="margin-top:6px">ادخل إلى بوابة المزوّد لمتابعة طلباتك وإدراجاتك وأدائك.</p>
     <a href="login.html?redirect=p-dashboard.html" class="btn btn-pri btn-block btn-sm">🔐 تسجيل الدخول للشركاء</a>
-    <a href="register.html" class="btn btn-soft btn-block btn-sm" style="margin-top:8px">✨ فتح حساب شريك جديد</a>
     <a href="login.html?redirect=a-dashboard.html" class="btn btn-soft btn-block btn-sm" style="margin-top:8px">🛡️ لوحة إدارة المنصة</a>
-   <div class="sep"></div>
-   <b>محتاج مساعدة؟</b><p class="muted" style="margin-top:6px">فريق خدمة الشركاء متاح من السبت للخميس، 9ص — 5م.</p>
-   <a href="contact.html" class="btn btn-soft btn-block btn-sm">تواصل مع الفريق</a>
   </div></aside>
  </div>
 </div></section>
@@ -75,10 +180,73 @@
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/store.js"></script>
-<script src="assets/js/app.js?v=3.6"></script>
+<script src="assets/js/app.js?v=3.7"></script>
 <script>
 mountShell("join.html");
-$("#ptype").innerHTML=PROVIDER_TYPES.map(t=>`<option value="${t.slug}">${t.single}</option>`).join("");$("#pgov").innerHTML=GOVS.map(g=>`<option>${g}</option>`).join("");
+$("#pgov").innerHTML = GOVS.map(g=>`<option>${g}</option>`).join("");
+
+function goToStep(s) {
+  if (s === 2) {
+    const name = $("#w_name").value.trim();
+    const email = $("#w_email").value.trim();
+    const phone = $("#w_phone").value.trim();
+    const pass = $("#w_pass").value;
+    const phoneErr = $("#w_phone_err");
+
+    if (!name) { toast("⚠️ يرجى إدخال اسم المسؤول"); $("#w_name").focus(); return; }
+    if (!email || !email.includes("@")) { toast("⚠️ يرجى إدخال بريد إلكتروني صحيح"); $("#w_email").focus(); return; }
+    if (!/^01[0125][0-9]{8}$/.test(phone)) {
+      phoneErr.style.display = "block";
+      toast("⚠️ رقم الهاتف غير مطابق لصيغة المحمول المصري");
+      $("#w_phone").focus();
+      return;
+    } else {
+      phoneErr.style.display = "none";
+    }
+    if (!pass || pass.length < 6) { toast("⚠️ كلمة المرور يجب أن لا تقل عن 6 خانات"); $("#w_pass").focus(); return; }
+  }
+
+  // Update panels
+  [1, 2, 3].forEach(n => {
+    const p = $(`#wizardStep${n}`);
+    if (p) p.classList.remove("active");
+    const ind = $(`#stepIndicator${n}`);
+    if (ind) {
+      if (n < s) { ind.className = "step-item completed"; }
+      else if (n === s) { ind.className = "step-item active"; }
+      else { ind.className = "step-item"; }
+    }
+  });
+
+  $(`#wizardStep${s}`).classList.add("active");
+  const prog = s === 1 ? "15%" : s === 2 ? "50%" : "90%";
+  $("#wizardProgress").style.width = prog;
+  window.scrollTo({ top: 320, behavior: "smooth" });
+}
+
+function handleMockUpload(input) {
+  if (input.files && input.files.length > 0) {
+    for (let f of input.files) {
+      const chip = document.createElement("span");
+      chip.className = "chip-photo";
+      chip.textContent = "📷 " + f.name;
+      $("#photoChips").appendChild(chip);
+    }
+    toast("✅ تم إرفاق صور المعدات بنجاح");
+  }
+}
+
+function finishRegistration() {
+  [1, 2, 3].forEach(n => {
+    const p = $(`#wizardStep${n}`);
+    if (p) p.classList.remove("active");
+  });
+  $("#wizardSteps").style.display = "none";
+  $("#wizardSuccess").classList.add("active");
+  $("#refId").textContent = "SRV-" + Math.floor(100000 + Math.random() * 900000);
+  window.scrollTo({ top: 320, behavior: "smooth" });
+  toast("✅ تم استلام طلبك بنجاح!");
+}
 </script>
 </body>
 </html>

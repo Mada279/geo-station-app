@@ -1,3 +1,31 @@
+
+window.openAdminGuideModal = function() {
+  openModal(`<button class="x" onclick="closeModal()">✕</button>
+  <div style="text-align:right">
+    <h3>📖 دليل مدير النظام</h3>
+    <p class="muted" style="color:#d97706;font-weight:bold;margin-bottom:12px">دورة العمل القياسية لمراجعة وتوثيق وتفعيل مزوّدي الخدمات على Survsta</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;display:flex;gap:12px;align-items:flex-start">
+        <div style="width:26px;height:26px;border-radius:50%;background:#0891b2;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">١</div>
+        <div><b style="font-size:13.5px">الخطوة ١: مراجعة طلبات الانضمام الجديدة من قائمة الطلبات.</b><div class="muted" style="font-size:11.5px;margin-top:2px">استعراض طلبات الانضمام الجديدة من طابور المراجعة حسب تاريخ التقديم.</div></div>
+      </div>
+      <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;display:flex;gap:12px;align-items:flex-start">
+        <div style="width:26px;height:26px;border-radius:50%;background:#0891b2;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">٢</div>
+        <div><b style="font-size:13.5px">الخطوة ٢: مراجعة صور الأجهزة والبيانات.</b><div class="muted" style="font-size:11.5px;margin-top:2px">مطابقة صور أجهزة التوتال ستيشن والـ GPS والمختبرات مع بيانات النشاط.</div></div>
+      </div>
+      <div style="padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;display:flex;gap:12px;align-items:flex-start">
+        <div style="width:26px;height:26px;border-radius:50%;background:#0891b2;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">٣</div>
+        <div><b style="font-size:13.5px">الخطوة ٣: استخدام أزرار الواتساب أو الإيميل لإرسال كود التفعيل المولد تلقائياً.</b><div class="muted" style="font-size:11.5px;margin-top:2px">توليد رمز OTP من 6 أرقام ومشاركته بروابط مباشرة وآمنة.</div></div>
+      </div>
+      <div style="padding:12px;background:#fef3c7;border-radius:10px;border:1px solid #fde68a;display:flex;gap:12px;align-items:flex-start">
+        <div style="width:26px;height:26px;border-radius:50%;background:#d97706;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">٤</div>
+        <div><b style="font-size:13.5px">الخطوة ٤: تفعيل الحساب لينتقل المزود إلى قائمة "المزودين المعتمدين".</b><div class="muted" style="font-size:11.5px;margin-top:2px">نشر الملف بالدليل العام وتوثيق الحساب رسمياً على المنصة.</div></div>
+      </div>
+    </div>
+    <button class="btn btn-pri btn-block" style="margin-top:16px" onclick="closeModal()">فهمت الدليل، إغلاق</button>
+  </div>`);
+};
+
 /* Survsta — Portal shell, data & shared components
    Survsta — All Rights Reserved */
 
@@ -96,6 +124,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
     <div class="sp"></div>
     <input class="tsearch" placeholder="بحث سريع…" onkeydown="if(event.key==='Enter')toast('بحث: '+this.value)">
     <button class="iconbtn" onclick="location.href='${mode==='admin'?'a-dashboard.html':'p-notifications.html'}'">🔔<span class="dot"></span></button>
+    <button class="btn btn-soft btn-sm" style="font-weight:bold;margin:0 4px;" onclick="window.openAdminGuideModal()">📖 دليل النظام</button>
     <button class="iconbtn" onclick="toast('مركز المساعدة')">❓</button>
     ${I18N.button()}
     <div class="who"><div class="av">${c.av}</div><div><b>${c.user}</b><small>${c.role}</small></div></div>

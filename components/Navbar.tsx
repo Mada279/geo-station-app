@@ -78,7 +78,7 @@ export default function Navbar({ user }: NavbarProps) {
             <div className="flex items-center gap-3">
               {user.role === 'admin' && (
                 <Link
-                  href="/admin/users"
+                  href="/admin"
                   className="rounded-lg bg-gray-900 border border-cyan-500/30 px-3.5 py-1.5 text-xs font-semibold text-cyan-400 hover:bg-gray-800 transition"
                 >
                   لوحة الإدارة
