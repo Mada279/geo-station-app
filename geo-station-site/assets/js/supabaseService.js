@@ -12,8 +12,8 @@
   // ============================================================
   // 🔑 SUPABASE CONFIGURATION — ضع مفاتيح مشروعك هنا
   // ============================================================
-  const SUPABASE_URL = "";       // مثال: "https://xyzcompany.supabase.co"
-  const SUPABASE_ANON_KEY = "";  // مثال: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  const SUPABASE_URL = "https://ellqshlnwbkbdykdhmvf.supabase.co";       // مثال: "https://xyzcompany.supabase.co"
+  const SUPABASE_ANON_KEY = "sb_publishable_i877vf50nPJ4ZkUz2ywCsg_XorQoDBQ";  // مثال: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
   const CDN_MODULE_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
