@@ -2,6 +2,7 @@
  * ============================================================
  *   Survsta — AUTH GUARD & RBAC SESSION MANAGER
  *   Role-Based Access Control (RBAC) for Provider & Admin Portals
+ *   Synchronized with Edge Middleware & survsta_session Cookie
  *   Survsta — All Rights Reserved
  * ============================================================
  */
@@ -18,7 +19,7 @@
     id: "admin-demo-1",
     email: "admin@survsta.com",
     name: "م. محمد فرج",
-    role: "super_admin",
+    role: "admin",
     org: "Survsta Admin",
     av: "مف"
   };
@@ -41,9 +42,90 @@
     },
 
     /**
-     * الحصول على المستخدم الحالي (حقيقي من السحابة أو من الجلسة المحلية)
+     * قراءة وفك تشفير كوكيز الجلسة survsta_session والمزامنة مع Edge Middleware
+     */
+    getSessionCookie() {
+      if (typeof document === "undefined" || !document.cookie) return null;
+      try {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.startsWith("survsta_session=")) {
+            const raw = cookie.substring("survsta_session=".length);
+            let parsed = null;
+            try {
+              parsed = JSON.parse(decodeURIComponent(raw));
+            } catch {
+              try {
+                parsed = JSON.parse(raw);
+              } catch {}
+            }
+            if (parsed && typeof parsed === "object" && parsed.role) {
+              return parsed;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[AuthGuard] خطأ في قراءة كوكيز survsta_session:", e);
+      }
+
+      // بديل احتياطي: user_role cookie
+      try {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.startsWith("user_role=")) {
+            const role = decodeURIComponent(cookie.substring("user_role=".length)).trim();
+            if (role) return { role: role };
+          }
+        }
+      } catch (e) {}
+
+      return null;
+    },
+
+    /**
+     * جلب الصفحة والمسار الحالي بدقة
+     */
+    getCurrentPage() {
+      const pathname = (typeof location !== "undefined" ? location.pathname || "" : "").toLowerCase();
+      const parts = pathname.split("/").filter(Boolean);
+      return parts[parts.length - 1] || "index.html";
+    },
+
+    /**
+     * الحصول على المستخدم الحالي (حقيقي من السحابة، أو من كوكيز الجلسة، أو من التخزين المحلي)
      */
     async getUser() {
+      // 0. فحص كوكيز الجلسة أولاً (Sync with Edge Middleware)
+      const sessionCookie = this.getSessionCookie();
+      if (sessionCookie && sessionCookie.role) {
+        // جلسة سارية عبر الكوكيز -> إلغاء أي حالة خروج سابقة فوراً
+        try {
+          localStorage.removeItem(STORAGE_KEY_LOGGED_OUT);
+          localStorage.removeItem(LEGACY_STORAGE_KEY_LOGGED_OUT);
+        } catch (e) {}
+
+        const isAdminRole = sessionCookie.role === "admin" || sessionCookie.role === "super_admin";
+        const baseDefault = isAdminRole ? DEFAULT_ADMIN : DEFAULT_PROVIDER;
+
+        const userObj = {
+          id: sessionCookie.userId || sessionCookie.id || baseDefault.id,
+          email: sessionCookie.email || (isAdminRole ? "admin@survsta.com" : "provider@survsta.com"),
+          name: sessionCookie.name || baseDefault.name,
+          role: sessionCookie.role,
+          org: sessionCookie.org || baseDefault.org,
+          av: sessionCookie.av || baseDefault.av
+        };
+
+        try {
+          localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userObj));
+          localStorage.setItem(LEGACY_STORAGE_KEY_USER, JSON.stringify(userObj));
+        } catch (e) {}
+
+        return userObj;
+      }
+
       // 1. إذا كان Supabase مهيأ
       if (this.isCloudMode()) {
         try {
@@ -86,11 +168,12 @@
         }
       }
 
-      // إذا لم يكن هناك تسجيل خروج صريح في وضع العرض، نوفر جلسة افتراضية متوافقة
+      // 3. التوافق التجريبي التلقائي إذا لم يتم تسجيل الخروج صراحة
       const page = this.getCurrentPage();
-      if (page.startsWith("a-")) {
+      const pathname = (typeof location !== "undefined" ? location.pathname || "" : "").toLowerCase();
+      if (page.startsWith("a-") || page === "admin" || pathname.startsWith("/admin") || pathname.includes("/a-")) {
         return DEFAULT_ADMIN;
-      } else if (page.startsWith("p-")) {
+      } else if (page.startsWith("p-") || page === "provider" || pathname.startsWith("/provider") || pathname.includes("/p-")) {
         return DEFAULT_PROVIDER;
       }
 
@@ -98,27 +181,47 @@
     },
 
     /**
-     * جلب الصفحة الحالية
-     */
-    getCurrentPage() {
-      const parts = (location.pathname || "").split("/");
-      return parts[parts.length - 1] || "index.html";
-    },
-
-    /**
      * فحص صلاحيات الصفحة الحالية وتطبيق الحماية (RBAC Guard)
+     * يمنع الـ "Flash and Bounce" ويتحقق من كوكيز survsta_session
      */
     async check() {
       const page = this.getCurrentPage();
-      const isProvider = page.startsWith("p-");
-      const isAdmin = page.startsWith("a-");
+      const pathname = (typeof location !== "undefined" ? location.pathname || "" : "").toLowerCase();
+
+      const isProvider = page.startsWith("p-") || pathname.startsWith("/provider") || pathname.includes("/p-") || page === "provider";
+      const isAdmin = page.startsWith("a-") || pathname.startsWith("/admin") || pathname.includes("/a-") || page === "admin" || page === "a-dashboard";
 
       // الصفحات العامة لا تحتاج تحقق حظر
       if (!isProvider && !isAdmin) return true;
 
+      // أولوية 1: فحص فوري لكوكيز الجلسة survsta_session المعتمَدة في Edge Middleware
+      const sessionCookie = this.getSessionCookie();
+      if (sessionCookie && sessionCookie.role) {
+        const isCookieAdmin = sessionCookie.role === "admin" || sessionCookie.role === "super_admin";
+        const isCookieProvider = sessionCookie.role === "provider";
+
+        if (isAdmin && isCookieAdmin) {
+          // مدير نظام مصادق عليه رسمياً - عدم التوجيه مطلقاً
+          this.getUser().catch(() => {});
+          return true;
+        }
+
+        if (isProvider && (isCookieProvider || isCookieAdmin)) {
+          // مزود خدمة أو مدير نظام يتصفح بوابة المزوّد
+          this.getUser().catch(() => {});
+          return true;
+        }
+
+        if (isAdmin && isCookieProvider) {
+          alert("⚠️ عذرًا: هذه الصفحة مخصصة لمديري النظام فقط. سيتم تحويلك إلى لوحة المزوّد.");
+          location.href = "p-dashboard.html";
+          return false;
+        }
+      }
+
       const user = await this.getUser();
 
-      // إذا لم يكن مسجل الدخول نهائياً
+      // إذا لم يكن مسجل الدخول نهائياً ولا توجد كوكيز صالحة
       if (!user) {
         console.warn(`[AuthGuard] وصول غير مصرح لصفحة (${page}) — تحويل لصفحة تسجيل الدخول.`);
         const redirectUrl = `login.html?redirect=${encodeURIComponent(page + location.search)}`;
@@ -153,6 +256,7 @@
      */
     async signIn(email, password, mockRole = null) {
       localStorage.removeItem(STORAGE_KEY_LOGGED_OUT);
+      localStorage.removeItem(LEGACY_STORAGE_KEY_LOGGED_OUT);
 
       // إذا كان Supabase متصلاً
       if (this.isCloudMode()) {
@@ -163,12 +267,17 @@
       }
 
       // محاكاة تسجيل الدخول المحلي (Demo / Offline Mode)
-      const role = mockRole || (email.includes("admin") ? "super_admin" : "provider");
+      const role = mockRole || (email.includes("admin") ? "admin" : "provider");
       const user = role === "super_admin" || role === "admin"
         ? { ...DEFAULT_ADMIN, email }
         : { ...DEFAULT_PROVIDER, email };
 
+      // مزامنة الكوكيز مع التخزين المحلي
+      document.cookie = `survsta_session=${encodeURIComponent(JSON.stringify({ role: user.role, email: user.email, name: user.name, org: user.org }))}; path=/; max-age=86400`;
+      document.cookie = `user_role=${user.role}; path=/; max-age=86400`;
+
       localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+      localStorage.setItem(LEGACY_STORAGE_KEY_USER, JSON.stringify(user));
       return { user, error: null };
     },
 
@@ -177,6 +286,7 @@
      */
     async signUp(email, password, metadata = {}) {
       localStorage.removeItem(STORAGE_KEY_LOGGED_OUT);
+      localStorage.removeItem(LEGACY_STORAGE_KEY_LOGGED_OUT);
 
       if (this.isCloudMode()) {
         return await global.SupabaseService.Auth.signUp({
@@ -196,7 +306,12 @@
         org: metadata.org_name || (role === "admin" ? "Survsta Admin" : "مكتب مساحة"),
         av: (metadata.full_name || email).substring(0, 2).toUpperCase()
       };
+
+      document.cookie = `survsta_session=${encodeURIComponent(JSON.stringify({ role: user.role, email: user.email, name: user.name, org: user.org }))}; path=/; max-age=86400`;
+      document.cookie = `user_role=${user.role}; path=/; max-age=86400`;
+
       localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+      localStorage.setItem(LEGACY_STORAGE_KEY_USER, JSON.stringify(user));
       return { user, error: null };
     },
 
@@ -212,13 +327,18 @@
         }
       }
 
+      // مسح الكوكيز لجعل Edge Middleware يرفض الوصول أيضاً
+      document.cookie = "survsta_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = "user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
       localStorage.removeItem(STORAGE_KEY_USER);
       localStorage.removeItem(LEGACY_STORAGE_KEY_USER);
       localStorage.setItem(STORAGE_KEY_LOGGED_OUT, "1");
       localStorage.setItem(LEGACY_STORAGE_KEY_LOGGED_OUT, "1");
 
       const page = this.getCurrentPage();
-      if (page.startsWith("p-") || page.startsWith("a-")) {
+      const pathname = (typeof location !== "undefined" ? location.pathname || "" : "").toLowerCase();
+      if (page.startsWith("p-") || page.startsWith("a-") || pathname.startsWith("/admin") || pathname.startsWith("/provider")) {
         location.href = "login.html";
       } else {
         location.reload();

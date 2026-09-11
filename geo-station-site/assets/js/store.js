@@ -27,7 +27,7 @@ if (typeof global.SupabaseService === "undefined" && typeof document !== "undefi
 /* ---------- Dynamic Loader for AuthGuard ---------- */
 if (typeof global.AuthGuard === "undefined" && typeof document !== "undefined") {
   const ag = document.createElement("script");
-  ag.src = "assets/js/authGuard.js";
+  ag.src = "assets/js/authGuard.js?v=3.8";
   ag.async = true;
   document.head.appendChild(ag);
 }

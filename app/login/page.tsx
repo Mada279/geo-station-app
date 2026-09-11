@@ -27,8 +27,20 @@ function LoginForm() {
 
       // Explicit Admin Login Logic
       if (cleanEmail === 'admin@survsta.com' && cleanPass === 'admin') {
-        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: 'admin' })) + "; path=/; max-age=86400";
+        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: 'admin', email: 'admin@survsta.com', name: 'م. محمد فرج', org: 'Survsta Admin' })) + "; path=/; max-age=86400";
         document.cookie = "user_role=admin; path=/; max-age=86400";
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.removeItem('SURVSTA_LOGGED_OUT');
+          localStorage.removeItem('GS_LOGGED_OUT');
+          localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify({
+            id: 'admin-demo-1',
+            email: 'admin@survsta.com',
+            name: 'م. محمد فرج',
+            role: 'admin',
+            org: 'Survsta Admin',
+            av: 'مف'
+          }));
+        }
         
         if (callbackUrl && callbackUrl.startsWith('/')) {
           router.push(callbackUrl);
@@ -40,8 +52,20 @@ function LoginForm() {
 
       // Explicit Provider Login Logic
       if (cleanEmail === 'provider@survsta.com' && cleanPass === 'provider') {
-        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: 'provider' })) + "; path=/; max-age=86400";
+        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: 'provider', email: 'provider@survsta.com', name: 'م. أحمد النجار', org: 'مكتب النخبة للمساحة' })) + "; path=/; max-age=86400";
         document.cookie = "user_role=provider; path=/; max-age=86400";
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.removeItem('SURVSTA_LOGGED_OUT');
+          localStorage.removeItem('GS_LOGGED_OUT');
+          localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify({
+            id: 'provider-demo-1',
+            email: 'provider@survsta.com',
+            name: 'م. أحمد النجار',
+            role: 'provider',
+            org: 'مكتب النخبة للمساحة',
+            av: 'أن'
+          }));
+        }
         
         if (callbackUrl && callbackUrl.startsWith('/')) {
           router.push(callbackUrl);
