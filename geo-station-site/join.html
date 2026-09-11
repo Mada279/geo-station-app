@@ -7,7 +7,7 @@
 <meta name="description" content="سجّل مكتبك أو شركتك أو مركزك على Survsta واستقبل طلبات تواصل حقيقية.">
 <meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
 <!-- Survsta Platform — All Rights Reserved -->
-<link rel="stylesheet" href="assets/css/style.css?v=3.5">
+<link rel="stylesheet" href="assets/css/style.css?v=3.6">
 </head>
 <body>
 <main id="main">
@@ -31,12 +31,14 @@
      <div class="field"><label>الاسم التجاري *</label><input required placeholder="مثال: مكتب الأمانة للمساحة"></div>
      <div class="field"><label>اسم المسؤول *</label><input required></div>
      <div class="field"><label>الصفة</label><input placeholder="صاحب المكتب / مدير"></div>
-     <div class="field"><label>رقم الهاتف *</label><input required placeholder="01xxxxxxxxx"></div>
-     <div class="field"><label>واتساب</label><input placeholder="01xxxxxxxxx"></div>
+     <div class="field"><label>رقم الهاتف *</label><input type="tel" required placeholder="01xxxxxxxxx" pattern="^01[0125][0-9]{8}$" maxlength="11" minlength="11" style="direction:ltr;text-align:right;"></div>
+     <div class="field"><label>واتساب</label><input type="tel" placeholder="01xxxxxxxxx" pattern="^01[0125][0-9]{8}$" maxlength="11" minlength="11" style="direction:ltr;text-align:right;"></div>
      <div class="field"><label>البريد الإلكتروني</label><input type="email"></div>
      <div class="field"><label>الموقع الإلكتروني / صفحة فيسبوك</label><input placeholder="https://"></div>
      <div class="field"><label>المحافظة *</label><select id="pgov" required></select></div>
-     <div class="field"><label>المدينة / الحي *</label><input required></div>
+      <div class="field"><label>المقر / العنوان (اختياري)</label><input placeholder="المقر الرئيسي (اختياري للمكاتب الافتراضية والميدانية)"></div>
+      <div class="field"><label>المدينة / الحي (اختياري)</label><input placeholder="المدينة أو المنطقة"></div>
+      <div class="field"><label>مواعيد العمل</label><input value="24 ساعة" placeholder="24 ساعة"></div>
      <div class="field"><label>سنة بدء النشاط</label><input placeholder="2015"></div>
      <div class="field"><label>حجم الفريق</label><select><option>1-5</option><option>6-15</option><option>16-40</option><option>أكثر من 40</option></select></div>
      <div class="field full"><label>الخدمات التي تقدّمها *</label><textarea required rows="2" placeholder="رفع مساحي، تقسيم أراضي، تأجير أجهزة، معايرة..."></textarea></div>
@@ -73,7 +75,7 @@
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/store.js"></script>
-<script src="assets/js/app.js?v=3.5"></script>
+<script src="assets/js/app.js?v=3.6"></script>
 <script>
 mountShell("join.html");
 $("#ptype").innerHTML=PROVIDER_TYPES.map(t=>`<option value="${t.slug}">${t.single}</option>`).join("");$("#pgov").innerHTML=GOVS.map(g=>`<option>${g}</option>`).join("");

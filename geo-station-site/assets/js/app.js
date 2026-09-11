@@ -1,3 +1,95 @@
+
+/* ---------------- Dynamic Need Categories & Phone Validation ---------------- */
+const NEED_SUB_CATEGORIES = {
+  "إيجار أجهزة": [
+    "إيجار يومي - طقم مساحة كامل",
+    "إيجار شهري - طقم مساحة كامل",
+    "جهاز فقط بدون أفراد",
+    "إيجار أسبوعي مع مسّاح",
+    "تأجير محطة رصد متكاملة Total Station",
+    "تأجير طقم استقبال أقمار صناعية GNSS / RTK",
+    "تأجير ميزان قامة Level رقمي أو بصري"
+  ],
+  "خدمة مساحية": [
+    "رفع مساحي طبوغرافي وخرائط كونتورية",
+    "توقيع محاور ونقاط إنشائية بالموقع",
+    "حصر كميات حفر وردم وتسويات",
+    "مسح ليزري ثلاثي الأبعاد 3D Laser Scanning",
+    "مسح جوي بطائرات الدرون مع معالجة الصور Drone",
+    "تقسيم وفرز أراضي ومطابقة إحداثيات",
+    "إنشاء وتثبيت شبكات ثوابت ورصد GPS"
+  ],
+  "شراء جهاز": [
+    "Total Station جديد بالضمان",
+    "Total Station مستعمل بحالة ممتازة",
+    "طقم GNSS / RTK متكامل جديد أو كسر زيرو",
+    "ميزان قامة Level مع الحامل والقامة",
+    "طائرة مسح جوي Drone مع الكاميرا والحساسات",
+    "ملحقات وإكسسوارات مساحية (عوكس، حوامل، بطاريات، كابلات)"
+  ],
+  "معايرة أو صيانة": [
+    "معايرة دورية وإصدار شهادة معتمدة",
+    "صيانة وإصلاح أعطال إلكترونية وشاشات",
+    "استبدال بوردات أو بطاريات أصلية",
+    "ضبط وتعديل محاور وزوايا الجهاز الأفقية والرأسية"
+  ],
+  "تدريب": [
+    "دورة تدريب عملي Total Station",
+    "دورة GNSS / RTK وتطبيقات الحقل",
+    "دورة AutoCAD Civil 3D للمساحة والطرق",
+    "دورة معالجة بيانات الدرون وLiDAR",
+    "دورة نظم المعلومات الجغرافية GIS"
+  ],
+  "توظيف": [
+    "مطلوب مهندس مساحة خبرة للموقع",
+    "مطلوب مسّاح موقع محترف Total / GPS",
+    "مطلوب مساعد مسّاح للعمل الميداني",
+    "مطلوب مهندس مكتب فني ومعالجة بيانات CAD"
+  ]
+};
+window.NEED_SUB_CATEGORIES = NEED_SUB_CATEGORIES;
+
+window.updateNeedSubCategories = function(mainCat) {
+  const subEl = document.getElementById("needSubCat");
+  if (!subEl) return;
+  const list = NEED_SUB_CATEGORIES[mainCat] || NEED_SUB_CATEGORIES["إيجار أجهزة"];
+  subEl.innerHTML = list.map((opt, idx) => `<option value="${opt}" ${idx === 0 ? "selected" : ""}>${opt}</option>`).join("");
+};
+
+window.validateEgyptPhone = function(el) {
+  const err = document.getElementById("needPhoneErr");
+  el.value = el.value.replace(/\D/g, "");
+  const val = el.value;
+  const isValid = /^01[0125][0-9]{8}$/.test(val);
+  if (val.length === 0) {
+    if (err) err.style.display = "none";
+    el.style.borderColor = "";
+    return false;
+  }
+  if (!isValid) {
+    if (err) err.style.display = "block";
+    el.style.borderColor = "#ef4444";
+    return false;
+  } else {
+    if (err) err.style.display = "none";
+    el.style.borderColor = "#10b981";
+    return true;
+  }
+};
+
+window.submitNeedForm = function(event) {
+  event.preventDefault();
+  const phoneEl = document.getElementById("needPhone");
+  if (phoneEl && !/^01[0125][0-9]{8}$/.test(phoneEl.value.trim())) {
+    window.validateEgyptPhone(phoneEl);
+    phoneEl.focus();
+    return false;
+  }
+  closeModal();
+  toast('✅ تم استلام احتياجك — جارٍ مطابقته مع المزوّدين المناسبين');
+  return false;
+};
+
 /* Survsta — shared shell, components & interactions
    Survsta — All Rights Reserved */
 
@@ -168,7 +260,17 @@ async function updateNavbarAuth(){
 
 /* ---------------- ui helpers ---------------- */
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._i);t._i=setTimeout(()=>t.classList.remove("show"),3000)}
-function openModal(k,arg){$("#mbox").innerHTML=MODALS[k]?MODALS[k](arg):"";$("#modal").classList.add("open");document.body.style.overflow="hidden"}
+function openModal(k,arg){
+  $("#mbox").innerHTML = MODALS[k] ? MODALS[k](arg) : "";
+  $("#modal").classList.add("open");
+  document.body.style.overflow = "hidden";
+  if (k === "need" && typeof window.updateNeedSubCategories === "function") {
+    setTimeout(() => {
+      const mainCatEl = document.getElementById("needMainCat");
+      if (mainCatEl) window.updateNeedSubCategories(mainCatEl.value);
+    }, 20);
+  }
+}
 function closeModal(){$("#modal").classList.remove("open");document.body.style.overflow=""}
 
 /* ---------------- cards ---------------- */
@@ -260,22 +362,59 @@ const MODALS = {
   <div class="notice">Survsta منصة ربط وتوليد طلبات؛ الاتفاق والتنفيذ والسداد تتم مباشرة بين الطرفين.</div>
   <button class="btn btn-pri btn-block btn-lg" style="margin-top:14px">إرسال الطلب</button></form>`,
 
- need:()=>`<button class="x" onclick="closeModal()">✕</button>
+  need:()=>`<button class="x" onclick="closeModal()">✕</button>
   <h3>أضف احتياجك</h3><p class="muted">اكتبه مرة واحدة، وتوجّهه المنصة تلقائيًا للمزوّدين المؤهلين في نطاقك.</p>
-  <form onsubmit="event.preventDefault();closeModal();toast('✅ تم استلام احتياجك — جارٍ مطابقته مع المزوّدين المناسبين')">
+  <form onsubmit="return window.submitNeedForm(event)">
   <div class="formgrid" style="margin-top:14px">
-    <div class="field"><label>نوع الاحتياج</label><select><option>خدمة مساحية</option><option>تأجير جهاز</option><option>شراء جهاز</option><option>معايرة أو صيانة</option><option>تدريب</option><option>توظيف</option></select></div>
-    <div class="field"><label>الفئة</label><select>${SERVICES.map(s=>`<option>${s.t}</option>`).join("")}</select></div>
-    <div class="field"><label>المحافظة</label><select>${GOVS.map(g=>`<option>${g}</option>`).join("")}</select></div>
+    <div class="field">
+      <label>نوع الاحتياج الأساسي *</label>
+      <select id="needMainCat" onchange="window.updateNeedSubCategories(this.value)" required>
+        <option value="إيجار أجهزة" selected>إيجار أجهزة (تأجير معدات)</option>
+        <option value="خدمة مساحية">خدمة مساحية (رفع / توقيع / معالجة)</option>
+        <option value="شراء جهاز">شراء أجهزة ومعدات</option>
+        <option value="معايرة أو صيانة">معايرة أو صيانة معتمدة</option>
+        <option value="تدريب">تدريب وكورسات هندسية</option>
+        <option value="توظيف">طلب توظيف / كوادر مساحية</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>الفئة الفرعية المحددة *</label>
+      <select id="needSubCat" required>
+        <option value="إيجار يومي - طقم مساحة كامل">إيجار يومي - طقم مساحة كامل</option>
+        <option value="إيجار شهري - طقم مساحة كامل">إيجار شهري - طقم مساحة كامل</option>
+        <option value="جهاز فقط بدون أفراد">جهاز فقط بدون أفراد</option>
+        <option value="إيجار أسبوعي مع مسّاح">إيجار أسبوعي مع مسّاح</option>
+        <option value="تأجير محطة رصد متكاملة Total Station">تأجير محطة رصد متكاملة Total Station</option>
+        <option value="تأجير طقم استقبال أقمار صناعية GNSS / RTK">تأجير طقم استقبال أقمار صناعية GNSS / RTK</option>
+        <option value="تأجير ميزان قامة Level رقمي أو بصري">تأجير ميزان قامة Level رقمي أو بصري</option>
+      </select>
+    </div>
+    <div class="field"><label>المحافظة *</label><select id="needGov">${GOVS.map(g=>`<option>${g}</option>`).join("")}</select></div>
     <div class="field"><label>موعد البدء التقريبي</label><input type="date"></div>
-    <div class="field full"><label>وصف الاحتياج *</label><textarea required rows="3" placeholder="المساحة، الموقع التقريبي، المخرجات المطلوبة، المدة..."></textarea></div>
-    <div class="field"><label>الاسم *</label><input required></div>
-    <div class="field"><label>رقم الهاتف *</label><input required placeholder="01xxxxxxxxx"></div>
-    <div class="field"><label>الميزانية (اختياري — خاصة)</label><input placeholder="غير إلزامي"></div>
+    <div class="field full"><label>وصف الاحتياج *</label><textarea required rows="3" placeholder="المساحة، الموقع التقريبي، نوع الجهاز المطلوب، المدة..."></textarea></div>
+    <div class="field"><label>الاسم بالكامل *</label><input required placeholder="الاسم الكريم"></div>
+    <div class="field">
+      <label>رقم الهاتف (موبايل مصري) *</label>
+      <input 
+        type="tel" 
+        id="needPhone" 
+        required 
+        placeholder="01xxxxxxxxx" 
+        pattern="^01[0125][0-9]{8}$" 
+        maxlength="11" 
+        minlength="11" 
+        oninput="window.validateEgyptPhone(this)"
+        style="direction:ltr;text-align:right;"
+      >
+      <small id="needPhoneErr" style="display:none;color:#ef4444;font-size:11.5px;margin-top:4px;font-weight:600;">
+        ⚠️ يجب إدخال رقم هاتف مصري صحيح (11 رقمًا يبدأ بـ 010 أو 011 أو 012 أو 015)
+      </small>
+    </div>
+    <div class="field"><label>الميزانية التقريبية (اختياري)</label><input placeholder="غير إلزامي — مثال: 15,000 ج.م"></div>
     <div class="field"><label>وسيلة التواصل المفضّلة</label><select><option>واتساب</option><option>مكالمة هاتفية</option><option>بريد إلكتروني</option></select></div>
   </div>
-  <label class="muted" style="display:flex;gap:9px;margin:14px 0"><input type="checkbox" checked required> أوافق على توجيه طلبي للمزوّدين المطابقين وفق شروط المنصة.</label>
-  <button class="btn btn-org btn-block btn-lg">إرسال الاحتياج</button></form>`,
+  <label class="muted" style="display:flex;gap:9px;margin:14px 0;font-size:13px"><input type="checkbox" checked required> أوافق على توجيه طلبي للمزوّدين المطابقين وفق شروط المنصة.</label>
+  <button type="submit" class="btn btn-org btn-block btn-lg">إرسال الاحتياج الآن</button></form>`,
 
  apply:(t="الوظيفة")=>`<button class="x" onclick="closeModal()">✕</button>
   <h3>التقديم على: ${t}</h3><p class="muted">سيصل تقديمك لجهة العمل بعد مراجعة سريعة من الإدارة.</p>
