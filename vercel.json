@@ -31,6 +31,10 @@
   ],
   "rewrites": [
     {
+      "source": "/provider",
+      "destination": "/provider/dashboard/index.html"
+    },
+    {
       "source": "/provider/dashboard",
       "destination": "/provider/dashboard/index.html"
     },
@@ -41,6 +45,10 @@
     {
       "source": "/admin/users",
       "destination": "/a-users.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/login.html"
     },
     {
       "source": "/join",

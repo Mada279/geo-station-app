@@ -3,7 +3,7 @@ import { User, CreateUserInput, UpdateUserInput } from '@/types/user';
 // Mock in-memory store for demo / development fallback
 export let MOCK_USERS: User[] = [
   {
-    id: 'usr_01',
+    id: 'usr_admin',
     name: 'م. محمد فرج',
     email: 'admin@survsta.com',
     role: 'admin',
@@ -13,8 +13,18 @@ export let MOCK_USERS: User[] = [
     createdAt: '2026-08-15T10:00:00Z',
   },
   {
-    id: 'usr_02',
+    id: 'usr_provider',
     name: 'م. أحمد النجار',
+    email: 'provider@survsta.com',
+    role: 'provider',
+    status: 'active',
+    organization: 'مكتب النخبة للمساحة',
+    phone: '01112233445',
+    createdAt: '2026-08-20T12:30:00Z',
+  },
+  {
+    id: 'usr_02',
+    name: 'م. أحمد النجار (النخبة)',
     email: 'ahmed@elitesurvey.eg',
     role: 'provider',
     status: 'active',
@@ -32,54 +42,53 @@ export let MOCK_USERS: User[] = [
     phone: '01223344556',
     createdAt: '2026-09-01T09:15:00Z',
   },
-  {
-    id: 'usr_04',
-    name: 'دلتا جيوماتكس',
-    email: 'contact@deltageo.eg',
-    role: 'provider',
-    status: 'pending',
-    organization: 'دلتا جيوماتكس',
-    phone: '01099887766',
-    createdAt: '2026-09-05T14:40:00Z',
-  },
 ];
 
 /**
- * Mock authenticate user by email (ignores password for now)
+ * Explicit Authentication handler for Admin & Provider test accounts
  */
 export async function authenticateUser(email: string, password?: string): Promise<User> {
-  await new Promise((res) => setTimeout(res, 200));
-  const user = MOCK_USERS.find(
-    (u) => u.email.toLowerCase().trim() === email.toLowerCase().trim()
-  );
-  if (!user) {
-    throw new Error('البريد الإلكتروني غير مسجل في النظام. يرجى مراجعة البريد المدخل.');
+  await new Promise((res) => setTimeout(res, 150));
+  const cleanEmail = email.toLowerCase().trim();
+  const cleanPass = (password || '').trim();
+
+  // Explicit check for Admin
+  if (cleanEmail === 'admin@survsta.com') {
+    if (cleanPass && cleanPass !== 'admin' && cleanPass !== 'admin123456' && cleanPass !== 'demo1234') {
+      throw new Error('كلمة المرور غير صحيحة لحساب مدير النظام. كلمة المرور هي: admin');
+    }
+    return MOCK_USERS[0];
   }
+
+  // Explicit check for Provider
+  if (cleanEmail === 'provider@survsta.com' || cleanEmail === 'elite@provider.eg' || cleanEmail === 'ahmed@elitesurvey.eg') {
+    if (cleanPass && cleanPass !== 'provider' && cleanPass !== 'provider123456' && cleanPass !== 'demo1234') {
+      throw new Error('كلمة المرور غير صحيحة لحساب مزوّد الخدمة. كلمة المرور هي: provider');
+    }
+    return MOCK_USERS[1];
+  }
+
+  const user = MOCK_USERS.find((u) => u.email.toLowerCase().trim() === cleanEmail);
+  if (!user) {
+    throw new Error('البريد الإلكتروني غير مسجل. يرجى استخدام admin@survsta.com أو provider@survsta.com');
+  }
+
   return { ...user };
 }
 
-/**
- * Fetch all users (filterable by role/query)
- */
 export async function getUsers(): Promise<User[]> {
-  await new Promise((res) => setTimeout(res, 200));
+  await new Promise((res) => setTimeout(res, 150));
   return [...MOCK_USERS];
 }
 
-/**
- * Fetch a single user by ID for pre-filling the edit form
- */
 export async function getUserById(id: string): Promise<User | null> {
-  await new Promise((res) => setTimeout(res, 150));
+  await new Promise((res) => setTimeout(res, 100));
   const user = MOCK_USERS.find((u) => u.id === id);
   return user ? { ...user } : null;
 }
 
-/**
- * Create a new user with assigned role
- */
 export async function createUser(data: CreateUserInput): Promise<User> {
-  await new Promise((res) => setTimeout(res, 300));
+  await new Promise((res) => setTimeout(res, 200));
   const newUser: User = {
     ...data,
     id: `usr_${Date.now()}`,
@@ -89,22 +98,16 @@ export async function createUser(data: CreateUserInput): Promise<User> {
   return newUser;
 }
 
-/**
- * Update existing user details or role
- */
 export async function updateUser(id: string, data: UpdateUserInput): Promise<User> {
-  await new Promise((res) => setTimeout(res, 300));
+  await new Promise((res) => setTimeout(res, 200));
   const index = MOCK_USERS.findIndex((u) => u.id === id);
   if (index === -1) throw new Error('User not found');
   MOCK_USERS[index] = { ...MOCK_USERS[index], ...data };
   return MOCK_USERS[index];
 }
 
-/**
- * Permanently delete a user
- */
 export async function deleteUser(id: string): Promise<boolean> {
-  await new Promise((res) => setTimeout(res, 250));
+  await new Promise((res) => setTimeout(res, 150));
   MOCK_USERS = MOCK_USERS.filter((u) => u.id !== id);
   return true;
 }

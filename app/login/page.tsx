@@ -22,55 +22,67 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      // 1. Authenticate user
-      const user = await authenticateUser(email, password);
+      const cleanEmail = email.toLowerCase().trim();
+      const cleanPass = password.trim();
 
-      // 2. Set Session Cookie EXACTLY as specified
-      document.cookie =
-        "survsta_session=" +
-        encodeURIComponent(
-          JSON.stringify({
-            userId: user.id,
-            email: user.email,
-            role: user.role,
-          })
-        ) +
-        "; path=/; max-age=86400";
+      // Explicit Admin Login Logic
+      if (cleanEmail === 'admin@survsta.com' && cleanPass === 'admin') {
+        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: 'admin' })) + "; path=/; max-age=86400";
+        document.cookie = "user_role=admin; path=/; max-age=86400";
+        
+        if (callbackUrl && callbackUrl.startsWith('/')) {
+          router.push(callbackUrl);
+        } else {
+          router.push('/admin');
+        }
+        return;
+      }
 
-      // Also set user_role for redundant middleware verification
+      // Explicit Provider Login Logic
+      if (cleanEmail === 'provider@survsta.com' && cleanPass === 'provider') {
+        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: 'provider' })) + "; path=/; max-age=86400";
+        document.cookie = "user_role=provider; path=/; max-age=86400";
+        
+        if (callbackUrl && callbackUrl.startsWith('/')) {
+          router.push(callbackUrl);
+        } else {
+          router.push('/provider');
+        }
+        return;
+      }
+
+      // General / Fallback Authentication
+      const user = await authenticateUser(cleanEmail, cleanPass);
+
+      // Set cookie exactly as requested
+      document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: user.role })) + "; path=/; max-age=86400";
       document.cookie = `user_role=${user.role}; path=/; max-age=86400`;
 
-      // 3. Smart Redirection
       if (callbackUrl && callbackUrl.startsWith('/')) {
         router.push(callbackUrl);
       } else {
-        switch (user.role) {
-          case 'admin':
-            router.push('/admin/users');
-            break;
-          case 'provider':
-            router.push('/provider/dashboard');
-            break;
-          case 'customer':
-          default:
-            router.push('/');
-            break;
+        if (user.role === 'admin') {
+          router.push('/admin');
+        } else if (user.role === 'provider') {
+          router.push('/provider');
+        } else {
+          router.push('/');
         }
       }
     } catch (err: unknown) {
       setError(
         err instanceof Error
           ? err.message
-          : 'تعذر تسجيل الدخول. يرجى التحقق من بيانات الاعتماد.'
+          : 'تعذر تسجيل الدخول. يرجى التحقق من البريد وكلمة المرور.'
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleQuickFill = (testEmail: string) => {
+  const handleQuickFill = (testEmail: string, testPass: string) => {
     setEmail(testEmail);
-    setPassword('demo1234');
+    setPassword(testPass);
     setError(null);
   };
 
@@ -113,7 +125,7 @@ function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@company.com"
+            placeholder="admin@survsta.com أو provider@survsta.com"
             autoComplete="email"
             className="w-full rounded-xl border border-gray-800 bg-gray-950 px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition"
           />
@@ -121,7 +133,7 @@ function LoginForm() {
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] text-gray-500">(أي كلمة مرور مقبولة في التجربة)</span>
+            <span className="text-[11px] text-gray-500">(admin أو provider)</span>
             <label className="block text-xs font-semibold text-gray-300">
               كلمة المرور *
             </label>
@@ -153,40 +165,43 @@ function LoginForm() {
         </button>
       </form>
 
-      {/* Helper Box: Test Credentials */}
+      {/* Helper Box: Official Test Accounts */}
       <div className="mt-8 rounded-xl border border-dashed border-gray-800 bg-gray-950/60 p-4 text-xs">
         <div className="font-semibold text-gray-400 mb-2 flex items-center justify-between">
           <span className="text-[11px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-            حسابات الاختبار (RBAC Mock)
+            حسابات الاختبار المعتمدة (Mock Accounts)
           </span>
-          <span>بيانات التجربة السريعة:</span>
+          <span>بيانات التجربة المباشرة:</span>
         </div>
-        <div className="space-y-1.5 text-gray-400">
+        <div className="space-y-2 text-gray-400">
           <div
-            onClick={() => handleQuickFill('admin@survsta.com')}
-            className="cursor-pointer rounded-lg px-2.5 py-1.5 bg-gray-900 hover:bg-gray-800 hover:text-white flex items-center justify-between transition"
+            onClick={() => handleQuickFill('admin@survsta.com', 'admin')}
+            className="cursor-pointer rounded-lg p-2.5 bg-gray-900 hover:bg-gray-800 hover:text-white transition border border-gray-800"
           >
-            <span className="text-red-400 text-[11px]">Admin (مدير النظام)</span>
-            <code className="text-cyan-300 font-mono text-[11px]">admin@survsta.com</code>
+            <div className="flex items-center justify-between">
+              <span className="text-red-400 font-bold text-xs">🛡️ Admin (مدير النظام)</span>
+              <span className="text-[10px] text-gray-500">اضغط للتعبئة التلقائية</span>
+            </div>
+            <div className="flex items-center justify-between mt-1 text-[11px] font-mono">
+              <span className="text-cyan-300">admin@survsta.com</span>
+              <span className="text-gray-400">كلمة المرور: <b className="text-white">admin</b></span>
+            </div>
           </div>
+
           <div
-            onClick={() => handleQuickFill('ahmed@elitesurvey.eg')}
-            className="cursor-pointer rounded-lg px-2.5 py-1.5 bg-gray-900 hover:bg-gray-800 hover:text-white flex items-center justify-between transition"
+            onClick={() => handleQuickFill('provider@survsta.com', 'provider')}
+            className="cursor-pointer rounded-lg p-2.5 bg-gray-900 hover:bg-gray-800 hover:text-white transition border border-gray-800"
           >
-            <span className="text-cyan-400 text-[11px]">Provider (مزوّد خدمة)</span>
-            <code className="text-cyan-300 font-mono text-[11px]">ahmed@elitesurvey.eg</code>
-          </div>
-          <div
-            onClick={() => handleQuickFill('procurement@orchid.com')}
-            className="cursor-pointer rounded-lg px-2.5 py-1.5 bg-gray-900 hover:bg-gray-800 hover:text-white flex items-center justify-between transition"
-          >
-            <span className="text-emerald-400 text-[11px]">Customer (عميل)</span>
-            <code className="text-cyan-300 font-mono text-[11px]">procurement@orchid.com</code>
+            <div className="flex items-center justify-between">
+              <span className="text-cyan-400 font-bold text-xs">🏢 Provider (مزوّد الخدمة)</span>
+              <span className="text-[10px] text-gray-500">اضغط للتعبئة التلقائية</span>
+            </div>
+            <div className="flex items-center justify-between mt-1 text-[11px] font-mono">
+              <span className="text-cyan-300">provider@survsta.com</span>
+              <span className="text-gray-400">كلمة المرور: <b className="text-white">provider</b></span>
+            </div>
           </div>
         </div>
-        <p className="mt-2 text-[10px] text-gray-500 text-center">
-          * اضغط على أي حساب لتعبئته تلقائياً وتجربة التوجيه حسب الدور.
-        </p>
       </div>
 
       {/* Footer Navigation */}

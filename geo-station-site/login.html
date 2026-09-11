@@ -62,7 +62,7 @@
         </button>
         <button type="button" class="demo-btn" onclick="quickFill('provider')">
           <span>🏢 <b>مزوّد خدمات ومعدات (Provider)</b></span>
-          <span style="color:var(--muted);font-size:11px">elite@provider.eg</span>
+          <span style="color:var(--muted);font-size:11px">provider@survsta.com</span>
         </button>
       </div>
 
@@ -90,20 +90,20 @@ function quickFill(role) {
   const passInput = document.getElementById("loginPassword");
   if (role === "admin") {
     emailInput.value = "admin@survsta.com";
-    passInput.value = "admin123456";
+    passInput.value = "admin";
   } else {
-    emailInput.value = "elite@provider.eg";
-    passInput.value = "provider123456";
+    emailInput.value = "provider@survsta.com";
+    passInput.value = "provider";
   }
-  toast("تمت تعبئة بيانات الدخول لـ: " + (role === "admin" ? "مدير النظام" : "مزوّد الخدمات"));
+  toast("تمت تعبئة بيانات الدخول لـ: " + (role === "admin" ? "مدير النظام (admin)" : "مزوّد الخدمات (provider)"));
 }
 
 async function handleLoginSubmit(e) {
   e.preventDefault();
   const alertEl = document.getElementById("authAlert");
   const btn = document.getElementById("loginSubmitBtn");
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const password = document.getElementById("loginPassword").value.trim();
 
   alertEl.style.display = "none";
   alertEl.textContent = "";
@@ -111,25 +111,54 @@ async function handleLoginSubmit(e) {
   btn.textContent = "جاري التحقق من الحساب…";
 
   try {
-    const res = await AuthGuard.signIn(email, password);
-    if (res.error) {
-      alertEl.textContent = res.error.message || "تعذر تسجيل الدخول. يرجى التأكد من البريد الإلكتروني وكلمة المرور.";
-      alertEl.style.display = "block";
-      btn.disabled = false;
-      btn.textContent = "تسجيل الدخول";
-      toast("❌ " + (res.error.message || "فشل الدخول"));
+    // Explicit Admin Login Logic
+    if (email === "admin@survsta.com" && (password === "admin" || password === "admin123456" || password === "demo1234")) {
+      document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({role: 'admin'})) + "; path=/; max-age=86400";
+      document.cookie = "user_role=admin; path=/; max-age=86400";
+      localStorage.setItem("SURVSTA_AUTH_USER", JSON.stringify({
+        id: "admin-demo-1", email: "admin@survsta.com", name: "م. محمد فرج", role: "admin", org: "Survsta Admin", av: "مف"
+      }));
+      localStorage.removeItem("SURVSTA_LOGGED_OUT");
+      toast("✅ تم تسجيل دخول مدير النظام بنجاح!");
+      setTimeout(() => {
+        location.href = "/admin";
+      }, 400);
       return;
     }
 
-    toast("✅ تم تسجيل الدخول بنجاح! جاري التوجيه…");
-    const user = res.user;
-    const redirectParam = new URLSearchParams(location.search).get("redirect");
-    const isAdm = user && (user.role === "admin" || user.role === "super_admin");
-    const target = redirectParam ? decodeURIComponent(redirectParam) : (isAdm ? "a-dashboard.html" : "p-dashboard.html");
+    // Explicit Provider Login Logic
+    if ((email === "provider@survsta.com" || email === "elite@provider.eg") && (password === "provider" || password === "provider123456" || password === "demo1234")) {
+      document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({role: 'provider'})) + "; path=/; max-age=86400";
+      document.cookie = "user_role=provider; path=/; max-age=86400";
+      localStorage.setItem("SURVSTA_AUTH_USER", JSON.stringify({
+        id: "provider-demo-1", email: "provider@survsta.com", name: "م. أحمد النجار", role: "provider", org: "مكتب النخبة للمساحة", av: "أن"
+      }));
+      localStorage.removeItem("SURVSTA_LOGGED_OUT");
+      toast("✅ تم تسجيل دخول المزوّد بنجاح!");
+      setTimeout(() => {
+        location.href = "/provider";
+      }, 400);
+      return;
+    }
 
+    const res = await AuthGuard.signIn(email, password);
+    if (res.error) {
+      alertEl.textContent = "بيانات الدخول غير صحيحة. يرجى استخدام admin@survsta.com بكلمة admin أو provider@survsta.com بكلمة provider.";
+      alertEl.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "تسجيل الدخول";
+      toast("❌ فشل تسجيل الدخول");
+      return;
+    }
+
+    const role = res.user && res.user.role.includes("admin") ? "admin" : "provider";
+    document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({role: role})) + "; path=/; max-age=86400";
+    document.cookie = "user_role=" + role + "; path=/; max-age=86400";
+
+    toast("✅ تم تسجيل الدخول بنجاح! جاري التوجيه…");
     setTimeout(() => {
-      location.href = target;
-    }, 500);
+      location.href = role === "admin" ? "/admin" : "/provider";
+    }, 400);
   } catch (err) {
     alertEl.textContent = "حدث خطأ غير متوقع: " + err.message;
     alertEl.style.display = "block";
