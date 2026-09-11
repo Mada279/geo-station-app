@@ -237,6 +237,29 @@ function handleMockUpload(input) {
 }
 
 function finishRegistration() {
+  const org = ($("#w_org") && $("#w_org").value.trim()) || "";
+  const person = ($("#w_name") && $("#w_name").value.trim()) || "";
+  const name = org ? (person ? `${org} (${person})` : org) : (person || "مزوّد خدمة جديد");
+  const email = ($("#w_email") && $("#w_email").value.trim()) || "";
+  const phone = ($("#w_phone") && $("#w_phone").value.trim()) || "";
+  const gov = ($("#pgov") && $("#pgov").value) || "القاهرة";
+  const locDet = ($("#w_loc") && $("#w_loc").value.trim()) || "";
+  const fullLoc = locDet ? `${gov} — ${locDet}` : gov;
+
+  if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+    window.SupabaseService.insert("providers", [{
+      name: name,
+      email: email,
+      phone: phone,
+      location: fullLoc,
+      status: "pending"
+    }]).then(() => {
+      console.log("✅ Provider registered in Supabase live database.");
+    }).catch(err => {
+      console.warn("⚠️ Supabase insertion error:", err);
+    });
+  }
+
   [1, 2, 3].forEach(n => {
     const p = $(`#wizardStep${n}`);
     if (p) p.classList.remove("active");
@@ -245,7 +268,7 @@ function finishRegistration() {
   $("#wizardSuccess").classList.add("active");
   $("#refId").textContent = "SRV-" + Math.floor(100000 + Math.random() * 900000);
   window.scrollTo({ top: 320, behavior: "smooth" });
-  toast("✅ تم استلام طلبك بنجاح!");
+  toast("✅ تم استلام طلبك بنجاح وحفظه في قاعدة البيانات!");
 }
 </script>
 </body>

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/utils/supabaseClient';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -17,71 +18,39 @@ interface PendingProvider {
   equipmentPhotos: string[];
   submittedAt: string;
   slaStatus: 'عاجل' | 'عادي';
+  status?: string;
+  createdAt?: string;
 }
 
-const INITIAL_PENDING_PROVIDERS: PendingProvider[] = [
-  {
-    id: 'REQ-104',
-    name: 'مكتب الدلتا للحلول المساحية',
-    contactPerson: 'المهندس تامر الدسوقي',
-    phone: '01012345678',
-    email: 'delta@geosurvey.com',
-    governorate: 'الغربية (طنطا)',
-    location: 'شارع البحر — برج الأطباء',
+function mapProviderRow(row: any): PendingProvider {
+  const loc = row.location || '';
+  const gov = loc.includes('—') ? loc.split('—')[0].trim() : loc.includes('-') ? loc.split('-')[0].trim() : loc || 'مصر';
+
+  return {
+    id: row.id,
+    name: row.name || 'مزوّد خدمة جديد',
+    contactPerson: row.contact_person || row.name || 'المسؤول',
+    phone: row.phone || '—',
+    email: row.email || '—',
+    governorate: gov,
+    location: loc || '—',
     workingHours: '24 ساعة',
-    services: ['إيجار أجهزة ومعدات مساحية', 'أعمال مساحية ورفع ميداني'],
-    equipmentPhotos: ['Leica_TS07_TotalStation.jpg', 'CHC_i73_GNSS_Receiver.png', 'Tripod_Accessories.jpg'],
-    submittedAt: 'اليوم — 10:30 ص',
+    services: Array.isArray(row.services) && row.services.length > 0 ? row.services : ['إيجار أجهزة ومعدات مساحية', 'بيع وتوريد أجهزة ومستلزمات'],
+    equipmentPhotos: Array.isArray(row.equipment_photos) && row.equipment_photos.length > 0 ? row.equipment_photos : ['TotalStation_Leica.jpg', 'GNSS_Receiver.png'],
+    submittedAt: row.created_at
+      ? new Date(row.created_at).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })
+      : 'اليوم',
     slaStatus: 'عاجل',
-  },
-  {
-    id: 'REQ-103',
-    name: 'شركة أبعاد للمساحة والمقاولات',
-    contactPerson: 'م. محمود عبد العال',
-    phone: '01198765432',
-    email: 'info@abaad-survey.com',
-    governorate: 'القاهرة',
-    location: 'التجمع الخامس — التسعين الجنوبي',
-    workingHours: '24 ساعة',
-    services: ['بيع وتوريد أجهزة ومستلزمات', 'إيجار أجهزة ومعدات مساحية', 'معايرة وصيانة معتمدة'],
-    equipmentPhotos: ['Sokkia_CX105.jpg', 'Trimble_R8s_BaseRover.jpg'],
-    submittedAt: 'أمس — 04:15 م',
-    slaStatus: 'عادي',
-  },
-  {
-    id: 'REQ-102',
-    name: 'مركز الدقة للمعايرة الهندسية',
-    contactPerson: 'د. خالد عبد الرحيم',
-    phone: '01234567890',
-    email: 'deqa@calibrate-eg.com',
-    governorate: 'الإسكندرية',
-    location: 'سموحة — بجوار جرين بلازا',
-    workingHours: '24 ساعة',
-    services: ['معايرة وصيانة معتمدة', 'تدريب وكورسات هندسية'],
-    equipmentPhotos: ['Collimator_Bench_Lab.jpg', 'Digital_Level_Sprinter.jpg'],
-    submittedAt: 'منذ يومين',
-    slaStatus: 'عادي',
-  },
-  {
-    id: 'REQ-101',
-    name: 'إيجيبت جيوماتكس للاستشارات والدرون',
-    contactPerson: 'م. سامح فوزي',
-    phone: '01555667788',
-    email: 'sameh@egypt-geomatics.com',
-    governorate: 'الجيزة',
-    location: 'الدقي — شارع مصدق',
-    workingHours: '24 ساعة',
-    services: ['مسح جوي وطائرات درون', 'أعمال مساحية ورفع ميداني', 'تدريب وكورسات هندسية'],
-    equipmentPhotos: ['DJI_Matrice_300_RTK.png', 'Zenmuse_L1_Lidar.jpg'],
-    submittedAt: 'منذ 3 أيام',
-    slaStatus: 'عاجل',
-  },
-];
+    status: row.status || 'pending',
+    createdAt: row.created_at,
+  };
+}
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'stats'>('pending');
-  const [pendingProviders, setPendingProviders] = useState<PendingProvider[]>(INITIAL_PENDING_PROVIDERS);
+  const [pendingProviders, setPendingProviders] = useState<PendingProvider[]>([]);
   const [approvedProviders, setApprovedProviders] = useState<PendingProvider[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedProvider, setSelectedProvider] = useState<PendingProvider | null>(null);
   
   // OTP Verification state
@@ -96,6 +65,55 @@ export default function AdminDashboardPage() {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
+
+  // Fetch Pending Providers from Supabase (Task 2)
+  const fetchPendingProviders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('providers')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('[Supabase Fetch Error]', error);
+        showToast('⚠️ تعذر جلب الطلبات المعلقة من Supabase: ' + error.message);
+      } else if (data) {
+        setPendingProviders(data.map(mapProviderRow));
+      }
+    } catch (err) {
+      console.error('[Pending Providers Error]', err);
+    }
+  };
+
+  // Fetch Approved Providers from Supabase
+  const fetchApprovedProviders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('providers')
+        .select('*')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('[Supabase Fetch Approved Error]', error);
+      } else if (data) {
+        setApprovedProviders(data.map(mapProviderRow));
+      }
+    } catch (err) {
+      console.error('[Approved Providers Error]', err);
+    }
+  };
+
+  // Initial Load from Supabase
+  useEffect(() => {
+    const loadAll = async () => {
+      setIsLoading(true);
+      await Promise.all([fetchPendingProviders(), fetchApprovedProviders()]);
+      setIsLoading(false);
+    };
+    loadAll();
+  }, []);
 
   const handleOpenReview = (provider: PendingProvider) => {
     // Generate fresh 6-digit OTP
@@ -116,13 +134,27 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleApproveProvider = (providerId: string) => {
+  // Approve Provider in Supabase (Task 3)
+  const handleApproveProvider = async (providerId: string) => {
     const p = pendingProviders.find((x) => x.id === providerId);
-    if (p) {
-      setPendingProviders((prev) => prev.filter((x) => x.id !== providerId));
-      setApprovedProviders((prev) => [p, ...prev]);
+    try {
+      const { error } = await supabase
+        .from('providers')
+        .update({ status: 'approved' })
+        .eq('id', providerId);
+
+      if (error) {
+        showToast(`❌ فشل الاعتماد في قاعدة البيانات: ${error.message}`);
+        return;
+      }
+
+      showToast(`🎉 تم اعتماد وتفعيل حساب "${p ? p.name : providerId}" بنجاح في Supabase.`);
       setSelectedProvider(null);
-      showToast(`🎉 تم اعتماد وتفعيل حساب "${p.name}" بنجاح وانتقاله للمزودين المعتمدين.`);
+      // Re-fetch to update the UI naturally from the live database
+      await Promise.all([fetchPendingProviders(), fetchApprovedProviders()]);
+    } catch (err) {
+      console.error('[Approve Error]', err);
+      showToast('❌ حدث خطأ غير متوقع أثناء الاعتماد.');
     }
   };
 
@@ -251,11 +283,16 @@ export default function AdminDashboardPage() {
               </span>
             </div>
 
-            {pendingProviders.length === 0 ? (
+            {isLoading ? (
+              <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-12 text-center">
+                <div className="inline-block w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <h3 className="text-sm font-bold text-white">جاري مزامنة وجلب الطلبات من Supabase...</h3>
+              </div>
+            ) : pendingProviders.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-gray-800 bg-gray-900/40 p-12 text-center">
                 <div className="text-4xl mb-3">🎉</div>
                 <h3 className="text-base font-bold text-white">لا توجد طلبات انضمام معلّقة حالياً!</h3>
-                <p className="text-xs text-gray-400 mt-1">تمت مراجعة واعتماد كافة طلبات مزوّدي الخدمات بنجاح.</p>
+                <p className="text-xs text-gray-400 mt-1">تمت مراجعة واعتماد كافة طلبات مزوّدي الخدمات في Supabase بنجاح.</p>
               </div>
             ) : (
               <div className="overflow-x-auto rounded-2xl border border-gray-800 bg-gray-900/80 shadow-xl backdrop-blur-md">
@@ -275,12 +312,12 @@ export default function AdminDashboardPage() {
                   <tbody className="divide-y divide-gray-800 text-gray-300">
                     {pendingProviders.map((p) => (
                       <tr
-                        key={p.id}
+                        key={p.id && p.id.length > 10 ? p.id.slice(0, 8) + '…' : p.id}
                         className="hover:bg-gray-800/40 transition cursor-pointer"
                         onClick={() => handleOpenReview(p)}
                       >
                         <td className="px-4 py-3.5 font-mono text-cyan-400 font-semibold whitespace-nowrap">
-                          {p.id}
+                          {p.id && p.id.length > 10 ? p.id.slice(0, 8) + '…' : p.id}
                         </td>
                         <td className="px-4 py-3.5">
                           <div className="font-bold text-white text-sm">{p.name}</div>
@@ -348,12 +385,12 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {approvedProviders.map((p) => (
-                  <div key={p.id} className="rounded-2xl border border-emerald-500/30 bg-gray-900/70 p-5 shadow-lg space-y-3">
+                  <div key={p.id && p.id.length > 10 ? p.id.slice(0, 8) + '…' : p.id} className="rounded-2xl border border-emerald-500/30 bg-gray-900/70 p-5 shadow-lg space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="rounded bg-emerald-500/20 text-emerald-400 px-2 py-0.5 text-[11px] font-bold">
                         ✓ معتمد ومنشور
                       </span>
-                      <span className="font-mono text-xs text-gray-400">{p.id}</span>
+                      <span className="font-mono text-xs text-gray-400">{p.id && p.id.length > 10 ? p.id.slice(0, 8) + '…' : p.id}</span>
                     </div>
                     <div>
                       <h4 className="text-base font-bold text-white">{p.name}</h4>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { supabase } from '@/utils/supabaseClient';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -55,6 +56,8 @@ export default function ProviderRegistrationWizard() {
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [uploading, setUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Phone Validation Regex: 11 digits starting with 010, 011, 012, or 015
   const EGYPT_PHONE_REGEX = /^01[0125][0-9]{8}$/;
@@ -75,14 +78,47 @@ export default function ProviderRegistrationWizard() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1) {
       if (validateStep1()) setStep(2);
     } else if (step === 2) {
       setStep(3);
     } else if (step === 3) {
-      // Complete Registration
-      setStep('success');
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        const fullLocation = formData.location
+          ? `${formData.governorate} — ${formData.location}`
+          : formData.governorate;
+
+        const displayName = formData.organization
+          ? `${formData.organization} (${formData.name})`
+          : formData.name;
+
+        const { data, error } = await supabase.from('providers').insert([
+          {
+            name: displayName,
+            email: formData.email.trim().toLowerCase(),
+            phone: formData.phone.trim(),
+            location: fullLocation,
+            status: 'pending',
+          },
+        ]);
+
+        if (error) {
+          console.error('[Supabase Registration Error]', error);
+          setSubmitError('تعذر إرسال البيانات إلى السحابة: ' + (error.message || 'يرجى المحاولة لاحقاً'));
+          return;
+        }
+
+        setStep('success');
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'حدث خطأ أثناء إرسال البيانات';
+        console.error('[Registration Exception]', err);
+        setSubmitError(msg);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -488,12 +524,18 @@ export default function ProviderRegistrationWizard() {
             >
               → الخطوة السابقة
             </button>
+            {submitError && (
+              <div className="w-full p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400 font-semibold mb-3 text-center">
+                ⚠️ {submitError}
+              </div>
+            )}
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={handleNext}
-              className="rounded-xl bg-gradient-to-l from-[#F4B400] to-amber-500 px-8 py-3 text-sm font-black text-black shadow-lg shadow-amber-500/20 hover:brightness-110 transition"
+              className="rounded-xl bg-gradient-to-l from-[#F4B400] to-amber-500 px-8 py-3 text-sm font-black text-black shadow-lg shadow-amber-500/20 hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              إرسال طلب الانضمام الآن 🚀
+              {isSubmitting ? 'جاري إرسال الطلب وحفظ البيانات...' : 'إرسال طلب الانضمام الآن 🚀'}
             </button>
           </div>
         </div>
