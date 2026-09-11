@@ -78,7 +78,7 @@ export default function Navbar({ user }: NavbarProps) {
             <div className="flex items-center gap-3">
               {user.role === 'admin' && (
                 <Link
-                  href="/admin"
+                  href="/a-dashboard"
                   className="rounded-lg bg-gray-900 border border-cyan-500/30 px-3.5 py-1.5 text-xs font-semibold text-cyan-400 hover:bg-gray-800 transition"
                 >
                   لوحة الإدارة
@@ -86,7 +86,7 @@ export default function Navbar({ user }: NavbarProps) {
               )}
               {user.role === 'provider' && (
                 <Link
-                  href="/provider/dashboard"
+                  href="/p-dashboard"
                   className="rounded-lg bg-gray-900 border border-amber-500/30 px-3.5 py-1.5 text-xs font-semibold text-amber-400 hover:bg-gray-800 transition"
                 >
                   بوابة المزوّد

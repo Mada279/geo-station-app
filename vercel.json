@@ -31,20 +31,32 @@
   ],
   "rewrites": [
     {
-      "source": "/provider",
-      "destination": "/provider/dashboard/index.html"
-    },
-    {
-      "source": "/provider/dashboard",
-      "destination": "/provider/dashboard/index.html"
-    },
-    {
       "source": "/admin",
+      "destination": "/a-dashboard.html"
+    },
+    {
+      "source": "/admin.html",
+      "destination": "/a-dashboard.html"
+    },
+    {
+      "source": "/admin/dashboard",
       "destination": "/a-dashboard.html"
     },
     {
       "source": "/admin/users",
       "destination": "/a-users.html"
+    },
+    {
+      "source": "/provider",
+      "destination": "/p-dashboard.html"
+    },
+    {
+      "source": "/provider.html",
+      "destination": "/p-dashboard.html"
+    },
+    {
+      "source": "/provider/dashboard",
+      "destination": "/p-dashboard.html"
     },
     {
       "source": "/login",
