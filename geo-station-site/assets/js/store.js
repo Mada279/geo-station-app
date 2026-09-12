@@ -278,20 +278,24 @@ async function syncCloud(){
       const meta = COLLECTIONS[coll];
       if (!meta || !meta.table) continue;
 
-      const { data, error } = await global.SupabaseService.select(meta.table, { limit: 100 });
-      if (!error && Array.isArray(data) && data.length > 0) {
-        // تحديث السجلات المحلية بالسجلات الواردة من السحابة مع الحفاظ على التوافق
-        db[coll] = data.map(cloudRow => ({
-          ...cloudRow,
-          // توافق الحقول الشائعة
-          name: cloudRow.name || cloudRow.commercial_name || cloudRow.title,
-          gov: cloudRow.gov || cloudRow.governorate,
-          rate: cloudRow.rate || cloudRow.avg_rating || 0,
-          reviews: cloudRow.reviews || cloudRow.reviews_count || 0,
-          _st: cloudRow._st || "active"
-        }));
-        updatedCount++;
-        emit(coll, "sync", db[coll]);
+      try {
+        const { data, error } = await global.SupabaseService.select(meta.table, { limit: 100 });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          // تحديث السجلات المحلية بالسجلات الواردة من السحابة مع الحفاظ على التوافق
+          db[coll] = data.map(cloudRow => ({
+            ...cloudRow,
+            // توافق الحقول الشائعة
+            name: cloudRow.name || cloudRow.commercial_name || cloudRow.title,
+            gov: cloudRow.gov || cloudRow.governorate,
+            rate: cloudRow.rate || cloudRow.avg_rating || 0,
+            reviews: cloudRow.reviews || cloudRow.reviews_count || 0,
+            _st: cloudRow._st || "active"
+          }));
+          updatedCount++;
+          emit(coll, "sync", db[coll]);
+        }
+      } catch (collErr) {
+        console.warn(`[Store Sync] تخطي الجدول "${meta.table}" لعدم توفره في Supabase:`, collErr && collErr.message ? collErr.message : collErr);
       }
     }
 

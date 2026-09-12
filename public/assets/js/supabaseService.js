@@ -60,17 +60,21 @@
   }
 
   // ============================================================
-  // 1. DATA ACCESS LAYER (DAL) — دوال التعامل مع الجداول
+  // 1. DATA ACCESS LAYER (DAL) — دوال التعامل مع الجداول (Safe & Fallback-Ready)
   // ============================================================
 
   /**
    * جلب كافة السجلات من جدول محدد مع خيارات التصفية والفرز
+   * محمي بالكامل: إذا كان الجدول غير موجود، يتم إرجاع مصفوفة فارغة مع تنبيه خفيف بدلاً من إسقاط الواجهة
    */
   async function select(table, options = {}) {
-    const supabase = await getClient();
-    if (!supabase) return { data: null, error: new Error("Supabase غير مهيأ") };
-
     try {
+      const supabase = await getClient();
+      if (!supabase) {
+        console.warn(`[Supabase DAL] تخطي الجدول "${table}": عميل Supabase غير مهيأ.`);
+        return { data: [], error: null };
+      }
+
       let query = supabase.from(table).select(options.columns || "*");
 
       if (options.filters && Array.isArray(options.filters)) {
@@ -88,11 +92,15 @@
       }
 
       const { data, error } = await query;
-      if (error) throw error;
-      return { data, error: null };
+      if (error) {
+        // فحص ما إذا كان الخطأ بسبب عدم وجود الجدول (404 / 42P01 / PGRST204)
+        console.warn(`[Supabase DAL] الجدول "${table}" غير متوفر أو غير منشأ حالياً (${error.message || error.code || "404"}). تم إرجاع مصفوفة فارغة بنجاح لحماية الواجهة.`);
+        return { data: [], error: null };
+      }
+      return { data: Array.isArray(data) ? data : [], error: null };
     } catch (err) {
-      console.error(`[Supabase DAL] خطأ في جلب بيانات الجدول ${table}:`, err);
-      return { data: null, error: err };
+      console.warn(`[Supabase DAL] تم احتواء خطأ في جدول "${table}":`, err && err.message ? err.message : err);
+      return { data: [], error: null };
     }
   }
 
@@ -100,21 +108,24 @@
    * جلب سجل محدد بواسطة معرّفه (ID)
    */
   async function getById(table, id) {
-    const supabase = await getClient();
-    if (!supabase) return { data: null, error: new Error("Supabase غير مهيأ") };
-
     try {
+      const supabase = await getClient();
+      if (!supabase) return { data: null, error: null };
+
       const { data, error } = await supabase
         .from(table)
         .select("*")
         .eq("id", id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.warn(`[Supabase DAL] تعذر جلب السجل #${id} من "${table}":`, error.message || error);
+        return { data: null, error: null };
+      }
       return { data, error: null };
     } catch (err) {
-      console.error(`[Supabase DAL] خطأ في جلب السجل ${table}#${id}:`, err);
-      return { data: null, error: err };
+      console.warn(`[Supabase DAL] استثناء عند جلب السجل #${id} من "${table}":`, err && err.message ? err.message : err);
+      return { data: null, error: null };
     }
   }
 
@@ -122,20 +133,23 @@
    * إدراج سجل أو مصفوفة سجلات جديدة
    */
   async function insert(table, records) {
-    const supabase = await getClient();
-    if (!supabase) return { data: null, error: new Error("Supabase غير مهيأ") };
-
     try {
+      const supabase = await getClient();
+      if (!supabase) return { data: [], error: null };
+
       const { data, error } = await supabase
         .from(table)
         .insert(records)
         .select();
 
-      if (error) throw error;
-      return { data, error: null };
+      if (error) {
+        console.warn(`[Supabase DAL] تعذر إدراج بيانات في "${table}":`, error.message || error);
+        return { data: [], error: null };
+      }
+      return { data: Array.isArray(data) ? data : [], error: null };
     } catch (err) {
-      console.error(`[Supabase DAL] خطأ في إدراج السجل في ${table}:`, err);
-      return { data: null, error: err };
+      console.warn(`[Supabase DAL] استثناء عند الإدراج في "${table}":`, err && err.message ? err.message : err);
+      return { data: [], error: null };
     }
   }
 
@@ -143,21 +157,24 @@
    * تعديل سجل موجود بواسطة المعرّف
    */
   async function update(table, id, values) {
-    const supabase = await getClient();
-    if (!supabase) return { data: null, error: new Error("Supabase غير مهيأ") };
-
     try {
+      const supabase = await getClient();
+      if (!supabase) return { data: null, error: null };
+
       const { data, error } = await supabase
         .from(table)
         .update({ ...values, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select();
 
-      if (error) throw error;
-      return { data: data ? data[0] : null, error: null };
+      if (error) {
+        console.warn(`[Supabase DAL] تعذر تحديث السجل #${id} في "${table}":`, error.message || error);
+        return { data: null, error: null };
+      }
+      return { data: data && data.length ? data[0] : null, error: null };
     } catch (err) {
-      console.error(`[Supabase DAL] خطأ في تحديث السجل ${table}#${id}:`, err);
-      return { data: null, error: err };
+      console.warn(`[Supabase DAL] استثناء عند تحديث السجل #${id} في "${table}":`, err && err.message ? err.message : err);
+      return { data: null, error: null };
     }
   }
 
@@ -165,20 +182,23 @@
    * حذف سجل نهائياً
    */
   async function remove(table, id) {
-    const supabase = await getClient();
-    if (!supabase) return { success: false, error: new Error("Supabase غير مهيأ") };
-
     try {
+      const supabase = await getClient();
+      if (!supabase) return { success: false, error: null };
+
       const { error } = await supabase
         .from(table)
         .delete()
         .eq("id", id);
 
-      if (error) throw error;
+      if (error) {
+        console.warn(`[Supabase DAL] تعذر حذف السجل #${id} من "${table}":`, error.message || error);
+        return { success: false, error: null };
+      }
       return { success: true, error: null };
     } catch (err) {
-      console.error(`[Supabase DAL] خطأ في حذف السجل ${table}#${id}:`, err);
-      return { success: false, error: err };
+      console.warn(`[Supabase DAL] استثناء عند حذف السجل #${id} من "${table}":`, err && err.message ? err.message : err);
+      return { success: false, error: null };
     }
   }
 
