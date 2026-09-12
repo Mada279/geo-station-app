@@ -87,6 +87,35 @@ ${rows().length? table(["الرقم","العنصر","النوع","مقدّم ا�
 <div class="notice" style="margin-top:16px">لا تُمنح شارة توثيق إلا بما تمّت مراجعته فعليًا. الاعتماد يعني اكتمال البيانات ووضوحها، ولا يعني اعتمادًا فنيًا لجودة الأعمال أو حالة الأجهزة.</div>
 `);
 }
+
+// مزامنة حية من Supabase للطلبات الجديدة
+if (typeof window !== "undefined") {
+  setTimeout(async () => {
+    try {
+      if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+        const { data } = await window.SupabaseService.select("providers", { limit: 20 });
+        if (data && data.length) {
+          data.forEach(p => {
+            const pid = p.id ? String(p.id).slice(0, 8) : "REQ-NEW";
+            if (!A_APPROVALS.some(x => x.id === pid || x.item === p.name)) {
+              A_APPROVALS.unshift({
+                id: pid,
+                item: p.name || "مزوّد مساحة جديد",
+                kind: "ملف مزوّد (سحابي)",
+                owner: p.name || "مزوّد جديد",
+                gov: p.location || "القاهرة",
+                date: p.created_at ? new Date(p.created_at).toLocaleDateString('ar-EG') : "اليوم",
+                risk: "—",
+                sla: "عاجل"
+              });
+            }
+          });
+        }
+      }
+    } catch(e) { console.warn("Supabase live sync error:", e); }
+  }, 100);
+}
+
 draw();
 
 </script>

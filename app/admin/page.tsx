@@ -5,6 +5,9 @@ import { supabase } from '@/utils/supabaseClient';
 import Link from 'next/link';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface PendingProvider {
   id: string;
   name: string;
@@ -66,18 +69,23 @@ export default function AdminDashboardPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Fetch Pending Providers from Supabase (Task 2)
+  // Fetch Pending Providers from Supabase with Live Fallback
   const fetchPendingProviders = async () => {
     try {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('providers')
         .select('*')
-        .eq('status', 'pending')
+        .or('status.eq.pending,status.is.null')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('[Supabase Fetch Error]', error);
-        showToast('⚠️ تعذر جلب الطلبات المعلقة من Supabase: ' + error.message);
+        console.warn('[Supabase Fetch Pending Fallback]', error);
+        const fallback = await supabase.from('providers').select('*');
+        if (fallback.data) {
+          const pending = fallback.data.filter((r: any) => !r.status || r.status === 'pending');
+          setPendingProviders(pending.map(mapProviderRow));
+          return;
+        }
       } else if (data) {
         setPendingProviders(data.map(mapProviderRow));
       }
@@ -173,6 +181,21 @@ export default function AdminDashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-800 pb-5">
           <div className="flex items-center gap-3">
             {/* Guide Button - Required in Task 3 */}
+            {/* Live Refresh Button */}
+            <button
+              onClick={async () => {
+                setIsLoading(true);
+                await Promise.all([fetchPendingProviders(), fetchApprovedProviders()]);
+                setIsLoading(false);
+                showToast('🔄 تم تحديث البيانات مباشرة من Supabase!');
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-500/40 bg-cyan-950/40 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-cyan-300 hover:bg-cyan-900/60 transition"
+              title="تحديث البيانات لحظياً من قاعدة البيانات"
+            >
+              <span>🔄</span>
+              <span>تحديث مباشر</span>
+            </button>
+
             <button
               onClick={() => setIsGuideOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-l from-amber-500 to-[#F4B400] px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-950 shadow-lg shadow-amber-500/20 hover:brightness-110 transition focus:outline-none focus:ring-2 focus:ring-amber-500"
