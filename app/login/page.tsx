@@ -45,7 +45,7 @@ function LoginForm() {
         if (callbackUrl && callbackUrl.startsWith('/')) {
           router.push(callbackUrl);
         } else {
-          router.push('/a-dashboard');
+          router.push('/admin');
         }
         return;
       }
@@ -70,7 +70,7 @@ function LoginForm() {
         if (callbackUrl && callbackUrl.startsWith('/')) {
           router.push(callbackUrl);
         } else {
-          router.push('/p-dashboard');
+          router.push('/provider/dashboard');
         }
         return;
       }
@@ -86,9 +86,9 @@ function LoginForm() {
         router.push(callbackUrl);
       } else {
         if (user.role === 'admin') {
-          router.push('/a-dashboard');
+          router.push('/admin');
         } else if (user.role === 'provider') {
-          router.push('/p-dashboard');
+          router.push('/provider/dashboard');
         } else {
           router.push('/');
         }
