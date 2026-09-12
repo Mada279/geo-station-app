@@ -125,7 +125,7 @@ const NAV = [
 ];
 
 function survstaLogo(idSuffix = "nav", isDark = false){
-  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 160px !important; max-width: 160px !important; height: auto !important; max-height: 48px !important; display: block;" />`;
+  return `<img alt="Survsta" src="/assets/img/Designer.png" class="object-contain survsta-logo" style="width: 160px !important; max-width: 160px !important; height: auto !important; max-height: 48px !important; display: block;" />`;
 }
 window.survstaLogo = survstaLogo;
 

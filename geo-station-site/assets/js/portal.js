@@ -93,7 +93,7 @@ const CTX = {
 };
 
 function survstaLogo(idSuffix = "side", isDark = false){
-  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 250px !important; min-width: 250px !important; height: auto !important; max-height: 80px !important; display: block;" />`;
+  return `<img alt="Survsta" src="/assets/img/Designer.png" class="object-contain survsta-logo" style="width: 250px !important; min-width: 250px !important; height: auto !important; max-height: 80px !important; display: block;" />`;
 }
 if(typeof window !== "undefined") window.survstaLogo = survstaLogo;
 

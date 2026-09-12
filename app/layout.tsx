@@ -19,7 +19,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className="dark">
+        <html lang="ar" dir="rtl" className="dark">
+      <head>
+        <link rel="stylesheet" href="/assets/css/tokens.css" />
+        <link rel="stylesheet" href="/assets/css/style.css" />
+        <link rel="stylesheet" href="/assets/css/font.css" />
+        <link rel="stylesheet" href="/assets/css/portal.css" />
+      </head>
       <body className="min-h-screen bg-gray-950 text-gray-100 antialiased selection:bg-cyan-500 selection:text-gray-950">
         <Navbar />
         <main>{children}</main>
