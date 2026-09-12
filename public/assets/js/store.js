@@ -271,14 +271,8 @@ async function syncCloud(){
     const db = load();
     let updatedCount = 0;
 
-    // مزامنة المجموعات الرئيسية النشطة
-    // مزامنة الجداول الموجودة فعلياً في Supabase لتجنب أخطاء 404 في الكونسول
-    const EXISTING_SUPABASE_TABLES = ["providers", "equipment"];
-    const syncTargets = ["providers", "equipment", "leads", "reviews", "jobs", "services", "courses", "clients"]
-      .filter(coll => {
-        const meta = COLLECTIONS[coll];
-        return meta && meta.table && EXISTING_SUPABASE_TABLES.includes(meta.table);
-      });
+    // مزامنة الجداول الموجودة فعلياً في Supabase فقط لتجنب أخطاء 404 في الكونسول
+    const syncTargets = ["providers", "equipment"];
 
     for (const coll of syncTargets) {
       const meta = COLLECTIONS[coll];
