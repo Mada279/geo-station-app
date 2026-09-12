@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import '../public/assets/css/tokens.css';
 import '../public/assets/css/font.css';
 import '../public/assets/css/style.css';
@@ -30,9 +31,10 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/font.css" />
         <link rel="stylesheet" href="/assets/css/portal.css" />
       </head>
-      <body className="min-h-screen bg-gray-950 text-gray-100 antialiased selection:bg-cyan-500 selection:text-gray-950">
+      <body className="min-h-screen bg-gray-950 text-gray-100 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between">
         <Navbar />
-        <main>{children}</main>
+        <main className="flex-grow">{children}</main>
+        <Footer />
       </body>
     </html>
   );
