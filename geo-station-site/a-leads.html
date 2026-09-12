@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة الطلبات | Survsta</title>
+<meta name="description" content="إدارة الطلبات">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Portal — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js?v=3.7"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-leads.html", "إدارة الطلبات", `<a href="/admin">لوحة الإدارة</a> / <b>إدارة الطلبات</b>`);
+
+const AL=[["LD-1042","شركة أوركيد","مكتب النخبة","رفع مساحي 6 أفدنة","الإسكندرية","ملف المزوّد","جديد","—"],
+ ["LD-1041","م. أحمد سليم","مكتب النخبة","تأجير GNSS أسبوع","الجيزة","صفحة جهاز","جديد","—"],
+ ["LD-1040","مقاولات النصر","دلتا جيوماتكس","مسح ليزري","القاهرة","طلب احتياج","تم التواصل","—"],
+ ["LD-1039","م. سيد كامل","جيو تك للتوريدات","شراء Total Station","الجيزة","نتائج البحث","جديد","بلا رد 31 ساعة"],
+ ["LD-1037","شركة المستقبل","هورايزون جيو","مسح طرق 12 كم","الجيزة","الخريطة","تفاوض","—"],
+ ["LD-1019","شركة هرم للمقاولات","مكتب النخبة","طلب مكرر","الجيزة","طلب احتياج","مكرر","تكرار مؤكد"],
+ ["LD-1015","حساب مشبوه","دلتا جيوماتكس","استفسار غير واضح","—","نتائج البحث","غير صالح","نمط مشبوه"]];
+setContent(`
+<div class="pagehead"><div><h2>إدارة طلبات التواصل</h2>
+  <p>مراقبة جودة الطلبات وسرعة استجابة المزوّدين ورصد التكرار والحسابات المشبوهة.</p></div>
+  <button class="btn btn-soft" onclick="toast('تم تصدير تقرير الطلبات')">⬇ تصدير</button></div>
+
+<div class="grid g5" style="margin-bottom:16px">
+  ${kpi("طلبات اليوم","41","▲ 12%","up","📥")}
+  ${kpi("متوسط أول رد","2.6 ساعة","تحسّن 18%","up","⚡")}
+  ${kpi("بلا رد > 24 ساعة","37","تحتاج متابعة","dn","🔴")}
+  ${kpi("مكرر / غير صالح","9","2.1% من الإجمالي","flat","🚫")}
+  ${kpi("نسبة الإغلاق الناجح","24%","▲ 3 نقاط","up","🎯")}
+</div>
+
+<div class="grid g2" style="margin-bottom:16px">
+ <div class="card"><h3>أسرع المزوّدين استجابة</h3>
+  <div style="margin-top:12px">${[["مركز الدقة للمعايرة","0.8 ساعة",98],["مكتب النخبة","2.4 ساعة",94],["دلتا جيوماتكس","3.1 ساعة",91],["النيل لأجهزة المساحة","6.7 ساعة",74]]
+   .map(([n,t,p])=>`<div style="margin-bottom:11px"><div class="rowb"><span style="font-size:13.5px"><b>${n}</b> <span class="muted">— ${t}</span></span><b>${p}%</b></div>
+     <div class="bar ok"><i style="width:${p}%"></i></div></div>`).join("")}</div></div>
+ <div class="card"><h3>مزوّدون بطيئو الاستجابة — يحتاجون تنبيه</h3>
+  <div style="margin-top:12px">${table(["المزوّد","طلبات بلا رد","متوسط الرد",""],
+   [["جيو تك للتوريدات",9,"38 ساعة"],["مكتب البحر للمساحة",6,"29 ساعة"],["الغرب للخدمات",4,"26 ساعة"]]
+   .map(r=>[`<b>${r[0]}</b>`,`<span class="chip err">${r[1]}</span>`,r[2],
+     `<button class="btn btn-soft btn-sm" onclick="toast('📧 تم إرسال تنبيه للمزوّد')">تنبيه</button>`]))}</div></div>
+</div>
+
+<div class="toolbar"><input placeholder="بحث بالعميل أو المزوّد…" style="min-width:210px">
+ <select><option>كل الحالات</option><option>جديد</option><option>تم التواصل</option><option>مكرر</option><option>غير صالح</option></select>
+ <select><option>كل المصادر</option><option>ملف المزوّد</option><option>صفحة جهاز</option><option>طلب احتياج</option><option>الخريطة</option></select>
+ <select><option>كل التنبيهات</option><option>بلا رد &gt;24س</option><option>تكرار</option><option>نمط مشبوه</option></select>
+ <div style="flex:1"></div><span class="muted">${AL.length} طلب معروض</span></div>
+
+${table(["الرقم","العميل","المزوّد","الموضوع","الموقع","المصدر","تنبيه","الحالة","الإجراء"],
+ AL.map(l=>[`<code>${l[0]}</code>`,l[1],`<b>${l[2]}</b>`,l[3],l[4],`<span class="muted">${l[5]}</span>`,
+   l[7]==="—"?'<span class="muted">—</span>':`<span class="chip err">${l[7]}</span>`, st(l[6]),
+   `<div class="acts"><button class="btn btn-soft btn-sm" onclick="insp('${l[0]}')">فحص</button>
+    <button class="btn btn-err btn-sm" onclick="toast('${l[0]}: تم تعليمه كمكرر')">مكرر</button></div>`]))}
+`);
+function insp(id){
+ openModal(`<button class="x" onclick="closeModal()">✕</button><h3>فحص الطلب ${id}</h3>
+  <div class="sep"></div>
+  <h3 style="font-size:16px">سجل الأحداث الكامل</h3>
+  <div class="tl" style="margin-top:10px">
+   <div class="it"><b>إنشاء الطلب</b><small>2026-09-03 09:12 — من ملف المزوّد</small></div>
+   <div class="it ok"><b>تسليم للمزوّد</b><small>+2 ثانية</small></div>
+   <div class="it"><b>إشعار بريد + داخل المنصة</b><small>+5 ثوانٍ</small></div>
+   <div class="it warn"><b>لم يُفتح بعد</b><small>مضى 31 ساعة — تجاوز SLA</small></div></div>
+  <div class="sep"></div>
+  <h3 style="font-size:16px">إجراءات</h3>
+  <div class="grid g2" style="margin-top:12px">
+   ${[["📧","تنبيه المزوّد","btn-org","تم إرسال تنبيه"],["🔁","إعادة توجيه لمزوّد آخر","btn-pri","تم توجيه الطلب لمزوّد بديل"],
+      ["🚫","تعليم كمكرر","btn-soft","تم تعليمه كمكرر"],["⛔","تعليم كغير صالح","btn-err","تم تعليمه كغير صالح"]]
+    .map(([i,t,c,m])=>`<button class="btn ${c}" onclick="closeModal();toast('${id}: ${m}')">${i} ${t}</button>`).join("")}</div>`);
+}
+
+</script>
+</body>
+</html>

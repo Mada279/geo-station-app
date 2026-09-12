@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مكتبة الوسائط | Survsta</title>
+<meta name="description" content="مكتبة الوسائط">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Portal — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js?v=3.7"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-media.html", "مكتبة الوسائط", `<a href="/admin">لوحة الإدارة</a> / <b>مكتبة الوسائط</b>`);
+
+const COLL="media";
+setContent(`
+<div class="pagehead"><div><h2>مكتبة الوسائط</h2>
+  <p>كل صور المنصة في مكان واحد — رفع واستبدال وحذف، مع معرفة أماكن الاستخدام قبل أي حذف.</p></div>
+  <div class="rowf">
+   <input type="file" id="bulkImg" accept="image/*" multiple style="display:none" onchange="bulkUpload(this)">
+   <button class="btn btn-cta" onclick="document.getElementById('bulkImg').click()">📤 رفع صور</button>
+   ${CRUD.addBtn("media","إضافة يدويًا")}</div></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  <div class="kpi"><div class="ic">🖼️</div><div><div class="lab">ملفات نشطة</div><div class="n" id="uActive">0</div></div></div>
+  <div class="kpi"><div class="ic">📦</div><div><div class="lab">مؤرشفة</div><div class="n" id="uArch">0</div></div></div>
+  ${kpi("صيغ مدعومة","JPG · PNG","ضغط تلقائي","flat","🗜️")}
+  <div class="card" style="padding:14px"><div class="rowb"><span class="muted" style="font-size:12.5px">مساحة التخزين</span>
+    <b id="stlab" style="font-size:12.5px">—</b></div>
+    <div class="storagebar" id="stbar" style="margin-top:8px"><i style="width:0%"></i></div>
+    <small class="hint">الصور تُضغط تلقائيًا حتى 400 ك.ب</small></div>
+</div>
+
+<div class="drop" onclick="document.getElementById('bulkImg').click()"
+     ondragover="event.preventDefault();this.classList.add('over')"
+     ondragleave="this.classList.remove('over')"
+     ondrop="event.preventDefault();this.classList.remove('over');bulkUpload({files:event.dataTransfer.files})">
+  📁 اسحب الصور هنا أو اضغط للاختيار<br><small>رفع متعدد — تُضغط وتُخزَّن فورًا وتصبح متاحة لكل نماذج المنصة</small></div>
+
+<div class="tabs" style="margin:16px 0 14px">
+  <button class="on" data-v="active" onclick="setView('active')">النشطة</button>
+  <button data-v="archived" onclick="setView('archived')">المؤرشفة</button></div>
+
+<div class="toolbar"><input id="q" placeholder="بحث باسم الملف…" style="min-width:230px" oninput="onQ(this.value)">
+  <select class="fsel" onchange="onF('type',this.value)"><option value="">كل الأنواع</option>
+   <option>صورة</option><option>صورة مرفوعة</option><option>شعار</option></select>
+  <div style="flex:1"></div><span class="muted" id="cnt">0</span></div>
+
+<div id="tblhost"></div>
+`);
+
+function rowFilter(r){
+  if(FILT.type && r.type!==FILT.type) return false;
+  if(Q && !((r.name||"")+(r.usedIn||"")).includes(Q)) return false;
+  return true;
+}
+function buildTable(rows){
+  return `<div class="medlib">${rows.map(r=>`
+    <div class="medtile">
+      <div class="mth"><img src="${r.file}" alt="${r.name}" loading="lazy"></div>
+      <div class="mtb">
+        <b>${r.name}</b>
+        <small class="muted">${r.type||"صورة"} • ${r.size||"—"} • ${r.date||"—"}</small>
+        <small class="hint">📍 ${r.usedIn||"غير مستخدمة"}</small>
+        <div class="acts" style="margin-top:9px">
+          <button class="btn btn-soft btn-sm" onclick="CRUD.view('media',${r.id})">عرض</button>
+          <button class="btn btn-pri btn-sm" onclick="CRUD.open('media',${r.id})">تعديل</button>
+          <button class="btn btn-err btn-sm" onclick="delMedia(${r.id})">حذف</button>
+        </div></div></div>`).join("")}</div>`;
+}
+function delMedia(id){
+  const m = GS.get("media",id);
+  const used = (m.usedIn||"").trim();
+  const warn = used && used!=="غير مستخدمة بعد" && used!=="غير مستخدمة"
+    ? `<div class="notice" style="margin-top:12px">⚠ هذه الصورة مستخدمة في: <b>${used}</b>. حذفها سيترك تلك المواضع بلا صورة.</div>` : "";
+  openModal(`<button class="x" onclick="closeModal()">✕</button><h3>🗑️ حذف من مكتبة الوسائط</h3>
+    <p class="muted">${m.name}</p>
+    <img src="${m.file}" style="max-height:170px;border-radius:12px;margin-top:10px">${warn}
+    <div class="grid g2" style="margin-top:14px">
+      <button class="btn btn-org" onclick="CRUD.doArchive('media',${id})">📦 أرشفة</button>
+      <button class="btn btn-err" onclick="CRUD.doDelete('media',${id},'${m.name.replace(/'/g,"")}')">⛔ حذف نهائي</button></div>
+    <button class="btn btn-soft btn-block" style="margin-top:12px" onclick="closeModal()">إلغاء</button>`);
+}
+function bulkUpload(input){
+  const files=[...(input.files||[])].filter(f=>/^image\//.test(f.type));
+  if(!files.length){ toast("⚠ لم تُختر صور صالحة"); return; }
+  toast(`⏳ جارٍ رفع وضغط ${files.length} صورة…`);
+  let done=0, failed=0;
+  files.forEach(f=>{
+    GS.uploadImage(f).then(r=>{
+      GS.addMedia(f.name.replace(/\.[^.]+$/,""), r.dataUrl, r.sizeLabel);
+      done++; if(done+failed===files.length) finish(done,failed);
+    }).catch(()=>{ failed++; if(done+failed===files.length) finish(done,failed); });
+  });
+}
+function finish(d,f){ render(); toast(`✅ رُفعت ${d} صورة${f?` — فشل ${f}`:""}`); }
+
+let VIEW="active", Q="", FILT={};
+function refreshTable(){ render(); }
+function render(){
+  const rows = (VIEW==="archived"?GS.archived(COLL):GS.active(COLL)).filter(rowFilter);
+  $("#tblhost").innerHTML = rows.length ? buildTable(rows)
+    : `<div class="empty">لا توجد سجلات مطابقة. <button class="btn btn-soft btn-sm" onclick="clearF()">مسح الفلاتر</button></div>`;
+  $("#cnt").textContent = rows.length + " سجل";
+  $("#uActive").textContent = GS.active(COLL).length;
+  $("#uArch").textContent = GS.archived(COLL).length;
+  const u = GS.usage();
+  const sb=$("#stbar"); if(sb){ sb.querySelector("i").style.width=u.pct+"%"; sb.classList.toggle("hi",u.pct>75);
+    $("#stlab").textContent = u.label + " / 5 م.ب"; }
+}
+function clearF(){ Q=""; FILT={}; $("#q").value=""; $$(".fsel").forEach(s=>s.value=""); render(); }
+function setView(v){ VIEW=v; $$(".tabs button").forEach(b=>b.classList.toggle("on", b.dataset.v===v)); render(); }
+function onQ(v){ Q=v.trim(); render(); }
+function onF(k,v){ FILT[k]=v; render(); }
+
+GS.onChange(render); render();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سوق أجهزة المساحة | Survsta</title>
+<meta name="description" content="أجهزة Total Station وGNSS وماسحات ليزرية وطائرات مسح للبيع والإيجار في مصر من موردين معتمدين.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Platform — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/style.css?v=3.7">
+</head>
+<body>
+<main id="main">
+<section class="sec tight"><div class="wrap">
+  <div class="muted" id="crumb">الرئيسية / سوق الأجهزة</div>
+  <div class="sechead" style="margin-top:10px"><div><h2 id="ttl">سوق أجهزة المساحة</h2>
+    <p>عروض بيع وإيجار من موردين ومكاتب معتمدة، مع بيانات الحالة والموديل وحالة المعايرة كما وردت من المزوّد.</p></div></div>
+
+  <div class="layout">
+    <aside class="panel sticky">
+      <h4 style="margin-bottom:14px">تصفية الأجهزة</h4>
+      <div class="fgroup"><h4>بحث</h4><input type="text" id="f-q" placeholder="Leica, GNSS, Drone..."></div>
+      <div class="fgroup"><h4>نوع العرض</h4><select id="f-mode"><option value="">بيع وإيجار</option><option value="rent">إيجار فقط</option><option value="sale">بيع فقط</option></select></div>
+      <div class="fgroup"><h4>الفئة</h4><select id="f-cat"><option value="">كل الفئات</option></select></div>
+      <div class="fgroup"><h4>المحافظة</h4><select id="f-gov"><option value="">كل المحافظات</option></select></div>
+      <div class="fgroup"><h4>الحالة</h4>
+        <label><input type="checkbox"> جديد</label><label><input type="checkbox"> مستعمل — ممتاز</label><label><input type="checkbox"> مستعمل — جيد</label></div>
+      <div class="fgroup"><h4>الماركة</h4><div id="brands"></div></div>
+      <button class="btn btn-soft btn-block btn-sm" onclick="clearF()">مسح كل الفلاتر</button>
+    </aside>
+    <div>
+      <div class="toolbar"><span class="muted" id="count"></span><div style="flex:1"></div>
+        <select id="f-sort"><option value="relevance">الأكثر صلة</option><option value="newest">الأحدث موديلًا</option>
+          <option>الأقل سعرًا</option><option>الأعلى سعرًا</option></select></div>
+      <div id="out"></div>
+      <div class="pager" id="pager"></div>
+    </div>
+  </div>
+</div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js?v=3.7"></script>
+<script>
+mountShell("equipment.html");
+
+$("#f-cat").innerHTML += EQUIP_CATS.map(c=>`<option>${c}</option>`).join("");
+$("#f-gov").innerHTML += GOVS.map(g=>`<option>${g}</option>`).join("");
+$("#brands").innerHTML = BRANDS.slice(0,6).map(b=>`<label><input type="checkbox"> ${b}</label>`).join("");
+if(qs("cat"))  $("#f-cat").value=qs("cat");
+if(qs("mode")) $("#f-mode").value=qs("mode");
+if(qs("gov"))  $("#f-gov").value=qs("gov");
+if(qs("q"))    $("#f-q").value=qs("q");
+function clearF(){["f-q","f-cat","f-gov","f-mode"].forEach(i=>$("#"+i).value="");draw()}
+function draw(){
+  const f=readFilters(), r=filterEquipment(f);
+  const label = f.mode==="rent"?"أجهزة للإيجار":f.mode==="sale"?"أجهزة للبيع":"سوق أجهزة المساحة";
+  $("#ttl").textContent = f.cat? f.cat + (f.mode?` — ${f.mode==='rent'?'إيجار':'بيع'}`:"") : label;
+  $("#count").innerHTML = `<b>${r.length}</b> عرض${f.gov?" في "+f.gov:""}`;
+  $("#out").innerHTML = r.length ? `<div class="grid g3">${r.map(equipmentCard).join("")}</div>`
+    : `<div class="empty"><h3>لا توجد أجهزة مطابقة</h3><p>وسّع الفلاتر، أو اطلب الجهاز وسيصلك عرض من الموردين.</p>
+       <button class="btn btn-org" onclick="openModal('need')">اطلب الجهاز</button></div>`;
+  $("#pager").innerHTML = r.length? `<button class="on" onclick="toast('أنت في الصفحة الأولى')" aria-current="page">1</button><button onclick="toast('نموذج عرض')">2</button><button onclick="toast('نموذج عرض')">›</button>`:"";
+}
+["f-q","f-cat","f-gov","f-mode","f-sort"].forEach(i=>{$("#"+i).addEventListener("input",draw);$("#"+i).addEventListener("change",draw)});
+draw(); $("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

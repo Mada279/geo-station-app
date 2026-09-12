@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الخدمات المساحية | Survsta</title>
+<meta name="description" content="دليل الخدمات المساحية: رفع طبوغرافي، مسح ليزري، مسح جوي، تقسيم أراضي، معايرة، GIS وحصر كميات.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Platform — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/style.css?v=3.7">
+</head>
+<body>
+<main id="main">
+<section class="hero"><div class="hero-bg"><img src="assets/img/totalstation-construction-crane.jpg" alt="محطة مساحية متكاملة في موقع إنشاءات"></div>
+<div class="wrap hero-in" style="padding:52px 0 54px">
+  <div style="color:#9db2c6;font-size:13px">الرئيسية / الخدمات</div>
+  <h1 style="font-size:clamp(26px,3.6vw,40px);margin:12px 0 10px">الخدمات المساحية والجيوماتكس</h1>
+  <p class="lead">اختر الخدمة التي تحتاجها لعرض الجهات القادرة على تنفيذها داخل نطاقك الجغرافي.</p>
+</div></section><section class="sec"><div class="wrap"><div class="grid g3" id="out"></div></div></section>
+<section class="sec alt"><div class="wrap"><div class="split">
+  <img src="assets/img/totalstation-bridge-project.jpg" alt="أجهزة وأعمال مساحية دقيقة">
+  <div><div class="kicker">مش متأكد من الخدمة المناسبة؟</div>
+    <h2 style="font-size:29px;margin:8px 0 12px">اشرح المشكلة، وإحنا نوصّلك بالجهة الصح</h2>
+    <p class="muted" style="font-size:15.5px">مش لازم تعرف الاسم الفني للخدمة. اكتب طبيعة العمل والموقع والمخرجات اللي محتاجها، والمنصة توجّه طلبك للمكاتب والشركات المؤهلة في نطاقك.</p>
+    <ul style="margin-top:14px;color:var(--ink2)"><li>توجيه مجاني وبدون التزام</li><li>عروض من أكثر من جهة للمقارنة</li><li>بياناتك لا تُشارك إلا بموافقتك</li></ul>
+    <button class="btn btn-org btn-lg" style="margin-top:18px" onclick="openModal('need')">أضف احتياجك</button></div>
+</div></div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js?v=3.7"></script>
+<script>
+mountShell("services.html");
+$("#out").innerHTML=SERVICES.map(serviceCard).join("");$("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

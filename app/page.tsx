@@ -103,6 +103,34 @@ export default function HomePage() {
                 </Link>
               </div>
 
+              {/* Gateway Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-4">
+                <Link
+                  href="/login"
+                  className="rounded-xl bg-cyan-400 px-6 py-3 text-sm font-bold text-gray-950 shadow-lg shadow-cyan-400/25 hover:bg-cyan-300 hover:shadow-cyan-400/40 transition-all"
+                >
+                  🔐 تسجيل الدخول
+                </Link>
+                <Link
+                  href="/admin"
+                  className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-6 py-3 text-sm font-bold text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all backdrop-blur-sm"
+                >
+                  🛡️ لوحة الإدارة
+                </Link>
+                <Link
+                  href="/provider/dashboard"
+                  className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-6 py-3 text-sm font-bold text-amber-400 hover:bg-amber-500/20 hover:border-amber-400 transition-all backdrop-blur-sm"
+                >
+                  📊 بوابة المزوّد
+                </Link>
+                <Link
+                  href="/join"
+                  className="rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-gray-300 hover:bg-white/10 hover:text-white transition-all backdrop-blur-sm"
+                >
+                  ✨ انضم كشريك
+                </Link>
+              </div>
+
             </div>
 
             {/* Left Column: lg:col-span-5 (Task 2: Clean, Transparent Visual Anchor with ONLY the Large Survsta Image) */}

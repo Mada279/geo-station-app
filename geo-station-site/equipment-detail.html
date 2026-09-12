@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تفاصيل الجهاز | Survsta</title>
+<meta name="description" content="تفاصيل جهاز المساحة: المواصفات والحالة وحالة المعايرة والمزوّد.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Platform — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/style.css?v=3.7">
+</head>
+<body>
+<main id="main">
+<section class="sec tight"><div class="wrap">
+  <div class="muted" id="crumb"></div>
+  <div class="layout rev" style="margin-top:16px">
+    <div id="body"></div><aside id="aside"></aside>
+  </div>
+  <div class="sechead" style="margin-top:44px"><div><h2>أجهزة مشابهة</h2></div><a href="equipment.html" class="btn btn-soft">كل السوق ←</a></div>
+  <div class="grid g3" id="similar"></div>
+</div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js?v=3.7"></script>
+<script>
+mountShell("equipment.html");
+
+const e = EQUIPMENT.find(x=>x.slug===qs("slug")) || EQUIPMENT[0];
+const p = pv(e.pid);
+document.title = e.title + " | Survsta";
+$("#crumb").innerHTML = `<a href="index.html">الرئيسية</a> / <a href="equipment.html">سوق الأجهزة</a> / <a href="equipment.html?cat=${encodeURIComponent(e.cat)}">${e.cat}</a> / <b>${e.title}</b>`;
+$("#body").innerHTML = `
+ <div class="panel">
+   <img src="${e.img}" alt="${e.title}" style="width:100%;height:390px;object-fit:cover;border-radius:14px">
+   <div class="gallery">${[IMG.product,IMG.tsField,IMG.gnssTablet,IMG.teamTS].map(i=>`<img src="${i}" alt="">`).join("")}</div>
+ </div>
+ <div class="panel" style="margin-top:18px">
+   <div class="rowb"><h1 style="font-size:26px">${e.title}</h1><div>${money(e)}</div></div>
+   <div class="muted" style="margin-top:7px">${e.cat} • ${e.brand} • موديل ${e.year} • 📍 ${e.gov}</div>
+   <div style="margin-top:10px">
+     ${e.modes.includes("rent")?'<span class="chip cy">متاح للإيجار</span>':""}
+     ${e.modes.includes("sale")?'<span class="chip cy">متاح للبيع</span>':""}
+     <span class="chip">${e.cond}</span>
+     <span class="chip ${e.avail.includes("متاح")?"ok":"warn"}">${e.avail}</span>
+     <span class="chip ok">✔ إدراج معتمد</span></div>
+   <div class="sep"></div>
+   <h3 style="font-size:19px">وصف الجهاز</h3><p style="margin-top:8px;color:var(--ink2)">${e.desc}</p>
+   <div class="sep"></div>
+   <h3 style="font-size:19px">المواصفات</h3>
+   <table class="spec" style="margin-top:10px"><tbody>
+     ${Object.entries(e.specs).map(([k,v])=>`<tr><th>${k}</th><td>${v}</td></tr>`).join("")}
+     <tr><th>حالة المعايرة</th><td>${e.cal} ${e.cal.includes("سارية")?'<span class="chip ok">مُدرجة وسارية</span>':e.cal.includes("منتهية")?'<span class="chip err">منتهية</span>':e.cal.includes("غير")?'<span class="chip warn">غير مُدرجة</span>':'<span class="chip ok">شهادة مصنع</span>'}</td></tr>
+   </tbody></table>
+   <div class="notice" style="margin-top:14px">بيانات المعايرة تُعرض كما وردت من المزوّد. عدم وجود سجل حديث لا يعني بالضرورة صلاحية أو عدم صلاحية الجهاز — يُنصح بطلب الشهادة قبل التعاقد.</div>
+ </div>`;
+$("#aside").innerHTML = `
+ <div class="panel sticky">
+   <div class="rowf"><div class="avatar">${p.name.slice(0,2)}</div>
+     <div><a href="provider.html?slug=${p.slug}"><b>${p.name}</b></a>
+       <div class="muted">${p.type} • ${p.gov}</div>
+       <div><span class="stars">${stars(p.rate)}</span> <span class="muted">${p.rate}</span></div></div></div>
+   <div style="margin-top:10px">${p.ver.map(v=>`<span class="chip ok">✔ ${v}</span>`).join("")}</div>
+   <button class="btn btn-pri btn-block btn-lg" style="margin-top:14px" onclick="openModal('contact','${e.title}')">طلب تواصل بخصوص الجهاز</button>
+   <a href="provider.html?slug=${p.slug}" class="btn btn-soft btn-block" style="margin-top:9px">عرض ملف المزوّد</a>
+   <button class="btn btn-soft btn-block" style="margin-top:9px" onclick="toast('تمت إضافة الجهاز لقائمتك المحفوظة')">♡ حفظ الجهاز</button>
+   <div class="sep"></div>
+   <div class="muted" style="font-size:13px">⏱ متوسط رد المزوّد: ${p.resp}<br>🔐 لا تُشارك بياناتك إلا بعد موافقتك.</div>
+ </div>`;
+$("#similar").innerHTML = EQUIPMENT.filter(x=>x.id!==e.id).sort((a,b)=>(b.cat===e.cat)-(a.cat===e.cat)).slice(0,3).map(equipmentCard).join("");
+$("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تفاصيل الوظيفة | Survsta</title>
+<meta name="description" content="تفاصيل الوظيفة والمتطلبات وجهة العمل.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Platform — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/style.css?v=3.7">
+</head>
+<body>
+<main id="main">
+<section class="sec tight"><div class="wrap">
+  <div class="muted" id="crumb"></div>
+  <div class="layout rev" style="margin-top:16px"><div id="body"></div><aside id="aside"></aside></div>
+  <div class="sechead" style="margin-top:44px"><div><h2>وظائف مشابهة</h2></div><a href="jobs.html" class="btn btn-soft">كل الوظائف ←</a></div>
+  <div class="grid g2" id="more"></div>
+</div></section><div id="cta"></div>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js?v=3.7"></script>
+<script>
+mountShell("jobs.html");
+
+const j = JOBS.find(x=>x.slug===qs("slug")) || JOBS[0];
+const cp = pv(j.pid);
+document.title=j.t+" | Survsta";
+$("#crumb").innerHTML=`<a href="index.html">الرئيسية</a> / <a href="jobs.html">الوظائف</a> / <b>${j.t}</b>`;
+$("#body").innerHTML=`<div class="panel">
+  <div class="rowb"><h1 style="font-size:27px">${j.t}</h1><span class="chip cy">${j.type}</span></div>
+  <div class="muted" style="margin-top:8px">${j.company} • 📍 ${j.gov} • خبرة ${j.exp} • 🕒 ${j.posted}</div>
+  <div style="margin-top:10px"><span class="chip ok">✔ منشورة بعد مراجعة الإدارة</span><span class="chip">💰 ${j.salary}</span></div>
+  <div class="sep"></div>
+  <h3 style="font-size:19px">الوصف الوظيفي</h3><p style="margin-top:8px;color:var(--ink2)">${j.d}</p>
+  <div class="sep"></div>
+  <h3 style="font-size:19px">المتطلبات</h3><ul style="margin-top:10px;color:var(--ink2)">${j.req.map(r=>`<li style="margin-bottom:6px">${r}</li>`).join("")}</ul>
+  <div class="sep"></div>
+  <h3 style="font-size:19px">مميزات العمل</h3>
+  <div class="grid g2" style="margin-top:10px">${["تأمين اجتماعي وطبي","بدل انتقالات ميدانية","تدريب مستمر على الأجهزة","فرص ترقٍّ داخل الفريق"]
+    .map(x=>`<div class="card" style="padding:12px"><div class="rowf"><span class="chip ok">✔</span><b style="font-size:14.5px">${x}</b></div></div>`).join("")}</div>
+  <button class="btn btn-pri btn-lg" style="margin-top:18px" onclick="openModal('apply','${j.t}')">تقديم على الوظيفة</button>
+  <button class="btn btn-soft btn-lg" style="margin-top:18px" onclick="openModal('report')">🚩 إبلاغ</button>
+ </div>`;
+$("#aside").innerHTML=`<div class="panel sticky"><h3 style="font-size:18px">عن جهة العمل</h3>
+  <div class="rowf" style="margin-top:12px"><div class="avatar">${cp.name.slice(0,2)}</div>
+   <div><a href="provider.html?slug=${cp.slug}"><b>${cp.name}</b></a><div class="muted">${cp.type} • ${cp.gov}</div></div></div>
+  <div style="margin-top:10px">${cp.ver.map(v=>`<span class="chip ok">✔ ${v}</span>`).join("")}</div>
+  <a href="provider.html?slug=${cp.slug}" class="btn btn-soft btn-block" style="margin-top:12px">عرض ملف الجهة</a>
+  <button class="btn btn-pri btn-block btn-lg" style="margin-top:9px" onclick="openModal('apply','${j.t}')">تقديم سريع</button>
+  <button class="btn btn-soft btn-block" style="margin-top:9px" onclick="toast('تم حفظ الوظيفة')">♡ حفظ الوظيفة</button></div>`;
+$("#more").innerHTML=JOBS.filter(x=>x.id!==j.id).slice(0,4).map(jobCard).join("");
+$("#cta").innerHTML=ctaBand();
+</script>
+</body>
+</html>

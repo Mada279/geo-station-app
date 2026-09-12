@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الاستيراد والتصدير | Survsta</title>
+<meta name="description" content="الاستيراد والتصدير">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Portal — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js?v=3.7"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-import.html", "الاستيراد والتصدير", `<a href="/admin">لوحة الإدارة</a> / <b>الاستيراد والتصدير</b>`);
+
+setContent(`
+<div class="pagehead"><div><h2>الاستيراد والتصدير</h2>
+  <p>نقل البيانات بالجملة مع تحقق من الصيغة وفحص تكرار قبل الإدراج الفعلي.</p></div></div>
+
+<div class="grid g2">
+ <div class="card"><h3>استيراد بيانات</h3>
+  <p class="muted" style="margin-top:6px">ارفع ملف CSV أو XLSX وفق القالب المعتمد. لا يُدرج أي سجل قبل اجتياز التحقق.</p>
+  <div class="drop" style="margin-top:14px">📁 اسحب الملف هنا أو اضغط للاختيار<br><small>CSV / XLSX — حتى 5,000 سجل لكل عملية</small></div>
+  <div class="field" style="margin-top:14px"><label>نوع البيانات</label>
+   <select><option>مزوّدون</option><option>إدراجات أجهزة</option><option>خدمات</option><option>مواقع وإحداثيات</option><option>دورات تدريبية</option></select></div>
+  <div style="margin-top:12px">
+   <label class="check"><input type="checkbox" checked> تشغيل فحص التكرار قبل الإدراج</label>
+   <label class="check"><input type="checkbox" checked> إرسال كل السجلات لطابور المراجعة (عدم النشر المباشر)</label>
+   <label class="check"><input type="checkbox"> تحديث السجلات القائمة عند تطابق المعرّف</label></div>
+  <div class="rowf" style="margin-top:14px">
+   <button class="btn btn-pri" onclick="runImport()">▶ بدء التحقق</button>
+   <button class="btn btn-soft" onclick="toast('تم تنزيل القالب')">⬇ تنزيل القالب</button></div>
+  <div id="impres"></div>
+ </div>
+
+ <div class="card"><h3>تصدير بيانات</h3>
+  <p class="muted" style="margin-top:6px">تصدير مُقيَّد ومسجَّل — كل عملية تصدير تظهر في سجل التدقيق.</p>
+  <div class="formgrid" style="margin-top:14px">
+   <div class="field"><label>نوع البيانات</label><select><option>مزوّدون</option><option>إدراجات أجهزة</option><option>طلبات التواصل</option><option>المستخدمون</option><option>سجل التدقيق</option></select></div>
+   <div class="field"><label>الصيغة</label><select><option>CSV</option><option>XLSX</option><option>JSON</option></select></div>
+   <div class="field"><label>من تاريخ</label><input type="date"></div>
+   <div class="field"><label>إلى تاريخ</label><input type="date"></div>
+   <div class="field full"><label class="check"><input type="checkbox"> إخفاء بيانات الاتصال الشخصية (تصدير مُجهَّل)</label></div>
+  </div>
+  <div class="notice" style="margin-top:12px">تصدير بيانات تحتوي على معلومات اتصال شخصية يتطلب صلاحية «مدير النظام» ويُسجَّل باسم المُصدِّر.</div>
+  <button class="btn btn-pri btn-block" style="margin-top:14px" onclick="toast('⬇ جارٍ تجهيز ملف التصدير — سيصلك رابط التنزيل')">تصدير الآن</button>
+ </div>
+</div>
+
+<div class="card" style="margin-top:16px"><h3>سجل عمليات النقل</h3>
+ <div style="margin-top:14px">${table(["الرقم","النوع","العملية","السجلات","نجح","فشل","المستخدم","التاريخ","الحالة"],
+  [["IM-017","مزوّدون","استيراد",120,114,6,"data@survsta.com","2026-09-03 08:55","مكتمل"],
+   ["EX-042","طلبات تواصل","تصدير",1043,1043,0,"admin@survsta.com","2026-09-02 17:20","مكتمل"],
+   ["IM-016","إدراجات أجهزة","استيراد",340,298,42,"data@survsta.com","2026-08-29 11:02","مكتمل بأخطاء"],
+   ["IM-015","مواقع وإحداثيات","استيراد",88,88,0,"data@survsta.com","2026-08-24 14:45","مكتمل"]]
+  .map(r=>[`<code>${r[0]}</code>`,r[1],`<span class="chip ${r[2]==="استيراد"?"cy":"pur"}">${r[2]}</span>`,
+    num(r[3]),`<span class="chip ok">${num(r[4])}</span>`,r[5]?`<span class="chip err">${r[5]}</span>`:'—',
+    r[6],`<span class="muted">${r[7]}</span>`,
+    r[8]==="مكتمل"?'<span class="chip ok">مكتمل</span>':'<span class="chip warn">'+r[8]+'</span>']))}</div>
+</div>
+`);
+function runImport(){
+ $("#impres").innerHTML=`<div class="notice ok" style="margin-top:14px"><b>نتيجة التحقق:</b>
+  <div class="grid g4" style="margin-top:10px">
+   <div><div class="muted">إجمالي السجلات</div><b style="font-size:18px">120</b></div>
+   <div><div class="muted">صالحة</div><b style="font-size:18px;color:var(--ok)">108</b></div>
+   <div><div class="muted">تكرار محتمل</div><b style="font-size:18px;color:var(--warn)">6</b></div>
+   <div><div class="muted">أخطاء صيغة</div><b style="font-size:18px;color:var(--err)">6</b></div></div>
+  <div class="rowf" style="margin-top:12px"><button class="btn btn-pri btn-sm" onclick="toast('تم إدراج 108 سجل في طابور المراجعة')">إدراج الصالح (108)</button>
+   <button class="btn btn-soft btn-sm" onclick="toast('تنزيل تقرير الأخطاء')">⬇ تقرير الأخطاء</button></div></div>`;
+}
+
+</script>
+</body>
+</html>

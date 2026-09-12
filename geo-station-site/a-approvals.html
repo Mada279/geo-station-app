@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مركز الاعتمادات | Survsta</title>
+<meta name="description" content="مركز الاعتمادات">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Portal — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js?v=3.7"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-approvals.html", "مركز الاعتمادات", `<a href="/admin">لوحة الإدارة</a> / <b>مركز الاعتمادات</b>`);
+
+let AF="all";
+const TB=[["all","الكل",A_APPROVALS.length],["ملف مزوّد","ملفات مزوّدين",A_APPROVALS.filter(a=>a.kind.includes("ملف")||a.kind.includes("مركز")).length],
+ ["جهاز","أجهزة",A_APPROVALS.filter(a=>a.kind==="جهاز").length],["وظيفة","وظائف",A_APPROVALS.filter(a=>a.kind==="وظيفة").length],
+ ["متأخر","متأخرة عن SLA",A_APPROVALS.filter(a=>a.sla==="متأخر").length]];
+function setAF(k){AF=k;draw()}
+function rows(){return A_APPROVALS.filter(a=> AF==="all"?true
+  : AF==="متأخر"? a.sla==="متأخر"
+  : AF==="ملف مزوّد"? (a.kind.includes("ملف")||a.kind.includes("مركز"))
+  : a.kind===AF)}
+
+function review(id){
+ const a=A_APPROVALS.find(x=>x.id===id);
+ openModal(`<button class="x" onclick="closeModal()">✕</button>
+  <h3>مراجعة ${a.id}</h3><p class="muted">${a.kind} • مقدَّم من ${a.owner} • ${a.date}</p>
+  <div class="sep"></div>
+  ${table([],[["<b>العنصر</b>",a.item],["<b>النوع</b>",a.kind],["<b>المحافظة</b>",a.gov],
+    ["<b>مقدّم الطلب</b>",a.owner],["<b>مهلة المراجعة</b>",a.sla==="متأخر"?'<span class="chip err">متأخر</span>':a.sla],
+    ["<b>فحص الجودة الآلي</b>",a.risk==="—"?'<span class="chip ok">لم تُرصد مشكلات</span>':`<span class="chip warn">${a.risk}</span>`]])}
+  <h3 style="font-size:16px;margin-top:16px">قائمة التحقق</h3>
+  <div style="margin-top:9px">
+   ${["البيانات الأساسية مكتملة وواضحة","وسيلة تواصل واحدة على الأقل مؤكدة","الموقع والإحداثيات منطقية",
+      "الوصف خالٍ من ادعاءات اعتماد غير موثّقة","لا يوجد تكرار مع سجل قائم","الصور/المستندات كافية للنوع"]
+    .map((t,i)=>`<label class="check"><input type="checkbox" ${i<3?"checked":""}> ${t}</label>`).join("")}</div>
+  <div class="field" style="margin-top:14px"><label>ملاحظة المراجعة (تُسجَّل في سجل التدقيق)</label>
+   <textarea rows="3" placeholder="عند طلب التعديل أو الرفض، وضّح السبب بدقة ليتمكن المزوّد من المعالجة"></textarea></div>
+  <div class="rowf" style="margin-top:16px;flex-wrap:wrap">
+   <button class="btn btn-ok" onclick="closeModal();toast('✅ ${a.id}: تم الاعتماد والنشر — سُجِّل الحدث')">اعتماد ونشر</button>
+   <button class="btn btn-org" onclick="closeModal();toast('📝 ${a.id}: تم إرسال طلب تعديلات للمزوّد')">طلب تعديلات</button>
+   <button class="btn btn-err" onclick="closeModal();toast('⛔ ${a.id}: تم الرفض — سُجِّل الحدث')">رفض</button>
+   <button class="btn btn-soft" onclick="closeModal();toast('تم تعليمه كمكرر')">تعليم كمكرر</button>
+  </div>`);
+}
+
+function draw(){
+setContent(`
+<div class="pagehead"><div><h2>مركز الاعتمادات</h2>
+  <p>لا يُنشر أي عنصر قبل المراجعة. كل قرار (اعتماد / تعديل / رفض) يُسجَّل في سجل التدقيق بالفاعل والزمن.</p></div>
+  <div class="rowf"><button class="btn btn-soft" onclick="toast('تم تعيين الطابور لفريق المراجعة')">👥 توزيع الطابور</button>
+   <button class="btn btn-pri" onclick="toast('تم فتح أول عنصر في الطابور')">▶ بدء المراجعة المتسلسلة</button></div></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  ${kpi("في الطابور","12","","flat","📋")}
+  ${kpi("متأخرة عن SLA","3","تحتاج أولوية","dn","🔴")}
+  ${kpi("تمت مراجعتها اليوم","18","▲ 5","up","✅")}
+  ${kpi("متوسط زمن المراجعة","6.2 ساعة","تحسّن 20%","up","⏱️")}
+</div>
+
+${tabs(TB,AF,"setAF")}
+
+<div class="toolbar">
+  <input placeholder="بحث بالعنصر أو مقدّم الطلب…" style="min-width:210px">
+  <select><option>كل المحافظات</option><option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option></select>
+  <select><option>كل مستويات الخطورة</option><option>تكرار محتمل</option><option>بيانات ناقصة</option></select>
+  <div style="flex:1"></div><span class="muted">${rows().length} عنصر</span>
+</div>
+
+${rows().length? table(["الرقم","العنصر","النوع","مقدّم الطلب","المحافظة","التاريخ","فحص الجودة","المهلة","الإجراء"],
+ rows().map(a=>[`<code>${a.id}</code>`,`<b>${a.item}</b>`,`<span class="chip">${a.kind}</span>`,a.owner,a.gov,
+   `<span class="muted">${a.date}</span>`,
+   a.risk==="—"?'<span class="chip ok">سليم</span>':`<span class="chip warn">${a.risk}</span>`,
+   a.sla==="متأخر"?'<span class="chip err">متأخر</span>':`<span class="muted">${a.sla}</span>`,
+   `<div class="acts"><button class="btn btn-pri btn-sm" onclick="review('${a.id}')">مراجعة</button>
+    <button class="btn btn-ok btn-sm" onclick="toast('${a.id}: اعتماد سريع')">✔</button></div>`]))
+ : `<div class="empty"><h3>لا توجد عناصر في هذا التصنيف</h3><p>الطابور نظيف — أحسنت.</p></div>`}
+
+<div class="notice" style="margin-top:16px">لا تُمنح شارة توثيق إلا بما تمّت مراجعته فعليًا. الاعتماد يعني اكتمال البيانات ووضوحها، ولا يعني اعتمادًا فنيًا لجودة الأعمال أو حالة الأجهزة.</div>
+`);
+}
+
+// مزامنة حية من Supabase للطلبات الجديدة
+if (typeof window !== "undefined") {
+  setTimeout(async () => {
+    try {
+      if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+        const { data } = await window.SupabaseService.select("providers", { limit: 20 });
+        if (data && data.length) {
+          data.forEach(p => {
+            const pid = p.id ? String(p.id).slice(0, 8) : "REQ-NEW";
+            if (!A_APPROVALS.some(x => x.id === pid || x.item === p.name)) {
+              A_APPROVALS.unshift({
+                id: pid,
+                item: p.name || "مزوّد مساحة جديد",
+                kind: "ملف مزوّد (سحابي)",
+                owner: p.name || "مزوّد جديد",
+                gov: p.location || "القاهرة",
+                date: p.created_at ? new Date(p.created_at).toLocaleDateString('ar-EG') : "اليوم",
+                risk: "—",
+                sla: "عاجل"
+              });
+            }
+          });
+        }
+      }
+    } catch(e) { console.warn("Supabase live sync error:", e); }
+  }, 100);
+}
+
+draw();
+
+</script>
+</body>
+</html>

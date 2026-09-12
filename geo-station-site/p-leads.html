@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>صندوق طلبات التواصل | Survsta</title>
+<meta name="description" content="صندوق طلبات التواصل">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Portal — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js?v=3.7"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("provider", "p-leads.html", "صندوق طلبات التواصل", `<a href="/provider/dashboard">بوابة المزوّد</a> / <b>صندوق الطلبات</b>`);
+
+let LF="all";
+const FILTERS=[["all","الكل",P_LEADS.length],["جديد","جديدة",P_LEADS.filter(l=>l.status==="جديد").length],
+ ["نشط","قيد المتابعة",P_LEADS.filter(l=>["تم التواصل","مؤهل","تفاوض"].includes(l.status)).length],
+ ["مغلق","مغلقة",P_LEADS.filter(l=>l.status.startsWith("مغلق")).length],
+ ["مكرر","مكرر / غير صالح",P_LEADS.filter(l=>["مكرر","غير صالح"].includes(l.status)).length]];
+
+function rowsFor(){
+  return P_LEADS.filter(l=> LF==="all" ? true
+    : LF==="نشط" ? ["تم التواصل","مؤهل","تفاوض"].includes(l.status)
+    : LF==="مغلق" ? l.status.startsWith("مغلق")
+    : LF==="مكرر" ? ["مكرر","غير صالح"].includes(l.status)
+    : l.status===LF);
+}
+function setLF(k){ LF=k; draw(); }
+
+async function unlockAndChargeLead(id){
+  try {
+    toast("⏳ جارٍ فتح بيانات الطلب وخصم الرسوم من المحفظة عبر Supabase...");
+    const numericId = parseInt(String(id).replace(/\D/g, "")) || id;
+    await GS.unlockLead(numericId);
+    toast("✅ تم فتح الطلب وخصم الرسوم بنجاح من المحفظة!");
+    const l = P_LEADS.find(x=>x.id===id);
+    if(l){ l.status = "تم التواصل"; }
+    closeModal();
+    draw();
+  } catch(err) {
+    console.error("[Pay-Per-Lead Error]", err);
+    toast("⚠ " + (err.message || "تعذر خصم الرصيد وفتح الطلب"));
+  }
+}
+
+function openLead(id){
+  const l=P_LEADS.find(x=>x.id===id);
+  const isNew = l.status === "جديد";
+
+  openModal(`<button class="x" onclick="closeModal()">✕</button>
+   <h3>${l.id} — ${l.subj}</h3><p class="muted">${l.date}</p>
+   <div class="sep"></div>
+   ${table([],[["<b>العميل</b>",l.cust],["<b>مسؤول التواصل</b>",l.contact],["<b>الموقع</b>",l.gov],
+     ["<b>المصدر</b>",l.src],["<b>قيمة الفرصة المقدّرة</b>",l.val],["<b>الحالة</b>",st(l.status)]])}
+   
+   ${isNew ? `
+   <div class="notice cy" style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+     <div><b>💳 نظام الدفع لكل طلب (Pay-Per-Lead):</b><br><small class="muted">سيتم كشف الهاتف وخصم رسوم الطلب تلقائياً من محفظتك السحابية.</small></div>
+     <button class="btn btn-cta btn-sm" onclick="unlockAndChargeLead('${l.id}')">🔓 فتح الطلب وخصم الرسوم</button>
+   </div>` : `
+   <div class="notice ok" style="margin-top:12px">
+     ✅ <b>تم فتح بيانات الاتصال:</b> هاتف العميل جاهز للتواصل، وتمت المعاملة وتوثيقها في سجل المحفظة.
+   </div>`}
+
+   <h3 style="font-size:16px;margin-top:16px">تحديث الحالة</h3>
+   <div class="rowf" style="flex-wrap:wrap;margin-top:9px">
+    ${["مُطّلع عليه","تم التواصل","مؤهل","تفاوض","مغلق — ناجح","مغلق — غير ناجح","مكرر"]
+      .map(s=>`<button class="btn btn-soft btn-sm" onclick="closeModal();toast('${l.id}: تم تحديث الحالة إلى ${s}')">${s}</button>`).join("")}</div>
+   <div class="sep"></div>
+   <h3 style="font-size:16px">سجل أحداث الطلب</h3>
+   <div class="tl" style="margin-top:10px">
+     <div class="it"><b>تم إنشاء الطلب من ${l.src}</b><small>${l.date}</small></div>
+     <div class="it ok"><b>تم تسليمه لصندوقك</b><small>بعد ثانيتين من الإنشاء</small></div>
+     ${!isNew ? `<div class="it ok"><b>تم فتح الطلب وخصم الرسوم من المحفظة</b><small>عبر Supabase RPC</small></div>`:""}
+     ${["تم التواصل","مؤهل","تفاوض"].includes(l.status)?`<div class="it warn"><b>تم كشف بيانات الاتصال والتواصل مع العميل</b><small>+1 ساعة</small></div>`:""}
+     ${l.status.startsWith("مغلق")?`<div class="it ${l.status.includes("غير")?"err":"ok"}"><b>${l.status}</b><small>تم إغلاق الطلب</small></div>`:""}
+   </div>
+   <div class="field" style="margin-top:14px"><label>ملاحظة داخلية</label><textarea rows="2" placeholder="لن يراها العميل"></textarea></div>
+   <button class="btn btn-pri btn-block" style="margin-top:12px" onclick="closeModal();toast('تم حفظ الملاحظة')">حفظ</button>`);
+}
+
+function draw(){
+setContent(`
+<div class="pagehead"><div><h2>صندوق طلبات التواصل</h2>
+  <p>دورة الحياة: جديد ← مُسلَّم ← مُطّلع عليه ← تم التواصل ← مؤهل ← تفاوض ← مغلق. كل تغيير حالة يُسجَّل كحدث.</p></div>
+  <button class="btn btn-soft" onclick="toast('تم تصدير الطلبات بصيغة CSV')">⬇ تصدير</button></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  ${kpi("طلبات جديدة","2","بانتظار ردك","up","🆕")}
+  ${kpi("متوسط أول رد","2.4 س","أسرع من 78% من المزوّدين","up","⚡")}
+  ${kpi("قيد التفاوض","2","فرص مفتوحة","flat","🤝")}
+  ${kpi("نسبة الإغلاق الناجح","28%","▲ 4%","up","🎯")}
+</div>
+
+${tabs(FILTERS,LF,"setLF")}
+
+<div class="toolbar">
+  <input placeholder="بحث بالعميل أو الموضوع…" style="min-width:220px">
+  <select><option>كل المصادر</option><option>ملف الجهة</option><option>صفحة جهاز</option><option>طلب احتياج</option><option>الخريطة</option></select>
+  <select><option>كل المحافظات</option><option>الإسكندرية</option><option>القاهرة</option><option>الجيزة</option></select>
+  <select><option>آخر 30 يومًا</option><option>آخر 7 أيام</option><option>هذا العام</option></select>
+  <div style="flex:1"></div><span class="muted">${rowsFor().length} طلب</span>
+</div>
+
+${rowsFor().length? table(["الرقم","العميل","الموضوع","المصدر","القيمة","التاريخ","الحالة",""],
+  rowsFor().map(l=>[`<code>${l.id}</code>`, userCell(l.cust,l.gov), l.subj,
+    `<span class="muted">${l.src}</span>`,
+    `<span class="chip ${l.val==="عالية"?"ok":l.val==="متوسطة"?"warn":""}">${l.val}</span>`,
+    `<span class="muted">${l.date}</span>`, st(l.status),
+    `<button class="btn btn-pri btn-sm" onclick="openLead('${l.id}')">فتح</button>`]))
+ : `<div class="empty"><h3>لا توجد طلبات في هذا التصنيف</h3><p>الطلبات الجديدة ستظهر هنا فور وصولها.</p></div>`}
+`);
+}
+draw();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة الأجهزة | Survsta</title>
+<meta name="description" content="إدارة الأجهزة">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Portal — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js?v=3.7"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("provider", "p-listings.html", "إدارة الأجهزة", `<a href="/provider/dashboard">بوابة المزوّد</a> / <b>إدارة الأجهزة</b>`);
+
+function equipForm(id){
+  const e = id? P_LISTINGS.find(x=>x.id===id) : null;
+  openModal(`<button class="x" onclick="closeModal()">✕</button>
+   <h3>${e?"تعديل إدراج — "+e.t:"إضافة جهاز جديد"}</h3>
+   <p class="muted">كل إدراج جديد أو تعديل جوهري يمر بمراجعة الإدارة قبل النشر.</p>
+   <div class="steps" style="margin-top:14px"><div class="on">البيانات</div><div>الحالة والتوافر</div><div>الصور</div><div>المراجعة</div></div>
+   <div class="formgrid">
+    <div class="field"><label>الفئة *</label><select>${["Total Station","GNSS / RTK","Laser Scanner","Drone","أجهزة ميزان","ملحقات وقطع غيار"].map(c=>`<option ${e&&e.cat===c?"selected":""}>${c}</option>`).join("")}</select></div>
+    <div class="field"><label>الماركة *</label><select>${["Leica","Topcon","Trimble","Stonex","Nikon","Spectra","FARO","DJI","South"].map(b=>`<option>${b}</option>`).join("")}</select></div>
+    <div class="field"><label>الموديل / العنوان *</label><input value="${e?e.t:""}" placeholder="مثال: Leica TS16"></div>
+    <div class="field"><label>سنة الصنع</label><input placeholder="2022"></div>
+    <div class="field"><label>الحالة *</label><select><option>جديد</option><option>مستعمل — ممتاز</option><option>مستعمل — جيد جدًا</option><option>مستعمل — جيد</option></select></div>
+    <div class="field"><label>الرقم التسلسلي</label><input placeholder="اختياري — لا يُعرض للعامة"><div class="hint">يُستخدم للتوثيق ومنع التكرار فقط.</div></div>
+    <div class="field"><label>نوع العرض *</label><select><option>إيجار</option><option>بيع</option><option>إيجار + بيع</option></select></div>
+    <div class="field"><label>السعر</label><input value="${e?e.price:""}" placeholder="500 ج/يوم أو: حسب العرض"></div>
+    <div class="field"><label>حالة التوافر *</label><select><option>متاح الآن</option><option>محجوز حتى تاريخ</option><option>غير متاح مؤقتًا</option></select></div>
+    <div class="field"><label>الموقع *</label><select><option>الإسكندرية — سموحة (المقر الرئيسي)</option><option>الإسكندرية — العصافرة</option></select></div>
+    <div class="field"><label>حالة المعايرة</label><select><option>سارية — مع شهادة</option><option>شهادة مصنع</option><option>منتهية</option><option>غير مُدرجة</option><option>لا ينطبق</option></select></div>
+    <div class="field"><label>تاريخ انتهاء المعايرة</label><input type="date"></div>
+    <div class="field full"><label>الوصف *</label><textarea rows="3" placeholder="اذكر الحزمة المرفقة وحالة الجهاز وأي ملاحظات مهمة للعميل"></textarea></div>
+    <div class="field full"><label>الصور</label>
+      <div class="drop">📷 اسحب الصور هنا أو اضغط للرفع<br><small>3 صور على الأقل — الإدراجات المصوّرة تحصل على طلبات أكثر بـ 3 أضعاف</small></div></div>
+   </div>
+   <div class="notice" style="margin-top:14px">لا تُدرج بيانات معايرة غير صحيحة. عرض سجل منتهٍ على أنه سارٍ يعرّض حسابك للإيقاف.</div>
+   <div class="rowf" style="margin-top:16px">
+     <button class="btn btn-pri" onclick="closeModal();toast('✅ تم الإرسال للمراجعة — سيظهر بعد اعتماد الإدارة')">إرسال للمراجعة</button>
+     <button class="btn btn-soft" onclick="closeModal();toast('تم الحفظ كمسودة')">حفظ كمسودة</button>
+     ${e?`<button class="btn btn-err" onclick="closeModal();toast('تم أرشفة الإدراج')">أرشفة</button>`:""}
+   </div>`);
+}
+
+setContent(`
+<div class="pagehead"><div><h2>إدارة الأجهزة</h2>
+  <p>دورة كل إدراج: مسودة ← إرسال للمراجعة ← اعتماد الإدارة ← منشور في السوق والخريطة.</p></div>
+  <div class="rowf"><button class="btn btn-soft" onclick="toast('واجهة استيراد جماعي — نموذج')">⬆ استيراد جماعي</button>
+    <button class="btn btn-pri" onclick="equipForm()">＋ إضافة جهاز</button></div></div>
+
+<div class="grid g5" style="margin-bottom:16px">
+  ${kpi("إجمالي الإدراجات","7","","flat","📦")}
+  ${kpi("منشور","3","مرئي في البحث","up","✅")}
+  ${kpi("قيد المراجعة","2","متوسط 24 ساعة","flat","⏳")}
+  ${kpi("مطلوب تعديل","1","إجراء مطلوب","dn","⚠️")}
+  ${kpi("مشاهدات الإدراجات","1,842","▲ 18%","up","👁️")}
+</div>
+
+<div class="toolbar">
+  <input placeholder="بحث في إدراجاتك…" style="min-width:200px">
+  <select><option>كل الحالات</option><option>منشور</option><option>قيد المراجعة</option><option>مطلوب تعديل</option><option>مسودة</option></select>
+  <select><option>كل الفئات</option><option>Total Station</option><option>GNSS / RTK</option><option>ملحقات</option></select>
+  <div style="flex:1"></div><span class="muted">${P_LISTINGS.length} إدراج</span>
+</div>
+
+${table(["الرقم","الجهاز","الفئة","نوع العرض","السعر","المعايرة","مشاهدات","طلبات","الحالة",""],
+ P_LISTINGS.map(e=>[`<code>${e.id}</code>`,`<b>${e.t}</b><div class="muted">آخر تحديث ${e.upd}</div>`,e.cat,
+   `<span class="chip cy">${e.mode}</span>`, e.price,
+   e.cal.includes("سارية")?`<span class="chip ok">${e.cal}</span>`:e.cal.includes("منتهية")?`<span class="chip err">${e.cal}</span>`:`<span class="muted">${e.cal}</span>`,
+   e.views?num(e.views):"—", e.leads||"—", st(e.status),
+   `<div class="acts"><button class="btn btn-soft btn-sm" onclick="equipForm('${e.id}')">تعديل</button>
+    ${e.status==="مطلوب تعديل"?`<button class="btn btn-org btn-sm" onclick="toast('عرض ملاحظات الإدارة')">الملاحظات</button>`:""}
+    ${e.status==="مسودة"?`<button class="btn btn-pri btn-sm" onclick="toast('تم الإرسال للمراجعة')">إرسال</button>`:""}</div>`]))}
+
+<div class="notice" style="margin-top:16px"><b>ملاحظة الإدارة على EQ-131 (South N7):</b> سجل المعايرة منتهٍ منذ 03/2026.
+ يُرجى رفع شهادة سارية أو تغيير حالة المعايرة إلى «منتهية» بوضوح قبل إعادة الإرسال.</div>
+`);
+
+</script>
+</body>
+</html>

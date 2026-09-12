@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مركز التوثيق | Survsta</title>
+<meta name="description" content="مركز التوثيق">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Portal — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js?v=3.7"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-verification.html", "مركز التوثيق", `<a href="/admin">لوحة الإدارة</a> / <b>مركز التوثيق</b>`);
+
+const VQ=[["VR-088","دلتا جيوماتكس","معدات موثّقة","سجل تجاري + صور معدات + فواتير شراء","2026-09-02","قيد المراجعة"],
+ ["VR-087","مركز الدقة للمعايرة","نشاط موثّق","سجل تجاري + عقد إيجار المقر","2026-09-01","قيد المراجعة"],
+ ["VR-085","شركة أبعاد للمساحة","ملف موثّق","بطاقة ضريبية","2026-08-31","بيانات ناقصة"],
+ ["VR-081","النيل لأجهزة المساحة","معدات موثّقة","صور مخزون + شهادات مصنع","2026-08-28","معتمد"]];
+setContent(`
+<div class="pagehead"><div><h2>مركز التوثيق</h2>
+  <p>منح الشارات مبني على أدلة مراجَعة فعليًا. لا تُمنح شارة بناءً على ادعاء المزوّد وحده.</p></div>
+  <button class="btn btn-soft" onclick="toast('عرض سياسة التوثيق')">📄 سياسة التوثيق</button></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  ${kpi("طلبات توثيق معلّقة","3","","flat","🔎")}
+  ${kpi("ملف موثّق","148","المستوى الأساسي","flat","✔️")}
+  ${kpi("نشاط موثّق","62","أدلة إضافية مراجَعة","up","🏅")}
+  ${kpi("معدات موثّقة","24","أدلة على معدات بعينها","up","📡")}
+</div>
+
+<div class="card"><h3>مستويات التوثيق ومعاييرها</h3>
+ <div class="grid g4" style="margin-top:14px">
+ ${[["✔️","ملف موثّق","مراجعة بيانات الملف الأساسية ووسيلة تواصل واحدة مؤكدة والموقع.","الحد الأدنى للنشر"],
+    ["🏅","نشاط موثّق","أدلة إضافية على مزاولة النشاط (سجل تجاري / مقر / أعمال سابقة).","اختياري"],
+    ["📡","معدات موثّقة","أدلة على ملكية أو حيازة معدات محددة مُدرجة في الملف.","اختياري"],
+    ["🧪","سجل معايرة","يُعرض فقط عند توريد شهادة سارية — ولا يُستنتج من سجل قديم.","لكل جهاز"]]
+  .map(([i,t,d,n])=>`<div class="card" style="background:#f9fcfd"><div style="font-size:22px">${i}</div>
+    <b style="display:block;margin-top:8px">${t}</b><p class="muted" style="margin-top:6px">${d}</p>
+    <div style="margin-top:9px"><span class="chip">${n}</span></div></div>`).join("")}</div>
+</div>
+
+<div class="card" style="margin-top:16px"><h3>طابور طلبات التوثيق</h3>
+ <div style="margin-top:14px">${table(["الرقم","الجهة","الشارة المطلوبة","الأدلة المقدَّمة","التاريخ","الحالة","الإجراء"],
+  VQ.map(v=>[`<code>${v[0]}</code>`,`<b>${v[1]}</b>`,`<span class="chip pur">${v[2]}</span>`,
+    `<span class="muted">${v[3]}</span>`,`<span class="muted">${v[4]}</span>`,
+    v[5]==="معتمد"?st("معتمد"):v[5]==="بيانات ناقصة"?'<span class="chip err">بيانات ناقصة</span>':st("قيد المراجعة"),
+    `<div class="acts"><button class="btn btn-pri btn-sm" onclick="verify('${v[0]}','${v[1]}','${v[2]}')">فحص الأدلة</button></div>`]))}</div>
+</div>
+
+<div class="notice" style="margin-top:16px">الشارة تعكس حالة وقت المراجعة فقط. تُراجع الشارات دوريًا، وتُسحب عند ثبوت عدم دقة الأدلة — ويُسجَّل السحب في سجل التدقيق.</div>
+`);
+function verify(id,org,badge){
+ openModal(`<button class="x" onclick="closeModal()">✕</button><h3>فحص أدلة التوثيق — ${id}</h3>
+  <p class="muted">${org} • الشارة المطلوبة: ${badge}</p>
+  <div class="grid g3" style="margin-top:14px">${["سجل تجاري","صور المعدات","فواتير شراء"].map(t=>
+   `<div class="card" style="background:#f9fcfd;text-align:center"><div style="font-size:26px">📄</div>
+     <b style="font-size:13px;display:block;margin-top:7px">${t}</b>
+     <button class="btn btn-soft btn-sm" style="margin-top:8px" onclick="toast('فتح المستند')">عرض</button></div>`).join("")}</div>
+  <div class="sep"></div>
+  <h3 style="font-size:16px">تحقق المراجع</h3>
+  <div style="margin-top:9px">${["المستندات واضحة وغير منتهية","الاسم في المستند يطابق الاسم المسجّل","الأدلة تخص النشاط المعلن فعلًا","لا توجد مؤشرات تزوير أو تعديل"]
+   .map((x,i)=>`<label class="check"><input type="checkbox" ${i<2?"checked":""}> ${x}</label>`).join("")}</div>
+  <div class="field" style="margin-top:14px"><label>ملاحظة المراجعة *</label><textarea rows="3" placeholder="اذكر ما تم التحقق منه تحديدًا — هذه الملاحظة تُحفظ كمرجع للشارة"></textarea></div>
+  <div class="rowf" style="margin-top:14px;flex-wrap:wrap">
+   <button class="btn btn-ok" onclick="closeModal();toast('🏅 ${id}: تم منح شارة ${badge}')">منح الشارة</button>
+   <button class="btn btn-org" onclick="closeModal();toast('📝 طلب أدلة إضافية')">طلب أدلة إضافية</button>
+   <button class="btn btn-err" onclick="closeModal();toast('⛔ تم رفض طلب التوثيق')">رفض</button></div>`);
+}
+
+</script>
+</body>
+</html>

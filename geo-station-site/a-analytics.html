@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تحليلات المنصة | Survsta</title>
+<meta name="description" content="تحليلات المنصة">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Portal — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js?v=3.7"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-analytics.html", "تحليلات المنصة", `<a href="/admin">لوحة الإدارة</a> / <b>تحليلات المنصة</b>`);
+
+setContent(`
+<div class="pagehead"><div><h2>تحليلات المنصة وذكاء السوق</h2>
+  <p>سلوك الطلب والعرض عبر المحافظات والفئات — أساس قرارات النمو والاستقطاب.</p></div>
+  <div class="rowf"><select class="btn btn-soft"><option>آخر 30 يومًا</option><option>آخر 90 يومًا</option><option>هذا العام</option></select>
+   <button class="btn btn-soft" onclick="toast('تم تصدير تقرير ذكاء السوق')">⬇ تصدير</button></div></div>
+
+<div class="grid g5">
+  ${kpi("عمليات بحث","24,180","▲ 19%","up","🔍")}
+  ${kpi("تحويل بحث ← طلب","4.3%","▲ 0.6 نقطة","up","🎯")}
+  ${kpi("مزوّدون نشطون","96","▲ 8","up","🏢")}
+  ${kpi("تغطية المحافظات","6 / 27","هدف 2027: 15","flat","🗺️")}
+  ${kpi("معدل الاحتفاظ بالمزوّد","81%","▲ 4%","up","🔄")}
+</div>
+
+<div class="card" style="margin-top:16px"><div class="rowb"><h3>نمو المنصة — 12 أسبوعًا</h3>
+  <div><span class="chip cy">عمليات بحث</span><span class="chip ok">طلبات</span><span class="chip warn">مزوّدون جدد</span></div></div>
+ ${spark([9800,10400,11100,12300,13000,14800,15900,17600,18900,20800,22400,24180],true)}
+ <div class="rowb muted" style="margin-top:8px"><span>يونيو</span><span>يوليو</span><span>أغسطس</span><span>سبتمبر</span></div>
+</div>
+
+<div class="grid g2" style="margin-top:16px">
+ <div class="card"><h3>أعلى الفئات طلبًا</h3>
+  <div style="margin-top:12px">${[["رفع مساحي طبوغرافي",34],["تأجير GNSS / RTK",22],["Total Station للبيع",18],["معايرة وصيانة",14],["Drone Survey",12],["مسح ليزري 3D",9]]
+   .map(([t,v])=>barRow(t,v,34)).join("")}</div></div>
+ <div class="card"><h3>أكثر عبارات البحث</h3>
+  <div style="margin-top:12px">${table(["العبارة","عمليات بحث","نتائج متاحة","تحويل"],
+   [["رفع مساحي الإسكندرية",2140,18,"6.2%"],["تأجير توتال ستيشن",1890,11,"7.8%"],["معايرة أجهزة مساحة",1240,7,"4.1%"],
+    ["مساح شغل حر",980,0,"0.0%"],["جي بي اس مساحة",870,9,"5.4%"]]
+   .map(r=>[r[0],num(r[1]),r[2]===0?'<span class="chip err">0</span>':r[2],
+     `<span class="chip ${parseFloat(r[3])>5?"ok":parseFloat(r[3])===0?"err":"warn"}">${r[3]}</span>`]))}</div></div>
+</div>
+
+<div class="grid g2" style="margin-top:16px">
+ <div class="card"><h3>فجوات العرض — فرص استقطاب</h3>
+  <p class="muted" style="margin-top:6px">طلب مرتفع مقابل عرض ضعيف أو معدوم.</p>
+  <div style="margin-top:12px">${table(["المنطقة","الفئة","بحث شهري","مزوّدون","الفجوة"],
+   [["مطروح","معايرة",64,1,"حرجة"],["البحيرة","Laser Scanner",41,0,"حرجة"],["الدقهلية","Drone Survey",37,1,"عالية"],
+    ["المنوفية","GNSS للإيجار",29,2,"متوسطة"],["القليوبية","رفع مساحي",24,3,"متوسطة"]]
+   .map(r=>[r[0],r[1],r[2],`<span class="chip ${r[3]===0?"err":r[3]<2?"warn":""}">${r[3]}</span>`,
+     `<span class="chip ${r[4]==="حرجة"?"err":r[4]==="عالية"?"warn":""}">${r[4]}</span>`]))}</div></div>
+ <div class="card"><h3>صحة السوق حسب المحافظة</h3>
+  <div style="margin-top:12px">${table(["المحافظة","مزوّدون","طلبات","نسبة الرد","الحالة"],
+   [["القاهرة",58,396,"91%","صحي"],["الإسكندرية",44,323,"89%","صحي"],["الجيزة",26,177,"84%","صحي"],
+    ["البحيرة",11,83,"71%","يحتاج دعم"],["الدقهلية",6,42,"66%","يحتاج دعم"],["مطروح",3,22,"58%","حرج"]]
+   .map(r=>[r[0],r[1],num(r[2]),r[3],
+     `<span class="chip ${r[4]==="صحي"?"ok":r[4]==="حرج"?"err":"warn"}">${r[4]}</span>`]))}</div></div>
+</div>
+
+<div class="grid g3" style="margin-top:16px">
+ <div class="card"><h3>مسار التحويل</h3>
+  <div style="margin-top:12px">${[["زيارة المنصة",100],["إجراء بحث",68],["فتح ملف/إدراج",41],["بدء طلب تواصل",7],["إتمام الطلب",4.3]]
+   .map(([t,v])=>barRow(t,v,100)).join("")}</div></div>
+ <div class="card"><h3>مصادر الزيارات</h3>
+  <div style="margin-top:12px">${[["بحث Google",47],["مباشر",23],["فيسبوك",18],["إحالة من مزوّد",8],["أخرى",4]].map(([t,v])=>barRow(t,v,100)).join("")}</div></div>
+ <div class="card"><h3>الأجهزة المستخدمة</h3>
+  <div style="margin-top:12px">${[["موبايل",71],["كمبيوتر",26],["تابلت",3]].map(([t,v])=>barRow(t,v,100)).join("")}</div>
+  <div class="sep"></div>
+  <div class="notice cy">71% من الاستخدام على الموبايل — أولوية استمرار تحسين تجربة الهاتف وإطلاق التطبيق.</div></div>
+</div>
+`);
+
+</script>
+</body>
+</html>

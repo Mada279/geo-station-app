@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تجميع البيانات | Survsta</title>
+<meta name="description" content="تجميع البيانات">
+<meta name="robots" content="noindex">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Portal — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/portal.css?v=3.7">
+</head>
+<body>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/portal.js?v=3.7"></script>
+<script src="assets/js/crud.js"></script>
+<script>
+mountPortal("admin", "a-data.html", "تجميع البيانات", `<a href="/admin">لوحة الإدارة</a> / <b>تجميع البيانات</b>`);
+
+setContent(`
+<div class="pagehead"><div><h2>تجميع البيانات الميدانية</h2>
+  <p>إدخال منظّم لبناء قاعدة السوق قبل انتشار التسجيل الذاتي — مع فحص تكرار تلقائي.</p></div>
+  <div class="rowf"><a href="a-import.html" class="btn btn-soft">🔄 استيراد / تصدير</a>
+   <button class="btn btn-pri" onclick="toast('✅ تم حفظ السجل وإرساله لطابور المراجعة')">حفظ السجل</button></div></div>
+
+<div class="grid g4" style="margin-bottom:16px">
+  ${kpi("سجلات مُدخلة هذا الشهر","64","▲ 19","up","🗂️")}
+  ${kpi("بانتظار التحقق","23","","flat","⏳")}
+  ${kpi("تكرارات مرصودة","7","تحتاج دمج","dn","🔗")}
+  ${kpi("معدل اكتمال البيانات","78%","▲ 6%","up","📊")}
+</div>
+
+<div class="split">
+ <div>
+  <div class="card"><h3>سجل جهة جديدة</h3>
+   <div class="steps" style="margin-top:14px"><div class="on">الهوية</div><div>التواصل</div><div>الموقع</div><div>النشاط</div><div>التحقق</div></div>
+   <div class="formgrid">
+    <div class="field"><label>نوع الجهة *</label><select><option>مكتب مساحة</option><option>شركة مساحة</option><option>مورد أجهزة</option><option>مركز معايرة</option><option>مركز تدريب</option></select></div>
+    <div class="field"><label>الاسم التجاري *</label><input placeholder="مثال: مكتب الأمانة للمساحة" oninput="dupCheck(this.value)"></div>
+    <div class="field"><label>الاسم القانوني</label><input></div>
+    <div class="field"><label>سنة بدء النشاط</label><input placeholder="2015"></div>
+    <div class="field"><label>اسم المسؤول</label><input></div>
+    <div class="field"><label>الصفة</label><input placeholder="صاحب المكتب / مدير"></div>
+    <div class="field"><label>الهاتف الرئيسي *</label><input placeholder="01xxxxxxxxx"></div>
+    <div class="field"><label>واتساب</label><input></div>
+    <div class="field"><label>البريد الإلكتروني</label><input type="email"></div>
+    <div class="field"><label>الموقع الإلكتروني</label><input placeholder="https://"></div>
+    <div class="field"><label>فيسبوك</label><input placeholder="https://facebook.com/"></div>
+    <div class="field"><label>لينكدإن</label><input></div>
+    <div class="field"><label>المحافظة *</label><select><option>الإسكندرية</option><option>القاهرة</option><option>الجيزة</option><option>البحيرة</option><option>مطروح</option><option>الدقهلية</option></select></div>
+    <div class="field"><label>المدينة / الحي *</label><input></div>
+    <div class="field full"><label>العنوان التفصيلي</label><input></div>
+    <div class="field"><label>خط العرض</label><input placeholder="31.2156"></div>
+    <div class="field"><label>خط الطول</label><input placeholder="29.9553"></div>
+    <div class="field full"><label>الخدمات المقدّمة *</label><input placeholder="رفع مساحي، تقسيم، تأجير أجهزة، معايرة…"></div>
+    <div class="field full"><label>المعدات المعروفة</label><input placeholder="Leica TS16، GNSS RTK…"></div>
+    <div class="field"><label>مصدر البيانات *</label><select><option>زيارة ميدانية</option><option>مكالمة هاتفية</option><option>مصدر عام منشور</option><option>ترشيح من مزوّد</option></select></div>
+    <div class="field"><label>حالة التحقق من الهاتف</label><select><option>تم التأكيد بمكالمة</option><option>لم يُؤكد بعد</option><option>الرقم غير عامل</option></select></div>
+    <div class="field full"><label>ملاحظات المُدخِل *</label><textarea rows="3" placeholder="اذكر ما تم التحقق منه فعليًا فقط — لا تُدرج انطباعات أو ادعاءات غير مؤكدة"></textarea></div>
+   </div>
+   <div id="dup"></div>
+   <div class="rowf" style="margin-top:16px">
+    <button class="btn btn-pri" onclick="toast('✅ تم الحفظ وإرساله لطابور المراجعة')">حفظ وإرسال للمراجعة</button>
+    <button class="btn btn-soft" onclick="toast('تم الحفظ كمسودة')">حفظ كمسودة</button></div>
+  </div>
+ </div>
+
+ <aside class="sticky">
+  <div class="card"><h3>معايير الجودة</h3>
+   <div style="margin-top:12px">${[["اسم تجاري واضح",1],["وسيلة تواصل مؤكدة",1],["محافظة ومدينة",1],["إحداثيات",0],["خدمة واحدة على الأقل",1],["مصدر بيانات موثّق",1]]
+    .map(([t,v])=>`<div class="rowb" style="padding:7px 0;border-bottom:1px solid var(--bd)">
+      <span style="font-size:13.5px">${t}</span>${v?'<span class="chip ok">✔</span>':'<span class="chip warn">ناقص</span>'}</div>`).join("")}</div>
+   <div class="sep"></div>
+   <div class="rowb"><span class="muted">اكتمال السجل الحالي</span><b>83%</b></div>
+   <div class="bar" style="margin-top:7px"><i style="width:83%"></i></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>آخر السجلات المُدخلة</h3>
+   <div class="tl" style="margin-top:12px">
+    <div class="it"><b>مكتب الأمانة للمساحة</b><small>الدقهلية — منذ 20 دقيقة</small></div>
+    <div class="it ok"><b>مركز الميزان للمعايرة</b><small>القاهرة — اليوم 09:10</small></div>
+    <div class="it warn"><b>جيو لاين للتوريدات</b><small>الجيزة — تكرار محتمل</small></div>
+    <div class="it ok"><b>مكتب البحر للمساحة</b><small>الإسكندرية — أمس</small></div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="notice">لا تُدخل بيانات جهة دون تفويض أو مصدر عام مشروع. البيانات المُجمّعة ميدانيًا تخضع لنفس سياسة الخصوصية.</div></div>
+ </aside>
+</div>
+`);
+function dupCheck(v){
+ $("#dup").innerHTML = v.length>6
+  ? `<div class="notice" style="margin-top:14px">⚠ <b>فحص التكرار:</b> عُثر على جهة مشابهة بالاسم في نفس المحافظة —
+     <b>مكتب الأمانة للمساحة</b> (الدقهلية، مُدخل 2026-08-30).
+     <div class="rowf" style="margin-top:10px"><button class="btn btn-soft btn-sm" onclick="toast('فتح السجل القائم')">عرض السجل القائم</button>
+     <button class="btn btn-soft btn-sm" onclick="toast('تم تعليمه كسجل مختلف')">هذه جهة مختلفة</button></div></div>`
+  : "";
+}
+
+</script>
+</body>
+</html>

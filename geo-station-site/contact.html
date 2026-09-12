@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تواصل معنا | Survsta</title>
+<meta name="description" content="تواصل مع فريق Survsta — الدعم الفني، خدمة الشركاء، والاستفسارات التجارية.">
+<meta name="author" content="Eng. Mohamed Farag — CoreviaZone">
+<!-- Survsta Platform — All Rights Reserved -->
+<link rel="stylesheet" href="assets/css/style.css?v=3.7">
+</head>
+<body>
+<main id="main">
+<section class="hero"><div class="hero-bg"><img src="assets/img/office-cad-workstation.jpg" alt="محطة عمل وتواصل هندسي"></div>
+<div class="wrap hero-in" style="padding:52px 0 54px">
+  <div style="color:#9db2c6;font-size:13px">الرئيسية / تواصل معنا</div>
+  <h1 style="font-size:clamp(26px,3.6vw,40px);margin:12px 0 10px">تواصل معنا</h1>
+  <p class="lead">سواء كنت عميلًا أو مكتبًا أو موردًا أو مركز تدريب — فريقنا جاهز يساعدك.</p>
+</div></section><section class="sec"><div class="wrap"><div class="layout rev">
+ <div class="panel">
+  <h2 style="font-size:23px">أرسل رسالتك</h2>
+  <form style="margin-top:16px" onsubmit="event.preventDefault();toast('✅ تم استلام رسالتك — سنرد خلال يوم عمل');this.reset()">
+   <div class="formgrid">
+    <div class="field"><label>الاسم *</label><input required></div>
+    <div class="field"><label>رقم الهاتف *</label><input required placeholder="01xxxxxxxxx"></div>
+    <div class="field"><label>البريد الإلكتروني</label><input type="email"></div>
+    <div class="field"><label>نوع الاستفسار</label><select>
+      <option>استفسار عام</option><option>دعم فني</option><option>خدمة الشركاء والتسجيل</option>
+      <option>الإعلانات والظهور المميّز</option><option>شكوى أو بلاغ</option><option>شراكة أو تعاون</option></select></div>
+    <div class="field full"><label>الرسالة *</label><textarea required rows="5" placeholder="اكتب تفاصيل استفسارك"></textarea></div>
+   </div>
+   <button class="btn btn-pri btn-lg btn-block" style="margin-top:16px">إرسال الرسالة</button>
+  </form>
+ </div>
+ <aside><div class="panel sticky">
+  <h3 style="font-size:18px">قنوات التواصل</h3>
+  <table class="spec" style="margin-top:12px"><tbody>
+   <tr><th>الدعم الفني</th><td>support@survsta.com</td></tr>
+   <tr><th>خدمة الشركاء</th><td>partners@survsta.com</td></tr>
+   <tr><th>الإعلانات</th><td>ads@survsta.com</td></tr>
+   <tr><th>مواعيد العمل</th><td>السبت — الخميس، 9ص — 5م</td></tr>
+   <tr><th>المقر</th><td>الإسكندرية، مصر</td></tr>
+  </tbody></table>
+  <div class="sep"></div>
+  <b>هل أنت مزوّد خدمة؟</b>
+  <p class="muted" style="margin-top:6px">سجّل جهتك مباشرة بدل انتظار الرد.</p>
+  <a href="join.html" class="btn btn-dark btn-block btn-sm">انضم كشريك</a>
+ </div></aside>
+</div></div></section>
+
+<section class="sec alt"><div class="wrap">
+ <div class="sechead"><div><div class="kicker">قبل ما تراسلنا</div><h2>إجابات سريعة قد توفّر عليك الانتظار</h2></div>
+  <a href="help.html" class="btn btn-soft">مركز المساعدة ←</a></div>
+ <div class="grid g3">
+  <div class="card"><div class="ico">🙋</div><h3>أنا عميل وأريد مزوّد خدمة</h3><p>لا تحتاج مراسلتنا — أرسل احتياجك مباشرة وسنوجّهه للجهات المؤهلة في نطاقك خلال وقت قصير.</p>
+    <button class="btn btn-org btn-sm" style="margin-top:12px" onclick="openModal('need')">أضف احتياجك</button></div>
+  <div class="card"><div class="ico">🏢</div><h3>أريد تسجيل مكتبي أو شركتي</h3><p>التسجيل ذاتي ومجاني عبر نموذج الشركاء، ويراجعه الفريق خلال 48 ساعة عمل.</p>
+    <a href="join.html" class="btn btn-dark btn-sm" style="margin-top:12px">انضم كشريك</a></div>
+  <div class="card"><div class="ico">⚠️</div><h3>لدي بلاغ عن بيانات خاطئة</h3><p>استخدم زر «الإبلاغ» داخل الملف أو الإدراج مباشرة — البلاغ يصل للفريق ويُسجَّل في سجل التدقيق.</p>
+    <button class="btn btn-soft btn-sm" style="margin-top:12px" onclick="openModal('report')">🚩 إرسال بلاغ</button></div>
+ </div>
+ <div class="grid g4" style="margin-top:22px">
+  <div class="card"><b>زمن الرد المتوقع</b><p style="margin-top:6px">يوم عمل واحد للاستفسارات العامة.</p></div>
+  <div class="card"><b>طلبات الشركاء</b><p style="margin-top:6px">حتى 48 ساعة عمل للمراجعة والتفعيل.</p></div>
+  <div class="card"><b>البلاغات</b><p style="margin-top:6px">تُراجع خلال 48 ساعة مع إخطار بالنتيجة.</p></div>
+  <div class="card"><b>نطاق التغطية</b><p style="margin-top:6px">الإسكندرية والقاهرة والجيزة، والتوسع مستمر.</p></div>
+ </div>
+</div></section>
+</main>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js?v=3.7"></script>
+<script>
+mountShell("about.html");
+
+</script>
+</body>
+</html>

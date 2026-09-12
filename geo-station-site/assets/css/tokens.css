@@ -1,0 +1,222 @@
+/* ============================================================
+   Survsta — Design Tokens (single source of truth)
+   Industrial Dark Luxury + Geospatial Tech
+   Survsta — All Rights Reserved
+   ============================================================ */
+
+:root{
+  /* ---- NAVY / INK scale (9 steps) — structure & depth ---- */
+  --n900:#040c16;  /* deepest — hero void */
+  --n800:#07111f;  /* primary dark surface */
+  --n700:#0b1b2d;
+  --n600:#0d2034;  /* raised dark surface */
+  --n500:#14304c;
+  --n400:#1d3f60;
+  --n300:#2e5a80;
+  --n200:#557fa3;
+  --n100:#93a9be;
+
+  /* ---- CYAN scale — technology, navigation, secondary action ---- */
+  --c900:#04353c; --c800:#065c68; --c700:#0a7583; --c600:#13a0b2;
+  --c500:#28c7d8; /* brand cyan */
+  --c400:#57d8e5; --c300:#8ce7f0; --c200:#bdf2f7; --c100:#e6fafd;
+
+  /* ---- ORANGE scale — PRIMARY ACTION ONLY (request / contact) ---- */
+  --o900:#4a2103; --o800:#8b4a10; --o700:#b46316; --o600:#dd7f22;
+  --o500:#f2913d; /* brand orange */
+  --o400:#f7ac68; --o300:#fbc795; --o200:#fde0c4; --o100:#fdf1e4;
+
+  /* ---- GOLD scale — DISTINCTION ONLY (badges, sponsored, premium) ---- */
+  --g900:#4a3a05; --g800:#8a6c0c; --g700:#b08a12; --g600:#dcae1f;
+  --g500:#f4b84a;
+  --g400:#f8cd7e; --g300:#fbe0ad; --g200:#fdeed2; --g100:#fef8ea;
+
+  /* ---- semantic states ---- */
+  --ok:#1f9d5c;   --ok-bg:#e8f9f0;  --ok-bd:#b3e5cb;  --ok-fg:#0f6b43;
+  --warn:#c98a06; --warn-bg:#fff6e3;--warn-bd:#f0d894; --warn-fg:#7d5a06;
+  --err:#d13438;  --err-bg:#fdeaea; --err-bd:#f4c3c4; --err-fg:#9c1f23;
+  --info:var(--c700); --info-bg:var(--c100); --info-bd:var(--c200);
+
+  /* ---- light surfaces (data-dense pages) ---- */
+  --bg:#f4f7fa;
+  --card:#ffffff;
+  --card2:#fafcfe;
+  --bd:#e1e9f1;
+  --bd2:#cfdde9;
+  --ink:#0f1c2e;
+  --ink2:#33465e;
+  --muted:#5d6e84;
+
+  /* ---- brand aliases (backwards compatible) ---- */
+  --navy:var(--n800); --navy2:var(--n600); --navy3:var(--n500);
+  --cyan:var(--c500); --cyan2:var(--c300); --cyan-d:var(--c700);
+  --orange:var(--o500); --gold:var(--g500);
+
+  /* ---- radius / elevation ---- */
+  --r-sm:9px; --r:14px; --r-lg:20px; --r-xl:26px; --r-full:999px;
+  --sh1:0 1px 2px rgba(9,24,42,.06), 0 2px 6px rgba(9,24,42,.05);
+  --sh2:0 4px 14px rgba(9,24,42,.08);
+  --sh:0 14px 38px rgba(9,24,42,.11);
+  --sh-lg:0 26px 64px rgba(4,12,22,.20);
+  --sh-dark:0 22px 60px rgba(0,0,0,.42);
+  --ring:0 0 0 3px rgba(40,199,216,.34);
+
+  /* ---- type scale ---- */
+  --font:"Cairo","Segoe UI",Tahoma,"Noto Sans Arabic",Arial,sans-serif;
+  --fs-xs:12.5px; --fs-sm:13.5px; --fs-base:15px; --fs-md:16.5px;
+  --fs-lg:19px; --fs-xl:23px; --fs-2xl:30px; --fs-3xl:clamp(30px,4.6vw,52px);
+
+  /* ---- layout ---- */
+  --max:1280px; --side:246px; --head-h:72px;
+  --gutter:20px;
+
+  /* ---- geospatial texture (used on dark sections) ---- */
+  --grid-line:rgba(40,199,216,.075);
+  --grid-size:44px;
+}
+
+/* ============ DARK SURFACE UTILITIES ============
+   Applied to key pages: hero, map, academy, CTA bands.
+   Data-dense pages stay light for readability.        */
+
+.surface-dark{
+  background:
+    radial-gradient(1100px 520px at 82% -8%, rgba(40,199,216,.16), transparent 62%),
+    radial-gradient(760px 420px at 6% 108%, rgba(242,145,61,.10), transparent 60%),
+    linear-gradient(168deg, var(--n900) 0%, var(--n800) 42%, var(--n700) 100%);
+  color:#e8f1f8;
+  position:relative;
+  isolation:isolate;
+}
+/* geospatial grid + contour overlay */
+.surface-dark::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:var(--grid-size) var(--grid-size);
+  mask-image:radial-gradient(ellipse 76% 82% at 50% 34%, #000 30%, transparent 82%);
+  -webkit-mask-image:radial-gradient(ellipse 76% 82% at 50% 34%, #000 30%, transparent 82%);
+}
+.surface-dark .muted{color:#95acc2}
+.surface-dark a{color:inherit}
+.surface-dark h1,.surface-dark h2,.surface-dark h3{color:#fff}
+
+/* contour-line accent — pure CSS, no external asset */
+.contour{position:absolute;inset:0;z-index:-1;opacity:.5;pointer-events:none;
+  background:
+   repeating-radial-gradient(ellipse 60% 40% at 78% 26%,
+     transparent 0 26px, rgba(40,199,216,.09) 26px 27px);
+}
+
+/* ============ FOCUS — accessibility baseline ============ */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--c500);
+  outline-offset:2px;
+  border-radius:6px;
+}
+
+/* ============ BUTTON ROLE DISCIPLINE ============
+   orange = primary action (request/contact/submit)
+   cyan   = navigation & secondary action
+   gold   = distinction/premium only (never a plain CTA)  */
+.btn-cta{background:linear-gradient(135deg,var(--o500),var(--o600));color:#2a1202;box-shadow:0 6px 18px rgba(242,145,61,.30)}
+.btn-cta:hover{background:linear-gradient(135deg,var(--o400),var(--o500));transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,var(--g500),var(--g600));color:#3a2c02}
+.btn-gold:hover{filter:brightness(1.06)}
+
+/* ============ PRINT ============ */
+@media print{
+  .header,.footer,.utility,.side,.topbar,.burger,.btn{display:none!important}
+  body{background:#fff;color:#000}
+}
+
+/* ============ language toggle ============ */
+.langbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.26);
+  background:rgba(255,255,255,.08);color:#fff;padding:5px 11px;border-radius:var(--r-full);
+  font-size:12.5px;font-weight:800;line-height:1;transition:.16s;cursor:pointer}
+.langbtn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.45)}
+.langbtn .globe{font-size:13px}
+.langbtn b{min-width:15px;text-align:center}
+.topbar .langbtn,.toolbar .langbtn{border-color:var(--bd2);background:var(--card);color:var(--ink)}
+.topbar .langbtn:hover,.toolbar .langbtn:hover{background:var(--card2);border-color:var(--c500)}
+html[dir="ltr"] body{text-align:left}
+html[dir="ltr"] .stars{letter-spacing:0}
+
+/* stars are a graphic indicator, not body text — darken + outline for AA-large */
+.stars{color:#b8860b;text-shadow:0 0 1px rgba(90,64,4,.35)}
+
+/* ============ brand lockup: keep Latin name LTR inside RTL page ============ */
+.brand{direction:ltr;display:inline-flex;align-items:center}
+.brand img.survsta-logo, .brand .survsta-logo{display:block !important;width:300px !important;min-width:300px !important;height:auto !important;max-height:100px !important;opacity:1 !important;visibility:visible !important;object-fit:contain !important}
+html[dir="rtl"] .brand{flex-direction:row}
+
+/* ============ official store badges ============ */
+.appbtns{display:inline-flex;gap:12px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.app-store-badge, .storebtn{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  direction:ltr !important;
+  unicode-bidi:isolate !important;
+  padding:8px 16px !important;
+  background:#000000 !important;
+  color:#ffffff !important;
+  border-radius:8px !important;
+  border:1px solid #222222 !important;
+  text-decoration:none !important;
+  box-sizing:border-box !important;
+  height:48px !important;
+  transition:transform .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease !important;
+  cursor:pointer !important;
+}
+.app-store-badge:hover, .storebtn:hover{
+  background:#111111 !important;
+  border-color:#333333 !important;
+  transform:translateY(-1px) !important;
+  box-shadow:0 4px 14px rgba(0,0,0,.45) !important;
+  color:#ffffff !important;
+}
+.app-store-badge svg, .storebtn svg{
+  width:24px !important;
+  height:24px !important;
+  flex-shrink:0 !important;
+  display:block !important;
+}
+.app-store-badge .txt, .app-store-badge .badge-txt,
+.storebtn .txt, .storebtn .badge-txt{
+  display:flex !important;
+  flex-direction:column !important;
+  text-align:left !important;
+  line-height:1.2 !important;
+  justify-content:center !important;
+}
+.app-store-badge .txt small, .app-store-badge .badge-txt small,
+.storebtn .txt small, .storebtn .badge-txt small{
+  font-size:10px !important;
+  color:#cccccc !important;
+  letter-spacing:0.2px !important;
+  font-weight:400 !important;
+  margin:0 !important;
+  padding:0 !important;
+  line-height:1.1 !important;
+}
+.app-store-badge .txt b, .app-store-badge .badge-txt b,
+.storebtn .txt b, .storebtn .badge-txt b{
+  font-size:16px !important;
+  font-weight:600 !important;
+  color:#ffffff !important;
+  letter-spacing:0.1px !important;
+  margin:0 !important;
+  padding:0 !important;
+  line-height:1.2 !important;
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
+}
+
+/* ============ Force high-contrast dropdowns & inputs ============ */
+select, select option, select optgroup{
+  background-color:#ffffff !important;
+  color:#1e293b !important;
+  -webkit-text-fill-color:#1e293b !important;
+}
+
