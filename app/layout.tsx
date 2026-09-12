@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
+import '../public/assets/css/tokens.css';
+import '../public/assets/css/font.css';
+import '../public/assets/css/style.css';
+import '../public/assets/css/portal.css';
 import '@/app/globals.css';
 
 export const metadata: Metadata = {
