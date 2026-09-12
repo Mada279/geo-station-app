@@ -1,6 +1,5 @@
 {
   "cleanUrls": true,
-  "outputDirectory": "geo-station-site",
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -31,40 +30,16 @@
   ],
   "rewrites": [
     {
-      "source": "/admin",
-      "destination": "/a-dashboard.html"
+      "source": "/a-dashboard",
+      "destination": "/admin"
+    },
+    {
+      "source": "/a-dashboard.html",
+      "destination": "/admin"
     },
     {
       "source": "/admin.html",
-      "destination": "/a-dashboard.html"
-    },
-    {
-      "source": "/admin/dashboard",
-      "destination": "/a-dashboard.html"
-    },
-    {
-      "source": "/admin/users",
-      "destination": "/a-users.html"
-    },
-    {
-      "source": "/provider",
-      "destination": "/p-dashboard.html"
-    },
-    {
-      "source": "/provider.html",
-      "destination": "/p-dashboard.html"
-    },
-    {
-      "source": "/provider/dashboard",
-      "destination": "/p-dashboard.html"
-    },
-    {
-      "source": "/login",
-      "destination": "/login.html"
-    },
-    {
-      "source": "/join",
-      "destination": "/join.html"
+      "destination": "/admin"
     }
   ]
 }

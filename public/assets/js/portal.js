@@ -62,21 +62,27 @@ const PROVIDER_NAV = [
 ];
 const ADMIN_NAV = [
   ["_","نظرة عامة"],
-  ["/admin","🛡️","لوحة الإدارة"],
-  ["/admin/analytics","📈","تحليلات المنصة"],
+  ["a-dashboard.html","🛡️","لوحة الإدارة"],
+  ["a-analytics.html","📈","تحليلات المنصة"],
   ["_","المراجعة والاعتماد"],
-  ["/admin/approvals","✅","مركز الاعتمادات"],
-  ["/admin/equipment","📡","مراجعة الأجهزة"],
-  ["/admin/verification","🔎","مركز التوثيق"],
-  ["/admin/reviews","⭐","مراجعة التقييمات"],
+  ["a-approvals.html","✅","مركز الاعتمادات","12"],
+  ["a-equipment.html","📡","مراجعة الأجهزة","4"],
+  ["a-verification.html","🔎","مركز التوثيق"],
+  ["a-reviews.html","⭐","مراجعة التقييمات","2"],
+  ["a-reports.html","🚩","البلاغات","5"],
   ["_","إدارة البيانات"],
-  ["/admin/providers","🏢","المزوّدون"],
-  ["/admin/users","👤","المستخدمون"],
-  ["/admin/clients","👥","العملاء"],
+  ["a-providers.html","🏢","المزوّدون"],
+  ["a-clients.html","👥","العملاء"],
+  ["a-users.html","👤","المستخدمون"],
+  ["a-content.html","🗃️","المحتوى"],
+  ["a-media.html","🖼️","مكتبة الوسائط"],
+  ["a-jobs.html","💼","الوظائف"],
+  ["a-data.html","🗂️","تجميع البيانات"],
+  ["a-import.html","🔄","الاستيراد والتصدير"],
   ["_","المتابعة"],
-  ["/admin/leads","📥","إدارة الطلبات"],
-  ["/admin/audit","📜","سجل التدقيق"],
-  ["/admin/settings","⚙️","إعدادات النظام"]
+  ["a-leads.html","📥","إدارة الطلبات"],
+  ["a-audit.html","📜","سجل التدقيق"],
+  ["a-settings.html","⚙️","إعدادات النظام"]
 ];
 
 const CTX = {
