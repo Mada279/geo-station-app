@@ -272,7 +272,13 @@ async function syncCloud(){
     let updatedCount = 0;
 
     // مزامنة المجموعات الرئيسية النشطة
-    const syncTargets = ["providers", "equipment", "leads", "reviews", "jobs", "services", "courses", "clients"];
+    // مزامنة الجداول الموجودة فعلياً في Supabase لتجنب أخطاء 404 في الكونسول
+    const EXISTING_SUPABASE_TABLES = ["providers", "equipment"];
+    const syncTargets = ["providers", "equipment", "leads", "reviews", "jobs", "services", "courses", "clients"]
+      .filter(coll => {
+        const meta = COLLECTIONS[coll];
+        return meta && meta.table && EXISTING_SUPABASE_TABLES.includes(meta.table);
+      });
 
     for (const coll of syncTargets) {
       const meta = COLLECTIONS[coll];
