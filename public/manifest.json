@@ -1,0 +1,21 @@
+{
+  "name": "Survsta",
+  "short_name": "Survsta",
+  "description": "المنصة الرقمية الأولى لقطاع المساحة والجيوماتكس في مصر والشرق الأوسط",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#081933",
+  "theme_color": "#081933",
+  "icons": [
+    {
+      "src": "/images/Designer.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/Designer.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

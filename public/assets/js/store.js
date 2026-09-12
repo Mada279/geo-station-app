@@ -14,7 +14,7 @@ const SCHEMA_VERSION = 2;
 /* ---------- Dynamic Loader for Supabase Service Layer ---------- */
 if (typeof global.SupabaseService === "undefined" && typeof document !== "undefined") {
   const s = document.createElement("script");
-  s.src = "assets/js/supabaseService.js";
+  s.src = "/assets/js/supabaseService.js";
   s.async = true;
   s.onload = () => {
     if (global.GS && global.GS.syncCloud) {
@@ -27,7 +27,7 @@ if (typeof global.SupabaseService === "undefined" && typeof document !== "undefi
 /* ---------- Dynamic Loader for AuthGuard ---------- */
 if (typeof global.AuthGuard === "undefined" && typeof document !== "undefined") {
   const ag = document.createElement("script");
-  ag.src = "assets/js/authGuard.js?v=3.8";
+  ag.src = "/assets/js/authGuard.js?v=3.8";
   ag.async = true;
   document.head.appendChild(ag);
 }

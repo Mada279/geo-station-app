@@ -31,7 +31,7 @@ window.openAdminGuideModal = function() {
 
 if (typeof window !== "undefined" && typeof window.AuthGuard === "undefined" && typeof document !== "undefined") {
   const ag = document.createElement("script");
-  ag.src = "assets/js/authGuard.js?v=3.8";
+  ag.src = "/assets/js/authGuard.js?v=3.8";
   document.head.appendChild(ag);
 }
 
