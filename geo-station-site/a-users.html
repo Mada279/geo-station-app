@@ -17,7 +17,7 @@
 <script src="assets/js/portal.js?v=3.7"></script>
 <script src="assets/js/crud.js"></script>
 <script>
-mountPortal("admin", "a-users.html", "إدارة المستخدمين", `<a href="a-dashboard.html">لوحة الإدارة</a> / <b>المستخدمون</b>`);
+mountPortal("admin", "a-users.html", "إدارة المستخدمين", `<a href="/admin">لوحة الإدارة</a> / <b>المستخدمون</b>`);
 
 const COLL="users";
 const PERMS=[["عرض لوحة الإدارة",1,1,1,1],["اعتماد ورفض المحتوى",1,1,0,0],["إضافة وتعديل البيانات",1,1,1,0],

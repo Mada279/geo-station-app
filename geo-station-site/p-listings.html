@@ -17,7 +17,7 @@
 <script src="assets/js/portal.js?v=3.7"></script>
 <script src="assets/js/crud.js"></script>
 <script>
-mountPortal("provider", "p-listings.html", "إدارة الأجهزة", `<a href="p-dashboard.html">بوابة المزوّد</a> / <b>إدارة الأجهزة</b>`);
+mountPortal("provider", "p-listings.html", "إدارة الأجهزة", `<a href="/provider/dashboard">بوابة المزوّد</a> / <b>إدارة الأجهزة</b>`);
 
 function equipForm(id){
   const e = id? P_LISTINGS.find(x=>x.id===id) : null;

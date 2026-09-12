@@ -43,7 +43,7 @@ const num = n=>n.toLocaleString("en-US");
 /* ================= NAVIGATION ================= */
 const PROVIDER_NAV = [
   ["_","التشغيل"],
-  ["p-dashboard.html","📊","لوحة التحكم"],
+  ["/provider/dashboard","📊","لوحة التحكم"],
   ["p-leads.html","📥","صندوق الطلبات","6"],
   ["p-listings.html","📡","إدارة الأجهزة"],
   ["p-services.html","🧭","الخدمات"],
@@ -62,7 +62,7 @@ const PROVIDER_NAV = [
 ];
 const ADMIN_NAV = [
   ["_","نظرة عامة"],
-  ["a-dashboard.html","🛡️","لوحة الإدارة"],
+  ["/admin","🛡️","لوحة الإدارة"],
   ["a-analytics.html","📈","تحليلات المنصة"],
   ["_","المراجعة والاعتماد"],
   ["a-approvals.html","✅","مركز الاعتمادات","12"],
@@ -87,9 +87,9 @@ const ADMIN_NAV = [
 
 const CTX = {
   provider:{ title:"بوابة المزوّد", org:"مكتب النخبة للمساحة", sub:"مكتب مساحة • الإسكندرية",
-             user:"م. أحمد النجار", role:"مدير الحساب", av:"أن", nav:PROVIDER_NAV, home:"p-dashboard.html" },
+             user:"م. أحمد النجار", role:"مدير الحساب", av:"أن", nav:PROVIDER_NAV, home:"/provider/dashboard" },
   admin:{    title:"لوحة الإدارة", org:"Survsta Admin", sub:"بيئة التشغيل — الإصدار 1.0",
-             user:"م. محمد فرج", role:"مدير النظام", av:"مف", nav:ADMIN_NAV, home:"a-dashboard.html" }
+             user:"م. محمد فرج", role:"مدير النظام", av:"مف", nav:ADMIN_NAV, home:"/admin" }
 };
 
 function survstaLogo(idSuffix = "side", isDark = false){
@@ -113,7 +113,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
    ${nav}
    <div class="backsite">
      <a class="nv" href="index.html"><span class="ic">🌐</span>عرض الموقع العام</a>
-     <a class="nv" href="${mode==="admin"?"p-dashboard.html":"a-dashboard.html"}"><span class="ic">🔀</span>${mode==="admin"?"بوابة المزوّد":"لوحة الإدارة"}</a>
+     <a class="nv" href="${mode==="admin"?"/provider/dashboard":"/admin"}"><span class="ic">🔀</span>${mode==="admin"?"بوابة المزوّد":"لوحة الإدارة"}</a>
      <a class="nv" href="javascript:void(0)" onclick="if(window.AuthGuard){AuthGuard.logout()}else{toast('تم تسجيل الخروج');location.href='login.html'}"><span class="ic">🚪</span>تسجيل الخروج</a>
    </div>
  </aside>
@@ -123,7 +123,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
     <h1>${pageTitle}</h1>
     <div class="sp"></div>
     <input class="tsearch" placeholder="بحث سريع…" onkeydown="if(event.key==='Enter')toast('بحث: '+this.value)">
-    <button class="iconbtn" onclick="location.href='${mode==='admin'?'a-dashboard.html':'p-notifications.html'}'">🔔<span class="dot"></span></button>
+    <button class="iconbtn" onclick="location.href='${mode==='admin'?'/admin':'p-notifications.html'}'">🔔<span class="dot"></span></button>
     <button class="btn btn-soft btn-sm" style="font-weight:bold;margin:0 4px;" onclick="window.openAdminGuideModal()">📖 دليل النظام</button>
     <button class="iconbtn" onclick="toast('مركز المساعدة')">❓</button>
     ${I18N.button()}

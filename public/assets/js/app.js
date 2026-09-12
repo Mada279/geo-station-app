@@ -182,8 +182,8 @@ function buildFooter(){
       <a href="join.html">سجّل مكتبك أو شركتك</a>
       <a href="how-it-works.html">كيف تعمل المنصة</a>
       <a href="contact.html">خدمة الشركاء</a>
-      <a href="p-dashboard.html">لوحة المزوّد</a>
-      <a href="a-dashboard.html">لوحة الإدارة</a></div>
+      <a href="/provider/dashboard">لوحة المزوّد</a>
+      <a href="/admin">لوحة الإدارة</a></div>
     <div><h4>المنصة</h4>
       <a href="about.html">من نحن</a>
       <a href="help.html">المساعدة والأسئلة</a>
@@ -238,7 +238,7 @@ async function updateNavbarAuth(){
 
   if (user) {
     const isAdm = user.role === "admin" || user.role === "super_admin";
-    const dashHref = isAdm ? "a-dashboard.html" : "p-dashboard.html";
+    const dashHref = isAdm ? "/admin" : "/provider/dashboard";
     const dashLabel = isAdm ? "لوحة الإدارة" : "لوحة التحكم";
 
     const logoutAction = "if(window.AuthGuard){AuthGuard.logout()}else{localStorage.removeItem('SURVSTA_AUTH_USER');localStorage.removeItem('GS_AUTH_USER');localStorage.setItem('SURVSTA_LOGGED_OUT','1');location.reload()}";

@@ -121,7 +121,7 @@ async function handleLoginSubmit(e) {
       localStorage.removeItem("SURVSTA_LOGGED_OUT");
       toast("✅ تم تسجيل دخول مدير النظام بنجاح!");
       setTimeout(() => {
-        location.href = "/a-dashboard";
+        location.href = "/admin";
       }, 400);
       return;
     }
@@ -136,7 +136,7 @@ async function handleLoginSubmit(e) {
       localStorage.removeItem("SURVSTA_LOGGED_OUT");
       toast("✅ تم تسجيل دخول المزوّد بنجاح!");
       setTimeout(() => {
-        location.href = "/p-dashboard";
+        location.href = "/provider/dashboard";
       }, 400);
       return;
     }
@@ -157,7 +157,7 @@ async function handleLoginSubmit(e) {
 
     toast("✅ تم تسجيل الدخول بنجاح! جاري التوجيه…");
     setTimeout(() => {
-      location.href = role === "admin" ? "/a-dashboard" : "/p-dashboard";
+      location.href = role === "admin" ? "/admin" : "/provider/dashboard";
     }, 400);
   } catch (err) {
     alertEl.textContent = "حدث خطأ غير متوقع: " + err.message;

@@ -17,7 +17,7 @@
 <script src="assets/js/portal.js?v=3.7"></script>
 <script src="assets/js/crud.js"></script>
 <script>
-mountPortal("admin", "a-approvals.html", "مركز الاعتمادات", `<a href="a-dashboard.html">لوحة الإدارة</a> / <b>مركز الاعتمادات</b>`);
+mountPortal("admin", "a-approvals.html", "مركز الاعتمادات", `<a href="/admin">لوحة الإدارة</a> / <b>مركز الاعتمادات</b>`);
 
 let AF="all";
 const TB=[["all","الكل",A_APPROVALS.length],["ملف مزوّد","ملفات مزوّدين",A_APPROVALS.filter(a=>a.kind.includes("ملف")||a.kind.includes("مركز")).length],

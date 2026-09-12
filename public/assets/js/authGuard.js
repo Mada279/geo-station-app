@@ -214,7 +214,7 @@
 
         if (isAdmin && isCookieProvider) {
           alert("⚠️ عذرًا: هذه الصفحة مخصصة لمديري النظام فقط. سيتم تحويلك إلى لوحة المزوّد.");
-          location.href = "p-dashboard.html";
+          location.href = "/provider/dashboard";
           return false;
         }
       }
@@ -234,7 +234,7 @@
         const allowed = user.role === "admin" || user.role === "super_admin";
         if (!allowed) {
           alert("⚠️ عذرًا: هذه الصفحة مخصصة لمديري النظام فقط. سيتم تحويلك إلى لوحة المزوّد.");
-          location.href = "p-dashboard.html";
+          location.href = "/provider/dashboard";
           return false;
         }
       }

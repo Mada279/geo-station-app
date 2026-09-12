@@ -17,7 +17,7 @@
 <script src="assets/js/portal.js?v=3.7"></script>
 <script src="assets/js/crud.js"></script>
 <script>
-mountPortal("admin", "a-settings.html", "إعدادات النظام", `<a href="a-dashboard.html">لوحة الإدارة</a> / <b>إعدادات النظام</b>`);
+mountPortal("admin", "a-settings.html", "إعدادات النظام", `<a href="/admin">لوحة الإدارة</a> / <b>إعدادات النظام</b>`);
 function dbStats(){
   const u=GS.usage(); const sb=$("#stbar");
   if(sb){ sb.querySelector("i").style.width=u.pct+"%"; sb.classList.toggle("hi",u.pct>75); $("#stlab").textContent=u.label+" / 5 م.ب"; }

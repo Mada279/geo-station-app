@@ -35,9 +35,9 @@ graph TD
         PublicPages["الصفحات العامة (Public Pages)
 index, providers, equipment, map"]
         ProviderPortal["بوابة المزوّد (Provider Portal)
-p-dashboard, p-leads, p-listings"]
+provider-dashboard, p-leads, p-listings"]
         AdminPortal["لوحة الإدارة (Admin Panel)
-a-dashboard, a-approvals, a-users"]
+admin, a-approvals, a-users"]
         
         AuthGuard["حارس الصلاحيات (AuthGuard.js)
 RBAC & Session Manager"]
@@ -135,7 +135,7 @@ d:\geo_station web site├── SURVSTA_OPERATIONS_MANUAL.md     # دليل ا�
     │   └── help.html / directory.html# مركز المساعدة والدليل الشامل
     │
     ├── (بوابة المزوّد - Provider Portal p-*.html):
-    │   ├── p-dashboard.html         # لوحة القيادة والمؤشرات الرقمية للمكتب
+    │   ├── provider/dashboard         # لوحة القيادة والمؤشرات الرقمية للمكتب
     │   ├── p-leads.html             # صندوق الوارد للطلبات وفتح بيانات العملاء
     │   ├── p-listings.html          # إدارة الأجهزة المعروضة للإيجار والبيع
     │   ├── p-services.html          # الخدمات المساحية المقدمة وأسعارها
@@ -150,7 +150,7 @@ d:\geo_station web site├── SURVSTA_OPERATIONS_MANUAL.md     # دليل ا�
     │   └── p-settings.html          # إعدادات الحساب والمحفظة وكلمة المرور
     │
     └── (لوحة الإدارة العليا - Super Admin Portal a-*.html):
-        ├── a-dashboard.html         # مؤشرات المنصة الشاملة وحجم التداول
+        ├── admin (dashboard)         # مؤشرات المنصة الشاملة وحجم التداول
         ├── a-analytics.html         # تحليلات النمو الإقليمي وتوزيع الطلبات
         ├── a-approvals.html         # مركز مراجعة واعتماد المكاتب والأجهزة الجديدة
         ├── a-equipment.html         # المراجعة الفنية للأجهزة والمواصفات
