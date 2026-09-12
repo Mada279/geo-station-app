@@ -1,5 +1,4 @@
 {
-  "cleanUrls": true,
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -26,20 +25,6 @@
           "value": "strict-origin-when-cross-origin"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/a-dashboard",
-      "destination": "/admin"
-    },
-    {
-      "source": "/a-dashboard.html",
-      "destination": "/admin"
-    },
-    {
-      "source": "/admin.html",
-      "destination": "/admin"
     }
   ]
 }

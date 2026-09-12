@@ -13,6 +13,9 @@ import {
   deleteUser,
 } from '@/services/userService';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
