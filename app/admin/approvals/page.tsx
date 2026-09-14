@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 interface PendingItem {
   id: string;

@@ -16,12 +16,12 @@
   const LEGACY_STORAGE_KEY_LOGGED_OUT = "GS_LOGGED_OUT";
 
   const DEFAULT_ADMIN = {
-    id: "admin-demo-1",
-    email: "admin@survsta.com",
-    name: "م. محمد فرج",
+    id: "admin-ahmed",
+    email: "ahmed@survsta.com",
+    name: "م. أحمد",
     role: "admin",
     org: "Survsta Admin",
-    av: "مف"
+    av: "أح"
   };
 
   const DEFAULT_PROVIDER = {
@@ -224,7 +224,7 @@
       // إذا لم يكن مسجل الدخول نهائياً ولا توجد كوكيز صالحة
       if (!user) {
         console.warn(`[AuthGuard] وصول غير مصرح لصفحة (${page}) — تحويل لصفحة تسجيل الدخول.`);
-        const redirectUrl = `/login?callbackUrl=${encodeURIComponent(page + location.search)}`;
+        const redirectUrl = `login.html?redirect=${encodeURIComponent(page + location.search)}`;
         location.href = redirectUrl;
         return false;
       }
@@ -339,7 +339,7 @@
       const page = this.getCurrentPage();
       const pathname = (typeof location !== "undefined" ? location.pathname || "" : "").toLowerCase();
       if (page.startsWith("p-") || page.startsWith("a-") || pathname.startsWith("/admin") || pathname.startsWith("/provider")) {
-        location.href = "/login";
+        location.href = "login.html";
       } else {
         location.reload();
       }

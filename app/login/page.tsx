@@ -4,6 +4,7 @@ import React, { useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/utils/supabaseClient';
 import { authenticateUser } from '@/services/userService';
 
 function LoginForm() {
@@ -25,24 +26,34 @@ function LoginForm() {
       const cleanEmail = email.toLowerCase().trim();
       const cleanPass = password.trim();
 
-      // Explicit Admin Login Logic
-      if (cleanEmail === 'admin@survsta.com' && cleanPass === 'admin') {
-        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: 'admin', email: 'admin@survsta.com', name: 'م. محمد فرج', org: 'Survsta Admin' })) + "; path=/; max-age=86400";
+      // 1. Strict Admin Credentials Check
+      if (cleanEmail === 'ahmed@survsta.com') {
+        if (cleanPass !== 'Ahm@d242526') {
+          throw new Error('كلمة المرور غير صحيحة لحساب مدير النظام.');
+        }
+
+        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({
+          role: 'admin',
+          email: 'ahmed@survsta.com',
+          name: 'م. أحمد',
+          org: 'Survsta Admin'
+        })) + "; path=/; max-age=86400";
         document.cookie = "user_role=admin; path=/; max-age=86400";
+
         if (typeof window !== 'undefined' && window.localStorage) {
           localStorage.removeItem('SURVSTA_LOGGED_OUT');
           localStorage.removeItem('GS_LOGGED_OUT');
           localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify({
-            id: 'admin-demo-1',
-            email: 'admin@survsta.com',
-            name: 'م. محمد فرج',
+            id: 'admin-ahmed',
+            email: 'ahmed@survsta.com',
+            name: 'م. أحمد',
             role: 'admin',
             org: 'Survsta Admin',
-            av: 'مف'
+            av: 'أح'
           }));
         }
-        
-        if (callbackUrl && callbackUrl.startsWith('/')) {
+
+        if (callbackUrl && callbackUrl.startsWith('/admin')) {
           router.push(callbackUrl);
         } else {
           router.push('/admin');
@@ -50,23 +61,117 @@ function LoginForm() {
         return;
       }
 
-      // Explicit Provider Login Logic
-      if (cleanEmail === 'provider@survsta.com' && cleanPass === 'provider') {
-        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: 'provider', email: 'provider@survsta.com', name: 'م. أحمد النجار', org: 'مكتب النخبة للمساحة' })) + "; path=/; max-age=86400";
-        document.cookie = "user_role=provider; path=/; max-age=86400";
+      // 2. Real Provider Authentication via Supabase Auth & Live Providers Database
+      let dbProv: any = null;
+      try {
+        const { data } = await supabase
+          .from('providers')
+          .select('*')
+          .eq('email', cleanEmail)
+          .maybeSingle();
+        dbProv = data;
+      } catch (dbErr) {
+        console.warn('[DB Check Exception]:', dbErr);
+      }
+
+      // Check account approval status if registered in providers table
+      if (dbProv) {
+        if (dbProv.status === 'blocked' || dbProv.status === 'rejected') {
+          throw new Error('هذا الحساب معطل أو تم رفضه. يرجى التواصل مع إدارة المنصة.');
+        }
+        if (dbProv.status === 'pending') {
+          throw new Error('حسابك قيد المراجعة والاعتماد من قبل إدارة المنصة. يرجى الانتظار حتى اعتماده.');
+        }
+      }
+
+      // Attempt Supabase Auth validation
+      let authSuccess = false;
+      let authUser: any = null;
+
+      try {
+        const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: cleanPass,
+        });
+
+        if (authData?.user && !authErr) {
+          authSuccess = true;
+          authUser = authData.user;
+        } else if (authErr?.message === 'Email not confirmed') {
+          // Email confirmation required by Supabase Auth, but email and password are confirmed valid
+          authSuccess = true;
+          authUser = { id: dbProv?.id || 'sb-user', email: cleanEmail };
+        } else if (authErr?.message && authErr.message.includes('Invalid login credentials')) {
+          // Check if provider exists in providers table or locally
+          const localStoredPass = typeof window !== 'undefined' ? localStorage.getItem('SURVSTA_PROVIDER_CRED_' + cleanEmail) : null;
+          if (localStoredPass && localStoredPass !== cleanPass) {
+            throw new Error('كلمة المرور غير صحيحة. يرجى التحقق من كلمة المرور وإعادة المحاولة.');
+          } else if (!dbProv && !localStoredPass) {
+            throw new Error('بيانات الدخول غير صحيحة. يرجى التأكد من البريد وكلمة المرور.');
+          }
+        }
+      } catch (authEx: any) {
+        if (authEx?.message && (authEx.message.includes('غير صحيحة') || authEx.message.includes('معطل') || authEx.message.includes('قيد المراجعة'))) {
+          throw authEx;
+        }
+      }
+
+      // Verify against client-cached registered credentials
+      if (!authSuccess && typeof window !== 'undefined' && window.localStorage) {
+        const storedPass = localStorage.getItem('SURVSTA_PROVIDER_CRED_' + cleanEmail);
+        if (storedPass !== null) {
+          if (cleanPass === storedPass) {
+            authSuccess = true;
+          } else {
+            throw new Error('كلمة المرور غير صحيحة. يرجى التحقق من كلمة المرور وإعادة المحاولة.');
+          }
+        }
+      }
+
+      // If provider exists and is approved in live database (e.g. registered before Auth sync)
+      if (!authSuccess && dbProv && dbProv.status === 'approved') {
+        // Cache credentials locally so future logins verify against this exact password
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.setItem('SURVSTA_PROVIDER_CRED_' + cleanEmail, cleanPass);
+        }
+        // Also register in Supabase Auth in the background
+        try {
+          supabase.auth.signUp({
+            email: cleanEmail,
+            password: cleanPass,
+            options: { data: { role: 'provider', name: dbProv.name } }
+          }).catch(() => {});
+        } catch {}
+
+        authSuccess = true;
+      }
+
+      // If user is a verified Provider
+      if (authSuccess || dbProv) {
+        if (!authSuccess) {
+          throw new Error('كلمة المرور غير صحيحة. يرجى التحقق من كلمة المرور وإعادة المحاولة.');
+        }
+
+        const role = 'provider';
+        const name = dbProv?.name || authUser?.user_metadata?.name || 'مزوّد الخدمة';
+        const org = dbProv?.name || authUser?.user_metadata?.organization || 'مكتب مساحي معتمد';
+
+        document.cookie = `survsta_session=${encodeURIComponent(JSON.stringify({ role, email: cleanEmail, name, org }))}; path=/; max-age=86400`;
+        document.cookie = 'user_role=provider; path=/; max-age=86400';
+
         if (typeof window !== 'undefined' && window.localStorage) {
           localStorage.removeItem('SURVSTA_LOGGED_OUT');
           localStorage.removeItem('GS_LOGGED_OUT');
           localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify({
-            id: 'provider-demo-1',
-            email: 'provider@survsta.com',
-            name: 'م. أحمد النجار',
-            role: 'provider',
-            org: 'مكتب النخبة للمساحة',
-            av: 'أن'
+            id: dbProv?.id || authUser?.id || 'provider-1',
+            email: cleanEmail,
+            name,
+            role,
+            org,
+            av: name.slice(0, 2)
           }));
         }
-        
+
         if (callbackUrl && callbackUrl.startsWith('/')) {
           router.push(callbackUrl);
         } else {
@@ -75,12 +180,29 @@ function LoginForm() {
         return;
       }
 
-      // General / Fallback Authentication
+      // 4. Fallback Provider / User Authentication Handler
       const user = await authenticateUser(cleanEmail, cleanPass);
 
-      // Set cookie exactly as requested
-      document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({ role: user.role })) + "; path=/; max-age=86400";
+      document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({
+        role: user.role,
+        email: user.email,
+        name: user.name,
+        org: user.organization
+      })) + "; path=/; max-age=86400";
       document.cookie = `user_role=${user.role}; path=/; max-age=86400`;
+
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.removeItem('SURVSTA_LOGGED_OUT');
+        localStorage.removeItem('GS_LOGGED_OUT');
+        localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          org: user.organization,
+          av: user.name.slice(0, 2)
+        }));
+      }
 
       if (callbackUrl && callbackUrl.startsWith('/')) {
         router.push(callbackUrl);
@@ -97,17 +219,11 @@ function LoginForm() {
       setError(
         err instanceof Error
           ? err.message
-          : 'تعذر تسجيل الدخول. يرجى التحقق من البريد وكلمة المرور.'
+          : 'تعذر تسجيل الدخول. يرجى التحقق من البريد الإلكتروني وكلمة المرور.'
       );
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleQuickFill = (testEmail: string, testPass: string) => {
-    setEmail(testEmail);
-    setPassword(testPass);
-    setError(null);
   };
 
   return (
@@ -149,19 +265,16 @@ function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@survsta.com أو provider@survsta.com"
+            placeholder="name@company.com"
             autoComplete="email"
             className="w-full rounded-xl border border-gray-800 bg-gray-950 px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition"
           />
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] text-gray-500">(admin أو provider)</span>
-            <label className="block text-xs font-semibold text-gray-300">
-              كلمة المرور *
-            </label>
-          </div>
+          <label className="block text-xs font-semibold text-gray-300 mb-1">
+            كلمة المرور *
+          </label>
           <input
             type="password"
             required
@@ -188,45 +301,6 @@ function LoginForm() {
           )}
         </button>
       </form>
-
-      {/* Helper Box: Official Test Accounts */}
-      <div className="mt-8 rounded-xl border border-dashed border-gray-800 bg-gray-950/60 p-4 text-xs">
-        <div className="font-semibold text-gray-400 mb-2 flex items-center justify-between">
-          <span className="text-[11px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-            حسابات الاختبار المعتمدة (Mock Accounts)
-          </span>
-          <span>بيانات التجربة المباشرة:</span>
-        </div>
-        <div className="space-y-2 text-gray-400">
-          <div
-            onClick={() => handleQuickFill('admin@survsta.com', 'admin')}
-            className="cursor-pointer rounded-lg p-2.5 bg-gray-900 hover:bg-gray-800 hover:text-white transition border border-gray-800"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-red-400 font-bold text-xs">🛡️ Admin (مدير النظام)</span>
-              <span className="text-[10px] text-gray-500">اضغط للتعبئة التلقائية</span>
-            </div>
-            <div className="flex items-center justify-between mt-1 text-[11px] font-mono">
-              <span className="text-cyan-300">admin@survsta.com</span>
-              <span className="text-gray-400">كلمة المرور: <b className="text-white">admin</b></span>
-            </div>
-          </div>
-
-          <div
-            onClick={() => handleQuickFill('provider@survsta.com', 'provider')}
-            className="cursor-pointer rounded-lg p-2.5 bg-gray-900 hover:bg-gray-800 hover:text-white transition border border-gray-800"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-cyan-400 font-bold text-xs">🏢 Provider (مزوّد الخدمة)</span>
-              <span className="text-[10px] text-gray-500">اضغط للتعبئة التلقائية</span>
-            </div>
-            <div className="flex items-center justify-between mt-1 text-[11px] font-mono">
-              <span className="text-cyan-300">provider@survsta.com</span>
-              <span className="text-gray-400">كلمة المرور: <b className="text-white">provider</b></span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Footer Navigation */}
       <div className="mt-6 text-center text-xs text-gray-400">

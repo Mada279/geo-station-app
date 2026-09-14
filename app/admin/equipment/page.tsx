@@ -1,13 +1,60 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import { supabase } from '@/utils/supabaseClient';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+const INITIAL_EQUIPMENT = [
+  {
+    id: 'EQ-1001',
+    name: 'محطة رصد متكاملة Leica TS07 (1 ثانية)',
+    category: 'Total Station',
+    provider: 'مكتب الأهرام للمساحة',
+    serial: 'SN-948271',
+    calibrationDate: '2026-01-15',
+    calibrationStatus: 'سارية (صلاحية 10 أشهر)',
+    status: 'معتمد ونشط',
+    price: '1,500 ج.م / يوم',
+  },
+  {
+    id: 'EQ-1002',
+    name: 'جهاز تحديد المواقع Trimble R12i GNSS',
+    category: 'GNSS / GPS',
+    provider: 'جيو تكنولوجي مصر',
+    serial: 'TR-772910',
+    calibrationDate: '2025-11-20',
+    calibrationStatus: 'سارية (صلاحية 8 أشهر)',
+    status: 'معتمد ونشط',
+    price: '2,200 ج.م / يوم',
+  },
+  {
+    id: 'EQ-1003',
+    name: 'ميزان قامة بصري دقيق Sokkia B20',
+    category: 'Optical Level',
+    provider: 'الإسكندرية للمسح',
+    serial: 'SK-330192',
+    calibrationDate: '2026-02-01',
+    calibrationStatus: 'سارية (صلاحية 11 شهر)',
+    status: 'معتمد ونشط',
+    price: '350 ج.م / يوم',
+  },
+  {
+    id: 'EQ-1004',
+    name: 'جهاز مستقبل CHCNAV i73+ Pocket GNSS',
+    category: 'GNSS / GPS',
+    provider: 'سرفاي تك للمقاولات',
+    serial: 'CHC-551029',
+    calibrationDate: '2026-03-01',
+    calibrationStatus: 'سارية حديثاً',
+    status: 'معتمد ونشط',
+    price: '1,800 ج.م / يوم',
+  },
+];
 
 export default function AdminEquipmentPage() {
   const [filterBrand, setFilterBrand] = useState('all');
+  const [equipmentList, setEquipmentList] = useState(INITIAL_EQUIPMENT);
+  const [searchTerm, setSearchTerm] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -15,52 +62,32 @@ export default function AdminEquipmentPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const equipmentList = [
-    {
-      id: 'EQ-1001',
-      name: 'محطة رصد متكاملة Leica TS07 (1 ثانية)',
-      category: 'Total Station',
-      provider: 'مكتب الأهرام للمساحة',
-      serial: 'SN-948271',
-      calibrationDate: '2026-01-15',
-      calibrationStatus: 'سارية (صلاحية 10 أشهر)',
-      status: 'معتمد ونشط',
-      price: '1,500 ج.م / يوم',
-    },
-    {
-      id: 'EQ-1002',
-      name: 'جهاز تحديد المواقع Trimble R12i GNSS',
-      category: 'GNSS / GPS',
-      provider: 'جيو تكنولوجي مصر',
-      serial: 'TR-772910',
-      calibrationDate: '2025-11-20',
-      calibrationStatus: 'سارية (صلاحية 8 أشهر)',
-      status: 'معتمد ونشط',
-      price: '2,200 ج.م / يوم',
-    },
-    {
-      id: 'EQ-1003',
-      name: 'ميزان قامة بصري دقيق Sokkia B20',
-      category: 'Optical Level',
-      provider: 'الإسكندرية للمسح',
-      serial: 'SK-330192',
-      calibrationDate: '2026-02-01',
-      calibrationStatus: 'سارية (صلاحية 11 شهر)',
-      status: 'معتمد ونشط',
-      price: '350 ج.م / يوم',
-    },
-    {
-      id: 'EQ-1004',
-      name: 'جهاز مستقبل CHCNAV i73+ Pocket GNSS',
-      category: 'GNSS / GPS',
-      provider: 'سرفاي تك للمقاولات',
-      serial: 'CHC-551029',
-      calibrationDate: '2026-03-01',
-      calibrationStatus: 'سارية حديثاً',
-      status: 'معتمد ونشط',
-      price: '1,800 ج.م / يوم',
-    },
-  ];
+  useEffect(() => {
+    async function loadLiveEquipment() {
+      try {
+        const { data, error } = await supabase
+          .from('equipment')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          const liveMapped = data.map((d: any) => ({
+            id: d.id,
+            name: d.title || 'جهاز مساحي',
+            category: d.category || 'Total Station',
+            provider: 'مزوّد معتمد بالسحابة',
+            serial: (d.id || '').slice(0, 8).toUpperCase() || 'SN-LIVE',
+            calibrationDate: d.created_at ? d.created_at.slice(0, 10) : '2026-03-01',
+            calibrationStatus: 'سارية وموثقة',
+            status: 'معتمد ونشط',
+            price: d.daily_price ? `${Number(d.daily_price).toLocaleString('en-US')} ج.م / يوم` : 'حسب الاتفاق',
+          }));
+          setEquipmentList([...liveMapped, ...INITIAL_EQUIPMENT]);
+        }
+      } catch {}
+    }
+    loadLiveEquipment();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-[#081933] text-gray-100" style={{ direction: 'rtl' }}>

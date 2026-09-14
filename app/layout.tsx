@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import '../public/assets/css/tokens.css';
-import '../public/assets/css/font.css';
-import '../public/assets/css/style.css';
-import '../public/assets/css/portal.css';
+import './styles/font.css';
+import './styles/tokens.css';
+import './styles/style.css';
+import './styles/portal.css';
 import '@/app/globals.css';
 
 export const metadata: Metadata = {
@@ -24,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className="dark">
-      <body className="min-h-screen bg-gray-950 text-gray-100 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between">
+    <html lang="ar" dir="rtl">
+      <body className="min-h-screen bg-[#f4f7fa] text-slate-800 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between">
         <Navbar />
         <main className="flex-grow">{children}</main>
         <Footer />

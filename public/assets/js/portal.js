@@ -44,45 +44,45 @@ const num = n=>n.toLocaleString("en-US");
 const PROVIDER_NAV = [
   ["_","التشغيل"],
   ["/provider/dashboard","📊","لوحة التحكم"],
-  ["/provider/dashboard#leads","📥","صندوق الطلبات","6"],
-  ["/provider/dashboard#equipment","📡","إدارة الأجهزة"],
-  ["/provider/dashboard#services","🧭","الخدمات"],
+  ["p-leads.html","📥","صندوق الطلبات","6"],
+  ["p-listings.html","📡","إدارة الأجهزة"],
+  ["p-services.html","🧭","الخدمات"],
   ["_","الملف والحساب"],
-  ["/provider/dashboard#profile","🏢","ملف الجهة"],
-  ["/provider/dashboard#locations","📍","المواقع والتغطية"],
-  ["/provider/dashboard#team","👥","الفريق والصلاحيات"],
+  ["p-profile.html","🏢","ملف الجهة"],
+  ["p-locations.html","📍","المواقع والتغطية"],
+  ["p-team.html","👥","الفريق والصلاحيات"],
   ["_","النمو"],
-  ["/provider/dashboard#analytics","📈","التحليلات"],
-  ["/provider/dashboard#jobs","💼","الوظائف المنشورة"],
-  ["/provider/dashboard#reviews","⭐","التقييمات"],
-  ["/provider/dashboard#ads","📣","الظهور المميّز"],
+  ["p-analytics.html","📈","التحليلات"],
+  ["p-jobs.html","💼","الوظائف المنشورة"],
+  ["p-reviews.html","⭐","التقييمات"],
+  ["p-ads.html","📣","الظهور المميّز"],
   ["_","النظام"],
-  ["/provider/dashboard#notifications","🔔","الإشعارات","3"],
-  ["/provider/dashboard#settings","⚙️","الإعدادات"]
+  ["p-notifications.html","🔔","الإشعارات","3"],
+  ["p-settings.html","⚙️","الإعدادات"]
 ];
 const ADMIN_NAV = [
   ["_","نظرة عامة"],
   ["/admin","🛡️","لوحة الإدارة"],
-  ["/admin/analytics","📈","تحليلات المنصة"],
+  ["a-analytics.html","📈","تحليلات المنصة"],
   ["_","المراجعة والاعتماد"],
-  ["/admin/approvals","✅","مركز الاعتمادات","12"],
-  ["/admin/equipment","📡","مراجعة الأجهزة","4"],
-  ["/admin/verification","🔎","مركز التوثيق"],
-  ["/admin","⭐","مراجعة التقييمات","2"],
-  ["/admin","🚩","البلاغات","5"],
+  ["a-approvals.html","✅","مركز الاعتمادات","12"],
+  ["a-equipment.html","📡","مراجعة الأجهزة","4"],
+  ["a-verification.html","🔎","مركز التوثيق"],
+  ["a-reviews.html","⭐","مراجعة التقييمات","2"],
+  ["a-reports.html","🚩","البلاغات","5"],
   ["_","إدارة البيانات"],
-  ["/admin/providers","🏢","المزوّدون"],
-  ["/admin/clients","👥","العملاء"],
-  ["/admin/users","👤","المستخدمون"],
-  ["/admin","🗃️","المحتوى"],
-  ["/admin","🖼️","مكتبة الوسائط"],
-  ["/admin","💼","الوظائف"],
-  ["/admin","🗂️","تجميع البيانات"],
-  ["/admin","🔄","الاستيراد والتصدير"],
+  ["a-providers.html","🏢","المزوّدون"],
+  ["a-clients.html","👥","العملاء"],
+  ["a-users.html","👤","المستخدمون"],
+  ["a-content.html","🗃️","المحتوى"],
+  ["a-media.html","🖼️","مكتبة الوسائط"],
+  ["a-jobs.html","💼","الوظائف"],
+  ["a-data.html","🗂️","تجميع البيانات"],
+  ["a-import.html","🔄","الاستيراد والتصدير"],
   ["_","المتابعة"],
-  ["/admin/leads","📥","إدارة الطلبات"],
-  ["/admin/audit","📜","سجل التدقيق"],
-  ["/admin/settings","⚙️","إعدادات النظام"]
+  ["a-leads.html","📥","إدارة الطلبات"],
+  ["a-audit.html","📜","سجل التدقيق"],
+  ["a-settings.html","⚙️","إعدادات النظام"]
 ];
 
 const CTX = {
@@ -93,7 +93,7 @@ const CTX = {
 };
 
 function survstaLogo(idSuffix = "side", isDark = false){
-  return `<img alt="Survsta" src="/assets/img/Designer.png" class="object-contain survsta-logo" style="width: 250px !important; min-width: 250px !important; height: auto !important; max-height: 80px !important; display: block;" />`;
+  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 250px !important; min-width: 250px !important; height: auto !important; max-height: 80px !important; display: block;" />`;
 }
 if(typeof window !== "undefined") window.survstaLogo = survstaLogo;
 
@@ -112,9 +112,9 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
    <div class="ctx"><b>${c.org}</b><small>${c.sub}</small></div>
    ${nav}
    <div class="backsite">
-     <a class="nv" href="/"><span class="ic">🌐</span>عرض الموقع العام</a>
+     <a class="nv" href="index.html"><span class="ic">🌐</span>عرض الموقع العام</a>
      <a class="nv" href="${mode==="admin"?"/provider/dashboard":"/admin"}"><span class="ic">🔀</span>${mode==="admin"?"بوابة المزوّد":"لوحة الإدارة"}</a>
-     <a class="nv" href="javascript:void(0)" onclick="if(window.AuthGuard){AuthGuard.logout()}else{toast('تم تسجيل الخروج');location.href='/login'}"><span class="ic">🚪</span>تسجيل الخروج</a>
+     <a class="nv" href="javascript:void(0)" onclick="if(window.AuthGuard){AuthGuard.logout()}else{toast('تم تسجيل الخروج');location.href='login.html'}"><span class="ic">🚪</span>تسجيل الخروج</a>
    </div>
  </aside>
  <div class="main">
@@ -123,7 +123,7 @@ function mountPortal(mode, active, pageTitle, crumbHtml){
     <h1>${pageTitle}</h1>
     <div class="sp"></div>
     <input class="tsearch" placeholder="بحث سريع…" onkeydown="if(event.key==='Enter')toast('بحث: '+this.value)">
-    <button class="iconbtn" onclick="location.href='${mode==='admin'?'/admin':'/provider/dashboard#notifications'}'">🔔<span class="dot"></span></button>
+    <button class="iconbtn" onclick="location.href='${mode==='admin'?'/admin':'p-notifications.html'}'">🔔<span class="dot"></span></button>
     <button class="btn btn-soft btn-sm" style="font-weight:bold;margin:0 4px;" onclick="window.openAdminGuideModal()">📖 دليل النظام</button>
     <button class="iconbtn" onclick="toast('مركز المساعدة')">❓</button>
     ${I18N.button()}

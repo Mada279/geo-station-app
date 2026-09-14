@@ -4,8 +4,8 @@ import { User, CreateUserInput, UpdateUserInput } from '@/types/user';
 export let MOCK_USERS: User[] = [
   {
     id: 'usr_admin',
-    name: 'م. محمد فرج',
-    email: 'admin@survsta.com',
+    name: 'م. أحمد',
+    email: 'ahmed@survsta.com',
     role: 'admin',
     status: 'active',
     organization: 'Survsta Core Team',
@@ -45,32 +45,32 @@ export let MOCK_USERS: User[] = [
 ];
 
 /**
- * Explicit Authentication handler for Admin & Provider test accounts
+ * Explicit Authentication handler for Admin & Provider accounts
  */
 export async function authenticateUser(email: string, password?: string): Promise<User> {
   await new Promise((res) => setTimeout(res, 150));
   const cleanEmail = email.toLowerCase().trim();
   const cleanPass = (password || '').trim();
 
-  // Explicit check for Admin
-  if (cleanEmail === 'admin@survsta.com') {
-    if (cleanPass && cleanPass !== 'admin' && cleanPass !== 'admin123456' && cleanPass !== 'demo1234') {
-      throw new Error('كلمة المرور غير صحيحة لحساب مدير النظام. كلمة المرور هي: admin');
+  // Strict check for Admin
+  if (cleanEmail === 'ahmed@survsta.com') {
+    if (cleanPass !== 'Ahm@d242526') {
+      throw new Error('كلمة المرور غير صحيحة لحساب مدير النظام.');
     }
     return MOCK_USERS[0];
   }
 
-  // Explicit check for Provider
+  // Check for Provider
   if (cleanEmail === 'provider@survsta.com' || cleanEmail === 'elite@provider.eg' || cleanEmail === 'ahmed@elitesurvey.eg') {
-    if (cleanPass && cleanPass !== 'provider' && cleanPass !== 'provider123456' && cleanPass !== 'demo1234') {
-      throw new Error('كلمة المرور غير صحيحة لحساب مزوّد الخدمة. كلمة المرور هي: provider');
+    if (cleanPass && cleanPass !== 'Provider@2026' && cleanPass !== 'provider') {
+      throw new Error('كلمة المرور غير صحيحة لحساب مزوّد الخدمة.');
     }
     return MOCK_USERS[1];
   }
 
   const user = MOCK_USERS.find((u) => u.email.toLowerCase().trim() === cleanEmail);
   if (!user) {
-    throw new Error('البريد الإلكتروني غير مسجل. يرجى استخدام admin@survsta.com أو provider@survsta.com');
+    throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة.');
   }
 
   return { ...user };

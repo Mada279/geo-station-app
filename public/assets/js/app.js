@@ -102,7 +102,7 @@ const pv = id=>PROVIDERS.find(p=>p.id===id);
 
 /* ---------------- shell ---------------- */
 const NAV = [
-  {t:"الرئيسية", h:"/"},
+  {t:"الرئيسية", h:"index.html"},
   {t:"الدليل", h:"directory.html", sub:PROVIDER_TYPES.map(x=>({t:x.name, h:`providers.html?type=${x.slug}`, d:x.desc}))},
   {t:"الأجهزة", h:"equipment.html", sub:[
     {t:"كل الأجهزة", h:"equipment.html", d:"تصفح كل المعروض للبيع والإيجار"},
@@ -125,7 +125,7 @@ const NAV = [
 ];
 
 function survstaLogo(idSuffix = "nav", isDark = false){
-  return `<img alt="Survsta" src="/assets/img/Designer.png" class="object-contain survsta-logo" style="width: 160px !important; max-width: 160px !important; height: auto !important; max-height: 48px !important; display: block;" />`;
+  return `<img alt="Survsta" src="assets/img/Designer.png" class="object-contain survsta-logo" style="width: 160px !important; max-width: 160px !important; height: auto !important; max-height: 48px !important; display: block;" />`;
 }
 window.survstaLogo = survstaLogo;
 
@@ -142,16 +142,16 @@ function buildHeader(active){
     <a href="mobile-app.html">📱 حمّل التطبيق</a>
     <a href="help.html">المساعدة</a>
     <a href="contact.html">تواصل معنا</a>
-    <span id="nav-auth-util"><a href="/login">🔐 دخول الشركاء</a></span>
+    <span id="nav-auth-util"><a href="login.html">🔐 دخول الشركاء</a></span>
     ${I18N.button()}
   </div>
 </div></div>
 <header class="header"><div class="wrap">
-  <a href="/" class="brand" aria-label="Survsta">${survstaLogo("nav")}</a>
+  <a href="index.html" class="brand" aria-label="Survsta">${survstaLogo("nav")}</a>
   <nav class="mainnav" id="mainnav">${NAV.map(link).join("")}</nav>
   <div class="head-actions">
-    <a href="/join" class="btn btn-gold btn-sm" style="background:#F4B400;color:#000;font-weight:700;padding:8px 20px;border-radius:8px;">انضم الآن</a>
-    <span id="nav-auth-cta"><a href="/login" class="btn btn-ghost btn-sm">دخول</a></span>
+    <a href="join.html" class="btn btn-gold btn-sm" style="background:#F4B400;color:#000;font-weight:700;padding:8px 20px;border-radius:8px;">انضم الآن</a>
+    <span id="nav-auth-cta"><a href="login.html" class="btn btn-ghost btn-sm">دخول</a></span>
     <button class="burger" onclick="$('#mainnav').classList.toggle('open')">☰</button>
   </div>
 </div></header>`;
@@ -177,9 +177,9 @@ function buildFooter(){
       <a href="academy.html">Academy <span style="background:#fef3c7;color:#92400e;font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;">قريباً</span></a>
       <a href="jobs.html">الوظائف</a></div>
     <div><h4>للشركاء</h4>
-      <a href="/login">🔐 تسجيل الدخول</a>
-      <a href="/join">✨ فتح حساب جديد</a>
-      <a href="/join">سجّل مكتبك أو شركتك</a>
+      <a href="login.html">🔐 تسجيل الدخول</a>
+      <a href="register.html">✨ فتح حساب جديد</a>
+      <a href="join.html">سجّل مكتبك أو شركتك</a>
       <a href="how-it-works.html">كيف تعمل المنصة</a>
       <a href="contact.html">خدمة الشركاء</a>
       <a href="/provider/dashboard">لوحة المزوّد</a>
@@ -506,7 +506,7 @@ function ctaBand(){
       <p>اكتب احتياجك مرة واحدة، وتوجّهه Survsta للمكاتب والشركات المؤهلة في نطاقك الجغرافي — مجانًا وبدون التزام.</p></div>
     <div class="rowf">
       <button class="btn btn-org btn-lg" onclick="openModal('need')">أضف احتياجك</button>
-      <a href="/join" class="btn btn-ghost btn-lg">انضم كشريك</a></div>
+      <a href="join.html" class="btn btn-ghost btn-lg">انضم كشريك</a></div>
   </div></div></section>`;
 }
 

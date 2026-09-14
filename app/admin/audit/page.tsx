@@ -3,8 +3,6 @@
 import React from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export default function AdminAuditPage() {
   return (
@@ -93,8 +91,8 @@ export default function AdminAuditPage() {
               </thead>
               <tbody className="divide-y divide-cyan-500/10">
                 {[
-                  { action: 'اعتماد مزوّد خدمة جديد', user: 'admin@survsta.com', target: 'providers (id: 489)', ip: '197.34.12.89', time: 'منذ 8 دقائق', status: 'ناجح', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
-                  { action: 'تعديل صلاحيات مستخدم', user: 'admin@survsta.com', target: 'users (role -> admin)', ip: '197.34.12.89', time: 'منذ 25 دقيقة', status: 'ناجح', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
+                  { action: 'اعتماد مزوّد خدمة جديد', user: 'ahmed@survsta.com', target: 'providers (id: 489)', ip: '197.34.12.89', time: 'منذ 8 دقائق', status: 'ناجح', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
+                  { action: 'تعديل صلاحيات مستخدم', user: 'ahmed@survsta.com', target: 'users (role -> admin)', ip: '197.34.12.89', time: 'منذ 25 دقيقة', status: 'ناجح', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
                   { action: 'تسجيل مزوّد عبر بوابة الانضمام', user: 'public_lead', target: 'providers (محمد علي)', ip: '156.204.81.12', time: 'منذ ساعتين', status: 'مسجل', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30' },
                   { action: 'توليد كود تحقق OTP', user: 'system_auth', target: 'sms_gateway (854921)', ip: '10.0.4.1', time: 'منذ 3 ساعات', status: 'مرسل', color: 'text-purple-400 bg-purple-500/10 border-purple-500/30' },
                 ].map((row, idx) => (

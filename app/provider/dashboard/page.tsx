@@ -39,9 +39,68 @@ export default function ProviderDashboardPage() {
   const [newMonthlyPrice, setNewMonthlyPrice] = useState('');
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>(['total_station_leica.jpg']);
 
+  // Edit Price Modal State
+  const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
+  const [editDailyPrice, setEditDailyPrice] = useState('');
+  const [editMonthlyPrice, setEditMonthlyPrice] = useState('');
+  const [isUpdatingPrice, setIsUpdatingPrice] = useState(false);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleOpenEditPrice = (item: EquipmentItem) => {
+    setEditingItem(item);
+    const cleanDaily = (item.dailyRate || '').replace(/[^0-9.]/g, '');
+    const cleanMonthly = (item.monthlyRate || '').replace(/[^0-9.]/g, '');
+    setEditDailyPrice(cleanDaily);
+    setEditMonthlyPrice(cleanMonthly);
+  };
+
+  const handleSaveEditPrice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
+
+    setIsUpdatingPrice(true);
+    try {
+      const dailyNum = editDailyPrice.trim() ? parseFloat(editDailyPrice) : null;
+      const monthlyNum = editMonthlyPrice.trim() ? parseFloat(editMonthlyPrice) : null;
+
+      // Update in Supabase equipment table
+      const { error } = await supabase
+        .from('equipment')
+        .update({
+          daily_price: dailyNum,
+          monthly_price: monthlyNum,
+        })
+        .eq('id', editingItem.id);
+
+      if (error) {
+        console.warn('[Edit Price Supabase Error]:', error.message);
+      }
+
+      // Update local equipment state immediately
+      setEquipment((prev) =>
+        prev.map((it) =>
+          it.id === editingItem.id
+            ? {
+                ...it,
+                dailyRate: dailyNum ? `${Number(dailyNum).toLocaleString('en-US')} ج.م` : '—',
+                monthlyRate: monthlyNum ? `${Number(monthlyNum).toLocaleString('en-US')} ج.م` : '—',
+              }
+            : it
+        )
+      );
+
+      showToast(`✅ تم تحديث أسعار "${editingItem.title}" بنجاح!`);
+      setEditingItem(null);
+    } catch (err) {
+      console.error('[Edit Price Exception]:', err);
+      showToast('❌ تعذر تحديث السعر حالياً.');
+    } finally {
+      setIsUpdatingPrice(false);
+    }
   };
 
   // Fetch actual equipment data from Supabase
@@ -304,7 +363,7 @@ export default function ProviderDashboardPage() {
         </div>
 
         {/* Equipment Listing Section */}
-        <div className="space-y-4" id="equipment">
+        <div className="space-y-4 scroll-mt-6" id="equipment">
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-400">
               قائمة المعدات والأجهزة المعروضة في حسابك — متصلة مباشرة بقاعدة بيانات Supabase.
@@ -409,8 +468,8 @@ export default function ProviderDashboardPage() {
                       <td className="px-4 py-3.5 text-center whitespace-nowrap">
                         <div className="inline-flex items-center gap-1.5">
                           <button
-                            onClick={() => showToast(`جارٍ فتح محرر أسعار ${item.title}`)}
-                            className="rounded-lg border border-cyan-500/30 bg-[#0F253E] px-2.5 py-1 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/20 transition"
+                            onClick={() => handleOpenEditPrice(item)}
+                            className="rounded-lg border border-cyan-500/30 bg-[#0F253E] px-2.5 py-1 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/20 transition cursor-pointer"
                           >
                             تعديل السعر
                           </button>
@@ -556,6 +615,83 @@ export default function ProviderDashboardPage() {
                 </button>
               </div>
 
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Price Modal Dialog */}
+      {editingItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-cyan-500/40 bg-[#081933] p-6 shadow-2xl space-y-5 text-right">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <button
+                type="button"
+                onClick={() => setEditingItem(null)}
+                className="text-gray-400 hover:text-white text-lg font-bold p-1 rounded-lg"
+              >
+                ✕
+              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">💰</span>
+                <div>
+                  <h3 className="text-base font-black text-white">تعديل أسعار التأجير</h3>
+                  <p className="text-[11px] text-gray-400 truncate max-w-[240px]">
+                    {editingItem.title}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSaveEditPrice} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1">
+                  سعر الإيجار اليومي (ج.م)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={editDailyPrice}
+                  onChange={(e) => setEditDailyPrice(e.target.value)}
+                  placeholder="مثال: 1500"
+                  className="w-full rounded-xl border border-gray-700 bg-gray-950 px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition text-right"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1">
+                  سعر الإيجار الشهري (ج.م)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={editMonthlyPrice}
+                  onChange={(e) => setEditMonthlyPrice(e.target.value)}
+                  placeholder="مثال: 25000"
+                  className="w-full rounded-xl border border-gray-700 bg-gray-950 px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition text-right"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3 border-t border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  className="rounded-xl border border-gray-700 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingPrice}
+                  className="rounded-xl bg-gradient-to-l from-cyan-500 to-[#1CA7FF] px-5 py-2.5 text-xs font-bold text-gray-950 hover:brightness-110 disabled:opacity-50 transition shadow-lg shadow-cyan-500/20 cursor-pointer"
+                >
+                  {isUpdatingPrice ? 'جاري الحفظ...' : 'حفظ وتحديث الأسعار ✓'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

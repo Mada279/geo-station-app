@@ -6,8 +6,6 @@ import Image from 'next/image';
 import { supabase } from '@/utils/supabaseClient';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 interface PendingProvider {
   id: string;

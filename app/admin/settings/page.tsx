@@ -3,8 +3,6 @@
 import React from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export default function AdminSettingsPage() {
   return (
@@ -120,7 +118,7 @@ export default function AdminSettingsPage() {
                 <label className="block text-gray-400 mb-1 font-semibold">البريد الإلكتروني للإشعارات العاجلة</label>
                 <input
                   type="email"
-                  defaultValue="admin@survsta.com"
+                  defaultValue="ahmed@survsta.com"
                   className="w-full rounded-xl border border-cyan-500/30 bg-[#081933] px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400"
                 />
               </div>

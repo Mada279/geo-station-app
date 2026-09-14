@@ -146,6 +146,35 @@ export default function ProviderSidebar({
     },
   ];
 
+  const [sidebarToast, setSidebarToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setSidebarToast(msg);
+    setTimeout(() => setSidebarToast(null), 3500);
+  };
+
+  const handleNavClick = (e: React.MouseEvent, item: { href: string; label: string }) => {
+    if (item.label === 'إدارة الأجهزة والمعدات') {
+      if (onClose) onClose();
+      const el = document.getElementById('equipment') || document.getElementById('equipment-section');
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+
+    if (item.label === 'لوحة التحكم العامة') {
+      if (onClose) onClose();
+      return;
+    }
+
+    // Secondary MVP feature links
+    e.preventDefault();
+    if (onClose) onClose();
+    showToast('سيتم تفعيل هذه الخاصية قريباً في التحديث القادم');
+  };
+
   const handleLogout = () => {
     document.cookie = 'survsta_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     document.cookie = 'user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -165,6 +194,14 @@ export default function ProviderSidebar({
 
   return (
     <>
+      {/* Toast Notification */}
+      {sidebarToast && (
+        <div className="fixed top-5 left-5 z-[99999] rounded-xl bg-gradient-to-r from-amber-500 to-[#F4B400] text-gray-950 font-bold px-4 py-3 shadow-2xl text-xs flex items-center gap-2 animate-bounce border border-amber-400">
+          <span>ℹ️</span>
+          <span>{sidebarToast}</span>
+        </div>
+      )}
+
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
@@ -228,10 +265,8 @@ export default function ProviderSidebar({
                     <Link
                       key={itemIdx}
                       href={item.href}
-                      onClick={() => {
-                        if (onClose) onClose();
-                      }}
-                      className={`flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all ${
+                      onClick={(e) => handleNavClick(e, item)}
+                      className={`flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all cursor-pointer ${
                         active
                           ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm'
                           : 'text-gray-300 hover:bg-[#0F253E] hover:text-white'

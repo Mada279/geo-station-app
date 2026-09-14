@@ -87,6 +87,7 @@ export default function ProviderRegistrationWizard() {
       setIsSubmitting(true);
       setSubmitError(null);
       try {
+        const cleanEmail = formData.email.trim().toLowerCase();
         const fullLocation = formData.location
           ? `${formData.governorate} — ${formData.location}`
           : formData.governorate;
@@ -95,10 +96,37 @@ export default function ProviderRegistrationWizard() {
           ? `${formData.organization} (${formData.name})`
           : formData.name;
 
+        // 1. Register credentials in Supabase Auth
+        try {
+          const { error: authError } = await supabase.auth.signUp({
+            email: cleanEmail,
+            password: formData.password,
+            options: {
+              data: {
+                name: displayName,
+                role: 'provider',
+                phone: formData.phone.trim(),
+                organization: formData.organization || displayName,
+              },
+            },
+          });
+          if (authError && !authError.message.includes('already registered')) {
+            console.warn('[Supabase Auth SignUp warn]:', authError.message);
+          }
+        } catch (authEx) {
+          console.warn('[Supabase Auth SignUp Exception]:', authEx);
+        }
+
+        // 2. Cache registered credentials locally for seamless verification
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.setItem('SURVSTA_PROVIDER_CRED_' + cleanEmail, formData.password);
+        }
+
+        // 3. Insert record into providers table with status 'pending'
         const { data, error } = await supabase.from('providers').insert([
           {
             name: displayName,
-            email: formData.email.trim().toLowerCase(),
+            email: cleanEmail,
             phone: formData.phone.trim(),
             location: fullLocation,
             status: 'pending',
