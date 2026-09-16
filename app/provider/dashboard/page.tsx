@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/utils/supabaseClient';
+import { MASTER_CATALOG, MasterCatalogItem } from '@/data/masterCatalog';
 
 const ProviderOnboardingTour = dynamic(
   () => import('@/components/ProviderOnboardingTour'),
@@ -32,18 +33,49 @@ export default function ProviderDashboardPage() {
   const [runTour, setRunTour] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Modal Form State
-  const [newTitle, setNewTitle] = useState('');
-  const [newCategory, setNewCategory] = useState('توتال ستيشن');
-  const [newDailyPrice, setNewDailyPrice] = useState('');
-  const [newMonthlyPrice, setNewMonthlyPrice] = useState('');
-  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>(['total_station_leica.jpg']);
+  // Modal Form State (Driven by Master Catalog)
+  const [selectedCatalogId, setSelectedCatalogId] = useState<string>(MASTER_CATALOG[0]?.id || '');
+  const [newDailyPrice, setNewDailyPrice] = useState<string>(
+    MASTER_CATALOG[0]?.suggestedDaily ? String(MASTER_CATALOG[0].suggestedDaily) : ''
+  );
+  const [newMonthlyPrice, setNewMonthlyPrice] = useState<string>(
+    MASTER_CATALOG[0]?.suggestedMonthly ? String(MASTER_CATALOG[0].suggestedMonthly) : ''
+  );
+  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([
+    MASTER_CATALOG[0]?.image || 'total_station_leica.jpg',
+  ]);
+
+  const selectedItem = MASTER_CATALOG.find((item) => item.id === selectedCatalogId) || MASTER_CATALOG[0];
+
+  const handleSelectCatalogItem = (catalogId: string) => {
+    setSelectedCatalogId(catalogId);
+    const item = MASTER_CATALOG.find((c) => c.id === catalogId);
+    if (item) {
+      if (item.suggestedDaily) setNewDailyPrice(String(item.suggestedDaily));
+      if (item.suggestedMonthly) setNewMonthlyPrice(String(item.suggestedMonthly));
+      if (item.image) setUploadedPhotos([item.image]);
+    }
+  };
 
   // Edit Price Modal State
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
   const [editDailyPrice, setEditDailyPrice] = useState('');
   const [editMonthlyPrice, setEditMonthlyPrice] = useState('');
   const [isUpdatingPrice, setIsUpdatingPrice] = useState(false);
+
+  // Dynamic KPI Metrics (defaulting realistically to zero activity for new accounts)
+  const [requestsCount, setRequestsCount] = useState<number>(0);
+  const [newRequestsToday, setNewRequestsToday] = useState<number>(0);
+  const [profileViews, setProfileViews] = useState<number>(0);
+  const [rating, setRating] = useState<number | null>(null);
+  const [reviewCount, setReviewCount] = useState<number>(0);
+
+  // Dynamic Provider Profile Information
+  const [providerProfile, setProviderProfile] = useState({
+    name: 'مزوّد معتمد',
+    org: 'مكتب مساحي معتمد',
+    location: 'تغطية شاملة',
+  });
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -141,8 +173,66 @@ export default function ProviderDashboardPage() {
     }
   };
 
+  // Fetch dynamic KPI metrics from Supabase or fallback gracefully to 0 for MVP
+  const fetchKpiData = async () => {
+    try {
+      // 1. Fetch incoming requests count
+      const { count: reqCount, error: reqErr } = await supabase
+        .from('incoming_requests')
+        .select('*', { count: 'exact', head: true });
+      if (!reqErr && reqCount !== null) {
+        setRequestsCount(reqCount);
+      }
+    } catch {
+      // Table not yet created in MVP - fallback: 0
+    }
+
+    try {
+      // 2. Fetch profile views count
+      const { count: viewCount, error: viewErr } = await supabase
+        .from('profile_views')
+        .select('*', { count: 'exact', head: true });
+      if (!viewErr && viewCount !== null) {
+        setProfileViews(viewCount);
+      }
+    } catch {
+      // Table not yet created in MVP - fallback: 0
+    }
+
+    try {
+      // 3. Fetch reviews / ratings
+      const { data: revData, error: revErr } = await supabase
+        .from('reviews')
+        .select('rating');
+      if (!revErr && revData && revData.length > 0) {
+        const sum = revData.reduce((acc: number, curr: any) => acc + (Number(curr.rating) || 0), 0);
+        setRating(sum / revData.length);
+        setReviewCount(revData.length);
+      }
+    } catch {
+      // Table not yet created in MVP - fallback: null / 0
+    }
+  };
+
   useEffect(() => {
     fetchEquipment();
+    fetchKpiData();
+
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('SURVSTA_AUTH_USER');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setProviderProfile({
+            name: parsed.name || 'مزوّد معتمد',
+            org: parsed.org || parsed.organization || parsed.company || 'مكتب مساحي معتمد',
+            location: parsed.location || 'تغطية شاملة',
+          });
+        }
+      } catch {
+        // keep fallback
+      }
+    }
   }, []);
 
   // Callback from ProviderOnboardingTour when step advances
@@ -167,21 +257,23 @@ export default function ProviderDashboardPage() {
 
   const handleSaveDevice = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) {
-      showToast('يرجى إدخال اسم الجهاز أو الخدمة');
+    if (!selectedItem) {
+      showToast('يرجى اختيار جهاز من الكتالوج المعتمد');
       return;
     }
 
     setIsSaving(true);
-    const photoUrl = uploadedPhotos[0] || 'total_station_leica.jpg';
+    const titleToSave = selectedItem.title;
+    const categoryToSave = selectedItem.category;
+    const photoUrl = uploadedPhotos[0] || selectedItem.image || 'total_station_leica.jpg';
 
     try {
       const { data, error } = await supabase
         .from('equipment')
         .insert([
           {
-            title: newTitle.trim(),
-            category: newCategory,
+            title: titleToSave,
+            category: categoryToSave,
             daily_price: newDailyPrice ? parseFloat(newDailyPrice) : null,
             monthly_price: newMonthlyPrice ? parseFloat(newMonthlyPrice) : null,
             image_url: photoUrl,
@@ -194,10 +286,10 @@ export default function ProviderDashboardPage() {
         // Optimistic local update fallback
         const localItem: EquipmentItem = {
           id: `EQ-${Math.floor(300 + Math.random() * 700)}`,
-          title: newTitle.trim(),
-          category: newCategory,
-          dailyRate: newDailyPrice ? `${Number(newDailyPrice).toLocaleString('en-US')} ج.م` : '1,200 ج.م',
-          monthlyRate: newMonthlyPrice ? `${Number(newMonthlyPrice).toLocaleString('en-US')} ج.م` : '22,000 ج.م',
+          title: titleToSave,
+          category: categoryToSave,
+          dailyRate: newDailyPrice ? `${Number(newDailyPrice).toLocaleString('en-US')} ج.م` : '—',
+          monthlyRate: newMonthlyPrice ? `${Number(newMonthlyPrice).toLocaleString('en-US')} ج.م` : '—',
           status: 'متاح للإيجار',
           photo: photoUrl,
         };
@@ -216,13 +308,10 @@ export default function ProviderDashboardPage() {
           created_at: row.created_at,
         };
         setEquipment((prev) => [addedItem, ...prev]);
-        showToast('🎉 تم حفظ ونشر الجهاز بنجاح في قاعدة البيانات الحية!');
+        showToast(`🎉 تم حفظ ونشر "${titleToSave}" بنجاح في قاعدة البيانات الحية!`);
       }
 
       setIsModalOpen(false);
-      setNewTitle('');
-      setNewDailyPrice('');
-      setNewMonthlyPrice('');
     } catch (err: any) {
       console.warn('[ProviderDashboard] Save exception:', err);
       showToast('❌ تعذر حفظ الجهاز. يرجى المحاولة لاحقاً.');
@@ -299,7 +388,7 @@ export default function ProviderDashboardPage() {
               <h1 className="text-xl sm:text-2xl font-black text-white">بوابة المزوّد — لوحة التحكم</h1>
             </div>
             <p className="text-xs text-gray-400 mt-1">
-              مكتب النخبة للمساحة • م. أحمد النجار (الإسكندرية — تغطية شاملة)
+              {providerProfile.org} • {providerProfile.name} ({providerProfile.location})
             </p>
           </div>
         </div>
@@ -339,8 +428,16 @@ export default function ProviderDashboardPage() {
               <span>طلبات التواصل الواردة</span>
               <span className="text-cyan-400 text-lg">📥</span>
             </div>
-            <div className="text-2xl font-black text-cyan-400">14 طلب</div>
-            <div className="text-[11px] text-gray-400 mt-1">▲ 4 طلبات جديدة اليوم</div>
+            <div className="text-2xl font-black text-cyan-400">
+              {isLoading ? (
+                <span className="inline-block w-12 h-7 bg-gray-700/50 animate-pulse rounded"></span>
+              ) : (
+                `${requestsCount} طلب`
+              )}
+            </div>
+            <div className="text-[11px] text-gray-400 mt-1">
+              {newRequestsToday > 0 ? `▲ ${newRequestsToday} طلبات جديدة اليوم` : 'لا توجد طلبات جديدة اليوم'}
+            </div>
           </div>
 
           <div className="rounded-2xl border border-amber-500/20 bg-[#0F253E]/80 p-4 backdrop-blur-md">
@@ -348,8 +445,16 @@ export default function ProviderDashboardPage() {
               <span>مشاهدات الملف هذا الشهر</span>
               <span className="text-purple-400 text-lg">👁️</span>
             </div>
-            <div className="text-2xl font-black text-purple-400">1,420</div>
-            <div className="text-[11px] text-gray-400 mt-1">من مهندسين وشركات مقاولات</div>
+            <div className="text-2xl font-black text-purple-400">
+              {isLoading ? (
+                <span className="inline-block w-12 h-7 bg-gray-700/50 animate-pulse rounded"></span>
+              ) : (
+                profileViews.toLocaleString('en-US')
+              )}
+            </div>
+            <div className="text-[11px] text-gray-400 mt-1">
+              {profileViews > 0 ? 'من مهندسين وشركات مقاولات' : 'بانتظار المشاهدات الأولى لحسابك'}
+            </div>
           </div>
 
           <div className="rounded-2xl border border-amber-500/20 bg-[#0F253E]/80 p-4 backdrop-blur-md">
@@ -357,8 +462,18 @@ export default function ProviderDashboardPage() {
               <span>تقييم المزوّد</span>
               <span className="text-yellow-400 text-lg">⭐</span>
             </div>
-            <div className="text-2xl font-black text-yellow-400">4.9 / 5.0</div>
-            <div className="text-[11px] text-gray-400 mt-1">بناءً على 24 مراجعة معتمدة</div>
+            <div className="text-2xl font-black text-yellow-400">
+              {isLoading ? (
+                <span className="inline-block w-12 h-7 bg-gray-700/50 animate-pulse rounded"></span>
+              ) : rating !== null && rating > 0 ? (
+                `${rating.toFixed(1)} / 5.0`
+              ) : (
+                '0.0 / 5.0'
+              )}
+            </div>
+            <div className="text-[11px] text-gray-400 mt-1">
+              {reviewCount > 0 ? `بناءً على ${reviewCount} مراجعة معتمدة` : 'لا يوجد تقييم بعد (حساب جديد)'}
+            </div>
           </div>
         </div>
 
@@ -514,35 +629,82 @@ export default function ProviderDashboardPage() {
             {/* Modal Form */}
             <form onSubmit={handleSaveDevice} className="space-y-4">
               
+              {/* Step 1 Target / Single Dropdown: Select Device from Catalog */}
               <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-                  اسم الجهاز والموديل <span className="text-amber-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="مثال: Leica FlexLine TS07 (1 ثانية)"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full rounded-xl border border-gray-700 bg-[#0F253E] px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1.5">الفئة والتصنيف</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label htmlFor="catalog-device-select" className="block text-xs font-semibold text-gray-300">
+                    اختر الجهاز من الكتالوج المعتمد (Master Catalog) <span className="text-amber-400">*</span>
+                  </label>
+                  <span className="text-[11px] text-amber-400/90 font-mono font-bold">
+                    {MASTER_CATALOG.length} أجهزة معتمدة
+                  </span>
+                </div>
                 <select
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full rounded-xl border border-gray-700 bg-[#0F253E] px-4 py-2.5 text-xs text-white focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer"
+                  id="catalog-device-select"
+                  value={selectedCatalogId}
+                  onChange={(e) => handleSelectCatalogItem(e.target.value)}
+                  className="w-full rounded-xl border border-amber-500/40 bg-[#0F253E] px-4 py-2.5 text-xs text-white focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 cursor-pointer font-medium"
                 >
-                  <option value="توتال ستيشن">توتال ستيشن (Total Station)</option>
-                  <option value="أجهزة GNSS/RTK">أجهزة GNSS / RTK المتطورة</option>
-                  <option value="موازين قامة">موازين قامة دقيقة ورقمية</option>
-                  <option value="ماسحات ليزرية">ماسحات ليزرية 3D Terrestrial Laser</option>
-                  <option value="درون ومسح جوي">طائرات بدون طيار مساحية (UAV/Drone)</option>
-                  <option value="خدمات هندسية">خدمات رفع مساحي وميزانيات شبكية</option>
+                  <optgroup label="📡 محطات رصد متكاملة (Total Stations)">
+                    {MASTER_CATALOG.filter((i) => i.category === 'توتال ستيشن').map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.title} — {item.brand}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="🛰️ أجهزة رصد الأقمار الصناعية (GNSS / RTK)">
+                    {MASTER_CATALOG.filter((i) => i.category === 'أجهزة GNSS/RTK').map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.title} — {item.brand}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="📐 موازين قامة دقيقة ورقمية (Levels)">
+                    {MASTER_CATALOG.filter((i) => i.category === 'ميزان قامة').map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.title} — {item.brand}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="🛸 طائرات درون ومسح جوي وماسحات ليزرية">
+                    {MASTER_CATALOG.filter(
+                      (i) => i.category === 'طائرات درون ومسح جوي' || i.category === 'ماسحات ليزرية'
+                    ).map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.title} — {item.brand}
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
+
+              {/* Inherited Specifications & Preview Card */}
+              {selectedItem && (
+                <div className="rounded-xl border border-cyan-500/30 bg-[#061429] p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-gray-400 font-medium">البيانات الموروثة تلقائياً:</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold">
+                        {selectedItem.brand}
+                      </span>
+                      <span className="rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 text-[10px] font-bold">
+                        {selectedItem.category}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">📦</span>
+                    <div className="text-xs font-bold text-white">
+                      {selectedItem.title}
+                    </div>
+                  </div>
+                  {selectedItem.description && (
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      {selectedItem.description}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Step 2 Target: Upload Area */}
               <div>

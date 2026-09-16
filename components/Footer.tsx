@@ -153,6 +153,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/faq" className="hover:text-cyan-400 transition-colors">
+                  الأسئلة الشائعة (FAQ)
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="hover:text-cyan-400 transition-colors">
                   تواصل معنا
                 </Link>
@@ -174,9 +179,9 @@ export default function Footer() {
 
         <div className="mt-12 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <div>© 2026 Survsta — جميع الحقوق محفوظة.</div>
-          <div className="flex items-center gap-1">
-            <span>Powered by</span>
-            <span className="font-semibold text-slate-400">Coreviazone</span>
+          <div dir="ltr" className="flex flex-col items-center sm:items-start text-left">
+            <span className="text-slate-400">Powered by Mohamed Farag</span>
+            <span className="text-red-500 font-bold tracking-wide">Coreviazone</span>
           </div>
         </div>
       </div>

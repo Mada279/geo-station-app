@@ -68,8 +68,6 @@ export default function ProviderSidebar({
           href: '/provider/dashboard#leads',
           label: 'صندوق الطلبات الواردة',
           icon: '📥',
-          badge: '4 جديد',
-          badgeColor: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
         },
         {
           href: '/provider/dashboard#services',
