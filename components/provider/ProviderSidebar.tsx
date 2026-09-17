@@ -162,6 +162,16 @@ export default function ProviderSidebar({
       return;
     }
 
+    if (item.label === 'الخدمات المساحية') {
+      if (onClose) onClose();
+      const el = document.getElementById('services') || document.getElementById('services-section');
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+
     if (item.label === 'لوحة التحكم العامة') {
       if (onClose) onClose();
       return;

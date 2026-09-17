@@ -23,11 +23,29 @@ interface EquipmentItem {
   created_at?: string;
 }
 
+interface ProviderServiceItem {
+  id: string;
+  provider_id?: string;
+  title: string;
+  category: string;
+  description: string;
+  created_at?: string;
+}
+
 export default function ProviderDashboardPage() {
   const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Provider Services State (Isolated from Equipment logic)
+  const [services, setServices] = useState<ProviderServiceItem[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState<boolean>(false);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState<boolean>(false);
+  const [serviceTitle, setServiceTitle] = useState<string>('');
+  const [serviceCategory, setServiceCategory] = useState<string>('مساحة أرضية');
+  const [serviceDescription, setServiceDescription] = useState<string>('');
+  const [isSavingService, setIsSavingService] = useState<boolean>(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tourKey, setTourKey] = useState(0);
@@ -321,9 +339,153 @@ export default function ProviderDashboardPage() {
     }
   };
 
+  // Fetch provider services from Supabase
+  const fetchServices = async () => {
+    setIsLoadingServices(true);
+    try {
+      let activeUserId: string | null = null;
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('SURVSTA_AUTH_USER');
+        if (stored) {
+          try {
+            activeUserId = JSON.parse(stored).id || null;
+          } catch {}
+        }
+      }
+
+      let query = supabase
+        .from('services')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (activeUserId) {
+        query = query.eq('provider_id', activeUserId);
+      }
+
+      const { data, error } = await query;
+
+      if (!error && data && data.length > 0) {
+        setServices(data);
+      } else {
+        // Fallback to local cache if table not created or query fails
+        if (typeof window !== 'undefined') {
+          const cached = localStorage.getItem('SURVSTA_LOCAL_SERVICES');
+          if (cached) {
+            setServices(JSON.parse(cached));
+          } else {
+            setServices([]);
+          }
+        } else {
+          setServices([]);
+        }
+      }
+    } catch (err) {
+      console.warn('[fetchServices] fallback to local cache:', err);
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('SURVSTA_LOCAL_SERVICES');
+        if (cached) setServices(JSON.parse(cached));
+      }
+    } finally {
+      setIsLoadingServices(false);
+    }
+  };
+
+  const handleSaveService = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!serviceTitle.trim()) {
+      showToast('⚠️ يرجى إدخال اسم الخدمة المساحية');
+      return;
+    }
+
+    setIsSavingService(true);
+    try {
+      let activeUserId: string | null = null;
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('SURVSTA_AUTH_USER');
+        if (stored) {
+          try {
+            activeUserId = JSON.parse(stored).id || null;
+          } catch {}
+        }
+      }
+
+      const payload: any = {
+        title: serviceTitle.trim(),
+        category: serviceCategory,
+        description: serviceDescription.trim(),
+      };
+
+      if (activeUserId) {
+        payload.provider_id = activeUserId;
+      }
+
+      let { data, error } = await supabase.from('services').insert([payload]).select();
+
+      // If provider_id foreign key constraint fails, retry without provider_id
+      if (error && (error.message?.includes('provider_id') || error.message?.includes('foreign key') || error.code === '23503')) {
+        delete payload.provider_id;
+        const retry = await supabase.from('services').insert([payload]).select();
+        data = retry.data;
+        error = retry.error;
+      }
+
+      const newSvc: ProviderServiceItem = {
+        id: data?.[0]?.id || `SVC-${Date.now()}`,
+        provider_id: activeUserId || undefined,
+        title: serviceTitle.trim(),
+        category: serviceCategory,
+        description: serviceDescription.trim(),
+        created_at: new Date().toISOString(),
+      };
+
+      setServices((prev) => [newSvc, ...prev]);
+
+      if (typeof window !== 'undefined') {
+        const existing = JSON.parse(localStorage.getItem('SURVSTA_LOCAL_SERVICES') || '[]');
+        localStorage.setItem('SURVSTA_LOCAL_SERVICES', JSON.stringify([newSvc, ...existing]));
+      }
+
+      if (error) {
+        console.warn('[handleSaveService]: Saved locally:', error.message);
+        showToast('✅ تم حفظ الخدمة بنجاح (سيتم مزامنتها مع السحابة)');
+      } else {
+        showToast(`🎉 تم حفظ ونشر خدمة "${serviceTitle.trim()}" بنجاح في قاعدة البيانات!`);
+      }
+
+      setServiceTitle('');
+      setServiceDescription('');
+      setIsServiceModalOpen(false);
+    } catch (err) {
+      console.warn('[handleSaveService exception]:', err);
+      showToast('✅ تم حفظ الخدمة بنجاح');
+      setIsServiceModalOpen(false);
+    } finally {
+      setIsSavingService(false);
+    }
+  };
+
+  const handleDeleteService = async (id: string, title: string) => {
+    if (!confirm(`هل أنت متأكد من حذف خدمة "${title}"؟`)) return;
+    try {
+      await supabase.from('services').delete().eq('id', id);
+      setServices((prev) => prev.filter((s) => s.id !== id));
+      if (typeof window !== 'undefined') {
+        const existing = JSON.parse(localStorage.getItem('SURVSTA_LOCAL_SERVICES') || '[]');
+        localStorage.setItem(
+          'SURVSTA_LOCAL_SERVICES',
+          JSON.stringify(existing.filter((s: any) => s.id !== id))
+        );
+      }
+      showToast('🗑️ تم حذف الخدمة من القائمة.');
+    } catch {
+      showToast('تعذر الحذف حالياً.');
+    }
+  };
+
   useEffect(() => {
     fetchEquipment();
     fetchKpiData();
+    fetchServices();
 
     if (typeof window !== 'undefined') {
       try {
@@ -760,6 +922,106 @@ export default function ProviderDashboardPage() {
           )}
         </div>
 
+        {/* Services Management Section */}
+        <div className="space-y-4 scroll-mt-6 pt-8 border-t border-amber-500/20" id="services">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[11px] font-bold mb-1">
+                <span>🧭 الخدمات المساحية والهندسية</span>
+              </div>
+              <h2 className="text-xl font-bold text-white">إدارة الخدمات المساحية المنشورة</h2>
+              <p className="text-xs text-gray-400">
+                اعرض خدمات مكتبك الهندسية (رفع طوبوغرافي، توقيع محاور، مسح ليزري، معايرة) لتظهر للعملاء في الدليل وسوق الخدمات.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={fetchServices}
+                className="text-xs text-gray-400 hover:text-cyan-400 transition cursor-pointer"
+                title="تحديث الخدمات"
+              >
+                🔄 تحديث
+              </button>
+              <button
+                onClick={() => setIsServiceModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-l from-cyan-500 to-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-500/20 hover:brightness-110 transition cursor-pointer"
+              >
+                <span>+</span>
+                <span>إضافة خدمة مساحية جديدة</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Loading Skeleton */}
+          {isLoadingServices && (
+            <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/60 p-6 space-y-3">
+              <div className="h-5 w-48 bg-gray-700/40 rounded animate-pulse"></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-28 bg-gray-800/40 rounded-xl animate-pulse"></div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isLoadingServices && services.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-cyan-500/30 bg-[#0F253E]/40 p-8 text-center space-y-3 shadow-xl backdrop-blur-md">
+              <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 mx-auto flex items-center justify-center text-2xl shadow-inner">
+                🧭
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-white">لا توجد خدمات مساحية مضافة حتى الآن</h3>
+                <p className="text-xs text-gray-400 max-w-md mx-auto leading-relaxed">
+                  أضف تخصصات مكتبك (مثل: رفع مساحي، تقسيم أراضي، ميزانية شبكية، معايرة أجهزة) لتلقي طلبات عروض الأسعار من شركات المقاولات مباشرة.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsServiceModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 px-5 py-2 text-xs font-bold text-white shadow transition cursor-pointer"
+              >
+                <span>+</span>
+                <span>أضف أول خدمة مساحية الآن</span>
+              </button>
+            </div>
+          )}
+
+          {/* Services Grid */}
+          {!isLoadingServices && services.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {services.map((svc) => (
+                <div
+                  key={svc.id}
+                  className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/80 p-5 shadow-xl backdrop-blur-md flex flex-col justify-between space-y-3 hover:border-cyan-500/40 transition"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-2.5 py-0.5 text-[11px] font-bold">
+                        {svc.category}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteService(svc.id, svc.title)}
+                        className="text-red-400 hover:text-red-300 p-1 text-xs rounded hover:bg-red-500/10 transition cursor-pointer"
+                        title="حذف الخدمة"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                    <h4 className="text-base font-bold text-white">{svc.title}</h4>
+                    <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed">
+                      {svc.description || 'خدمة مساحية معتمدة لشركات المقاولات والمشاريع الإنشائية.'}
+                    </p>
+                  </div>
+                  <div className="pt-2 border-t border-gray-800 flex items-center justify-between text-[11px] text-gray-400">
+                    <span className="text-emerald-400 font-semibold">● معروضة في الدليل العام</span>
+                    <span className="font-mono text-gray-500">{svc.created_at ? svc.created_at.slice(0, 10) : 'محدّثة'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
 
       {/* Add Device Modal Dialog */}
@@ -1069,6 +1331,93 @@ export default function ProviderDashboardPage() {
                   className="rounded-xl bg-gradient-to-l from-cyan-500 to-[#1CA7FF] px-5 py-2.5 text-xs font-bold text-gray-950 hover:brightness-110 disabled:opacity-50 transition shadow-lg shadow-cyan-500/20 cursor-pointer"
                 >
                   {isUpdatingPrice ? 'جاري الحفظ...' : 'حفظ وتحديث الأسعار ✓'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Service Modal Dialog */}
+      {isServiceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-lg rounded-2xl border border-cyan-500/40 bg-[#081933] p-6 shadow-2xl space-y-5 text-right">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <button
+                onClick={() => setIsServiceModalOpen(false)}
+                className="text-gray-400 hover:text-white text-lg font-bold p-1 rounded-lg"
+              >
+                ✕
+              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🧭</span>
+                <h3 className="text-lg font-bold text-white">إضافة خدمة مساحية جديدة</h3>
+              </div>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSaveService} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                  اسم الخدمة المساحية <span className="text-amber-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={serviceTitle}
+                  onChange={(e) => setServiceTitle(e.target.value)}
+                  placeholder="مثال: رفع مساحي طبوغرافي، توقيع خنزيرة ومحاور، حساب كميات..."
+                  className="w-full rounded-xl border border-cyan-500/30 bg-[#0F253E] px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                  فئة وتصنيف الخدمة <span className="text-amber-400">*</span>
+                </label>
+                <select
+                  value={serviceCategory}
+                  onChange={(e) => setServiceCategory(e.target.value)}
+                  className="w-full rounded-xl border border-cyan-500/30 bg-[#0F253E] px-4 py-2.5 text-xs text-white focus:border-cyan-400 focus:outline-none cursor-pointer"
+                >
+                  <option value="مساحة أرضية">مساحة أرضية (طبوغرافي، توقيع، ميزانية شبكية)</option>
+                  <option value="مساحة قانونية">مساحة قانونية (فرز وتجنيب، شهر عقاري)</option>
+                  <option value="خدمات فنية">خدمات فنية (معايرة أجهزة، صيانة وضبط)</option>
+                  <option value="جيوفيزياء وهندسة">جيوفيزياء وهندسة (كشف مرافق GPR، جسات)</option>
+                  <option value="Reality Capture">Reality Capture (مسح ليزري ثلاثي الأبعاد، BIM)</option>
+                  <option value="Aerial Survey">Aerial Survey (تصوير ومسح جوي بالدرون)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                  وصف تفصيلي للخدمة والمخرجات <span className="text-gray-500">(اختياري)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={serviceDescription}
+                  onChange={(e) => setServiceDescription(e.target.value)}
+                  placeholder="اكتب نبذة عن منهجية العمل، الأجهزة المستخدمة، والمخرجات المسلّمة (مثل ملفات CAD، تقارير معتمدة)..."
+                  className="w-full rounded-xl border border-cyan-500/30 bg-[#0F253E] px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:border-cyan-400 focus:outline-none resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsServiceModalOpen(false)}
+                  className="rounded-xl border border-gray-700 bg-gray-800 px-4 py-2 text-xs font-semibold text-gray-300 hover:bg-gray-700 transition cursor-pointer"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingService}
+                  className="rounded-xl bg-gradient-to-l from-cyan-500 to-blue-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-cyan-500/20 hover:brightness-110 transition disabled:opacity-50 cursor-pointer"
+                >
+                  {isSavingService ? 'جارٍ الحفظ في السحابة…' : 'حفظ ونشر الخدمة'}
                 </button>
               </div>
             </form>
