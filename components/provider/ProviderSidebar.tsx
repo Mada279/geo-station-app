@@ -210,12 +210,12 @@ export default function ProviderSidebar({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed inset-y-0 right-0 z-50 w-64 bg-[#081933] border-l border-amber-500/20 flex flex-col justify-between transition-transform duration-300 shadow-2xl lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 right-0 z-50 w-64 bg-[#081933] border-l border-amber-500/20 flex flex-col justify-between transition-transform duration-300 shadow-2xl lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:translate-x-0 shrink-0 [&::-webkit-scrollbar]:hidden ${
           isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
         }`}
         style={{ direction: 'rtl' }}
       >
-        <div className="flex flex-col flex-1 overflow-y-auto custom-scrollbar p-4 space-y-5">
+        <div className="flex flex-col flex-1 overflow-y-auto custom-scrollbar [&::-webkit-scrollbar]:hidden p-4 space-y-5">
           {/* Brand Header */}
           <div className="flex items-center justify-between border-b border-amber-500/20 pb-4">
             <Link href="/provider/dashboard" className="inline-flex items-center gap-2">

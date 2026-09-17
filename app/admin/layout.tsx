@@ -9,10 +9,10 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#081933] text-gray-100 flex" style={{ direction: 'rtl' }}>
-      <main className="flex-1 min-w-0 overflow-y-auto">
+    <div className="min-h-screen bg-[#081933] text-gray-100 flex flex-col" style={{ direction: 'rtl' }}>
+      <div className="flex-1 min-w-0">
         {children}
-      </main>
+      </div>
     </div>
   );
 }

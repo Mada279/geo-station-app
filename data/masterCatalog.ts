@@ -177,4 +177,14 @@ export const MASTER_CATALOG: MasterCatalogItem[] = [
     suggestedMonthly: 90000,
     description: 'ماسح ليزري ثلاثي الأبعاد فائق الصغر وسريع الرصد لتطبيقات BIM والرفع المعماري',
   },
+
+  // Other / Unlisted Equipment (أجهزة ومعدات أخرى)
+  {
+    id: 'other-unlisted',
+    title: 'جهاز غير مدرج (أخرى)',
+    category: 'أخرى',
+    brand: 'مخصص',
+    image: 'survey-accessories-kit.jpg',
+    description: 'أجهزة ومعدات مساحية وملحقات تقنية أخرى غير مدرجة في الكتالوج القياسي',
+  },
 ];

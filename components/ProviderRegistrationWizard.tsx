@@ -194,7 +194,7 @@ export default function ProviderRegistrationWizard() {
       
       {/* Brand Header */}
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center justify-center w-auto shrink-0 mx-auto transition-opacity hover:opacity-90" style={{ minWidth: '200px' }}>
+        <Link href="/" className="inline-flex items-center justify-center w-auto shrink-0 mx-auto transition-opacity hover:opacity-90 outline-none focus:outline-none focus-visible:outline-none" style={{ minWidth: '200px' }}>
           <Image
             alt="Survsta"
             className="object-contain w-[180px] sm:w-[220px] h-auto mx-auto"

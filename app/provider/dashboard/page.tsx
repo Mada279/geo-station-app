@@ -17,6 +17,7 @@ interface EquipmentItem {
   category: string;
   dailyRate: string;
   monthlyRate: string;
+  salePrice?: string;
   status: 'متاح للإيجار' | 'قيد الصيانة' | 'محجوز';
   photo: string;
   created_at?: string;
@@ -35,25 +36,89 @@ export default function ProviderDashboardPage() {
 
   // Modal Form State (Driven by Master Catalog)
   const [selectedCatalogId, setSelectedCatalogId] = useState<string>(MASTER_CATALOG[0]?.id || '');
+  const [customTitle, setCustomTitle] = useState<string>('');
   const [newDailyPrice, setNewDailyPrice] = useState<string>(
     MASTER_CATALOG[0]?.suggestedDaily ? String(MASTER_CATALOG[0].suggestedDaily) : ''
   );
   const [newMonthlyPrice, setNewMonthlyPrice] = useState<string>(
     MASTER_CATALOG[0]?.suggestedMonthly ? String(MASTER_CATALOG[0].suggestedMonthly) : ''
   );
+  const [newSalePrice, setNewSalePrice] = useState<string>('');
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([
     MASTER_CATALOG[0]?.image || 'total_station_leica.jpg',
   ]);
+  const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const selectedItem = MASTER_CATALOG.find((item) => item.id === selectedCatalogId) || MASTER_CATALOG[0];
 
   const handleSelectCatalogItem = (catalogId: string) => {
     setSelectedCatalogId(catalogId);
+    if (catalogId !== 'other-unlisted') {
+      setCustomTitle('');
+    }
     const item = MASTER_CATALOG.find((c) => c.id === catalogId);
     if (item) {
       if (item.suggestedDaily) setNewDailyPrice(String(item.suggestedDaily));
+      else setNewDailyPrice('');
       if (item.suggestedMonthly) setNewMonthlyPrice(String(item.suggestedMonthly));
+      else setNewMonthlyPrice('');
       if (item.image) setUploadedPhotos([item.image]);
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    setIsUploadingImage(true);
+    try {
+      // 1. Attempt Supabase Storage upload
+      const fileExt = file.name.split('.').pop() || 'jpg';
+      const cleanFileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+      const filePath = `equipment/${cleanFileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('equipment-images')
+        .upload(filePath, file);
+
+      if (!uploadError && uploadData) {
+        const { data: publicUrlData } = supabase.storage
+          .from('equipment-images')
+          .getPublicUrl(filePath);
+        if (publicUrlData?.publicUrl) {
+          setUploadedPhotos([publicUrlData.publicUrl]);
+          showToast('📸 تم رفع صورة الجهاز بنجاح إلى التخزين السحابي');
+          setIsUploadingImage(false);
+          return;
+        }
+      }
+
+      // 2. Base64 FileReader Fallback
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Url = event.target?.result as string;
+        if (base64Url) {
+          setUploadedPhotos([base64Url]);
+          showToast('📸 تم تجهيز صورة الجهاز بنجاح للمعاينة والنشر');
+        }
+        setIsUploadingImage(false);
+      };
+      reader.onerror = () => {
+        showToast('❌ تعذر قراءة ملف الصورة');
+        setIsUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.warn('[Image Upload Fallback]:', err);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Url = event.target?.result as string;
+        if (base64Url) {
+          setUploadedPhotos([base64Url]);
+          showToast('📸 تم تجهيز صورة الجهاز بنجاح للمعاينة والنشر');
+        }
+        setIsUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -64,6 +129,8 @@ export default function ProviderDashboardPage() {
   const [isUpdatingPrice, setIsUpdatingPrice] = useState(false);
 
   // Dynamic KPI Metrics (defaulting realistically to zero activity for new accounts)
+  const [providerId, setProviderId] = useState<string | null>(null);
+  const [uploadedEquipmentCount, setUploadedEquipmentCount] = useState<number>(0);
   const [requestsCount, setRequestsCount] = useState<number>(0);
   const [newRequestsToday, setNewRequestsToday] = useState<number>(0);
   const [profileViews, setProfileViews] = useState<number>(0);
@@ -140,6 +207,18 @@ export default function ProviderDashboardPage() {
     setIsLoading(true);
     setFetchError(null);
     try {
+      let activeUserId: string | null = null;
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('SURVSTA_AUTH_USER');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            activeUserId = parsed.id || null;
+            if (activeUserId) setProviderId(activeUserId);
+          } catch {}
+        }
+      }
+
       const { data, error } = await supabase
         .from('equipment')
         .select('*')
@@ -149,6 +228,7 @@ export default function ProviderDashboardPage() {
         console.warn('[ProviderDashboard] Supabase select error:', error.message);
         setFetchError('تعذر استرجاع الأجهزة من السحابة مؤقتاً.');
         setEquipment([]);
+        setUploadedEquipmentCount(0);
       } else if (data && data.length > 0) {
         const mapped: EquipmentItem[] = data.map((row) => ({
           id: row.id,
@@ -156,35 +236,62 @@ export default function ProviderDashboardPage() {
           category: row.category || 'أجهزة ومعدات',
           dailyRate: row.daily_price ? `${Number(row.daily_price).toLocaleString('en-US')} ج.م` : '—',
           monthlyRate: row.monthly_price ? `${Number(row.monthly_price).toLocaleString('en-US')} ج.م` : '—',
+          salePrice: row.sale_price ? `${Number(row.sale_price).toLocaleString('en-US')} ج.م` : undefined,
           status: 'متاح للإيجار',
           photo: row.image_url || 'total_station_leica.jpg',
           created_at: row.created_at,
         }));
         setEquipment(mapped);
+
+        // Execute Supabase exact count query where provider_id matches logged-in user
+        if (activeUserId) {
+          const { count, error: countErr } = await supabase
+            .from('equipment')
+            .select('*', { count: 'exact', head: true })
+            .eq('provider_id', activeUserId);
+
+          if (!countErr && count !== null && count > 0) {
+            setUploadedEquipmentCount(count);
+          } else {
+            // Fallback to active equipment count
+            setUploadedEquipmentCount(mapped.length);
+          }
+        } else {
+          setUploadedEquipmentCount(mapped.length);
+        }
       } else {
         setEquipment([]);
+        setUploadedEquipmentCount(0);
       }
     } catch (err: any) {
       console.warn('[ProviderDashboard] Fetch exception:', err);
       setFetchError('حدث خطأ في الاتصال بقاعدة البيانات.');
       setEquipment([]);
+      setUploadedEquipmentCount(0);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch dynamic KPI metrics from Supabase or fallback gracefully to 0 for MVP
+  // Fetch dynamic KPI metrics from Supabase
   const fetchKpiData = async () => {
     try {
-      // 1. Fetch incoming requests count
-      const { count: reqCount, error: reqErr } = await supabase
-        .from('incoming_requests')
+      // 1. Fetch incoming requests count from live contact_requests table
+      const { count: contactCount } = await supabase
+        .from('contact_requests')
         .select('*', { count: 'exact', head: true });
-      if (!reqErr && reqCount !== null) {
-        setRequestsCount(reqCount);
+      if (contactCount !== null) {
+        setRequestsCount(contactCount);
+      } else {
+        const { count: reqCount, error: reqErr } = await supabase
+          .from('incoming_requests')
+          .select('*', { count: 'exact', head: true });
+        if (!reqErr && reqCount !== null) {
+          setRequestsCount(reqCount);
+        }
       }
     } catch {
-      // Table not yet created in MVP - fallback: 0
+      // fallback: 0
     }
 
     try {
@@ -262,24 +369,58 @@ export default function ProviderDashboardPage() {
       return;
     }
 
+    const isOtherSelected = selectedCatalogId === 'other-unlisted';
+    if (isOtherSelected && !customTitle.trim()) {
+      showToast('⚠️ يرجى إدخال اسم وموديل الجهاز المخصص أولاً');
+      return;
+    }
+
     setIsSaving(true);
-    const titleToSave = selectedItem.title;
-    const categoryToSave = selectedItem.category;
+    const titleToSave = isOtherSelected ? customTitle.trim() : selectedItem.title;
+    const categoryToSave = isOtherSelected ? 'أخرى' : selectedItem.category;
     const photoUrl = uploadedPhotos[0] || selectedItem.image || 'total_station_leica.jpg';
+    const dailyNum = newDailyPrice.trim() ? parseFloat(newDailyPrice) : null;
+    const monthlyNum = newMonthlyPrice.trim() ? parseFloat(newMonthlyPrice) : null;
+    const saleNum = newSalePrice.trim() ? parseFloat(newSalePrice) : null;
+    const salePriceFormatted = saleNum ? `${Number(saleNum).toLocaleString('en-US')} ج.م` : undefined;
 
     try {
-      const { data, error } = await supabase
+      // First attempt inserting with sale_price and provider_id if columns exist
+      let insertPayload: any = {
+        title: titleToSave,
+        category: categoryToSave,
+        daily_price: dailyNum,
+        monthly_price: monthlyNum,
+        image_url: photoUrl,
+      };
+
+      if (saleNum !== null) {
+        insertPayload.sale_price = saleNum;
+      }
+      if (providerId) {
+        insertPayload.provider_id = providerId;
+      }
+
+      let { data, error } = await supabase
         .from('equipment')
-        .insert([
-          {
-            title: titleToSave,
-            category: categoryToSave,
-            daily_price: newDailyPrice ? parseFloat(newDailyPrice) : null,
-            monthly_price: newMonthlyPrice ? parseFloat(newMonthlyPrice) : null,
-            image_url: photoUrl,
-          },
-        ])
+        .insert([insertPayload])
         .select();
+
+      // If provider_id or foreign key constraint errors out, retry safely without provider_id
+      if (error && (error.message?.includes('provider_id') || error.message?.includes('foreign key') || error.code === '23503')) {
+        delete insertPayload.provider_id;
+        const retry = await supabase.from('equipment').insert([insertPayload]).select();
+        data = retry.data;
+        error = retry.error;
+      }
+
+      // If sale_price column doesn't exist in Supabase schema, retry safely without it
+      if (error && (error.message?.includes('sale_price') || error.code === 'PGRST204')) {
+        delete insertPayload.sale_price;
+        const retry = await supabase.from('equipment').insert([insertPayload]).select();
+        data = retry.data;
+        error = retry.error;
+      }
 
       if (error) {
         console.warn('[ProviderDashboard] Insert error:', error.message);
@@ -288,12 +429,14 @@ export default function ProviderDashboardPage() {
           id: `EQ-${Math.floor(300 + Math.random() * 700)}`,
           title: titleToSave,
           category: categoryToSave,
-          dailyRate: newDailyPrice ? `${Number(newDailyPrice).toLocaleString('en-US')} ج.م` : '—',
-          monthlyRate: newMonthlyPrice ? `${Number(newMonthlyPrice).toLocaleString('en-US')} ج.م` : '—',
+          dailyRate: dailyNum ? `${Number(dailyNum).toLocaleString('en-US')} ج.م` : '—',
+          monthlyRate: monthlyNum ? `${Number(monthlyNum).toLocaleString('en-US')} ج.م` : '—',
+          salePrice: salePriceFormatted,
           status: 'متاح للإيجار',
           photo: photoUrl,
         };
         setEquipment((prev) => [localItem, ...prev]);
+        setUploadedEquipmentCount((prev) => prev + 1);
         showToast('⚠️ تم إضافة الجهاز محلياً (وضع عدم الاتصال بالسحابة)');
       } else if (data && data[0]) {
         const row = data[0];
@@ -303,14 +446,18 @@ export default function ProviderDashboardPage() {
           category: row.category,
           dailyRate: row.daily_price ? `${Number(row.daily_price).toLocaleString('en-US')} ج.م` : '—',
           monthlyRate: row.monthly_price ? `${Number(row.monthly_price).toLocaleString('en-US')} ج.م` : '—',
+          salePrice: row.sale_price ? `${Number(row.sale_price).toLocaleString('en-US')} ج.م` : salePriceFormatted,
           status: 'متاح للإيجار',
           photo: row.image_url || photoUrl,
           created_at: row.created_at,
         };
         setEquipment((prev) => [addedItem, ...prev]);
+        setUploadedEquipmentCount((prev) => prev + 1);
         showToast(`🎉 تم حفظ ونشر "${titleToSave}" بنجاح في قاعدة البيانات الحية!`);
       }
 
+      setCustomTitle('');
+      setNewSalePrice('');
       setIsModalOpen(false);
     } catch (err: any) {
       console.warn('[ProviderDashboard] Save exception:', err);
@@ -329,6 +476,7 @@ export default function ProviderDashboardPage() {
         console.warn('[ProviderDashboard] Delete error:', error);
       }
       setEquipment((prev) => prev.filter((item) => item.id !== id));
+      setUploadedEquipmentCount((prev) => Math.max(0, prev - 1));
       showToast('🗑️ تم حذف الجهاز من القائمة.');
     } catch (err) {
       showToast('❌ تعذر الحذف حالياً.');
@@ -410,14 +558,14 @@ export default function ProviderDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="rounded-2xl border border-amber-500/20 bg-[#0F253E]/80 p-4 backdrop-blur-md">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-1">
-              <span>الأجهزة والخدمات النشطة</span>
+              <span>معداتك المنشورة</span>
               <span className="text-amber-400 text-lg">📡</span>
             </div>
             <div className="text-2xl font-black text-amber-300">
               {isLoading ? (
                 <span className="inline-block w-12 h-7 bg-gray-700/50 animate-pulse rounded"></span>
               ) : (
-                `${equipment.length} أجهزة`
+                `${uploadedEquipmentCount} ${uploadedEquipmentCount === 1 ? 'جهاز' : uploadedEquipmentCount === 2 ? 'جهازان' : 'أجهزة'}`
               )}
             </div>
             <div className="text-[11px] text-gray-400 mt-1">معروضة للبيع والتأجير المباشر</div>
@@ -492,7 +640,7 @@ export default function ProviderDashboardPage() {
                 🔄 تحديث
               </button>
               <span className="text-xs font-semibold text-amber-400">
-                إجمالي الأجهزة: {equipment.length}
+                إجمالي الأجهزة: {uploadedEquipmentCount}
               </span>
             </div>
           </div>
@@ -557,9 +705,16 @@ export default function ProviderDashboardPage() {
                         {item.id.length > 10 ? item.id.slice(0, 8) + '…' : item.id}
                       </td>
                       <td className="px-4 py-3.5">
-                        <div className="font-bold text-white text-sm">{item.title}</div>
+                        <div className="font-bold text-white text-sm flex items-center gap-2">
+                          <span>{item.title}</span>
+                          {item.salePrice && (
+                            <span className="rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 text-[10px] font-semibold">
+                              بيع: {item.salePrice}
+                            </span>
+                          )}
+                        </div>
                         <div className="text-[11px] text-gray-400 flex items-center gap-1.5 mt-0.5">
-                          <span>📷 {item.photo}</span>
+                          <span>📷 {item.photo?.startsWith('data:image') ? 'صورة مرفوعة' : item.photo}</span>
                           <span>• معايرة سارية</span>
                         </div>
                       </td>
@@ -675,7 +830,32 @@ export default function ProviderDashboardPage() {
                       </option>
                     ))}
                   </optgroup>
+                  <optgroup label="⚙️ أجهزة ومعدات أخرى">
+                    {MASTER_CATALOG.filter((i) => i.category === 'أخرى' || i.id === 'other-unlisted').map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.title}
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
+
+                {/* Conditional Custom Name Input when "Other" is selected */}
+                {selectedCatalogId === 'other-unlisted' && (
+                  <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                    <label htmlFor="custom-device-title" className="block text-xs font-bold text-amber-300 mb-1.5">
+                      اكتب اسم وموديل الجهاز المخصص <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      id="custom-device-title"
+                      type="text"
+                      required
+                      placeholder="مثال: ميزان ليزري دوار GeoMax Zone20 H أو ملحقات أخرى..."
+                      value={customTitle}
+                      onChange={(e) => setCustomTitle(e.target.value)}
+                      className="w-full rounded-lg border border-amber-400/50 bg-[#081933] px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Inherited Specifications & Preview Card */}
@@ -695,7 +875,7 @@ export default function ProviderDashboardPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-base">📦</span>
                     <div className="text-xs font-bold text-white">
-                      {selectedItem.title}
+                      {selectedCatalogId === 'other-unlisted' && customTitle.trim() ? customTitle : selectedItem.title}
                     </div>
                   </div>
                   {selectedItem.description && (
@@ -706,35 +886,60 @@ export default function ProviderDashboardPage() {
                 </div>
               )}
 
-              {/* Step 2 Target: Upload Area */}
+              {/* Step 2 Target: Real Upload Area */}
               <div>
                 <label className="block text-xs font-semibold text-gray-300 mb-1.5">صور المعدة الحقيقية</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleFileUpload(e.target.files[0]);
+                    }
+                  }}
+                />
                 <div
                   id="tour-upload-area"
                   className="rounded-xl border-2 border-dashed border-amber-500/40 bg-[#0F253E]/50 p-4 text-center hover:border-amber-400 transition cursor-pointer"
-                  onClick={() => {
-                    setUploadedPhotos(['Leica_TS07_Live.jpg', 'Certificate_Calibration.pdf']);
-                    showToast('📸 تم محاكاة رفع صورة الجهاز وشهادة المعايرة السارية');
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                      handleFileUpload(e.dataTransfer.files[0]);
+                    }
                   }}
                 >
                   <div className="text-2xl mb-1">📤</div>
-                  <div className="text-xs font-semibold text-amber-300">اسحب الصور هنا أو اضغط للاستعراض</div>
+                  <div className="text-xs font-semibold text-amber-300">
+                    {isUploadingImage ? 'جارٍ تحميل ومعالجة الصورة…' : 'اسحب الصور هنا أو اضغط لاختيار ملف من جهازك'}
+                  </div>
                   <div className="text-[10px] text-gray-400 mt-1">الصور الواضحة الميدانية ترفع نسبة التأجير بنسبة 85%</div>
+                  
                   {uploadedPhotos.length > 0 && (
-                    <div className="mt-2 flex items-center justify-center gap-2">
-                      <span className="inline-block bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full border border-emerald-500/30">
-                        ✓ {uploadedPhotos.length} ملفات جاهزة للنشر
+                    <div className="mt-3 flex items-center justify-center gap-3">
+                      {(uploadedPhotos[0].startsWith('data:image') || uploadedPhotos[0].startsWith('http') || uploadedPhotos[0].startsWith('/')) && (
+                        <img
+                          src={uploadedPhotos[0]}
+                          alt="Device preview"
+                          className="w-14 h-14 object-cover rounded-lg border border-amber-500/40 shadow-sm"
+                        />
+                      )}
+                      <span className="inline-block bg-emerald-500/20 text-emerald-300 text-[10px] px-2.5 py-1 rounded-full border border-emerald-500/30">
+                        ✓ صورة جاهزة للنشر
                       </span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Step 3 Target: Pricing Inputs */}
-              <div id="tour-price-input" className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[#0F253E]/40 border border-gray-800">
+              {/* Step 3 Target: Pricing Inputs (Daily, Monthly, and Sale Price) */}
+              <div id="tour-price-input" className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-[#0F253E]/40 border border-gray-800">
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-300 mb-1">
-                    السعر اليومي (ج.م)
+                    السعر اليومي (ج.م) [إيجار]
                   </label>
                   <input
                     type="number"
@@ -746,7 +951,7 @@ export default function ProviderDashboardPage() {
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-300 mb-1">
-                    السعر الشهري (ج.م)
+                    السعر الشهري (ج.م) [إيجار]
                   </label>
                   <input
                     type="number"
@@ -754,6 +959,18 @@ export default function ProviderDashboardPage() {
                     value={newMonthlyPrice}
                     onChange={(e) => setNewMonthlyPrice(e.target.value)}
                     className="w-full rounded-lg border border-gray-700 bg-[#081933] px-3 py-2 text-xs text-white placeholder-gray-500 focus:border-amber-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-amber-300 mb-1">
+                    سعر البيع (ج.م) [اختياري]
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="مثال: 120000"
+                    value={newSalePrice}
+                    onChange={(e) => setNewSalePrice(e.target.value)}
+                    className="w-full rounded-lg border border-amber-500/30 bg-[#081933] px-3 py-2 text-xs text-white placeholder-gray-500 focus:border-amber-400 focus:outline-none"
                   />
                 </div>
               </div>

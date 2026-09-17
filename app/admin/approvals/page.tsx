@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
+import { getWhatsAppLink } from '@/utils/phoneUtils';
 
 
 interface PendingItem {
@@ -199,7 +200,22 @@ export default function AdminApprovalsPage() {
                       <td className="p-3.5 font-bold text-white">{item.name}</td>
                       <td className="p-3.5">
                         <div>{item.contact}</div>
-                        <div className="text-[11px] text-gray-400 font-mono">{item.phone}</div>
+                        <div className="text-[11px] text-gray-400 font-mono flex items-center gap-1 mt-0.5">
+                          {item.phone && item.phone !== '—' ? (
+                            <a
+                              href={getWhatsAppLink(item.phone, `أهلاً ${item.name}، بخصوص طلب انضمامكم إلى منصة Survsta:`)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-400 hover:text-emerald-300 transition hover:underline inline-flex items-center gap-1"
+                              title="محادثة واتساب"
+                            >
+                              <span>💬</span>
+                              <span>{item.phone}</span>
+                            </a>
+                          ) : (
+                            <span>{item.phone}</span>
+                          )}
+                        </div>
                       </td>
                       <td className="p-3.5 text-gray-300">{item.location}</td>
                       <td className="p-3.5 text-gray-400">{item.createdAt}</td>

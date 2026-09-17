@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import FloatingAdButton from '@/components/FloatingAdButton';
 import './styles/font.css';
 import './styles/tokens.css';
 import './styles/style.css';
@@ -29,6 +30,7 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-grow">{children}</main>
         <Footer />
+        <FloatingAdButton />
       </body>
     </html>
   );

@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ContactButton from '@/components/ContactButton';
+import { supabase } from '@/utils/supabaseClient';
 
 interface EquipmentItem {
-  id: number;
+  id: string | number;
   slug: string;
   title: string;
   cat: string;
@@ -18,179 +20,182 @@ interface EquipmentItem {
   cal: string;
   avail: string;
   img: string;
-  year: number;
+  year: number | string;
   desc: string;
   specs: Record<string, string>;
+  providerName?: string;
+  providerPhone?: string;
 }
 
-const EQUIPMENT_DATA: EquipmentItem[] = [
-  {
-    id: 1,
-    slug: 'leica-ts16',
-    title: 'Leica TS16 Total Station الروبوتي',
-    cat: 'Total Station',
-    brand: 'Leica',
-    cond: 'مستعمل — ممتاز',
-    modes: ['rent'],
-    price: '500',
-    unit: 'جنيه / يوم',
-    gov: 'الإسكندرية',
-    cal: 'سارية حتى 04/2026',
-    avail: 'متاح الآن',
-    img: '/assets/img/leica-ts16-product.jpg',
-    year: 2021,
-    desc: 'جهاز Total Station روبوتيك بدقة زاوية 1" وتتبع أوتوماتيكي للعاكس، مناسب لأعمال التوقيع والرفع الدقيق.',
-    specs: { 'دقة الزاوية': '1 ثانية', 'المدى بدون عاكس': '1000 م', 'الشاشة': 'لمس ملوّن', 'الحزمة': 'جهاز + حامل + عاكس + شاحن' },
-  },
-  {
-    id: 2,
-    slug: 'topcon-gt1200',
-    title: 'Topcon GT-1200 روبوتيك فائق السرعة',
-    cat: 'Total Station',
-    brand: 'Topcon',
-    cond: 'جديد بالضمان',
-    modes: ['sale'],
-    price: 'حسب العرض',
-    unit: '',
-    gov: 'القاهرة',
-    cal: 'شهادة مصنع معتمدة',
-    avail: 'متاح بالمخزن',
-    img: '/assets/img/topcon-gt1200-product.jpg',
-    year: 2025,
-    desc: 'جهاز روبوتيك بحجم مدمج وتقنية UltraTrac لتتبع العاكس في البيئات المزدحمة، مثالي لمواقع التنفيذ الإنشائية.',
-    specs: { 'دقة الزاوية': '1 ثانية', 'المدى بدون عاكس': '1000 م', 'الوزن': '5.1 كجم', 'الضمان': 'سنتان من الوكيل' },
-  },
-  {
-    id: 3,
-    slug: 'gnss-rtk-set',
-    title: 'طقم GNSS RTK — Stonex S900',
-    cat: 'GNSS / RTK',
-    brand: 'Stonex',
-    cond: 'مستعمل — جيد جدًا',
-    modes: ['rent', 'sale'],
-    price: '1,100',
-    unit: 'جنيه / يوم',
-    gov: 'الجيزة',
-    cal: 'سارية حديثة',
-    avail: 'متاح للحجز',
-    img: '/assets/img/stonex-s900-product.jpg',
-    year: 2022,
-    desc: 'طقم GNSS كامل (Base + Rover) مع كنترولر ميداني وشرائح تصحيح، يدعم الشبكات المصرية للتصحيح اللحظي بدقة سنتيمترية.',
-    specs: { 'القنوات': '800+ قناة', 'الدقة الأفقية': '8 مم + 1ppm', 'الكنترولر': 'مضمّن', 'المدة الدنيا': '3 أيام' },
-  },
-  {
-    id: 4,
-    slug: 'faro-focus',
-    title: 'FARO Focus 3D ماسح ليزري رقمي',
-    cat: 'Laser Scanner',
-    brand: 'FARO',
-    cond: 'مستعمل — ممتاز',
-    modes: ['rent'],
-    price: '2,800',
-    unit: 'جنيه / يوم',
-    gov: 'القاهرة',
-    cal: 'سارية حتى 01/2026',
-    avail: 'متاح الآن',
-    img: '/assets/img/trimble-sx-kit.jpg',
-    year: 2020,
-    desc: 'ماسح ليزري ثابت لتوثيق المنشآت وأعمال As-Built ونمذجة BIM، يُسلّم مع حامل ثقيل وكرات مرجعية.',
-    specs: { 'المدى': 'حتى 150 م', 'السرعة': '976,000 نقطة/ث', 'المخرجات': 'سحابة نقاط E57', 'الملحقات': 'حامل + أهداف مرجعية' },
-  },
-  {
-    id: 5,
-    slug: 'dji-m300',
-    title: 'DJI Matrice 300 RTK طائرة مسح جوي',
-    cat: 'Drone',
-    brand: 'DJI',
-    cond: 'مستعمل — ممتاز',
-    modes: ['rent'],
-    price: '3,500',
-    unit: 'جنيه / يوم',
-    gov: 'القاهرة',
-    cal: 'فحص دوري',
-    avail: 'متاح بمشغل معتمد',
-    img: '/assets/img/drone-orthophoto-site.jpg',
-    year: 2022,
-    desc: 'طائرة مسح جوي بدقة RTK مع كاميرا مسح P1 عالية الدقة، تُؤجَّر مع طيار ومشغل معتمد للمساحات الكبيرة.',
-    specs: { 'زمن الطيران': 'حتى 45 دقيقة', 'الكاميرا': 'Zenmuse P1 45MP', 'التصاريح': 'معتمدة', 'المخرجات': 'أورثوفوتو + DEM' },
-  },
-  {
-    id: 6,
-    slug: 'nikon-auto-level',
-    title: 'جهاز ميزان أوتوماتيك Nikon AX-2S',
-    cat: 'أجهزة ميزان',
-    brand: 'Nikon',
-    cond: 'جديد',
-    modes: ['sale'],
-    price: 'حسب العرض',
-    unit: '',
-    gov: 'الإسكندرية',
-    cal: 'شهادة مصنع',
-    avail: 'متاح للتسليم',
-    img: '/assets/img/auto-level-site.jpg',
-    year: 2025,
-    desc: 'جهاز ميزان أوتوماتيك خفيف ودقيق لأعمال المناسيب والمطابقات في مواقع التنفيذ، مقاوم للأتربة والماء.',
-    specs: { 'التكبير': '24x', 'دقة الكيلومتر': '2.0 مم', 'المقاومة': 'IPX6', 'يشمل': 'شاقول + قامة + حامل' },
-  },
-  {
-    id: 7,
-    slug: 'trimble-r12i',
-    title: 'Trimble R12i GNSS بنظام IMU المائل',
-    cat: 'GNSS / RTK',
-    brand: 'Trimble',
-    cond: 'مستعمل — كالجديد',
-    modes: ['rent', 'sale'],
-    price: '1,200',
-    unit: 'جنيه / يوم',
-    gov: 'الإسكندرية',
-    cal: 'سارية حتى 07/2026',
-    avail: 'متاح الآن',
-    img: '/assets/img/gnss-rtk-case-kit.jpg',
-    year: 2023,
-    desc: 'جهاز GNSS فائق التطور بتقنية IMU للقياس المائل دون تسوية الفقاعة، يختصر زمن الرفع الميداني إلى النصف.',
-    specs: { 'IMU': 'مدمج — قياس مائل', 'الدقة': '8 مم + 1ppm', 'التوافق': 'شبكات RTK', 'يشمل': 'كنترولر + عصا كربون' },
-  },
-  {
-    id: 8,
-    slug: 'accessories-kit',
-    title: 'حزمة حوامل ثقيلة وعواكس وأكسسوارات',
-    cat: 'ملحقات وأكسسوارات',
-    brand: 'Spectra',
-    cond: 'جديد بالكرتونة',
-    modes: ['sale'],
-    price: 'حسب الحزمة',
-    unit: '',
-    gov: 'القاهرة',
-    cal: 'لا ينطبق',
-    avail: 'متاح فوراً',
-    img: '/assets/img/survey-accessories-kit.jpg',
-    year: 2025,
-    desc: 'حزمة متكاملة من الحوامل الخشبية والألومنيوم الثقيلة والعواكس والشواخص لتجهيز أطقم المساحة.',
-    specs: { 'المحتويات': '3 حوامل + 2 عاكس + شواخص', 'الخامة': 'ألومنيوم مقوّى', 'الضمان': 'سنة', 'التوصيل': 'متاح لكافة المحافظات' },
-  },
-];
+// Fallback image helper
+function getEquipmentImageUrl(rawUrl?: string | null, category?: string, title?: string): string {
+  if (!rawUrl) {
+    const t = (title || '').toLowerCase();
+    const c = (category || '').toLowerCase();
+    if (c.includes('gnss') || c.includes('gps') || t.includes('gps') || t.includes('rtk')) {
+      return '/assets/img/stonex-s900-product.jpg';
+    }
+    if (c.includes('ميزان') || t.includes('ميزان') || t.includes('level')) {
+      return '/assets/img/auto-level-site.jpg';
+    }
+    if (c.includes('درون') || t.includes('drone')) {
+      return '/assets/img/drone-orthophoto-site.jpg';
+    }
+    return '/assets/img/leica-ts16-product.jpg';
+  }
+  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://') || rawUrl.startsWith('data:image') || rawUrl.startsWith('/')) {
+    return rawUrl;
+  }
+  const lower = rawUrl.toLowerCase();
+  if (lower.includes('gps') || lower.includes('rtk')) {
+    return '/assets/img/stonex-s900-product.jpg';
+  }
+  if (lower.includes('level') || lower.includes('ميزان')) {
+    return '/assets/img/auto-level-site.jpg';
+  }
+  return '/assets/img/leica-ts16-product.jpg';
+}
 
 export default function EquipmentPage() {
+  const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMode, setSelectedMode] = useState('');
   const [selectedCat, setSelectedCat] = useState('');
   const [selectedGov, setSelectedGov] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('');
 
+  // Fetch dynamic equipment records from Supabase
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSupabaseEquipment() {
+      setIsLoading(true);
+      try {
+        // Fetch equipment
+        const { data: eqData, error: eqError } = await supabase
+          .from('equipment')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        // Fetch providers for office metadata lookup
+        const { data: provData } = await supabase
+          .from('providers')
+          .select('id, name, location, phone');
+
+        const provMap = new Map<string, any>();
+        if (provData) {
+          provData.forEach((p) => {
+            provMap.set(String(p.id), p);
+          });
+        }
+
+        if (eqError) {
+          console.warn('[EquipmentPage] Supabase error:', eqError.message);
+        }
+
+        if (isMounted && eqData && eqData.length > 0) {
+          const mapped: EquipmentItem[] = eqData.map((row: any, idx: number) => {
+            const provider = row.provider_id ? provMap.get(String(row.provider_id)) : null;
+            const provName = provider?.name || 'مكتب مساحي معتمد';
+            const provPhone = provider?.phone || '01033134413';
+            const provGov = row.governorate || provider?.location?.split('—')[0]?.trim() || 'القاهرة';
+
+            // Determine brand
+            let brand = row.brand || '';
+            if (!brand) {
+              const t = (row.title || '').toLowerCase();
+              if (t.includes('leica')) brand = 'Leica';
+              else if (t.includes('topcon')) brand = 'Topcon';
+              else if (t.includes('trimble')) brand = 'Trimble';
+              else if (t.includes('stonex')) brand = 'Stonex';
+              else if (t.includes('sokkia')) brand = 'Sokkia';
+              else if (t.includes('nikon')) brand = 'Nikon';
+              else if (t.includes('faro')) brand = 'FARO';
+              else if (t.includes('dji')) brand = 'DJI';
+              else brand = 'أخرى';
+            }
+
+            // Determine modes
+            const modes: string[] = [];
+            if (row.daily_price || row.monthly_price) modes.push('rent');
+            if (row.sale_price) modes.push('sale');
+            if (modes.length === 0) modes.push('rent');
+
+            // Price formatting
+            let displayPrice = 'حسب العرض';
+            let unit = '';
+            if (row.daily_price) {
+              displayPrice = Number(row.daily_price).toLocaleString('en-US');
+              unit = 'جنيه / يوم';
+            } else if (row.sale_price) {
+              displayPrice = `${Number(row.sale_price).toLocaleString('en-US')} ج.م`;
+              unit = '(للبيع)';
+            } else if (row.monthly_price) {
+              displayPrice = Number(row.monthly_price).toLocaleString('en-US');
+              unit = 'جنيه / شهر';
+            }
+
+            return {
+              id: row.id || idx + 1,
+              slug: `eq-${row.id || idx + 1}`,
+              title: row.title || 'جهاز مساحي متطور',
+              cat: row.category || 'Total Station',
+              brand: brand,
+              cond: row.condition || 'جديد / بحالة ممتازة',
+              modes: modes,
+              price: displayPrice,
+              unit: unit,
+              gov: provGov,
+              cal: row.calibration_date ? `سارية حتى ${row.calibration_date}` : 'شهادة معايرة معتمدة',
+              avail: row.status || 'متاح الآن',
+              img: getEquipmentImageUrl(row.image_url, row.category, row.title),
+              year: row.year || 2024,
+              desc: row.description || `جهاز مساحي عالي الدقة لفحص ومتابعة الأعمال الإنشائية والمساحية، معتمد وموثق في شبكة Survsta لدى ${provName}.`,
+              specs: row.specs || {
+                'الفئة': row.category || 'أجهزة مساحية',
+                'المكتب': provName,
+                'الحالة': row.condition || 'ممتاز',
+                'الضمان': 'فحص وتشغيل',
+              },
+              providerName: provName,
+              providerPhone: provPhone,
+            };
+          });
+
+          setEquipmentList(mapped);
+        } else if (isMounted) {
+          setEquipmentList([]);
+        }
+      } catch (err) {
+        console.warn('[EquipmentPage] Error fetching data:', err);
+        if (isMounted) setEquipmentList([]);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    loadSupabaseEquipment();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const filteredEquipment = useMemo(() => {
-    return EQUIPMENT_DATA.filter((item) => {
+    return equipmentList.filter((item) => {
       const matchQuery =
         !searchTerm ||
         item.title.includes(searchTerm) ||
         item.desc.includes(searchTerm) ||
         item.brand.toLowerCase().includes(searchTerm.toLowerCase());
       const matchMode = !selectedMode || item.modes.includes(selectedMode);
-      const matchCat = !selectedCat || item.cat === selectedCat;
-      const matchGov = !selectedGov || item.gov === selectedGov;
+      const matchCat = !selectedCat || item.cat === selectedCat || (selectedCat === 'Total Station' && item.cat.includes('توتال'));
+      const matchGov = !selectedGov || item.gov.includes(selectedGov);
       const matchBrand = !selectedBrand || item.brand === selectedBrand;
       return matchQuery && matchMode && matchCat && matchGov && matchBrand;
     });
-  }, [searchTerm, selectedMode, selectedCat, selectedGov, selectedBrand]);
+  }, [equipmentList, searchTerm, selectedMode, selectedCat, selectedGov, selectedBrand]);
 
   return (
     <div className="bg-[#f4f7fa] text-slate-800">
@@ -316,18 +321,60 @@ export default function EquipmentPage() {
             <div className="lg:col-span-3 space-y-6">
               <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between text-xs">
                 <span className="font-bold text-slate-700">
-                  معروض <span className="text-cyan-700">{filteredEquipment.length}</span> جهاز ومعدة
+                  {isLoading ? (
+                    'جاري استرجاع الأجهزة من السحابة...'
+                  ) : (
+                    <>معروض <span className="text-cyan-700">{filteredEquipment.length}</span> جهاز ومعدة</>
+                  )}
                 </span>
-                <span className="text-slate-500">محدّث بانتظام وفق أحدث عروض الموردين</span>
+                <span className="text-slate-500">محدّث بانتظام وفق أحدث عروض الموردين في قاعدة البيانات</span>
               </div>
 
-              {filteredEquipment.length === 0 ? (
-                <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-500">
-                  <span className="text-4xl block mb-2">📡</span>
-                  <p className="font-bold text-base text-slate-800">لا توجد أجهزة مطابقة للبحث</p>
-                  <p className="text-xs mt-1">جرّب اختيار ماركة أو فئة أخرى.</p>
+              {/* Loading Skeletons */}
+              {isLoading && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[1, 2, 3, 4].map((n) => (
+                    <div key={n} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-pulse flex flex-col justify-between">
+                      <div>
+                        <div className="h-48 bg-slate-200 w-full"></div>
+                        <div className="p-5 space-y-3">
+                          <div className="h-4 bg-slate-200 rounded w-1/3"></div>
+                          <div className="h-5 bg-slate-300 rounded w-3/4"></div>
+                          <div className="h-3 bg-slate-200 rounded w-full"></div>
+                          <div className="h-16 bg-slate-100 rounded-lg"></div>
+                        </div>
+                      </div>
+                      <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                        <div className="h-6 bg-slate-200 rounded w-24"></div>
+                        <div className="h-8 bg-slate-300 rounded w-24"></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ) : (
+              )}
+
+              {/* Empty State */}
+              {!isLoading && filteredEquipment.length === 0 && (
+                <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-500 space-y-3">
+                  <span className="text-4xl block mb-2">📡</span>
+                  <p className="font-bold text-base text-slate-800">لا توجد أجهزة مطابقة للبحث حالياً</p>
+                  <p className="text-xs text-slate-500">
+                    لم يتم العثور على أجهزة مطابقة للفلاتر الحالية. جرّب مسح الفلاتر أو تصفح كافة الفئات.
+                  </p>
+                  <div className="pt-2">
+                    <Link
+                      href="/join"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-900 px-5 py-2 text-xs font-bold transition shadow-sm"
+                    >
+                      <span>+</span>
+                      <span>سجل كمزوّد واعرض أول جهاز مساحي</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* Live Cards */}
+              {!isLoading && filteredEquipment.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredEquipment.map((item) => (
                     <div
@@ -342,6 +389,7 @@ export default function EquipmentPage() {
                             className="object-cover"
                             fill
                             src={item.img}
+                            unoptimized
                           />
                           <div className="absolute top-3 right-3 flex gap-1.5">
                             {item.modes.map((m, i) => (
@@ -369,7 +417,15 @@ export default function EquipmentPage() {
                             <span className="text-slate-500 text-[11px]">موديل {item.year} — {item.cond}</span>
                           </div>
 
-                          <h3 className="font-bold text-slate-900 text-base mb-2">{item.title}</h3>
+                          <h3 className="font-bold text-slate-900 text-base mb-1.5">{item.title}</h3>
+                          
+                          {item.providerName && (
+                            <div className="text-[11px] text-slate-500 mb-2 flex items-center gap-1 font-medium">
+                              <span>🏢 المزوّد:</span>
+                              <span className="text-slate-700 font-semibold">{item.providerName}</span>
+                            </div>
+                          )}
+
                           <p className="text-xs text-slate-600 line-clamp-2 mb-4 leading-relaxed">
                             {item.desc}
                           </p>
@@ -398,12 +454,12 @@ export default function EquipmentPage() {
                           <div className="text-[10px] text-slate-500 font-medium">{item.avail}</div>
                         </div>
 
-                        <Link
-                          href="/contact"
-                          className="rounded-lg bg-[#081933] hover:bg-[#0F253E] text-white px-4 py-2 font-bold text-xs transition"
-                        >
-                          تواصل مع المورد
-                        </Link>
+                        <ContactButton
+                          providerId={`equipment-${item.id}`}
+                          equipmentTitle={item.title}
+                          phoneNumber={item.providerPhone || '01033134413'}
+                          className="rounded-lg bg-[#081933] hover:bg-[#0F253E] text-white px-3.5 py-2 font-bold text-xs transition shadow-sm"
+                        />
                       </div>
                     </div>
                   ))}

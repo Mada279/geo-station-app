@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabaseClient';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import { getWhatsAppLink } from '@/utils/phoneUtils';
 
 
 interface PendingProvider {
@@ -653,7 +654,7 @@ export default function AdminDashboardPage() {
                   {copiedOtp ? '✓ تم النسخ' : '📋 نسخ الكود'}
                 </button>
                 <a
-                  href={`https://wa.me/${selectedProvider.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`أهلاً بك في Survsta! كود تفعيل حسابك هو: ${otpCode}`)}`}
+                  href={getWhatsAppLink(selectedProvider.phone, `أهلاً بك في Survsta! كود تفعيل حسابك هو: ${otpCode}`)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-xs font-bold"
