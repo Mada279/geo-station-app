@@ -10,28 +10,28 @@ interface UserTableProps {
 }
 
 const roleBadges: Record<UserRole, { label: string; class: string }> = {
-  admin: { label: 'مدير نظام', class: 'bg-red-500/10 text-red-400 border-red-500/30' },
-  provider: { label: 'مزوّد خدمة', class: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30' },
-  customer: { label: 'عميل', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
+  admin: { label: 'مدير نظام', class: 'bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30 whitespace-nowrap' },
+  provider: { label: 'مزوّد خدمة', class: 'bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30 whitespace-nowrap' },
+  customer: { label: 'عميل', class: 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap' },
 };
 
 const statusBadges: Record<UserStatus, { label: string; class: string }> = {
-  active: { label: 'نشط', class: 'bg-green-500/10 text-green-400' },
-  pending: { label: 'معلّق', class: 'bg-amber-500/10 text-amber-400' },
-  suspended: { label: 'موقوف', class: 'bg-gray-500/10 text-gray-400' },
+  active: { label: 'نشط', class: 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap' },
+  pending: { label: 'معلّق', class: 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 whitespace-nowrap' },
+  suspended: { label: 'موقوف', class: 'bg-gray-500/20 text-gray-400 font-bold border border-gray-500/30 whitespace-nowrap' },
 };
 
 export default function UserTable({ users, onEdit, onDelete }: UserTableProps) {
   if (users.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-12 text-center text-gray-400">
+      <div className="rounded-xl border border-slate-800 bg-[#0a192f] p-12 text-center text-gray-400">
         لا يوجد مستخدمون مطابقون لمعايير البحث.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-gray-800 bg-gray-900/80 shadow-xl">
+    <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#0a192f] shadow-xl">
       <table className="min-w-full divide-y divide-gray-800 text-right">
         <thead className="bg-gray-950/60 text-xs font-semibold uppercase tracking-wider text-gray-400">
           <tr>

@@ -14,8 +14,12 @@ CREATE TABLE IF NOT EXISTS providers (
   phone TEXT,
   location TEXT,
   status TEXT DEFAULT 'pending',
+  is_featured BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Ensure is_featured column exists if table was already created
+ALTER TABLE providers ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
 
 -- 2. Table: equipment
 CREATE TABLE IF NOT EXISTS equipment (

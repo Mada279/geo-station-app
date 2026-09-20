@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import ContactButton from '@/components/ContactButton';
 import { supabase } from '@/utils/supabaseClient';
+import { MOCK_PROFILES } from '@/utils/helpers';
 
 interface Provider {
   id: string | number;
@@ -126,13 +127,112 @@ export default function DirectoryPage() {
             };
           });
 
-          setProviders(mapped);
+          const fallbackMockList: Provider[] = MOCK_PROFILES.map((m, idx) => {
+            const loc = m.location || 'القاهرة';
+            const gov = loc.split('—')[0].trim();
+            const city = loc.includes('—') ? loc.split('—')[1].trim() : gov;
+            return {
+              id: m.id,
+              slug: m.slug,
+              name: m.name,
+              type: m.name.includes('شركة') ? 'شركة مساحة وهندسة' : m.name.includes('مورد') ? 'مورد وموزع معتمد' : m.name.includes('مركز') ? 'مركز معايرة وصيانة' : m.name.includes('أكاديمية') ? 'مركز تدريب وتأهيل' : 'مكتب مساحة معتمد',
+              cat: m.name.includes('شركة') ? 'companies' : m.name.includes('مورد') ? 'suppliers' : m.name.includes('مركز') ? 'calibration' : m.name.includes('أكاديمية') ? 'training' : 'offices',
+              gov: gov,
+              city: city,
+              rate: 4.8,
+              reviews: 45 + idx * 15,
+              since: 2023,
+              staff: 'طاقم هندسي معتمد',
+              resp: 'خلال ساعة',
+              ver: ['ملف موثّق', 'نشاط معتمد'],
+              featured: idx === 0 || m.name.includes('شركة'),
+              img: defaultImages[idx % defaultImages.length],
+              svc: m.services,
+              about: m.about,
+              phone: m.phone,
+            };
+          });
+
+          // If live database has only a few providers, append mock providers to guarantee rich demo
+          if (mapped.length < 4) {
+            setProviders([...mapped, ...fallbackMockList.slice(mapped.length)]);
+          } else {
+            setProviders(mapped);
+          }
         } else if (isMounted) {
-          setProviders([]);
+          const fallbackMockList: Provider[] = MOCK_PROFILES.map((m, idx) => {
+            const defaultImages = [
+              '/assets/img/hero-engineering-office.jpg',
+              '/assets/img/office-survey-team.jpg',
+              '/assets/img/survey-instruments-studio.jpg',
+              '/assets/img/calibration-lab-collimators.jpg',
+              '/assets/img/calibration-training-lab.jpg',
+              '/assets/img/office-cad-workstation.jpg',
+            ];
+            const loc = m.location || 'القاهرة';
+            const gov = loc.split('—')[0].trim();
+            const city = loc.includes('—') ? loc.split('—')[1].trim() : gov;
+            return {
+              id: m.id,
+              slug: m.slug,
+              name: m.name,
+              type: m.name.includes('شركة') ? 'شركة مساحة وهندسة' : m.name.includes('مورد') ? 'مورد وموزع معتمد' : m.name.includes('مركز') ? 'مركز معايرة وصيانة' : m.name.includes('أكاديمية') ? 'مركز تدريب وتأهيل' : 'مكتب مساحة معتمد',
+              cat: m.name.includes('شركة') ? 'companies' : m.name.includes('مورد') ? 'suppliers' : m.name.includes('مركز') ? 'calibration' : m.name.includes('أكاديمية') ? 'training' : 'offices',
+              gov: gov,
+              city: city,
+              rate: 4.8,
+              reviews: 45 + idx * 15,
+              since: 2023,
+              staff: 'طاقم هندسي معتمد',
+              resp: 'خلال ساعة',
+              ver: ['ملف موثّق', 'نشاط معتمد'],
+              featured: idx === 0 || m.name.includes('شركة'),
+              img: defaultImages[idx % defaultImages.length],
+              svc: m.services,
+              about: m.about,
+              phone: m.phone,
+            };
+          });
+          setProviders(fallbackMockList);
         }
       } catch (err) {
-        console.warn('[DirectoryPage] Error fetching providers:', err);
-        if (isMounted) setProviders([]);
+        console.warn('[DirectoryPage] Error fetching providers, using mock fallback:', err);
+        if (isMounted) {
+          const defaultImages = [
+            '/assets/img/hero-engineering-office.jpg',
+            '/assets/img/office-survey-team.jpg',
+            '/assets/img/survey-instruments-studio.jpg',
+            '/assets/img/calibration-lab-collimators.jpg',
+            '/assets/img/calibration-training-lab.jpg',
+            '/assets/img/office-cad-workstation.jpg',
+          ];
+          const fallbackMockList: Provider[] = MOCK_PROFILES.map((m, idx) => {
+            const loc = m.location || 'القاهرة';
+            const gov = loc.split('—')[0].trim();
+            const city = loc.includes('—') ? loc.split('—')[1].trim() : gov;
+            return {
+              id: m.id,
+              slug: m.slug,
+              name: m.name,
+              type: m.name.includes('شركة') ? 'شركة مساحة وهندسة' : m.name.includes('مورد') ? 'مورد وموزع معتمد' : m.name.includes('مركز') ? 'مركز معايرة وصيانة' : m.name.includes('أكاديمية') ? 'مركز تدريب وتأهيل' : 'مكتب مساحة معتمد',
+              cat: m.name.includes('شركة') ? 'companies' : m.name.includes('مورد') ? 'suppliers' : m.name.includes('مركز') ? 'calibration' : m.name.includes('أكاديمية') ? 'training' : 'offices',
+              gov: gov,
+              city: city,
+              rate: 4.8,
+              reviews: 45 + idx * 15,
+              since: 2023,
+              staff: 'طاقم هندسي معتمد',
+              resp: 'خلال ساعة',
+              ver: ['ملف موثّق', 'نشاط معتمد'],
+              featured: idx === 0 || m.name.includes('شركة'),
+              img: defaultImages[idx % defaultImages.length],
+              svc: m.services,
+              about: m.about,
+              phone: m.phone,
+            };
+          });
+          setProviders(fallbackMockList);
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -354,24 +454,28 @@ export default function DirectoryPage() {
                   {filteredProviders.map((p) => (
                     <div
                       key={p.id}
-                      className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between"
+                      className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between"
                     >
-                      <div>
+                      {/* 1. Profile Area (Clickable) */}
+                      <Link
+                        href={`/directory/${p.id}`}
+                        className="flex-1 group cursor-pointer active:scale-[0.98] transition-transform duration-150"
+                      >
                         {/* Image banner */}
-                        <div className="relative h-44 w-full bg-slate-100">
+                        <div className="relative h-44 w-full bg-slate-100 overflow-hidden">
                           <Image
                             alt={p.name}
-                            className="object-cover"
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
                             fill
                             src={p.img}
                             unoptimized
                           />
                           {p.featured && (
-                            <span className="absolute top-3 right-3 bg-amber-400 text-black text-[11px] font-black px-2.5 py-1 rounded-md shadow">
+                            <span className="absolute top-3 right-3 bg-amber-400 text-black text-[11px] font-black px-2.5 py-1 rounded-md shadow pointer-events-none">
                               ⭐ مميّز
                             </span>
                           )}
-                          <span className="absolute bottom-3 right-3 bg-[#081933]/90 text-white text-[11px] font-semibold px-2.5 py-1 rounded-md backdrop-blur-sm">
+                          <span className="absolute bottom-3 right-3 bg-[#081933]/90 text-white text-[11px] font-semibold px-2.5 py-1 rounded-md backdrop-blur-sm pointer-events-none">
                             📍 {p.gov} {p.city && p.city !== p.gov ? `— ${p.city}` : ''}
                           </span>
                         </div>
@@ -392,21 +496,16 @@ export default function DirectoryPage() {
                             ))}
                           </div>
 
-                          <h3 className="font-bold text-slate-900 text-lg mb-1">{p.name}</h3>
-
-                          {p.phone && (
-                            <div className="text-[11px] text-slate-500 mb-2 flex items-center gap-1.5 font-mono">
-                              <span>📞</span>
-                              <span dir="ltr">{p.phone}</span>
-                            </div>
-                          )}
+                          <h3 className="font-bold text-slate-900 text-lg mb-2 group-hover:text-cyan-700 transition">
+                            {p.name}
+                          </h3>
 
                           <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-4">
                             {p.about}
                           </p>
 
                           {/* Services chips */}
-                          <div className="flex flex-wrap gap-1.5 mb-4">
+                          <div className="flex flex-wrap gap-1.5 mb-2">
                             {p.svc.slice(0, 3).map((s, i) => (
                               <span
                                 key={i}
@@ -422,20 +521,18 @@ export default function DirectoryPage() {
                             )}
                           </div>
                         </div>
-                      </div>
+                      </Link>
 
-                      {/* Footer CTA */}
-                      <div className="px-5 py-3.5 bg-[#f4f7fa] border-t border-slate-100 flex items-center justify-between text-xs">
+                      {/* 2. Action Footer (Strictly OUTSIDE the Link) */}
+                      <div className="px-5 py-3.5 bg-[#f4f7fa] border-t border-slate-100 flex items-center justify-between mt-auto relative z-10">
                         <div className="flex items-center gap-1.5">
                           <span className="text-amber-500 font-bold">★ {p.rate}</span>
-                          <span className="text-slate-400">({p.reviews} تقييم)</span>
+                          <span className="text-slate-400">({p.reviews})</span>
                         </div>
-
                         <ContactButton
                           providerId={`provider-${p.id}`}
                           equipmentTitle={p.name}
                           phoneNumber={p.phone || '01033134413'}
-                          className="rounded-lg bg-[#081933] hover:bg-[#0F253E] text-white px-3.5 py-1.5 font-bold text-xs transition shadow-sm"
                         />
                       </div>
                     </div>

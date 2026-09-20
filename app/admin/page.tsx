@@ -173,7 +173,7 @@ export default function AdminDashboardPage() {
   const maxSpark = Math.max(...sparkValues);
 
   return (
-    <div className="flex min-h-screen bg-[#081933] text-gray-100" style={{ direction: 'rtl' }}>
+    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       
       {/* Unified Admin Sidebar */}
       <AdminSidebar
@@ -192,7 +192,7 @@ export default function AdminDashboardPage() {
               <button
                 type="button"
                 onClick={() => setIsSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-xl bg-[#0F253E] border border-cyan-500/30 text-cyan-300"
+                className="lg:hidden p-2 rounded-xl bg-slate-900 border border-slate-800 text-cyan-300"
               >
                 ☰
               </button>
@@ -204,14 +204,14 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <select className="rounded-xl border border-cyan-500/30 bg-[#0F253E] px-3.5 py-2 text-xs font-semibold text-gray-300 focus:outline-none focus:border-cyan-400">
+            <select className="rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs font-semibold text-gray-300 focus:outline-none focus:border-cyan-400">
               <option>آخر 30 يومًا</option>
               <option>آخر 7 أيام</option>
             </select>
 
             <button
               onClick={() => showToast('تم تصدير تقرير الحالة بنجاح ⬇')}
-              className="rounded-xl border border-cyan-500/30 bg-[#0F253E] px-4 py-2 text-xs font-bold text-gray-300 hover:bg-[#163659] transition"
+              className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-gray-300 hover:bg-slate-800 transition"
             >
               ⬇ تقرير الحالة
             </button>
@@ -219,7 +219,7 @@ export default function AdminDashboardPage() {
             {/* Live Sync from Supabase button */}
             <button
               onClick={loadAll}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-500/50 bg-gradient-to-l from-cyan-500 to-[#1CA7FF] px-4 py-2 text-xs font-black text-[#081933] shadow-lg shadow-cyan-500/20 hover:brightness-110 transition"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-500/50 bg-gradient-to-l from-cyan-500 to-sky-500 px-4 py-2 text-xs font-black text-slate-950 shadow-lg shadow-cyan-500/20 hover:brightness-110 transition"
               title="تحديث فوري من قاعدة البيانات"
             >
               <span>🔄</span>
@@ -238,7 +238,7 @@ export default function AdminDashboardPage() {
 
         {/* Top 5 KPI Metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/80 p-4 backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-1">
               <span>مزوّدون منشورون</span>
               <span className="text-xl">🏢</span>
@@ -260,7 +260,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/80 p-4 backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-1">
               <span>طلبات تواصل</span>
               <span className="text-xl">📥</span>
@@ -269,7 +269,7 @@ export default function AdminDashboardPage() {
             <div className="text-[11px] text-emerald-400 mt-1 font-semibold">▲ 27% نمو</div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/80 p-4 backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-1">
               <span>مستخدمون نشطون</span>
               <span className="text-xl">👤</span>
@@ -278,7 +278,7 @@ export default function AdminDashboardPage() {
             <div className="text-[11px] text-emerald-400 mt-1 font-semibold">▲ 11% تفاعل</div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/80 p-4 backdrop-blur-sm col-span-2 sm:col-span-1">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 col-span-2 sm:col-span-1">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-1">
               <span>تنبيهات جودة بيانات</span>
               <span className="text-xl">⚠️</span>
@@ -292,8 +292,8 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Order Growth Chart */}
-          <div className="lg:col-span-5 rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
+          <div className="lg:col-span-5 rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-800/50 pb-3">
               <h3 className="text-base font-bold text-white">نمو الطلبات — 12 أسبوعًا</h3>
               <span className="rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-bold font-mono">
                 +27%
@@ -319,6 +319,7 @@ export default function AdminDashboardPage() {
                       }`}
                       title={`${val} طلب`}
                     />
+                    <span className="text-[9px] text-gray-500 mt-1 font-mono">{idx + 1}</span>
                   </div>
                 );
               })}
@@ -329,14 +330,14 @@ export default function AdminDashboardPage() {
               <span>سبتمبر</span>
             </div>
 
-            {/* Metrics Breakdown */}
-            <div className="grid grid-cols-3 gap-2 border-t border-cyan-500/20 pt-3 text-center">
+            {/* Mini Stat row */}
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/50 text-center">
               <div>
-                <div className="text-[11px] text-gray-400">تحويل بحث ← طلب</div>
-                <div className="text-base font-bold text-cyan-300 font-mono mt-0.5">4.3%</div>
+                <div className="text-[11px] text-gray-400">إجمالي الأسبوع</div>
+                <div className="text-base font-bold text-white font-mono mt-0.5">148</div>
               </div>
               <div>
-                <div className="text-[11px] text-gray-400">متوسط أول رد</div>
+                <div className="text-[11px] text-gray-400">متوسط زمن الرد</div>
                 <div className="text-base font-bold text-white font-mono mt-0.5">2.6 س</div>
               </div>
               <div>
@@ -347,8 +348,8 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* REAL SUPABASE APPROVAL QUEUE TABLE */}
-          <div className="lg:col-span-7 rounded-2xl border border-cyan-500/30 bg-[#0F253E]/90 p-5 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
+          <div className="lg:col-span-7 rounded-2xl border border-slate-700 bg-slate-900 p-5 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-800/50 pb-3">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-white">طابور الاعتماد — الأقدم أولاً</h3>
                 <span className="rounded-full bg-cyan-500/20 text-cyan-300 px-2 py-0.5 text-xs font-mono font-bold">
@@ -369,7 +370,7 @@ export default function AdminDashboardPage() {
                 <div className="text-xs font-semibold">جاري جلب الطلبات مباشرة من Supabase...</div>
               </div>
             ) : pendingProviders.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-cyan-500/30 bg-[#081933]/50 p-8 text-center">
+              <div className="rounded-xl border border-dashed border-slate-700 bg-slate-950/50 p-8 text-center">
                 <div className="text-3xl mb-2">🎉</div>
                 <h4 className="text-sm font-bold text-white">لا توجد طلبات انضمام معلّقة حالياً!</h4>
                 <p className="text-xs text-gray-400 mt-1">
@@ -377,9 +378,9 @@ export default function AdminDashboardPage() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-cyan-500/20">
-                <table className="w-full text-right text-xs">
-                  <thead className="bg-[#081933]/80 text-gray-400 border-b border-cyan-500/20">
+              <div className="overflow-x-auto rounded-xl border border-slate-800">
+                <table className="w-full text-right text-xs bg-slate-900">
+                  <thead className="bg-slate-950 text-slate-300 border-b border-slate-800 font-bold">
                     <tr>
                       <th className="p-3 font-bold">المزوّد / المنشأة</th>
                       <th className="p-3 font-bold">المحافظة والتواصل</th>
@@ -387,9 +388,9 @@ export default function AdminDashboardPage() {
                       <th className="p-3 font-bold text-center">الإجراء</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-cyan-500/10 text-gray-300">
+                  <tbody className="divide-y divide-slate-800/50 text-slate-300">
                     {pendingProviders.map((p) => (
-                      <tr key={p.id} className="hover:bg-white/5 transition">
+                      <tr key={p.id} className="hover:bg-slate-800/40 transition">
                         <td className="p-3">
                           <div className="font-bold text-white text-sm">{p.name}</div>
                           <div className="text-[11px] text-gray-400">{p.submittedAt}</div>
@@ -399,7 +400,7 @@ export default function AdminDashboardPage() {
                           <div className="font-mono text-[11px] text-gray-400" dir="ltr">{p.phone}</div>
                         </td>
                         <td className="p-3 whitespace-nowrap">
-                          <span className="rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 text-[10.5px] font-bold">
+                          <span className="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-amber-500/15 text-amber-400 border border-amber-500/30">
                             قيد المراجعة
                           </span>
                         </td>
@@ -408,9 +409,9 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               onClick={() => handleOpenReview(p)}
-                              className="rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 px-2.5 py-1 text-xs font-bold transition"
+                              className="rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 px-3 py-1 text-xs font-bold text-cyan-300 transition"
                             >
-                              مراجعة وتوثيق
+                              مراجعة واعتماد
                             </button>
                             <button
                               type="button"
@@ -435,8 +436,8 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           
           {/* Card 1: Geographic Activity */}
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 space-y-3.5 shadow-lg">
-            <h3 className="text-sm font-bold text-white border-b border-cyan-500/20 pb-2.5">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-3.5 shadow-lg">
+            <h3 className="text-sm font-bold text-white border-b border-slate-800/50 pb-2.5">
               النشاط الجغرافي للمزوّدين
             </h3>
             <div className="space-y-2.5 text-xs">
@@ -452,7 +453,7 @@ export default function AdminDashboardPage() {
                     <span>{row.name}</span>
                     <span className="font-mono text-cyan-300 font-bold">{row.val}%</span>
                   </div>
-                  <div className="h-1.5 w-full bg-[#081933] rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden">
                     <div
                       style={{ width: `${row.val}%` }}
                       className="h-full bg-gradient-to-l from-cyan-500 to-[#1CA7FF] rounded-full"
@@ -464,8 +465,8 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Card 2: Provider Types */}
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 space-y-3.5 shadow-lg">
-            <h3 className="text-sm font-bold text-white border-b border-cyan-500/20 pb-2.5">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-3.5 shadow-lg">
+            <h3 className="text-sm font-bold text-white border-b border-slate-800/50 pb-2.5">
               توزيع المزوّدين حسب النوع
             </h3>
             <div className="space-y-2.5 text-xs">
@@ -481,7 +482,7 @@ export default function AdminDashboardPage() {
                     <span>{row.name}</span>
                     <span className="font-mono text-white font-bold">{row.count} جهة</span>
                   </div>
-                  <div className="h-1.5 w-full bg-[#081933] rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden">
                     <div
                       style={{ width: `${Math.round((row.count / 62) * 100)}%` }}
                       className="h-full bg-amber-400 rounded-full"
@@ -493,8 +494,8 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Card 3: Data Quality Alerts */}
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 space-y-3.5 shadow-lg">
-            <h3 className="text-sm font-bold text-white border-b border-cyan-500/20 pb-2.5">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-3.5 shadow-lg">
+            <h3 className="text-sm font-bold text-white border-b border-slate-800/50 pb-2.5">
               تنبيهات جودة البيانات
             </h3>
             <div className="space-y-2 text-xs">
@@ -505,7 +506,7 @@ export default function AdminDashboardPage() {
                 { label: 'سجلات معايرة منتهية', count: 6, color: 'bg-red-500/20 text-red-400 border border-red-500/30' },
                 { label: 'ملفات بدون نشاط 90 يومًا', count: 14, color: 'bg-gray-800 text-gray-400' },
               ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-1.5 border-b border-cyan-500/10">
+                <div key={i} className="flex items-center justify-between py-1.5 border-b border-slate-800/50">
                   <span className="text-gray-300">{item.label}</span>
                   <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${item.color}`}>
                     {item.count}
@@ -520,8 +521,8 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           
           {/* Recent Audit Events */}
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 space-y-3 shadow-lg">
-            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-2.5">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-3 shadow-lg">
+            <div className="flex items-center justify-between border-b border-slate-800/50 pb-2.5">
               <h3 className="text-sm font-bold text-white">أحدث أحداث التدقيق (Audit Logs)</h3>
               <Link href="/admin/audit" className="text-xs text-cyan-300 hover:underline">
                 السجل الكامل ←
@@ -529,7 +530,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-right text-xs">
-                <thead className="text-gray-400 border-b border-cyan-500/10 text-[11px]">
+                <thead className="text-gray-400 border-b border-slate-800/50 text-[11px]">
                   <tr>
                     <th className="py-2">الوقت</th>
                     <th className="py-2">المستخدم</th>
@@ -537,14 +538,14 @@ export default function AdminDashboardPage() {
                     <th className="py-2">الكيان</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-cyan-500/10 text-gray-300">
+                <tbody className="divide-y divide-slate-800/50 text-gray-300">
                   {[
                     { t: '10:45 ص', actor: 'م. محمد فرج', act: 'اعتماد مزود', ent: 'providers#149' },
                     { t: '09:20 ص', actor: 'أ. سارة منير', act: 'تعديل جهاز', ent: 'equipment#82' },
                     { t: 'أمس 04:12 م', actor: 'م. محمد فرج', act: 'إرسال OTP', ent: 'auth#941' },
                     { t: 'أمس 01:05 م', actor: 'النظام الآلي', act: 'فحص RLS', ent: 'database#live' },
                   ].map((row, i) => (
-                    <tr key={i} className="hover:bg-white/5">
+                    <tr key={i} className="hover:bg-slate-800/40">
                       <td className="py-2 text-gray-400">{row.t}</td>
                       <td className="py-2 font-semibold text-white">{row.actor}</td>
                       <td className="py-2 text-cyan-300">{row.act}</td>
@@ -557,14 +558,14 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Market Gaps */}
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 space-y-3 shadow-lg">
-            <div className="border-b border-cyan-500/20 pb-2.5">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-3 shadow-lg">
+            <div className="border-b border-slate-800/50 pb-2.5">
               <h3 className="text-sm font-bold text-white">فجوات السوق — طلب بلا عرض كافٍ</h3>
               <p className="text-[11px] text-gray-400 mt-0.5">مناطق وفئات عليها بحث مرتفع وعدد مزوّدين منخفض — فرص استقطاب.</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-right text-xs">
-                <thead className="text-gray-400 border-b border-cyan-500/10 text-[11px]">
+                <thead className="text-gray-400 border-b border-slate-800/50 text-[11px]">
                   <tr>
                     <th className="py-2">المنطقة</th>
                     <th className="py-2">الفئة المطلوبة</th>
@@ -572,14 +573,14 @@ export default function AdminDashboardPage() {
                     <th className="py-2 text-center">المزوّدون الحاليون</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-cyan-500/10 text-gray-300">
+                <tbody className="divide-y divide-slate-800/50 text-gray-300">
                   {[
                     { gov: 'مطروح', cat: 'معايرة أجهزة', search: 64, prov: 1 },
                     { gov: 'البحيرة', cat: 'Laser Scanner', search: 41, prov: 0 },
                     { gov: 'الدقهلية', cat: 'Drone Survey', search: 37, prov: 1 },
                     { gov: 'المنوفية', cat: 'GNSS للإيجار', search: 29, prov: 2 },
                   ].map((row, i) => (
-                    <tr key={i} className="hover:bg-white/5">
+                    <tr key={i} className="hover:bg-slate-800/40">
                       <td className="py-2 font-semibold text-white">{row.gov}</td>
                       <td className="py-2 text-cyan-200">{row.cat}</td>
                       <td className="py-2 text-center font-mono font-bold text-white">{row.search}</td>
@@ -600,7 +601,6 @@ export default function AdminDashboardPage() {
               </table>
             </div>
           </div>
-
         </div>
 
       </div>
@@ -608,8 +608,8 @@ export default function AdminDashboardPage() {
       {/* Review & Verification Modal with OTP and WhatsApp/Email deep links */}
       {selectedProvider && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-          <div className="w-full max-w-xl rounded-2xl border border-cyan-500/40 bg-[#0F253E] p-6 shadow-2xl space-y-5 text-right my-8">
-            <div className="flex items-start justify-between border-b border-cyan-500/20 pb-4">
+          <div className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-5 text-right my-8">
+            <div className="flex items-start justify-between border-b border-slate-800/50 pb-4">
               <button
                 onClick={() => setSelectedProvider(null)}
                 className="rounded-lg p-1.5 text-gray-400 hover:text-white"
@@ -622,7 +622,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs bg-[#081933] p-4 rounded-xl border border-cyan-500/20">
+            <div className="grid grid-cols-2 gap-3 text-xs bg-slate-950 p-4 rounded-xl border border-slate-800">
               <div>
                 <span className="text-gray-400 block">رقم الهاتف:</span>
                 <span className="font-mono text-white font-bold" dir="ltr">{selectedProvider.phone}</span>
@@ -641,7 +641,7 @@ export default function AdminDashboardPage() {
             <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-amber-300">كود التفعيل المقترح (OTP):</span>
-                <span className="text-xl font-mono font-black text-white tracking-widest bg-[#081933] px-3 py-1 rounded-lg border border-amber-500/30">
+                <span className="text-xl font-mono font-black text-white tracking-widest bg-slate-950 px-3 py-1 rounded-lg border border-amber-500/30">
                   {otpCode}
                 </span>
               </div>
@@ -649,7 +649,7 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={handleCopyOtp}
-                  className="rounded-lg bg-[#081933] hover:bg-white/10 text-amber-300 border border-amber-500/30 px-3 py-2 text-xs font-bold"
+                  className="rounded-lg bg-slate-950 hover:bg-slate-800 text-amber-300 border border-amber-500/30 px-3 py-2 text-xs font-bold"
                 >
                   {copiedOtp ? '✓ تم النسخ' : '📋 نسخ الكود'}
                 </button>
@@ -670,11 +670,11 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-between border-t border-cyan-500/20">
+            <div className="pt-2 flex items-center justify-between border-t border-slate-800/50">
               <button
                 type="button"
                 onClick={() => setSelectedProvider(null)}
-                className="rounded-xl border border-gray-700 px-4 py-2 text-xs font-semibold text-gray-400 hover:bg-white/5"
+                className="rounded-xl border border-gray-700 px-4 py-2 text-xs font-semibold text-gray-400 hover:bg-slate-800"
               >
                 إلغاء
               </button>
@@ -693,23 +693,23 @@ export default function AdminDashboardPage() {
       {/* Guide Modal */}
       {isGuideOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl border border-amber-500/40 bg-[#0F253E] p-6 shadow-2xl space-y-4 text-right">
-            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4 text-right">
+            <div className="flex items-center justify-between border-b border-slate-800/50 pb-3">
               <button onClick={() => setIsGuideOpen(false)} className="text-gray-400 hover:text-white">✕</button>
               <h3 className="text-base font-black text-white flex items-center gap-2">
                 <span>📖</span> دليل مدير النظام
               </h3>
             </div>
             <div className="space-y-3 text-xs text-gray-300 leading-relaxed">
-              <div className="p-3 rounded-xl bg-[#081933] border border-cyan-500/20">
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <b className="text-cyan-300 block mb-1">الخطوة ١: مراجعة طلبات الانضمام</b>
                 راجع بيانات المزوّد والأنشطة المقدمة ومطابقتها.
               </div>
-              <div className="p-3 rounded-xl bg-[#081933] border border-cyan-500/20">
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <b className="text-cyan-300 block mb-1">الخطوة ٢: مشاركة كود التفعيل (OTP)</b>
                 استخدم أزرار الواتساب أو الإيميل المباشرة لإرسال كود التحقق للمزوّد.
               </div>
-              <div className="p-3 rounded-xl bg-[#081933] border border-cyan-500/20">
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
                 <b className="text-cyan-300 block mb-1">الخطوة ٣: الاعتماد والنشر السحابي</b>
                 اضغط "تفعيل واعتماد المزوّد" لنقله فوراً لقائمة المعتمدين في Supabase.
               </div>
@@ -717,7 +717,7 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={() => setIsGuideOpen(false)}
-              className="w-full rounded-xl bg-cyan-500 py-2.5 text-xs font-bold text-[#081933]"
+              className="w-full rounded-xl bg-cyan-500 py-2.5 text-xs font-bold text-slate-950"
             >
               فهمت الدليل، إغلاق
             </button>

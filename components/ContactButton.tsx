@@ -102,17 +102,38 @@ export default function ContactButton({
   }, []);
 
   const handleClick = async (e: React.MouseEvent) => {
-    // State 1: Logged Out -> Redirect to login
+    e.preventDefault();
+    e.stopPropagation();
+
+    // State 1: Logged Out -> Track Anonymous Intent & Redirect
     if (isAuthResolved && !currentUser) {
-      e.preventDefault();
-      const redirectUrl = pathname ? `/login?callbackUrl=${encodeURIComponent(pathname)}` : '/login';
+      // A. Fire-and-forget tracking for Top-of-Funnel intent
+      const intentPayload = {
+        viewer_id: 'anonymous', 
+        provider_id: String(providerId),
+        equipment_title: equipmentTitle || null,
+        created_at: new Date().toISOString(),
+      };
+      
+      // Do not await this so the redirect is instant
+      supabase.from('contact_requests').insert([intentPayload]).then(
+        ({ error }) => {
+          if (error) {
+            supabase.from('lead_tracking').insert([intentPayload]).then(() => {}, () => {});
+          }
+        },
+        () => {}
+      );
+
+      // B. Redirect to login with proper callback
+      const currentPath = pathname || '/directory'; 
+      const redirectUrl = `/login?callbackUrl=${encodeURIComponent(currentPath)}`;
       router.push(redirectUrl);
       return;
     }
 
     // State 2: Logged In & Not Revealed yet -> Reveal & Log Lead
     if (!isRevealed) {
-      e.preventDefault();
       setIsRevealed(true);
       setIsLoggingLead(true);
 
@@ -157,9 +178,13 @@ export default function ContactButton({
     const waLink = getWhatsAppLink(phoneNumber, `مرحباً، أود الاستفسار بخصوص ${equipmentTitle || 'المعدة/الخدمة المعروضة على Survsta'}`);
 
     return (
-      <div className="inline-flex items-center gap-1.5 animate-in fade-in zoom-in-95 duration-200">
+      <div
+        className="inline-flex items-center gap-1.5 animate-in fade-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         <a
           href={`tel:+${rawDigits}`}
+          onClick={(e) => e.stopPropagation()}
           className="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
           title="اتصال هاتفي مباشر"
         >
@@ -168,6 +193,7 @@ export default function ContactButton({
         </a>
         <a
           href={waLink}
+          onClick={(e) => e.stopPropagation()}
           target="_blank"
           rel="noopener noreferrer"
           className="rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white px-2.5 py-1.5 text-xs font-bold transition flex items-center gap-1 shadow-md shadow-emerald-500/20"

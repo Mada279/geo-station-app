@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import ContactButton from '@/components/ContactButton';
 import { supabase } from '@/utils/supabaseClient';
+import { getEquipmentImageUrl, getDefaultCategoryImage } from '@/utils/helpers';
 
 interface EquipmentItem {
   id: string | number;
@@ -25,35 +26,7 @@ interface EquipmentItem {
   specs: Record<string, string>;
   providerName?: string;
   providerPhone?: string;
-}
-
-// Fallback image helper
-function getEquipmentImageUrl(rawUrl?: string | null, category?: string, title?: string): string {
-  if (!rawUrl) {
-    const t = (title || '').toLowerCase();
-    const c = (category || '').toLowerCase();
-    if (c.includes('gnss') || c.includes('gps') || t.includes('gps') || t.includes('rtk')) {
-      return '/assets/img/stonex-s900-product.jpg';
-    }
-    if (c.includes('ميزان') || t.includes('ميزان') || t.includes('level')) {
-      return '/assets/img/auto-level-site.jpg';
-    }
-    if (c.includes('درون') || t.includes('drone')) {
-      return '/assets/img/drone-orthophoto-site.jpg';
-    }
-    return '/assets/img/leica-ts16-product.jpg';
-  }
-  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://') || rawUrl.startsWith('data:image') || rawUrl.startsWith('/')) {
-    return rawUrl;
-  }
-  const lower = rawUrl.toLowerCase();
-  if (lower.includes('gps') || lower.includes('rtk')) {
-    return '/assets/img/stonex-s900-product.jpg';
-  }
-  if (lower.includes('level') || lower.includes('ميزان')) {
-    return '/assets/img/auto-level-site.jpg';
-  }
-  return '/assets/img/leica-ts16-product.jpg';
+  providerId?: string;
 }
 
 export default function EquipmentPage() {
@@ -160,6 +133,7 @@ export default function EquipmentPage() {
               },
               providerName: provName,
               providerPhone: provPhone,
+              providerId: row.provider_id ? String(row.provider_id) : undefined,
             };
           });
 
@@ -390,6 +364,10 @@ export default function EquipmentPage() {
                             fill
                             src={item.img}
                             unoptimized
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.src = getDefaultCategoryImage(item.cat, item.title);
+                            }}
                           />
                           <div className="absolute top-3 right-3 flex gap-1.5">
                             {item.modes.map((m, i) => (

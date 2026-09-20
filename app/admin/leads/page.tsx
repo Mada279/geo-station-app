@@ -6,7 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AdminLeadsPage() {
   return (
-    <div className="flex min-h-screen bg-[#081933] text-gray-100" style={{ direction: 'rtl' }}>
+    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       <AdminSidebar />
       <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         
@@ -26,7 +26,7 @@ export default function AdminLeadsPage() {
         
         {/* KPI Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-2xl border border-cyan-500/30 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>طلبات جديدة واردة</span>
               <span className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 text-base">🔔</span>
@@ -35,7 +35,7 @@ export default function AdminLeadsPage() {
             <div className="text-[11px] text-cyan-300 mt-2 font-semibold">تتطلب توجيه للمزوّدين الأنسب</div>
           </div>
 
-          <div className="rounded-2xl border border-amber-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>قيد التفاوض والتسعير</span>
               <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 text-base">💬</span>
@@ -44,7 +44,7 @@ export default function AdminLeadsPage() {
             <div className="text-[11px] text-amber-300/80 mt-2 font-semibold">عروض أسعار قيد المراجعة</div>
           </div>
 
-          <div className="rounded-2xl border border-emerald-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>صفقات تم إغلاقها</span>
               <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 text-base">🤝</span>
@@ -53,7 +53,7 @@ export default function AdminLeadsPage() {
             <div className="text-[11px] text-emerald-400 mt-2 font-semibold">▲ تسليم واستلام ناجح</div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>نسبة تحويل الطلبات</span>
               <span className="p-2 rounded-xl bg-purple-500/10 text-purple-400 text-base">📊</span>
@@ -64,47 +64,53 @@ export default function AdminLeadsPage() {
         </div>
 
         {/* Leads Table */}
-        <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E] p-6 shadow-xl space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-cyan-500/20 pb-4">
+        <div className="rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800/50 pb-4">
             <div>
               <h3 className="text-base font-bold text-white">قائمة الطلبات وعروض الأسعار الحالية</h3>
               <p className="text-xs text-gray-400 mt-0.5">متابعة الطلبات المفتوحة وتوزيعها جغرافياً على مزوّدي المعدات</p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-3.5 py-2 rounded-xl bg-gradient-to-l from-cyan-500 to-[#1CA7FF] text-xs font-bold text-[#081933] shadow-md hover:brightness-110 transition">
+              <button className="px-3.5 py-2 rounded-xl bg-gradient-to-l from-cyan-500 to-sky-500 text-xs font-bold text-slate-950 shadow-md hover:brightness-110 transition">
                 + إنشاء طلب يدوي
               </button>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-right text-xs text-gray-300">
-              <thead className="bg-[#081933] text-gray-400 border-b border-cyan-500/20 font-bold">
+            <table className="w-full text-right text-xs text-slate-200 bg-slate-900">
+              <thead className="bg-slate-950 text-slate-300 border-b border-slate-800 font-bold">
                 <tr>
-                  <th className="p-3.5">رقم الطلب</th>
-                  <th className="p-3.5">الجهة الطالبة</th>
-                  <th className="p-3.5">المعدات المطلوبة</th>
-                  <th className="p-3.5">موقع المشروع والمدة</th>
-                  <th className="p-3.5">الميزانية المقترحة</th>
-                  <th className="p-3.5">حالة الطلب</th>
-                  <th className="p-3.5 text-center">الإجراءات</th>
+                  <th className="p-3.5 text-slate-300">رقم الطلب</th>
+                  <th className="p-3.5 text-slate-300">الجهة الطالبة</th>
+                  <th className="p-3.5 text-slate-300">المعدات المطلوبة</th>
+                  <th className="p-3.5 text-slate-300">موقع المشروع والمدة</th>
+                  <th className="p-3.5 text-slate-300">الميزانية المقترحة</th>
+                  <th className="p-3.5 text-slate-300">حالة الطلب</th>
+                  <th className="p-3.5 text-slate-300 text-center">الإجراءات</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-cyan-500/10">
+              <tbody className="divide-y divide-slate-800/50">
                 {[
-                  { id: 'ORD-8921', client: 'شركة أوراسكوم للإنشاءات', equipment: 'عدد 2 جهاز GNSS + Base', location: 'العاصمة الإدارية — 3 أسابيع', budget: '42,000 ج.م', status: 'جديد بانتظار العروض', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30' },
-                  { id: 'ORD-8919', client: 'مكتب خطيب وعلمي', equipment: 'محطة رصد متكاملة Leica TS16', location: 'العلمين الجديدة — شهرين', budget: '80,000 ج.م', status: 'جاري التفاوض', color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' },
-                  { id: 'ORD-8910', client: 'مجموعة حسن علام', equipment: 'ميزان قامة دقيق + ملحقات', location: 'السادس من أكتوبر — 10 أيام', budget: '15,000 ج.م', status: 'تم الاتفاق والتوريد', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
-                ].map((row, idx) => (
-                  <tr key={idx} className="hover:bg-[#081933]/50 transition">
-                    <td className="p-3.5 font-mono font-bold text-cyan-300">{row.id}</td>
-                    <td className="p-3.5 font-bold text-white">{row.client}</td>
-                    <td className="p-3.5 text-gray-300">{row.equipment}</td>
-                    <td className="p-3.5 text-gray-400">{row.location}</td>
-                    <td className="p-3.5 font-bold text-white">{row.budget}</td>
+                  { id: 'ORD-8921', requester_name: 'شركة أوراسكوم للإنشاءات', equipment: 'عدد 2 جهاز GNSS + Base', location: 'العاصمة الإدارية — 3 أسابيع', budget: '42,000 ج.م', status: 'جديد بانتظار العروض', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
+                  { id: 'ORD-8919', requester_name: 'مكتب خطيب وعلمي', equipment: 'محطة رصد متكاملة Leica TS16', location: 'العلمين الجديدة — شهرين', budget: '80,000 ج.م', status: 'جاري التفاوض', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+                  { id: 'ORD-8910', requester_name: 'مجموعة حسن علام', equipment: 'ميزان قامة دقيق + ملحقات', location: 'السادس من أكتوبر — 10 أيام', budget: '15,000 ج.م', status: 'تم الاتفاق والتوريد', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+                ].map((lead: any, idx: number) => (
+                  <tr key={idx} className="hover:bg-slate-800/50 transition">
+                    <td className="p-3.5 font-mono font-bold text-cyan-300">{lead.id}</td>
+                    <td className="p-3.5 font-bold text-white">
+                      <span>{lead.requester_name || lead.viewer_id || 'زائر غير مسجل'}</span>
+                    </td>
+                    <td className="p-3.5 text-slate-200">{lead.equipment}</td>
+                    <td className="p-3.5 text-slate-300">{lead.location}</td>
+                    <td className="p-3.5 font-bold text-white">{lead.budget}</td>
                     <td className="p-3.5">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${row.color}`}>
-                        {row.status}
+                      <span className={`inline-flex items-center justify-center px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border ${lead.color || (
+                        lead.status === 'جديد بانتظار العروض' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' :
+                        lead.status === 'جاري التفاوض' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
+                        'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                      )}`}>
+                        {lead.status}
                       </span>
                     </td>
                     <td className="p-3.5 text-center space-x-2 space-x-reverse">

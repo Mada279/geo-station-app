@@ -6,7 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AdminVerificationPage() {
   return (
-    <div className="flex min-h-screen bg-[#081933] text-gray-100" style={{ direction: 'rtl' }}>
+    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       <AdminSidebar />
       <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         
@@ -26,7 +26,7 @@ export default function AdminVerificationPage() {
         
         {/* KPI Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-2xl border border-amber-500/30 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-amber-500/30 bg-slate-900 p-5 shadow-xl backdrop-blur-sm">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>وثائق قيد التدقيق الفني</span>
               <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 text-base">⏳</span>
@@ -35,7 +35,7 @@ export default function AdminVerificationPage() {
             <div className="text-[11px] text-amber-300/80 mt-2 font-semibold">تتطلب مراجعة من الإدارة</div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-5 shadow-xl backdrop-blur-sm">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>مزوّدون موثقون بالكامل</span>
               <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 text-base">✅</span>
@@ -44,7 +44,7 @@ export default function AdminVerificationPage() {
             <div className="text-[11px] text-emerald-400 mt-2 font-semibold">سجل تجاري وبطاقة ضريبية معتمدة</div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-5 shadow-xl backdrop-blur-sm">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>شهادات معايرة سارية</span>
               <span className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 text-base">📐</span>
@@ -53,7 +53,7 @@ export default function AdminVerificationPage() {
             <div className="text-[11px] text-cyan-300 mt-2 font-semibold">معتمدة من مراكز المعايرة الرسمية</div>
           </div>
 
-          <div className="rounded-2xl border border-red-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-red-500/20 bg-slate-900 p-5 shadow-xl backdrop-blur-sm">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>تنبيهات انتهاء المعايرة</span>
               <span className="p-2 rounded-xl bg-red-500/10 text-red-400 text-base">⚠️</span>
@@ -64,8 +64,8 @@ export default function AdminVerificationPage() {
         </div>
 
         {/* Verification Queue Table */}
-        <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E] p-6 shadow-xl space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-cyan-500/20 pb-4">
+        <div className="rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-800/50 pb-4">
             <div>
               <h3 className="text-base font-bold text-white">قائمة الوثائق المقدمة للتحقق</h3>
               <p className="text-xs text-gray-400 mt-0.5">شهادات المعايرة والسجلات الضريبية والتجارية الجديدة</p>
@@ -78,31 +78,39 @@ export default function AdminVerificationPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-right text-xs text-gray-300">
-              <thead className="bg-[#081933] text-gray-400 border-b border-cyan-500/20 font-bold">
+            <table className="w-full text-right text-xs text-slate-200 bg-slate-900">
+              <thead className="bg-slate-950 text-slate-300 border-b border-slate-800 font-bold">
                 <tr>
-                  <th className="p-3.5">اسم الجهة / المزوّد</th>
-                  <th className="p-3.5">نوع المستند</th>
-                  <th className="p-3.5">رقم المستند / السيريال</th>
-                  <th className="p-3.5">تاريخ التقديم</th>
-                  <th className="p-3.5">الحالة</th>
-                  <th className="p-3.5 text-center">الإجراءات</th>
+                  <th className="p-3.5 text-slate-300">اسم الجهة / المزوّد</th>
+                  <th className="p-3.5 text-slate-300">نوع المستند</th>
+                  <th className="p-3.5 text-slate-300">رقم المستند / السيريال</th>
+                  <th className="p-3.5 text-slate-300">تاريخ التقديم</th>
+                  <th className="p-3.5 text-slate-300">الحالة</th>
+                  <th className="p-3.5 text-slate-300 text-center">الإجراءات</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-cyan-500/10">
+              <tbody className="divide-y divide-slate-800/50">
                 {[
-                  { org: 'مكتب الدلتا للهندسة والمساحة', type: 'شهادة معايرة محطة رصد متكاملة TS07', ref: 'CAL-2026-894', date: 'منذ 2 ساعة', status: 'قيد الفحص', color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' },
-                  { org: 'الشركة الهندسية للتجهيزات الجيوديسية', type: 'السجل التجاري والبطاقة الضريبية', ref: 'CR-104928', date: 'اليوم 10:30 ص', status: 'بانتظار المراجعة', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30' },
-                  { org: 'سرفاي تك للمقاولات والمساحة', type: 'شهادة معايرة جهاز GNSS R12i', ref: 'CAL-2026-103', date: 'أمس', status: 'معتمد مبدئياً', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
-                ].map((row, idx) => (
-                  <tr key={idx} className="hover:bg-[#081933]/50 transition">
-                    <td className="p-3.5 font-bold text-white">{row.org}</td>
-                    <td className="p-3.5 text-cyan-200">{row.type}</td>
-                    <td className="p-3.5 font-mono text-gray-400">{row.ref}</td>
-                    <td className="p-3.5 text-gray-400">{row.date}</td>
+                  { provider_name: 'مكتب الدلتا للهندسة والمساحة', type: 'شهادة معايرة محطة رصد متكاملة TS07', ref: 'CAL-2026-894', date: 'منذ 2 ساعة', status: 'قيد الفحص' },
+                  { provider_name: 'الشركة الهندسية للتجهيزات الجيوديسية', type: 'السجل التجاري والبطاقة الضريبية', ref: 'CR-104928', date: 'اليوم 10:30 ص', status: 'بانتظار المراجعة' },
+                  { provider_name: 'سرفاي تك للمقاولات والمساحة', type: 'شهادة معايرة جهاز GNSS R12i', ref: 'CAL-2026-103', date: 'أمس', status: 'معتمد مبدئياً' },
+                ].map((doc: any, idx: number) => (
+                  <tr key={idx} className="hover:bg-slate-800/50 transition">
+                    <td className="p-3.5 font-semibold text-slate-200">
+                      <span className="font-semibold text-white">
+                        {doc.provider_name || doc.provider?.company_name || doc.provider?.name || 'مزود غير معروف'}
+                      </span>
+                    </td>
+                    <td className="p-3.5 text-slate-200">{doc.type}</td>
+                    <td className="p-3.5 font-mono text-slate-300">{doc.ref}</td>
+                    <td className="p-3.5 text-slate-400">{doc.date}</td>
                     <td className="p-3.5">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${row.color}`}>
-                        {row.status}
+                      <span className={`inline-flex items-center justify-center px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border ${
+                        doc.status === 'قيد الفحص' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
+                        doc.status === 'بانتظار المراجعة' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' :
+                        'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                      }`}>
+                        {doc.status}
                       </span>
                     </td>
                     <td className="p-3.5 text-center space-x-2 space-x-reverse">

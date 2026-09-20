@@ -6,7 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AdminSettingsPage() {
   return (
-    <div className="flex min-h-screen bg-[#081933] text-gray-100" style={{ direction: 'rtl' }}>
+    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       <AdminSidebar />
       <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         
@@ -26,7 +26,7 @@ export default function AdminSettingsPage() {
         
         {/* Connection & Health Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>قاعدة بيانات Supabase</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -35,7 +35,7 @@ export default function AdminSettingsPage() {
             <div className="text-[11px] text-gray-400 mt-1 font-mono">Latency: 38ms</div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>بوابة الدفع والفوترة</span>
               <span className="p-1 rounded-md bg-cyan-500/10 text-cyan-400 text-xs">💳</span>
@@ -44,7 +44,7 @@ export default function AdminSettingsPage() {
             <div className="text-[11px] text-cyan-300 mt-1">الجنيه المصري (EGP)</div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>خدمة الرسائل SMS OTP</span>
               <span className="p-1 rounded-md bg-purple-500/10 text-purple-400 text-xs">📱</span>
@@ -53,7 +53,7 @@ export default function AdminSettingsPage() {
             <div className="text-[11px] text-purple-300 mt-1">رصيد الرسائل: 8,420</div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>النسخ الاحتياطي التلقائي</span>
               <span className="p-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs">🛡️</span>
@@ -66,8 +66,8 @@ export default function AdminSettingsPage() {
         {/* Configuration Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* General Platform Settings */}
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E] p-6 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-white border-b border-cyan-500/20 pb-3 flex items-center gap-2">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-4">
+            <h3 className="text-base font-bold text-white border-b border-slate-800/50 pb-3 flex items-center gap-2">
               <span>🌐</span>
               <span>الإعدادات العامة وسياسات التأجير</span>
             </h3>
@@ -77,18 +77,18 @@ export default function AdminSettingsPage() {
                 <input
                   type="text"
                   defaultValue="Survsta — منصة الأجهزة والخدمات المساحية"
-                  className="w-full rounded-xl border border-cyan-500/30 bg-[#081933] px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400"
                 />
               </div>
               <div>
                 <label className="block text-gray-400 mb-1 font-semibold">الحد الأدنى لمدة حجز الأجهزة</label>
-                <select className="w-full rounded-xl border border-cyan-500/30 bg-[#081933] px-3.5 py-2.5 text-white focus:outline-none">
+                <select className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none">
                   <option>يوم واحد (24 ساعة)</option>
                   <option>3 أيام</option>
                   <option>أسبوع كامل</option>
                 </select>
               </div>
-              <div className="pt-2 flex items-center justify-between border-t border-cyan-500/10">
+              <div className="pt-2 flex items-center justify-between border-t border-slate-800/50">
                 <div>
                   <div className="font-bold text-white">إلزامية شهادة المعايرة السنوية</div>
                   <div className="text-gray-400 text-[11px]">منع إدراج أي جهاز لا يحمل شهادة معايرة سارية</div>
@@ -99,15 +99,15 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Security & Sessions */}
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E] p-6 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-white border-b border-cyan-500/20 pb-3 flex items-center gap-2">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-4">
+            <h3 className="text-base font-bold text-white border-b border-slate-800/50 pb-3 flex items-center gap-2">
               <span>🔒</span>
               <span>أمان المشرفين وإدارة الجلسات</span>
             </h3>
             <div className="space-y-3 text-xs">
               <div>
                 <label className="block text-gray-400 mb-1 font-semibold">مهلة انتهاء الجلسة عند عدم النشاط</label>
-                <select className="w-full rounded-xl border border-cyan-500/30 bg-[#081933] px-3.5 py-2.5 text-white focus:outline-none">
+                <select className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none">
                   <option>ساعتان (موصى به)</option>
                   <option>4 ساعات</option>
                   <option>8 ساعات</option>
@@ -119,10 +119,10 @@ export default function AdminSettingsPage() {
                 <input
                   type="email"
                   defaultValue="ahmed@survsta.com"
-                  className="w-full rounded-xl border border-cyan-500/30 bg-[#081933] px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400"
                 />
               </div>
-              <div className="pt-2 flex items-center justify-between border-t border-cyan-500/10">
+              <div className="pt-2 flex items-center justify-between border-t border-slate-800/50">
                 <div>
                   <div className="font-bold text-white">تسجيل التدقيق الصارم (Strict Audit)</div>
                   <div className="text-gray-400 text-[11px]">حفظ كافة استعلامات القراءة والكتابة وعناوين IP</div>
@@ -134,7 +134,7 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="flex justify-end pt-2">
-          <button className="px-6 py-2.5 rounded-xl bg-gradient-to-l from-cyan-500 to-[#1CA7FF] text-xs font-black text-[#081933] shadow-lg shadow-cyan-500/20 hover:brightness-110 transition">
+          <button className="px-6 py-2.5 rounded-xl bg-gradient-to-l from-cyan-500 to-sky-500 text-xs font-black text-slate-950 shadow-lg shadow-cyan-500/20 hover:brightness-110 transition">
             حفظ إعدادات النظام
           </button>
         </div>

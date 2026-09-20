@@ -92,11 +92,11 @@ code{background:#eef3f8;border-radius:6px;padding:2px 6px;font-size:12.5px;direc
 .chip.pur{background:#f0edfc;border-color:#d3caf5;color:#4f3fa8}
 .chip.solid{background:var(--navy2);color:#fff;border-color:var(--navy2)}
 
-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
-th,td{text-align:start;padding:11px 13px;font-size:13.5px;border-bottom:1px solid #eef2f6;vertical-align:middle}
-th{background:#f7fafc;color:var(--muted);font-weight:700;font-size:12.5px;white-space:nowrap}
-tbody tr:last-child td{border-bottom:0}
-tbody tr:hover{background:#fafcfe}
+.portal-table, .legacy-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.portal-table th, .portal-table td, .legacy-table th, .legacy-table td{text-align:start;padding:11px 13px;font-size:13.5px;border-bottom:1px solid #eef2f6;vertical-align:middle}
+.portal-table th, .legacy-table th{background:#f7fafc;color:var(--muted);font-weight:700;font-size:12.5px;white-space:nowrap}
+.portal-table tbody tr:last-child td, .legacy-table tbody tr:last-child td{border-bottom:0}
+.portal-table tbody tr:hover, .legacy-table tbody tr:hover{background:#fafcfe}
 .tblwrap{overflow-x:auto;border-radius:var(--r)}
 .tblwrap table{border-radius:0}
 td .acts{display:flex;gap:6px;flex-wrap:wrap}

@@ -6,7 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AdminAnalyticsPage() {
   return (
-    <div className="flex min-h-screen bg-[#081933] text-gray-100" style={{ direction: 'rtl' }}>
+    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       <AdminSidebar />
       <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         
@@ -26,7 +26,7 @@ export default function AdminAnalyticsPage() {
         
         {/* KPI Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>إجمالي قيمة الطلبات التقديرية</span>
               <span className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 text-base">💰</span>
@@ -38,7 +38,7 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>معدل إشغال المعدات المساحية</span>
               <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 text-base">📡</span>
@@ -50,7 +50,7 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>عقود الإيجار المنجزة</span>
               <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 text-base">📝</span>
@@ -59,7 +59,7 @@ export default function AdminAnalyticsPage() {
             <div className="text-[11px] text-cyan-300 mt-2 font-semibold">94% نسبة رضا العملاء</div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E]/90 p-5 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
               <span>متوسط زمن الاستجابة</span>
               <span className="p-2 rounded-xl bg-purple-500/10 text-purple-400 text-base">⚡</span>
@@ -71,8 +71,8 @@ export default function AdminAnalyticsPage() {
 
         {/* Charts & Analytics Visual Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 rounded-2xl border border-cyan-500/20 bg-[#0F253E] p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-4">
+          <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800/50 pb-4">
               <div>
                 <h3 className="text-base font-bold text-white">حجم الطلبات والنمو الشهري (2026)</h3>
                 <p className="text-xs text-gray-400 mt-0.5">مقارنة الطلبات المكتملة بعروض الأسعار الصادرة</p>
@@ -91,7 +91,7 @@ export default function AdminAnalyticsPage() {
                     <span>{row.month}</span>
                     <span className="text-cyan-400">{row.completed} مكتمل من {row.requests} طلب ({row.pct})</span>
                   </div>
-                  <div className="w-full bg-[#081933] rounded-full h-3.5 overflow-hidden border border-cyan-500/10">
+                  <div className="w-full bg-slate-950 rounded-full h-3.5 overflow-hidden border border-slate-800">
                     <div
                       className="bg-gradient-to-l from-cyan-400 to-blue-500 h-full rounded-full transition-all duration-500"
                       style={{ width: row.pct }}
@@ -102,8 +102,8 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-[#0F253E] p-6 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-white border-b border-cyan-500/20 pb-4">أكثر الأجهزة طلباً</h3>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-4">
+            <h3 className="text-base font-bold text-white border-b border-slate-800/50 pb-4">أكثر الأجهزة طلباً</h3>
             <div className="space-y-3">
               {[
                 { name: 'Leica TS07 Total Station', share: '38%', count: '130 عملية' },
@@ -111,7 +111,7 @@ export default function AdminAnalyticsPage() {
                 { name: 'Topcon OS-101 Total Station', share: '18%', count: '62 عملية' },
                 { name: 'CHCNAV i73+ GNSS Receiver', share: '15%', count: '51 عملية' },
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-[#081933]/60 border border-cyan-500/10">
+                <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
                   <div>
                     <div className="text-xs font-bold text-white">{item.name}</div>
                     <div className="text-[11px] text-gray-400 mt-0.5">{item.count}</div>
