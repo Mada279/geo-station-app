@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { supabase } from '@/utils/supabaseClient';
+import NotificationBell from '@/components/dashboard/NotificationBell';
 
 interface NavbarProps {
   user?: {
@@ -243,7 +244,8 @@ export default function Navbar({ user }: NavbarProps) {
               // Safe invisible placeholder during initial resolution to prevent hydration mismatch & flash
               <div className="h-9 w-28 opacity-0 pointer-events-none" />
             ) : currentUser ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
+                <NotificationBell userId={currentUser?.id} />
                 <Link
                   href={dashboardHref}
                   className="rounded-lg bg-[#F4B400] px-5 py-2 text-sm font-bold text-black shadow-sm hover:brightness-105 transition whitespace-nowrap"
@@ -261,7 +263,7 @@ export default function Navbar({ user }: NavbarProps) {
             ) : (
               <>
                 <Link
-                  href="/join"
+                  href="/onboarding"
                   className="rounded-lg bg-[#F4B400] px-5 py-2 text-sm font-bold text-black shadow-sm hover:brightness-105 transition whitespace-nowrap"
                 >
                   انضم الآن
@@ -276,20 +278,23 @@ export default function Navbar({ user }: NavbarProps) {
             )}
           </div>
 
-          {/* Mobile Hamburger Toggle */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden rounded-lg p-2 text-gray-400 hover:bg-gray-900 hover:text-white"
-            aria-label="Toggle navigation menu"
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {isMobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
+          {/* Mobile Actions: Notification Bell + Hamburger Toggle */}
+          <div className="md:hidden flex items-center gap-2">
+            {currentUser && <NotificationBell userId={currentUser?.id} />}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="rounded-lg p-2 text-gray-400 hover:bg-gray-900 hover:text-white"
+              aria-label="Toggle navigation menu"
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Mobile Drawer */}
@@ -373,7 +378,7 @@ export default function Navbar({ user }: NavbarProps) {
               ) : (
                 <>
                   <Link
-                    href="/join"
+                    href="/onboarding"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="text-center py-2.5 text-sm font-bold text-black bg-[#F4B400] rounded-lg hover:brightness-105"
                   >

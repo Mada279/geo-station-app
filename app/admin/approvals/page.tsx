@@ -92,11 +92,46 @@ export default function AdminApprovalsPage() {
   }, []);
 
   const handleApprove = async (id: string, name: string) => {
+    const approvedItem = items.find((item) => item.id === id);
     try {
       await supabase.from('providers').update({ status: 'approved' }).eq('id', id);
+
+      // Send in-app notification to provider
+      try {
+        await supabase.from('inapp_notifications').insert({
+          user_id: id,
+          title: 'تم اعتماد حسابك كمزود خدمة بنجاح! 🎉',
+          message: 'تهانينا! تمت مراجعة واعتماد حساب المزود الخاص بك من قبل الإدارة. يمكنك الآن نشر أجهزتك ومعداتك واستقبال طلبات الحجز.',
+          type: 'approval',
+          link: '/provider/dashboard',
+        });
+      } catch {}
+
+      // Update clients table active_modules if client entry exists
+      if (approvedItem?.email && approvedItem.email !== '—') {
+        try {
+          const { data: clientRow } = await supabase
+            .from('clients')
+            .select('id, active_modules')
+            .eq('email', approvedItem.email.trim().toLowerCase())
+            .maybeSingle();
+
+          if (clientRow) {
+            let updatedMods: any = clientRow.active_modules;
+            if (updatedMods && typeof updatedMods === 'object' && !Array.isArray(updatedMods)) {
+              updatedMods = { ...updatedMods, provider: 'active' };
+            } else if (Array.isArray(updatedMods)) {
+              updatedMods = Array.from(new Set([...updatedMods, 'provider']));
+            } else {
+              updatedMods = { client: 'active', provider: 'active' };
+            }
+            await supabase.from('clients').update({ active_modules: updatedMods }).eq('id', clientRow.id);
+          }
+        } catch {}
+      }
     } catch {}
     setItems((prev) => prev.filter((item) => item.id !== id));
-    showToast(`تم اعتماد المزوّد (${name}) بنجاح ونقله إلى القائمة المعتمدة ✅`);
+    showToast(`تم اعتماد المزوّد (${name}) بنجاح ونقله إلى القائمة المعتمدة وإرسال إشعار التفعيل ✅`);
   };
 
   const handleMarkNeedsRevision = async (id: string, name: string) => {

@@ -65,9 +65,14 @@ export default function ProviderSidebar({
           badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
         },
         {
-          href: '/provider/dashboard#leads',
+          href: '/provider/orders',
           label: 'صندوق الطلبات الواردة',
           icon: '📥',
+        },
+        {
+          href: '/notifications',
+          label: 'مركز الإشعارات والتنبيهات',
+          icon: '🔔',
         },
         {
           href: '/provider/dashboard#services',
@@ -87,12 +92,12 @@ export default function ProviderSidebar({
           badgeColor: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
         },
         {
-          href: '/provider/dashboard#locations',
+          href: '/provider/locations',
           label: 'المواقع والتغطية الجغرافية',
           icon: '📍',
         },
         {
-          href: '/provider/dashboard#team',
+          href: '/provider/team',
           label: 'الفريق ومسؤولو الاتصال',
           icon: '👥',
         },
@@ -102,17 +107,24 @@ export default function ProviderSidebar({
       title: 'النمو والانتشار',
       items: [
         {
-          href: '/provider/dashboard#analytics',
+          href: '/provider/analytics',
           label: 'تقارير التحليلات والمشاهدات',
           icon: '📈',
         },
         {
-          href: '/provider/dashboard#jobs',
+          href: '/provider/jobs',
           label: 'الوظائف الهندسية المنشورة',
           icon: '💼',
         },
         {
-          href: '/provider/dashboard#reviews',
+          href: '/provider/jobs/applications',
+          label: 'المتقدمون للوظائف (ATS)',
+          icon: '👥',
+          badge: 'جديد',
+          badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+        },
+        {
+          href: '/provider/reviews',
           label: 'التقييمات وآراء العملاء',
           icon: '⭐',
           badge: '4.9',
@@ -169,6 +181,41 @@ export default function ProviderSidebar({
         e.preventDefault();
         el.scrollIntoView({ behavior: 'smooth' });
       }
+      return;
+    }
+
+    if (item.label === 'صندوق الطلبات الواردة' || item.href === '/provider/orders') {
+      if (onClose) onClose();
+      return;
+    }
+
+    if (item.label === 'المواقع والتغطية الجغرافية' || item.href === '/provider/locations') {
+      if (onClose) onClose();
+      return;
+    }
+
+    if (
+      item.label === 'الوظائف الهندسية المنشورة' ||
+      item.href === '/provider/jobs' ||
+      item.label === 'المتقدمون للوظائف (ATS)' ||
+      item.href === '/provider/jobs/applications'
+    ) {
+      if (onClose) onClose();
+      return;
+    }
+
+    if (item.label === 'الفريق ومسؤولو الاتصال' || item.href === '/provider/team') {
+      if (onClose) onClose();
+      return;
+    }
+
+    if (item.label === 'التقييمات وآراء العملاء' || item.href === '/provider/reviews') {
+      if (onClose) onClose();
+      return;
+    }
+
+    if (item.label === 'تقارير التحليلات والمشاهدات' || item.href === '/provider/analytics') {
+      if (onClose) onClose();
       return;
     }
 

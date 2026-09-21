@@ -488,8 +488,8 @@ export default function FAQPage() {
                 <span>←</span>
               </Link>
               <Link
-                href="/join"
-                className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-[#081933] px-5 py-2.5 text-xs sm:text-sm font-bold text-cyan-300 hover:bg-[#102B4E] transition"
+                href="/onboarding"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-slate-900 hover:bg-amber-400 transition"
               >
                 <span>سجّل شركتك كمزود معتمد</span>
               </Link>

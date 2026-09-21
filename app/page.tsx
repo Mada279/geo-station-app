@@ -49,6 +49,23 @@ export default function HomePage() {
                 المنصة الرقمية المتخصصة لقطاع المساحة والهندسة: مكاتب معتمدة، بيع وتأجير أجهزة Total Station وGNSS، مراكز معايرة، خدمات هندسية ميدانية، وتدريب ووظائف متجددة.
               </p>
 
+              {/* Hero Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <Link
+                  href="/onboarding"
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-l from-amber-500 to-[#F4B400] px-6 py-3 text-sm font-black text-slate-950 shadow-lg shadow-amber-500/25 hover:brightness-110 hover:scale-105 active:scale-95 transition-all duration-200"
+                >
+                  <span>انضم إلينا الآن</span>
+                  <span className="text-base">←</span>
+                </Link>
+                <Link
+                  href="/directory"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-bold text-white hover:bg-white/10 transition"
+                >
+                  <span>استكشف الدليل الهندسي</span>
+                </Link>
+              </div>
+
               {/* Unified Search Component (Pill-style with glassmorphism) */}
               <div className="rounded-full border border-white/20 bg-white/10 p-2 backdrop-blur-xl shadow-2xl">
                 <form action="/directory" method="GET" className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
@@ -982,7 +999,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-4 pt-2">
                 <Link
-                  href="/join"
+                  href="/onboarding"
                   className="rounded-xl bg-[#F4B400] text-black px-6 py-3 text-sm font-bold shadow-md hover:brightness-110 transition"
                 >
                   سجّل جهتك مجانًا
@@ -1022,13 +1039,13 @@ export default function HomePage() {
             </div>
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/join"
+                href="/onboarding"
                 className="rounded-xl bg-[#F4B400] px-6 py-3 text-sm font-bold text-gray-950 shadow-md hover:brightness-110 transition"
               >
                 أضف احتياجك
               </Link>
               <Link
-                href="/join"
+                href="/onboarding"
                 className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-800 hover:bg-slate-50 transition shadow-xs"
               >
                 انضم كشريك

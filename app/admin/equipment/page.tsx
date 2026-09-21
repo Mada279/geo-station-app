@@ -8,24 +8,74 @@ interface EditEquipmentModalProps {
   item: any;
   isOpen: boolean;
   onClose: () => void;
-  onSaveSuccess: (updated: { id: string; title: string; description: string }) => void;
+  onSaveSuccess: (updated: { id: string; title: string; description: string; image_url?: string }) => void;
 }
 
 function EditEquipmentModal({ item, isOpen, onClose, onSaveSuccess }: EditEquipmentModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (item) {
       setTitle(item.title || item.name || '');
       setDescription(item.description || '');
+      setImageUrl(item.image_url || item.image || '');
       setErrorMsg(null);
     }
   }, [item]);
 
   if (!isOpen || !item) return null;
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingImage(true);
+    setErrorMsg(null);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const cleanFileName = `admin_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
+      const filePath = `equipment/${cleanFileName}`;
+
+      const { data: uploadData, error: uploadErr } = await supabase.storage
+        .from('equipment-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: file.type,
+        });
+
+      if (!uploadErr && uploadData) {
+        const { data: pubData } = supabase.storage.from('equipment-images').getPublicUrl(filePath);
+        if (pubData?.publicUrl) {
+          setImageUrl(pubData.publicUrl);
+          setIsUploadingImage(false);
+          return;
+        }
+      }
+
+      if (uploadErr) {
+        console.warn('[Admin Equipment Upload Warning]:', uploadErr.message);
+      }
+
+      // Base64 fallback preview
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        if (ev.target?.result) {
+          setImageUrl(ev.target.result as string);
+        }
+        setIsUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.error('[Admin Equipment Upload Exception]:', err);
+      setIsUploadingImage(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -37,13 +87,18 @@ function EditEquipmentModal({ item, isOpen, onClose, onSaveSuccess }: EditEquipm
     setErrorMsg(null);
 
     try {
-      // Execute Supabase update strictly for editable SEO fields only
+      // Execute Supabase update strictly for editable SEO and image fields
+      const updatePayload: Record<string, any> = {
+        title: title.trim(),
+        description: description.trim(),
+      };
+      if (imageUrl) {
+        updatePayload.image_url = imageUrl;
+      }
+
       const { error } = await supabase
         .from('equipment')
-        .update({
-          title: title.trim(),
-          description: description.trim(),
-        })
+        .update(updatePayload)
         .eq('id', item.id);
 
       if (error) {
@@ -54,6 +109,7 @@ function EditEquipmentModal({ item, isOpen, onClose, onSaveSuccess }: EditEquipm
         id: item.id,
         title: title.trim(),
         description: description.trim(),
+        image_url: imageUrl,
       });
       onClose();
     } catch (err: any) {
@@ -160,6 +216,50 @@ function EditEquipmentModal({ item, isOpen, onClose, onSaveSuccess }: EditEquipm
             <p className="text-[11px] text-gray-400 mt-1">
               يساعد محركات البحث في أرشفة الجهاز وفهرسته للمهندسين والمكاتب الباحثين عن هذه المعدات.
             </p>
+          </div>
+
+          {/* Equipment Image Preview & Upload */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-200 mb-1.5">
+              صورة الجهاز الأساسية (Equipment Photo)
+            </label>
+            <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-slate-950 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl.startsWith('http') || imageUrl.startsWith('data:') || imageUrl.startsWith('/') ? imageUrl : `/images/${imageUrl}`}
+                    alt={title || 'Equipment'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/total_station_leica.jpg';
+                    }}
+                  />
+                ) : (
+                  <span className="text-2xl">📸</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                  className="hidden"
+                  id="adminEquipmentImageUpload"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingImage}
+                  className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition inline-flex items-center gap-1.5"
+                >
+                  <span>{isUploadingImage ? 'جاري الرفع...' : '📷 رفع / استبدال صورة الجهاز'}</span>
+                </button>
+                <p className="text-[11px] text-gray-400 mt-1 truncate">
+                  يتم حفظها في سحابة التخزين (equipment-images) وتحديثها فورياً في المنصة.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -340,7 +440,7 @@ const INITIAL_EQUIPMENT = [
 
 export default function AdminEquipmentPage() {
   const [filterBrand, setFilterBrand] = useState('all');
-  const [equipmentList, setEquipmentList] = useState(INITIAL_EQUIPMENT);
+  const [equipmentList, setEquipmentList] = useState<any[]>(INITIAL_EQUIPMENT);
   const [searchTerm, setSearchTerm] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedEquipment, setSelectedEquipment] = useState<any | null>(null);
@@ -399,20 +499,22 @@ export default function AdminEquipmentPage() {
     loadLiveEquipment();
   }, []);
 
-  const handleSaveEquipmentSuccess = (updated: { id: string; title: string; description: string }) => {
+  const handleSaveEquipmentSuccess = (updated: { id: string; title: string; description: string; image_url?: string }) => {
     setEquipmentList((prev) =>
-      prev.map((item) =>
+      prev.map((item: any) =>
         item.id === updated.id
           ? {
               ...item,
               name: updated.title,
               title: updated.title,
               description: updated.description,
+              image_url: updated.image_url || item.image_url,
+              image: updated.image_url || item.image,
             }
           : item
       )
     );
-    showToast(`✅ تم تحديث بيانات الـ SEO للجهاز "${updated.title}" بنجاح!`);
+    showToast(`✅ تم تحديث بيانات وصورة الجهاز "${updated.title}" بنجاح!`);
   };
 
   const filteredEquipment = equipmentList.filter((item) => {

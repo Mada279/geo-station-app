@@ -305,7 +305,7 @@ function LoginForm() {
       {/* Footer Navigation */}
       <div className="mt-6 text-center text-xs text-gray-400">
         ليس لديك حساب بعد؟{' '}
-        <Link href="/join" className="text-cyan-400 font-semibold hover:underline">
+        <Link href="/onboarding" className="text-cyan-400 font-semibold hover:underline">
           انضم كشريك أو سجّل حساباً جديداً
         </Link>
       </div>

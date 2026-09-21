@@ -174,7 +174,7 @@ export default function ContactPage() {
                   <h4 className="font-bold text-slate-900 text-sm mb-1">هل أنت مزوّد خدمة؟</h4>
                   <p className="text-xs text-slate-600 mb-3">سجّل جهتك مباشرة عبر بوابة الشركاء بدل انتظار الرد.</p>
                   <Link
-                    href="/join"
+                    href="/onboarding"
                     className="block text-center rounded-lg bg-[#081933] text-white py-2.5 text-xs font-bold hover:bg-[#0F253E] transition"
                   >
                     انضم كشريك الآن
@@ -218,7 +218,7 @@ export default function ContactPage() {
               <div className="text-3xl mb-3">🏢</div>
               <h3 className="text-base font-bold text-slate-900 mb-2">أريد تسجيل مكتبي أو شركتي</h3>
               <p className="text-sm text-slate-600 mb-4">التسجيل ذاتي وسهل عبر نموذج الشركاء، ويراجعه فريق التوثيق خلال 48 ساعة عمل.</p>
-              <Link href="/join" className="inline-block px-4 py-2 bg-[#081933] hover:bg-[#0F253E] text-white text-xs font-bold rounded-lg transition">
+              <Link href="/onboarding" className="inline-block px-4 py-2 bg-[#081933] hover:bg-[#0F253E] text-white text-xs font-bold rounded-lg transition">
                 سجّل شركتك مجاناً
               </Link>
             </div>

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ProviderSidebar from './ProviderSidebar';
+import NotificationBell from '@/components/dashboard/NotificationBell';
 
 export default function ProviderClientShell({
   children,
@@ -36,6 +37,7 @@ export default function ProviderClientShell({
           </Link>
         </div>
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
             بوابة المزوّد
           </span>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import NotificationBell from '@/components/dashboard/NotificationBell';
 
 interface NavbarProps {
   user?: {
@@ -69,13 +70,14 @@ export default function Navbar({ user }: NavbarProps) {
         {/* User Actions / Auth Controls */}
         <div className="hidden md:flex items-center gap-3">
           <Link
-            href="/join"
+            href="/onboarding"
             className="rounded-lg bg-[#F4B400] px-5 py-2 text-sm font-bold text-black hover:brightness-110 shadow-sm transition"
           >
             انضم الآن
           </Link>
           {user ? (
             <div className="flex items-center gap-3">
+              <NotificationBell />
               {user.role === 'admin' && (
                 <Link
                   href="/admin"
@@ -156,7 +158,7 @@ export default function Navbar({ user }: NavbarProps) {
               تسجيل الدخول
             </Link>
             <Link
-              href="/join"
+              href="/onboarding"
               className="text-center py-2 text-sm font-semibold text-gray-950 bg-cyan-500 rounded-lg hover:bg-cyan-400"
             >
               انضم كشريك

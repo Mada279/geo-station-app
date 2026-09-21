@@ -438,8 +438,8 @@ export default function DirectoryPage() {
                   </p>
                   <div className="pt-2">
                     <Link
-                      href="/join"
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2 text-xs font-bold transition shadow-sm"
+                      href="/onboarding"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-900 px-5 py-2 text-xs font-bold transition shadow-sm"
                     >
                       <span>+</span>
                       <span>سجل مكتبك أو شركتك في الدليل الآن</span>

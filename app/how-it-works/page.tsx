@@ -184,8 +184,8 @@ export default function HowItWorksPage() {
           </div>
           <div className="flex gap-4">
             <Link
-              href="/join"
-              className="rounded-lg bg-[#F4B400] text-black font-bold px-6 py-3 text-sm hover:brightness-105 transition shadow-lg whitespace-nowrap"
+              href="/onboarding"
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-slate-900 hover:bg-amber-400 transition whitespace-nowrap"
             >
               تسجيل جهة جديدة
             </Link>

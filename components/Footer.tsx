@@ -111,12 +111,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/join" className="hover:text-cyan-400 transition-colors">
+                <Link href="/onboarding" className="hover:text-cyan-400 transition-colors">
                   فتح حساب جديد
                 </Link>
               </li>
               <li>
-                <Link href="/join" className="hover:text-cyan-400 transition-colors">
+                <Link href="/onboarding" className="hover:text-cyan-400 transition-colors">
                   سجّل مكتبك أو شركتك
                 </Link>
               </li>

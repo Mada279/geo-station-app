@@ -14,18 +14,75 @@ interface ReviewProviderModalProps {
 function ReviewProviderModal({ provider, isOpen, onClose, onSaveSuccess }: ReviewProviderModalProps) {
   const [name, setName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
+  const [docList, setDocList] = useState<{ title: string; url: string; field?: string }[]>([]);
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const docInputRef = React.useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (provider) {
       setName(provider.company_name || provider.name || provider.contact_person || '');
       setContactPerson(provider.contact_person || '');
       setErrorMsg(null);
+      const initialDocs = [
+        { title: 'السجل التجاري', url: provider.commercial_reg || provider.commercial_register || provider.cr_doc, field: 'commercial_reg' },
+        { title: 'البطاقة الضريبية', url: provider.tax_card || provider.tax_doc, field: 'tax_card' },
+        { title: 'رخصة مزاولة المهنة', url: provider.license || provider.license_doc, field: 'license' },
+        { title: 'شعار المكتب / الشركة', url: provider.logo_url || provider.avatar_url || provider.image_url, field: 'logo_url' },
+      ].filter((d) => Boolean(d.url));
+      setDocList(initialDocs);
     }
   }, [provider]);
 
   if (!isOpen || !provider) return null;
+
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !provider) return;
+    setIsUploadingDoc(true);
+    setErrorMsg(null);
+    try {
+      const ext = file.name.split('.').pop() || 'pdf';
+      const cleanFileName = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
+      const filePath = `documents/${cleanFileName}`;
+
+      const { data: uploadData, error: uploadErr } = await supabase.storage
+        .from('attachments')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: file.type,
+        });
+
+      let publicUrl = '';
+      if (!uploadErr && uploadData) {
+        const { data: pubData } = supabase.storage.from('attachments').getPublicUrl(filePath);
+        publicUrl = pubData?.publicUrl || '';
+      } else {
+        if (uploadErr) console.warn('[Attachment Storage Upload Warn]:', uploadErr.message);
+        publicUrl = URL.createObjectURL(file);
+      }
+
+      const newDoc = {
+        title: file.name,
+        url: publicUrl,
+        field: 'commercial_reg',
+      };
+      setDocList((prev) => [...prev, newDoc]);
+
+      // Update provider in Supabase
+      await supabase
+        .from('providers')
+        .update({ commercial_reg: publicUrl })
+        .eq('id', provider.id);
+    } catch (err: any) {
+      console.error('[Document Upload Exception]:', err);
+      setErrorMsg('تعذر رفع المستند. يرجى التأكد من تشغيل أمر إنشاء الـ Bucket وسياسات التخزين.');
+    } finally {
+      setIsUploadingDoc(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -77,13 +134,7 @@ function ReviewProviderModal({ provider, isOpen, onClose, onSaveSuccess }: Revie
     }
   };
 
-  // Extract documents or images if available
-  const docs = [
-    { title: 'السجل التجاري', url: provider.commercial_reg || provider.commercial_register || provider.cr_doc },
-    { title: 'البطاقة الضريبية', url: provider.tax_card || provider.tax_doc },
-    { title: 'رخصة مزاولة المهنة', url: provider.license || provider.license_doc },
-    { title: 'شعار المكتب / الشركة', url: provider.logo_url || provider.avatar_url || provider.image_url },
-  ].filter((d) => Boolean(d.url));
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in" style={{ direction: 'rtl' }}>
@@ -204,16 +255,36 @@ function ReviewProviderModal({ provider, isOpen, onClose, onSaveSuccess }: Revie
 
         {/* Uploaded Documents / Attachments */}
         <div className="space-y-2 rounded-xl bg-slate-950/60 p-4 border border-cyan-500/15">
-          <h3 className="text-xs font-bold text-gray-300 flex items-center gap-1.5">
-            <span>📎</span>
-            <span>المستندات والوثائق المرفوعة</span>
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-gray-300 flex items-center gap-1.5">
+              <span>📎</span>
+              <span>المستندات والوثائق المرفوعة</span>
+            </h3>
+            <div>
+              <input
+                ref={docInputRef}
+                type="file"
+                accept=".pdf,image/*,.doc,.docx"
+                onChange={handleDocUpload}
+                className="hidden"
+                id="adminDocUpload"
+              />
+              <button
+                type="button"
+                onClick={() => docInputRef.current?.click()}
+                disabled={isUploadingDoc}
+                className="px-2.5 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-[11px] font-bold border border-cyan-500/30 transition flex items-center gap-1"
+              >
+                <span>{isUploadingDoc ? 'جاري الرفع...' : '+ إرفاق مستند جديد'}</span>
+              </button>
+            </div>
+          </div>
           
-          {docs.length > 0 ? (
+          {docList.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-              {docs.map((doc, idx) => (
+              {docList.map((doc, idx) => (
                 <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-cyan-500/20 text-xs">
-                  <span className="text-gray-300 font-medium">{doc.title}</span>
+                  <span className="text-gray-300 font-medium truncate max-w-[140px]">{doc.title}</span>
                   <a
                     href={doc.url}
                     target="_blank"

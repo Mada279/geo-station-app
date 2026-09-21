@@ -51,7 +51,7 @@ export default function ProviderRegistrationWizard() {
     location: '',
     workingHours: '24 ساعة',
     services: ['إيجار أجهزة ومعدات مساحية', 'بيع وتوريد أجهزة ومستلزمات'],
-    equipmentPhotos: ['total_station_leica.jpg', 'gps_rtk_receiver.jpg'],
+    equipmentPhotos: [],
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -123,15 +123,31 @@ export default function ProviderRegistrationWizard() {
         }
 
         // 3. Insert record into providers table with status 'pending'
-        const { data, error } = await supabase.from('providers').insert([
-          {
+        const insertPayload: Record<string, any> = {
+          name: displayName,
+          email: cleanEmail,
+          phone: formData.phone.trim(),
+          location: fullLocation,
+          status: 'pending',
+          logo_url: formData.equipmentPhotos.length > 0 ? formData.equipmentPhotos[0] : null,
+          equipment_photos: formData.equipmentPhotos,
+        };
+
+        let { error } = await supabase.from('providers').insert([insertPayload]);
+
+        // Fallback gracefully if logo_url or equipment_photos columns do not exist yet in Supabase
+        if (error && (error.message?.includes('column') || error.code === 'PGRST204')) {
+          console.warn('[Supabase Insert retry with basic schema]:', error.message);
+          const basicPayload = {
             name: displayName,
             email: cleanEmail,
             phone: formData.phone.trim(),
             location: fullLocation,
             status: 'pending',
-          },
-        ]);
+          };
+          const res = await supabase.from('providers').insert([basicPayload]);
+          error = res.error;
+        }
 
         if (error) {
           console.error('[Supabase Registration Error]', error);
@@ -167,19 +183,60 @@ export default function ProviderRegistrationWizard() {
     });
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files && files.length > 0) {
-      setUploading(true);
-      setTimeout(() => {
-        const names = Array.from(files).map((f) => f.name);
-        setFormData((prev) => ({
-          ...prev,
-          equipmentPhotos: [...prev.equipmentPhotos, ...names],
-        }));
-        setUploading(false);
-      }, 600);
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    const newPhotos: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        const fileExt = file.name.split('.').pop() || 'jpg';
+        const cleanFileName = `reg_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+        const filePath = `registration/${cleanFileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('provider-images')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true,
+            contentType: file.type,
+          });
+
+        if (!uploadError && uploadData) {
+          const { data: publicUrlData } = supabase.storage
+            .from('provider-images')
+            .getPublicUrl(filePath);
+
+          if (publicUrlData?.publicUrl) {
+            newPhotos.push(publicUrlData.publicUrl);
+            continue;
+          }
+        }
+
+        if (uploadError) {
+          console.warn('[Storage upload warn]:', uploadError.message);
+        }
+
+        // Fallback: Read as base64 preview if storage upload failed
+        const reader = new FileReader();
+        const dataUrl = await new Promise<string>((resolve) => {
+          reader.onload = () => resolve((reader.result as string) || '');
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(file);
+        });
+        if (dataUrl) newPhotos.push(dataUrl);
+      } catch (err) {
+        console.warn('[handleFileUpload error]:', err);
+      }
     }
+
+    setFormData((prev) => ({
+      ...prev,
+      equipmentPhotos: [...prev.equipmentPhotos, ...newPhotos],
+    }));
+    setUploading(false);
   };
 
   const removePhoto = (indexToRemove: number) => {
@@ -512,7 +569,7 @@ export default function ProviderRegistrationWizard() {
                   📸
                 </div>
                 <div className="text-xs font-bold text-cyan-400 hover:underline">
-                  {uploading ? 'جاري معالجة الصور...' : 'اضغط هنا لرفع صور الأجهزة والمختبر (Mock File Upload)'}
+                  {uploading ? 'جاري رفع الصور ومعالجتها سحابياً...' : 'اضغط هنا لرفع صور الأجهزة والمكتب المساحي'}
                 </div>
                 <span className="text-[11px] text-gray-500">يدعم صيغ PNG, JPG للمحطات والمستقبلات وأطقم العمل</span>
               </label>
@@ -520,18 +577,23 @@ export default function ProviderRegistrationWizard() {
               {/* Uploaded photos list */}
               {formData.equipmentPhotos.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-gray-800/80">
-                  <div className="text-[11px] font-semibold text-gray-400 mb-2">الصور المرفقة ({formData.equipmentPhotos.length}):</div>
+                  <div className="text-[11px] font-semibold text-gray-400 mb-2">الصور المرفوعة ({formData.equipmentPhotos.length}):</div>
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {formData.equipmentPhotos.map((photoName, idx) => (
+                    {formData.equipmentPhotos.map((photoUrl, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-1.5 bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-gray-300"
+                        className="inline-flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-lg p-1.5 text-xs text-gray-300"
                       >
-                        <span>📷 {photoName}</span>
+                        {photoUrl.startsWith('http') || photoUrl.startsWith('data:') || photoUrl.startsWith('blob:') ? (
+                          <img src={photoUrl} alt={`Equipment ${idx + 1}`} className="w-8 h-8 rounded object-cover border border-cyan-500/30" />
+                        ) : (
+                          <span>📷</span>
+                        )}
+                        <span className="truncate max-w-[120px] font-mono text-[11px]">صورة {idx + 1}</span>
                         <button
                           type="button"
                           onClick={() => removePhoto(idx)}
-                          className="text-red-400 hover:text-red-300 font-bold ml-1 text-xs"
+                          className="text-red-400 hover:text-red-300 font-bold ml-1 text-xs px-1"
                           title="حذف"
                         >
                           ✕
