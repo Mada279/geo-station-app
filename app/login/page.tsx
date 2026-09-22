@@ -247,6 +247,14 @@ function LoginForm() {
         </p>
       </div>
 
+      {/* Success Alert */}
+      {searchParams.get('message') === 'password_updated' && (
+        <div className="mb-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-400 flex items-center gap-2">
+          <span>✓</span>
+          <span>تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.</span>
+        </div>
+      )}
+
       {/* Error Alert */}
       {error && (
         <div className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 p-3.5 text-xs text-red-400">
@@ -272,9 +280,17 @@ function LoginForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1">
-            كلمة المرور *
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-xs font-semibold text-gray-300">
+              كلمة المرور *
+            </label>
+            <Link
+              href="/auth/forgot-password"
+              className="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 hover:underline transition"
+            >
+              هل نسيت كلمة المرور؟
+            </Link>
+          </div>
           <input
             type="password"
             required
