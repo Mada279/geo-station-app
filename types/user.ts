@@ -10,6 +10,8 @@ export interface User {
   organization?: string;
   phone?: string;
   createdAt: string;
+  sourceTable?: 'clients' | 'providers' | 'system';
+  is_suspended?: boolean;
 }
 
 export type CreateUserInput = Omit<User, 'id' | 'createdAt'> & {

@@ -382,6 +382,10 @@ CREATE INDEX IF NOT EXISTS idx_clients_coverage_areas ON clients USING gin (cove
 ALTER TABLE providers ADD COLUMN IF NOT EXISTS coverage_areas JSONB DEFAULT '[]'::jsonb;
 CREATE INDEX IF NOT EXISTS idx_providers_coverage_areas ON providers USING gin (coverage_areas);
 
+-- Ensure is_suspended column exists on clients and providers for user suspension control
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS is_suspended BOOLEAN DEFAULT false;
+ALTER TABLE providers ADD COLUMN IF NOT EXISTS is_suspended BOOLEAN DEFAULT false;
+
 
 -- Table: orders (Client Order History)
 CREATE TABLE IF NOT EXISTS orders (

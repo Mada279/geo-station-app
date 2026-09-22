@@ -11,6 +11,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  toggleUserSuspension,
 } from '@/services/userService';
 
 
@@ -78,6 +79,21 @@ export default function UserManagementPage() {
     await deleteUser(userId);
     setUsers((prev) => prev.filter((u) => u.id !== userId));
     showToast('تم حذف المستخدم بنجاح.');
+  };
+
+  // 5. Toggle Suspension Dispatcher
+  const handleToggleSuspend = async (user: User) => {
+    try {
+      const updated = await toggleUserSuspension(user);
+      setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+      if (updated.status === 'suspended' || updated.is_suspended) {
+        showToast(`تم إيقاف حساب المستخدم "${user.name}" بنجاح.`);
+      } else {
+        showToast(`تم تفعيل حساب المستخدم "${user.name}" بنجاح.`);
+      }
+    } catch (err: any) {
+      showToast(err.message || 'تعذر تغيير حالة الحساب.');
+    }
   };
 
   // Filtered Users (Search query & Role filter)
@@ -154,6 +170,7 @@ export default function UserManagementPage() {
             users={filteredUsers}
             onEdit={handleStartEdit}
             onDelete={(user) => setDeletingUser(user)}
+            onToggleSuspend={handleToggleSuspend}
           />
         )}
 

@@ -76,12 +76,30 @@ function LoginForm() {
 
       // Check account approval status if registered in providers table
       if (dbProv) {
+        if (dbProv.status === 'suspended' || dbProv.is_suspended) {
+          throw new Error('تم إيقاف هذا الحساب من قبل إدارة المنصة. يرجى التواصل مع الدعم الفني.');
+        }
         if (dbProv.status === 'blocked' || dbProv.status === 'rejected') {
           throw new Error('هذا الحساب معطل أو تم رفضه. يرجى التواصل مع إدارة المنصة.');
         }
         if (dbProv.status === 'pending') {
           throw new Error('حسابك قيد المراجعة والاعتماد من قبل إدارة المنصة. يرجى الانتظار حتى اعتماده.');
         }
+      }
+
+      // Check client table for suspension status
+      try {
+        const { data: dbClient } = await supabase
+          .from('clients')
+          .select('id, status')
+          .eq('email', cleanEmail)
+          .maybeSingle();
+
+        if (dbClient && (dbClient.status === 'suspended' || (dbClient as any).is_suspended)) {
+          throw new Error('تم إيقاف هذا الحساب من قبل إدارة المنصة. يرجى التواصل مع الدعم الفني.');
+        }
+      } catch (clientErr: any) {
+        if (clientErr?.message && clientErr.message.includes('إيقاف')) throw clientErr;
       }
 
       // Attempt Supabase Auth validation

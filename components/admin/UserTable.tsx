@@ -7,6 +7,7 @@ interface UserTableProps {
   users: User[];
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
+  onToggleSuspend?: (user: User) => void;
 }
 
 const roleBadges: Record<UserRole, { label: string; class: string }> = {
@@ -21,7 +22,7 @@ const statusBadges: Record<UserStatus, { label: string; class: string }> = {
   suspended: { label: 'موقوف', class: 'bg-gray-500/20 text-gray-400 font-bold border border-gray-500/30 whitespace-nowrap' },
 };
 
-export default function UserTable({ users, onEdit, onDelete }: UserTableProps) {
+export default function UserTable({ users, onEdit, onDelete, onToggleSuspend }: UserTableProps) {
   if (users.length === 0) {
     return (
       <div className="rounded-xl border border-slate-800 bg-[#0a192f] p-12 text-center text-gray-400">
@@ -92,18 +93,37 @@ export default function UserTable({ users, onEdit, onDelete }: UserTableProps) {
               {/* Actions */}
               <td className="px-6 py-4 whitespace-nowrap text-left">
                 <div className="flex items-center justify-end gap-2">
+                  {onToggleSuspend && user.role !== 'admin' && (
+                    <button
+                      onClick={() => onToggleSuspend(user)}
+                      className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition ${
+                        user.status === 'suspended' || user.is_suspended
+                          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/20'
+                          : 'bg-amber-500/10 text-amber-300 border-amber-500/40 hover:bg-amber-500/20'
+                      }`}
+                      title={
+                        user.status === 'suspended' || user.is_suspended
+                          ? 'اضغط لتفعيل وإلغاء إيقاف الحساب'
+                          : 'اضغط لإيقاف الحساب ومنع تسجيل الدخول'
+                      }
+                    >
+                      {user.status === 'suspended' || user.is_suspended ? '✓ تفعيل' : '⛔ إيقاف'}
+                    </button>
+                  )}
                   <button
                     onClick={() => onEdit(user)}
                     className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs font-medium text-cyan-400 hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30 transition"
                   >
                     تعديل
                   </button>
-                  <button
-                    onClick={() => onDelete(user)}
-                    className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition"
-                  >
-                    حذف
-                  </button>
+                  {user.role !== 'admin' && (
+                    <button
+                      onClick={() => onDelete(user)}
+                      className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition"
+                    >
+                      حذف
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
