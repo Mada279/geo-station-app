@@ -70,6 +70,13 @@ export default function ProviderSidebar({
           icon: '📥',
         },
         {
+          href: '/provider/inbox',
+          label: 'صندوق الاستفسارات والوارد',
+          icon: '💬',
+          badge: 'جديد',
+          badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+        },
+        {
           href: '/notifications',
           label: 'مركز الإشعارات والتنبيهات',
           icon: '🔔',
@@ -189,7 +196,12 @@ export default function ProviderSidebar({
       return;
     }
 
-    if (item.label === 'صندوق الطلبات الواردة' || item.href === '/provider/orders') {
+    if (
+      item.label === 'صندوق الطلبات الواردة' ||
+      item.href === '/provider/orders' ||
+      item.label === 'صندوق الاستفسارات والوارد' ||
+      item.href === '/provider/inbox'
+    ) {
       if (onClose) onClose();
       return;
     }

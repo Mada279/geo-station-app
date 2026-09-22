@@ -1,5 +1,5 @@
 import InboxPage from '@/app/inbox/page';
 
-export default function ProviderInbox() {
+export default function DashboardInbox() {
   return <InboxPage />;
 }

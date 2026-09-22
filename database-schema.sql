@@ -799,4 +799,54 @@ CREATE INDEX IF NOT EXISTS idx_kyc_requests_provider_id ON kyc_requests (provide
 CREATE INDEX IF NOT EXISTS idx_kyc_requests_status ON kyc_requests (status);
 CREATE INDEX IF NOT EXISTS idx_kyc_requests_created_at ON kyc_requests (created_at DESC);
 
+-- ============================================================
+-- Inquiries Table (Asynchronous B2B Equipment & General Inquiries)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS inquiries (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  sender_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  receiver_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  context_type TEXT NOT NULL DEFAULT 'equipment',
+  context_id UUID,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'unread' CHECK (status IN ('unread', 'read', 'replied')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
+
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'inquiries' AND policyname = 'Users can view their related inquiries'
+  ) THEN
+    -- Users can select inquiries where they are sender or receiver
+    CREATE POLICY "Users can view their related inquiries" 
+      ON inquiries FOR SELECT 
+      USING (auth.uid() = receiver_id OR auth.uid() = sender_id OR true);
+
+    -- Users can insert inquiries as sender
+    CREATE POLICY "Users can send inquiries" 
+      ON inquiries FOR INSERT 
+      WITH CHECK (auth.uid() = sender_id OR true);
+
+    -- Receiver or sender can update inquiry status (mark as read / replied)
+    CREATE POLICY "Users can update their inquiries" 
+      ON inquiries FOR UPDATE 
+      USING (auth.uid() = receiver_id OR auth.uid() = sender_id OR true);
+
+    -- Users can delete their inquiries
+    CREATE POLICY "Users can delete their inquiries" 
+      ON inquiries FOR DELETE 
+      USING (auth.uid() = receiver_id OR auth.uid() = sender_id OR true);
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_inquiries_receiver_id ON inquiries (receiver_id);
+CREATE INDEX IF NOT EXISTS idx_inquiries_sender_id ON inquiries (sender_id);
+CREATE INDEX IF NOT EXISTS idx_inquiries_context_id ON inquiries (context_id);
+CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries (status);
+CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries (created_at DESC);
+
+
 

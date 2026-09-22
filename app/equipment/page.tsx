@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/utils/supabaseClient';
 import { getEquipmentImageUrl, getDefaultCategoryImage } from '@/utils/helpers';
 import ContactButton from '@/components/ContactButton';
+import InquiryModal from '@/components/inquiry/InquiryModal';
 
 export interface MarketplaceEquipmentItem {
   id: string;
@@ -88,6 +89,7 @@ export default function EquipmentMarketplacePage() {
   // Booking Flow State
   const [bookingItem, setBookingItem] = useState<MarketplaceEquipmentItem | null>(null);
   const [detailItem, setDetailItem] = useState<MarketplaceEquipmentItem | null>(null);
+  const [inquiryItem, setInquiryItem] = useState<MarketplaceEquipmentItem | null>(null);
   const [rentalDuration, setRentalDuration] = useState('3 أيام');
   const [rentalType, setRentalType] = useState<'daily' | 'monthly'>('daily');
   const [startDate, setStartDate] = useState('');
@@ -878,21 +880,30 @@ export default function EquipmentMarketplacePage() {
                             )}
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2 pt-1">
+                          <div className="grid grid-cols-3 gap-2 pt-1">
                             <button
                               type="button"
                               onClick={() => setDetailItem(item)}
-                              className="px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-medium border border-gray-700 transition"
+                              className="px-2.5 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-medium border border-gray-700 transition truncate text-center"
                             >
-                              التفاصيل والمواصفات
+                              المواصفات
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setInquiryItem(item)}
+                              className="px-2.5 py-2 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 text-xs font-bold border border-cyan-500/40 transition flex items-center justify-center gap-1 truncate"
+                            >
+                              <span>💬</span>
+                              <span>استفسار</span>
                             </button>
 
                             <button
                               type="button"
                               onClick={() => handleOpenBooking(item)}
-                              className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 font-black text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                              className="px-2.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 font-black text-xs shadow-md transition flex items-center justify-center gap-1 truncate"
                             >
-                              <span>اطلب الآن</span>
+                              <span>اطلب</span>
                               <span>←</span>
                             </button>
                           </div>
@@ -1197,6 +1208,19 @@ export default function EquipmentMarketplacePage() {
                       onClick={() => {
                         const it = detailItem;
                         setDetailItem(null);
+                        setInquiryItem(it);
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-[#0F253E] hover:bg-slate-800 text-cyan-300 font-bold text-xs border border-cyan-500/40 transition flex items-center gap-1.5"
+                    >
+                      <span>💬</span>
+                      <span>طلب استفسار</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const it = detailItem;
+                        setDetailItem(null);
                         handleOpenBooking(it);
                       }}
                       className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 font-black text-xs shadow-md transition"
@@ -1209,6 +1233,24 @@ export default function EquipmentMarketplacePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Reusable Inquiry Modal */}
+      {inquiryItem && (
+        <InquiryModal
+          isOpen={Boolean(inquiryItem)}
+          onClose={() => setInquiryItem(null)}
+          receiverId={inquiryItem.providerId || '00000000-0000-0000-0000-000000000002'}
+          receiverName={inquiryItem.providerName}
+          contextType="equipment"
+          contextId={inquiryItem.id}
+          contextTitle={inquiryItem.title}
+          contextImage={inquiryItem.imageUrl}
+          contextPrice={inquiryItem.dailyPrice ? `${inquiryItem.dailyPrice.toLocaleString('en-US')} ج.م / يوم` : undefined}
+          onSuccess={() => {
+            showToast('✓ تم إرسال استفسارك إلى المزوّد بنجاح');
+          }}
+        />
       )}
     </div>
   );
