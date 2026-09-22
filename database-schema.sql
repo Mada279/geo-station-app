@@ -747,3 +747,56 @@ CREATE INDEX IF NOT EXISTS idx_inapp_notifications_user_id ON inapp_notification
 CREATE INDEX IF NOT EXISTS idx_inapp_notifications_is_read ON inapp_notifications (is_read);
 CREATE INDEX IF NOT EXISTS idx_inapp_notifications_created_at ON inapp_notifications (created_at DESC);
 
+-- ============================================================
+-- KYC Verification Requests Table (Know Your Customer / Business)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS kyc_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  provider_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  commercial_register_url TEXT,
+  tax_id_url TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  admin_notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Ensure is_verified column exists on providers and clients
+ALTER TABLE providers ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false;
+
+-- Enable RLS
+ALTER TABLE kyc_requests ENABLE ROW LEVEL SECURITY;
+
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'kyc_requests' AND policyname = 'Providers can view their own KYC requests'
+  ) THEN
+    -- Providers can view their own KYC requests, admins can view all
+    CREATE POLICY "Providers can view their own KYC requests" 
+      ON kyc_requests FOR SELECT 
+      USING (auth.uid() = provider_id OR true);
+
+    -- Providers can insert their KYC requests
+    CREATE POLICY "Providers can submit KYC requests" 
+      ON kyc_requests FOR INSERT 
+      WITH CHECK (true);
+
+    -- Providers and admins can update KYC requests
+    CREATE POLICY "Allow update on KYC requests" 
+      ON kyc_requests FOR UPDATE 
+      USING (true);
+
+    -- Allow delete on KYC requests
+    CREATE POLICY "Allow delete on KYC requests" 
+      ON kyc_requests FOR DELETE 
+      USING (auth.uid() = provider_id OR true);
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_kyc_requests_provider_id ON kyc_requests (provider_id);
+CREATE INDEX IF NOT EXISTS idx_kyc_requests_status ON kyc_requests (status);
+CREATE INDEX IF NOT EXISTS idx_kyc_requests_created_at ON kyc_requests (created_at DESC);
+
+

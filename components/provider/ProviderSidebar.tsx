@@ -97,6 +97,11 @@ export default function ProviderSidebar({
           icon: '📍',
         },
         {
+          href: '/provider/verification',
+          label: 'توثيق الحساب (KYC)',
+          icon: '🛡️',
+        },
+        {
           href: '/provider/team',
           label: 'الفريق ومسؤولو الاتصال',
           icon: '👥',

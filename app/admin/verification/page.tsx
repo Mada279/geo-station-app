@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
 
@@ -21,6 +22,13 @@ export default function AdminVerificationPage() {
               مراجعة السجلات التجارية للمكاتب المساحية وشهادات المعايرة السنوية للأجهزة الهندسية.
             </p>
           </div>
+          <Link
+            href="/admin/kyc"
+            className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl shadow-lg transition flex items-center gap-2"
+          >
+            <span>🛡️</span>
+            <span>نظام توثيق الشركات والـ KYC المتقدم ←</span>
+          </Link>
         </div>
 
         
