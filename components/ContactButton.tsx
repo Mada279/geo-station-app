@@ -10,6 +10,7 @@ interface ContactButtonProps {
   equipmentTitle?: string;
   phoneNumber?: string;
   className?: string;
+  label?: string;
 }
 
 function getLocalUser() {
@@ -42,6 +43,7 @@ export default function ContactButton({
   equipmentTitle,
   phoneNumber = '01033134413',
   className,
+  label,
 }: ContactButtonProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -216,7 +218,7 @@ export default function ContactButton({
       <span className="group-hover:scale-110 transition-transform">
         {currentUser ? '📞' : '🔒'}
       </span>
-      <span>إظهار رقم التواصل</span>
+      <span>{label || 'إظهار رقم التواصل'}</span>
     </button>
   );
 }

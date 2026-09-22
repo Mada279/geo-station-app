@@ -9,6 +9,7 @@ import './styles/portal.css';
 import '@/app/globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://survsta.com'),
   title: 'Survsta — المنصة الرقمية لقطاع المساحة والجيوماتكس',
   description: 'سوق الأجهزة المساحية والخدمات والوظائف الهندسية في مصر والشرق الأوسط',
   icons: {
@@ -17,6 +18,35 @@ export const metadata: Metadata = {
     apple: '/images/Designer.png',
   },
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'Survsta — المنصة الرقمية لقطاع المساحة والجيوماتكس',
+    description: 'سوق الأجهزة المساحية والخدمات والوظائف الهندسية في مصر والشرق الأوسط',
+    url: 'https://survsta.com',
+    siteName: 'Survsta',
+    locale: 'ar_EG',
+    type: 'website',
+  },
+};
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Survsta',
+  alternateName: 'منصة سيرفستا للمساحة والجيوماتكس',
+  url: 'https://survsta.com',
+  logo: 'https://survsta.com/images/Designer.png',
+  description: 'المنصة الرقمية المتخصصة لقطاع المساحة والجيوماتكس في مصر والشرق الأوسط — دليل، سوق أجهزة، خدمات، وتدريب.',
+  sameAs: [
+    'https://www.facebook.com/share/1Cpz44dffG/',
+    'https://www.linkedin.com/company/survsta/',
+  ],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: '+201033134413',
+    contactType: 'customer support',
+    areaServed: 'EG',
+    availableLanguage: ['Arabic', 'English'],
+  },
 };
 
 export default function RootLayout({
@@ -26,6 +56,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+      </head>
       <body className="min-h-screen bg-[#f4f7fa] text-slate-800 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between">
         <Navbar />
         <main className="flex-grow">{children}</main>
