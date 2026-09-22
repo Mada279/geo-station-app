@@ -160,8 +160,11 @@ export default function InboxPage() {
       // Merge Supabase records
       let merged: InquiryItem[] = dbInquiries.map((inq) => {
         const parsed = parseInquiryContent(inq.message || '');
-        const client = clientMap.get(String(inq.sender_id));
+        const client = inq.sender_id ? clientMap.get(String(inq.sender_id)) : null;
         const eq = inq.context_id ? equipmentMap.get(String(inq.context_id)) : null;
+
+        const resolvedSenderName = inq.sender_name || client?.full_name || client?.company_name || parsed.senderName || 'مهندس موقع';
+        const resolvedSenderPhone = inq.sender_phone || client?.phone_number || parsed.senderPhone || '01033134413';
 
         return {
           id: inq.id,
@@ -172,12 +175,12 @@ export default function InboxPage() {
           message: inq.message,
           status: inq.status || 'unread',
           created_at: inq.created_at,
-          sender_name: client?.full_name || client?.company_name || parsed.senderName || 'مهندس موقع',
-          sender_phone: client?.phone_number || parsed.senderPhone || '01033134413',
+          sender_name: resolvedSenderName,
+          sender_phone: resolvedSenderPhone,
           sender_email: client?.email || '',
           preferred_method: parsed.preferredMethod,
           clean_message: parsed.cleanMessage,
-          context_title: eq?.title || 'جهاز مساحي',
+          context_title: eq?.title || (inq.context_type === 'general' ? 'استفسار عام عبر الموقع' : 'جهاز مساحي'),
           context_image: eq?.image_url,
           context_price: eq?.daily_price ? `${eq.daily_price} ج.م / يوم` : undefined,
         };

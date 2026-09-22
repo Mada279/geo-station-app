@@ -47,6 +47,7 @@ export default function AdminSidebar({ pendingCount = 0, isOpen = false, onClose
     {
       title: 'المتابعة والنظام',
       items: [
+        { href: '/admin/inbox', label: 'صندوق الاستفسارات (Inbox)', icon: '💬', badge: 'جديد', badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' },
         { href: '/admin/leads', label: 'إدارة الطلبات', icon: '📥' },
         { href: '/admin/audit', label: 'سجل التدقيق', icon: '📜' },
         { href: '/admin/settings', label: 'إعدادات النظام', icon: '⚙️' },

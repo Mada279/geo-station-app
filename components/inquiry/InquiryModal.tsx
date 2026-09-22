@@ -104,8 +104,10 @@ export default function InquiryModal({
       }]\n[بيانات المرسل: ${senderName || 'عميل'} — هاتف: ${senderPhone}]\n\n${cleanMsg}`;
 
       const inquiryRecord = {
-        sender_id: senderId || '00000000-0000-0000-0000-000000000001',
-        receiver_id: receiverId || '00000000-0000-0000-0000-000000000002',
+        sender_id: senderId || null,
+        sender_name: senderName.trim() || 'عميل مساحة',
+        sender_phone: senderPhone.trim(),
+        receiver_id: receiverId || null,
         context_type: contextType,
         context_id: contextId || null,
         message: formattedMessage,

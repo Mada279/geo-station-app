@@ -800,53 +800,82 @@ CREATE INDEX IF NOT EXISTS idx_kyc_requests_status ON kyc_requests (status);
 CREATE INDEX IF NOT EXISTS idx_kyc_requests_created_at ON kyc_requests (created_at DESC);
 
 -- ============================================================
--- Inquiries Table (Asynchronous B2B Equipment & General Inquiries)
+-- ============================================================
+-- Inquiries Table (Unified Asynchronous B2B Equipment & Platform Inquiries)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS inquiries (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  sender_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  receiver_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  context_type TEXT NOT NULL DEFAULT 'equipment',
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  sender_name TEXT,
+  sender_phone TEXT,
+  receiver_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  context_type TEXT NOT NULL DEFAULT 'general' CHECK (context_type IN ('equipment', 'general', 'service')),
   context_id UUID,
   message TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'unread' CHECK (status IN ('unread', 'read', 'replied')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
+-- Ensure newly added columns exist if table was already created
+ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS sender_name TEXT;
+ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS sender_phone TEXT;
+
+-- Drop NOT NULL constraints if existing to allow guest inquiries and general platform inquiries
+DO $$ 
+BEGIN
+  ALTER TABLE inquiries ALTER COLUMN sender_id DROP NOT NULL;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 
 DO $$ 
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE tablename = 'inquiries' AND policyname = 'Users can view their related inquiries'
-  ) THEN
-    -- Users can select inquiries where they are sender or receiver
-    CREATE POLICY "Users can view their related inquiries" 
-      ON inquiries FOR SELECT 
-      USING (auth.uid() = receiver_id OR auth.uid() = sender_id OR true);
-
-    -- Users can insert inquiries as sender
-    CREATE POLICY "Users can send inquiries" 
-      ON inquiries FOR INSERT 
-      WITH CHECK (auth.uid() = sender_id OR true);
-
-    -- Receiver or sender can update inquiry status (mark as read / replied)
-    CREATE POLICY "Users can update their inquiries" 
-      ON inquiries FOR UPDATE 
-      USING (auth.uid() = receiver_id OR auth.uid() = sender_id OR true);
-
-    -- Users can delete their inquiries
-    CREATE POLICY "Users can delete their inquiries" 
-      ON inquiries FOR DELETE 
-      USING (auth.uid() = receiver_id OR auth.uid() = sender_id OR true);
-  END IF;
+  ALTER TABLE inquiries ALTER COLUMN receiver_id DROP NOT NULL;
+EXCEPTION WHEN OTHERS THEN NULL;
 END $$;
+
+ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
+
+-- Allow INSERT for anyone (guests & authenticated users from Contact page or Equipment modal)
+DROP POLICY IF EXISTS "Anyone can insert inquiries" ON inquiries;
+CREATE POLICY "Anyone can insert inquiries"
+  ON inquiries FOR INSERT
+  TO public
+  WITH CHECK (true);
+
+-- Allow SELECT for the receiver, sender, or admin (or general inquiries where receiver_id is NULL)
+DROP POLICY IF EXISTS "Users and admins can view inquiries" ON inquiries;
+CREATE POLICY "Users and admins can view inquiries"
+  ON inquiries FOR SELECT
+  TO public
+  USING (
+    auth.uid() = receiver_id 
+    OR auth.uid() = sender_id 
+    OR receiver_id IS NULL 
+    OR EXISTS (
+      SELECT 1 FROM auth.users 
+      WHERE auth.users.id = auth.uid() 
+      AND (auth.users.raw_user_meta_data->>'role' = 'admin' OR auth.users.email LIKE '%admin%')
+    )
+  );
+
+-- Allow UPDATE for receiver, sender, or admin
+DROP POLICY IF EXISTS "Recipients and admins can update inquiries" ON inquiries;
+CREATE POLICY "Recipients and admins can update inquiries"
+  ON inquiries FOR UPDATE
+  TO public
+  USING (
+    auth.uid() = receiver_id 
+    OR auth.uid() = sender_id 
+    OR receiver_id IS NULL
+  );
 
 CREATE INDEX IF NOT EXISTS idx_inquiries_receiver_id ON inquiries (receiver_id);
 CREATE INDEX IF NOT EXISTS idx_inquiries_sender_id ON inquiries (sender_id);
+CREATE INDEX IF NOT EXISTS idx_inquiries_context_type ON inquiries (context_type);
 CREATE INDEX IF NOT EXISTS idx_inquiries_context_id ON inquiries (context_id);
 CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries (status);
 CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries (created_at DESC);
+
 
 
 
