@@ -159,6 +159,10 @@ export default function FeaturedProviders() {
                 fill
                 src={p.img}
                 unoptimized
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.src = '/assets/img/hero-engineering-office.jpg';
+                }}
               />
               <div className="absolute top-3 right-3 flex gap-2 pointer-events-none">
                 <span className="rounded-md bg-[#F4B400] text-black px-2 py-0.5 text-xs font-black shadow-sm">

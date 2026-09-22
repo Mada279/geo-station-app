@@ -469,6 +469,10 @@ export default function DirectoryPage() {
                             fill
                             src={p.img}
                             unoptimized
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.src = '/assets/img/hero-engineering-office.jpg';
+                            }}
                           />
                           {p.featured && (
                             <span className="absolute top-3 right-3 bg-amber-400 text-black text-[11px] font-black px-2.5 py-1 rounded-md shadow pointer-events-none">

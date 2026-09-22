@@ -1,9 +1,280 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import FeaturedProviders from '@/components/FeaturedProviders';
+import { supabase } from '@/utils/supabaseClient';
+import { getEquipmentImageUrl } from '@/utils/helpers';
+
+interface HomepageEquipment {
+  id: string;
+  title: string;
+  category?: string;
+  brand?: string;
+  location?: string;
+  image_url: string;
+  listing_type?: 'rent' | 'sale' | 'both';
+  status_badge?: string;
+  condition?: string;
+  model_year?: string;
+  price_display: string;
+  provider_name: string;
+  is_available?: boolean;
+}
+
+const FALLBACK_EQUIPMENT: HomepageEquipment[] = [
+  {
+    id: 'mock-eq-1',
+    title: 'Leica TS16 Total Station',
+    category: 'Total Station',
+    brand: 'Leica',
+    location: 'الإسكندرية',
+    image_url: '/assets/img/leica-ts16-product.jpg',
+    listing_type: 'rent',
+    status_badge: 'متاح الآن',
+    condition: 'مستعمل — ممتاز',
+    model_year: 'موديل 2021',
+    price_display: '500 جنيه / يوم',
+    provider_name: 'مكتب النخبة للمساحة',
+    is_available: true,
+  },
+  {
+    id: 'mock-eq-2',
+    title: 'Topcon GT-1200 روبوتيك',
+    category: 'Total Station',
+    brand: 'Topcon',
+    location: 'القاهرة',
+    image_url: '/assets/img/topcon-gt1200-product.jpg',
+    listing_type: 'sale',
+    status_badge: 'متاح',
+    condition: 'جديد',
+    model_year: 'موديل 2025',
+    price_display: 'حسب العرض',
+    provider_name: 'النيل لأجهزة المساحة',
+    is_available: true,
+  },
+  {
+    id: 'mock-eq-3',
+    title: 'طقم GNSS RTK — Stonex S900',
+    category: 'GNSS / RTK',
+    brand: 'Stonex',
+    location: 'الجيزة',
+    image_url: '/assets/img/stonex-s900-product.jpg',
+    listing_type: 'both',
+    status_badge: 'متاح',
+    condition: 'مستعمل — جيد جدًا',
+    model_year: 'موديل 2022',
+    price_display: 'حسب المدة',
+    provider_name: 'النيل لأجهزة المساحة',
+    is_available: true,
+  },
+];
+
+interface HomepageJob {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  exp: string;
+  desc: string;
+  posted: string;
+  salary: string;
+}
+
+const FALLBACK_JOBS: HomepageJob[] = [
+  {
+    id: 'mock-job-1',
+    title: 'مسّاح موقع — مشروع سكني',
+    company: 'مكتب النخبة للمساحة',
+    location: 'الإسكندرية',
+    type: 'دوام كامل',
+    exp: 'خبرة 3-5 سنوات',
+    desc: 'مسؤول عن الرفع المساحي وتوقيع المحاور ومتابعة أعمال التنفيذ اليومية بالموقع وإعداد التقارير الدورية.',
+    posted: 'منذ يومين',
+    salary: 'يُحدد بعد المقابلة',
+  },
+  {
+    id: 'mock-job-2',
+    title: 'محلل نظم معلومات جغرافية GIS',
+    company: 'دلتا جيوماتكس',
+    location: 'القاهرة',
+    type: 'دوام كامل',
+    exp: 'خبرة 2-4 سنوات',
+    desc: 'إعداد قواعد بيانات مكانية وخرائط تحليلية للمشروعات ودعم فرق التصميم بالبيانات الجغرافية.',
+    posted: 'منذ 4 أيام',
+    salary: 'تنافسي',
+  },
+  {
+    id: 'mock-job-3',
+    title: 'مساعد مسّاح',
+    company: 'الغرب للخدمات المساحية',
+    location: 'البحيرة',
+    type: 'عقد مشروع',
+    exp: 'خبرة سنة فأكثر',
+    desc: 'دعم فريق الرفع الميداني وتجهيز المعدات ومساعدة المسّاح في القياسات والتوقيع.',
+    posted: 'منذ أسبوع',
+    salary: 'يومية + بدل انتقال',
+  },
+];
+
+function formatRelativeTime(dateString?: string): string {
+  if (!dateString) return 'حديثاً';
+  try {
+    const diffMs = Date.now() - new Date(dateString).getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (diffHours < 1) return 'منذ لحظات';
+    if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays === 1) return 'أمس';
+    if (diffDays === 2) return 'منذ يومين';
+    if (diffDays <= 10) return `منذ ${diffDays} أيام`;
+    return `منذ ${diffDays} يوم`;
+  } catch {
+    return 'حديثاً';
+  }
+}
 
 export default function HomePage() {
+  const [equipment, setEquipment] = useState<HomepageEquipment[]>(FALLBACK_EQUIPMENT);
+  const [jobs, setJobs] = useState<HomepageJob[]>(FALLBACK_JOBS);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadHomepageData() {
+      try {
+        // 1. Fetch latest active equipment
+        const { data: eqData } = await supabase
+          .from('equipment')
+          .select('*')
+          .eq('is_flagged_stolen', false)
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        if (isMounted && eqData && eqData.length > 0) {
+          const provIds = Array.from(new Set(eqData.map((e) => e.provider_id).filter(Boolean)));
+          let provMap: Record<string, { name: string; location?: string }> = {};
+
+          if (provIds.length > 0) {
+            const { data: provs } = await supabase
+              .from('providers')
+              .select('id, name, company_name, location')
+              .in('id', provIds);
+
+            if (provs) {
+              provs.forEach((p) => {
+                provMap[p.id] = {
+                  name: p.company_name || p.name || 'مكتب مساحي معتمد',
+                  location: p.location,
+                };
+              });
+            }
+          }
+
+          const mappedEq: HomepageEquipment[] = eqData.map((item) => {
+            const prov = item.provider_id ? provMap[item.provider_id] : null;
+            let listing_type: 'rent' | 'sale' | 'both' = 'rent';
+            if (item.daily_price && item.sale_price) listing_type = 'both';
+            else if (item.sale_price) listing_type = 'sale';
+
+            let price_display = 'حسب العرض';
+            if (item.daily_price) {
+              price_display = `${item.daily_price} جنيه / يوم`;
+            } else if (item.monthly_price) {
+              price_display = `${item.monthly_price} جنيه / شهر`;
+            } else if (item.sale_price) {
+              price_display = `${item.sale_price.toLocaleString()} جنيه`;
+            }
+
+            return {
+              id: item.id,
+              title: item.title || 'جهاز مساحي',
+              category: item.category || 'Total Station',
+              brand: item.brand || '',
+              location: prov?.location || 'مصر',
+              image_url: getEquipmentImageUrl(item.image_url, item.category, item.title),
+              listing_type,
+              status_badge: item.status === 'available' || !item.status ? 'متاح الآن' : item.status,
+              condition: item.condition || 'مستعمل — ممتاز',
+              model_year: item.model ? `موديل ${item.model}` : 'معاير وجاهز',
+              price_display,
+              provider_name: prov?.name || 'مكتب مساحي معتمد',
+              is_available: true,
+            };
+          });
+
+          if (mappedEq.length >= 3) {
+            setEquipment(mappedEq.slice(0, 3));
+          } else {
+            const combined = [...mappedEq, ...FALLBACK_EQUIPMENT.slice(mappedEq.length)];
+            setEquipment(combined.slice(0, 3));
+          }
+        }
+
+        // 2. Fetch latest active jobs
+        const { data: dbJobs } = await supabase
+          .from('job_postings')
+          .select('*')
+          .eq('status', 'open')
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        if (isMounted && dbJobs && dbJobs.length > 0) {
+          const jobProvIds = Array.from(new Set(dbJobs.map((j) => j.provider_id).filter(Boolean)));
+          let jobCompanyMap: Record<string, { name: string; location?: string }> = {};
+
+          if (jobProvIds.length > 0) {
+            const { data: provs } = await supabase
+              .from('providers')
+              .select('id, name, company_name, location')
+              .in('id', jobProvIds);
+
+            if (provs) {
+              provs.forEach((p) => {
+                jobCompanyMap[p.id] = {
+                  name: p.company_name || p.name || 'مكتب مساحي معتمد',
+                  location: p.location,
+                };
+              });
+            }
+          }
+
+          const mappedJobs: HomepageJob[] = dbJobs.map((j) => {
+            const comp = j.provider_id ? jobCompanyMap[j.provider_id] : null;
+            return {
+              id: j.id,
+              title: j.title || 'وظيفة هندسية',
+              company: comp?.name || 'مكتب مساحي معتمد',
+              location: j.location || comp?.location || 'مصر',
+              type: j.job_type || 'دوام كامل',
+              exp: j.experience_level ? `خبرة ${j.experience_level}` : 'خبرة مطلوبة',
+              desc: j.description || 'فرصة عمل بمجال المساحة والهندسة الميدانية.',
+              posted: formatRelativeTime(j.created_at),
+              salary: j.salary_range || 'يُحدد بعد المقابلة',
+            };
+          });
+
+          if (mappedJobs.length >= 3) {
+            setJobs(mappedJobs.slice(0, 3));
+          } else {
+            const combined = [...mappedJobs, ...FALLBACK_JOBS.slice(mappedJobs.length)];
+            setJobs(combined.slice(0, 3));
+          }
+        }
+      } catch (err) {
+        console.warn('[HomePage] Error loading dynamic data:', err);
+      }
+    }
+
+    loadHomepageData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f4f7fa] text-slate-800">
       
@@ -351,138 +622,72 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Equipment 1 */}
-            <article className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md hover:border-cyan-500 transition-all flex flex-col">
-              <div className="relative h-48 w-full overflow-hidden">
-                <Image
-                  alt="Leica TS16 Total Station"
-                  className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
-                  height={200}
-                  src="/assets/img/leica-ts16-product.jpg"
-                  width={400}
-                />
-                <div className="absolute top-3 right-3 flex gap-2">
-                  <span className="rounded-md bg-slate-900 text-white px-2 py-0.5 text-xs font-bold">إيجار</span>
-                  <span className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-0.5 text-xs font-semibold">
-                    متاح الآن
-                  </span>
-                </div>
-              </div>
-              <div className="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 hover:text-cyan-700 transition-colors">
-                    Leica TS16 Total Station
-                  </h3>
-                  <div className="text-xs text-slate-500 mt-1">Total Station • Leica • 📍 الإسكندرية</div>
-                  <div className="mt-3 flex gap-2">
-                    <span className="rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-xs">مستعمل — ممتاز</span>
-                    <span className="rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-xs">موديل 2021</span>
-                  </div>
-                  <div className="mt-3 text-lg font-bold text-slate-900">
-                    500 <span className="text-xs font-normal text-slate-500">جنيه / يوم</span>
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    المزوّد: <span className="text-cyan-700 font-semibold">مكتب النخبة للمساحة</span>
+            {equipment.map((item) => (
+              <article
+                key={item.id}
+                className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md hover:border-cyan-500 transition-all flex flex-col"
+              >
+                <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                  <Image
+                    alt={item.title}
+                    className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
+                    height={200}
+                    src={item.image_url || '/assets/img/hero-engineering-office.jpg'}
+                    width={400}
+                    onError={(e) => {
+                      e.currentTarget.src = '/assets/img/hero-engineering-office.jpg';
+                    }}
+                  />
+                  <div className="absolute top-3 right-3 flex gap-2">
+                    {item.listing_type === 'both' ? (
+                      <>
+                        <span className="rounded-md bg-slate-900 text-white px-2 py-0.5 text-xs font-bold">إيجار</span>
+                        <span className="rounded-md bg-amber-500 text-black px-2 py-0.5 text-xs font-bold">بيع</span>
+                      </>
+                    ) : item.listing_type === 'sale' ? (
+                      <span className="rounded-md bg-amber-500 text-black px-2 py-0.5 text-xs font-bold">بيع</span>
+                    ) : (
+                      <span className="rounded-md bg-slate-900 text-white px-2 py-0.5 text-xs font-bold">إيجار</span>
+                    )}
+                    <span className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-0.5 text-xs font-semibold">
+                      {item.status_badge || 'متاح الآن'}
+                    </span>
                   </div>
                 </div>
-                <div className="mt-5 pt-3 border-t border-slate-100">
-                  <Link
-                    href="/equipment"
-                    className="block w-full text-center rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 text-xs font-bold transition"
-                  >
-                    طلب تواصل
-                  </Link>
-                </div>
-              </div>
-            </article>
-
-            {/* Equipment 2 */}
-            <article className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md hover:border-cyan-500 transition-all flex flex-col">
-              <div className="relative h-48 w-full overflow-hidden">
-                <Image
-                  alt="Topcon GT-1200 روبوتيك"
-                  className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
-                  height={200}
-                  src="/assets/img/topcon-gt1200-product.jpg"
-                  width={400}
-                />
-                <div className="absolute top-3 right-3 flex gap-2">
-                  <span className="rounded-md bg-amber-500 text-black px-2 py-0.5 text-xs font-bold">بيع</span>
-                  <span className="rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-0.5 text-xs font-semibold">
-                    متاح
-                  </span>
-                </div>
-              </div>
-              <div className="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 hover:text-cyan-700 transition-colors">
-                    Topcon GT-1200 روبوتيك
-                  </h3>
-                  <div className="text-xs text-slate-500 mt-1">Total Station • Topcon • 📍 القاهرة</div>
-                  <div className="mt-3 flex gap-2">
-                    <span className="rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-xs">جديد</span>
-                    <span className="rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-xs">موديل 2025</span>
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 hover:text-cyan-700 transition-colors line-clamp-1">
+                      {item.title}
+                    </h3>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {item.category || 'معدات مساحة'} {item.brand ? `• ${item.brand}` : ''} • 📍 {item.location || 'مصر'}
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <span className="rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-xs">
+                        {item.condition || 'حالة ممتازة'}
+                      </span>
+                      <span className="rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-xs">
+                        {item.model_year || 'جاهز للعمل'}
+                      </span>
+                    </div>
+                    <div className="mt-3 text-lg font-bold text-slate-900">
+                      {item.price_display}
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      المزوّد: <span className="text-cyan-700 font-semibold">{item.provider_name}</span>
+                    </div>
                   </div>
-                  <div className="mt-3 text-lg font-bold text-slate-900">
-                    حسب العرض
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    المزوّد: <span className="text-cyan-700 font-semibold">النيل لأجهزة المساحة</span>
+                  <div className="mt-5 pt-3 border-t border-slate-100">
+                    <Link
+                      href="/equipment"
+                      className="block w-full text-center rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 text-xs font-bold transition"
+                    >
+                      طلب تواصل
+                    </Link>
                   </div>
                 </div>
-                <div className="mt-5 pt-3 border-t border-slate-100">
-                  <Link
-                    href="/equipment"
-                    className="block w-full text-center rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 text-xs font-bold transition"
-                  >
-                    طلب تواصل
-                  </Link>
-                </div>
-              </div>
-            </article>
-
-            {/* Equipment 3 */}
-            <article className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md hover:border-cyan-500 transition-all flex flex-col">
-              <div className="relative h-48 w-full overflow-hidden">
-                <Image
-                  alt="طقم GNSS RTK — Stonex S900"
-                  className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
-                  height={200}
-                  src="/assets/img/stonex-s900-product.jpg"
-                  width={400}
-                />
-                <div className="absolute top-3 right-3 flex gap-2">
-                  <span className="rounded-md bg-slate-900 text-white px-2 py-0.5 text-xs font-bold">إيجار</span>
-                  <span className="rounded-md bg-amber-500 text-black px-2 py-0.5 text-xs font-bold">بيع</span>
-                </div>
-              </div>
-              <div className="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 hover:text-cyan-700 transition-colors">
-                    طقم GNSS RTK — Stonex S900
-                  </h3>
-                  <div className="text-xs text-slate-500 mt-1">GNSS / RTK • Stonex • 📍 الجيزة</div>
-                  <div className="mt-3 flex gap-2">
-                    <span className="rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-xs">مستعمل — جيد جدًا</span>
-                    <span className="rounded-md bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-xs">موديل 2022</span>
-                  </div>
-                  <div className="mt-3 text-lg font-bold text-slate-900">
-                    حسب المدة
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    المزوّد: <span className="text-cyan-700 font-semibold">النيل لأجهزة المساحة</span>
-                  </div>
-                </div>
-                <div className="mt-5 pt-3 border-t border-slate-100">
-                  <Link
-                    href="/equipment"
-                    className="block w-full text-center rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 text-xs font-bold transition"
-                  >
-                    طلب تواصل
-                  </Link>
-                </div>
-              </div>
-            </article>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -847,86 +1052,36 @@ export default function HomePage() {
               </div>
 
               <div className="space-y-4">
-                {/* Job 1 */}
-                <article className="rounded-2xl border border-slate-200 bg-[#f4f7fa] p-5 hover:border-cyan-500 hover:bg-white transition-all shadow-sm">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-base font-bold text-slate-900 hover:text-cyan-700 transition-colors">
-                      مسّاح موقع — مشروع سكني
-                    </h3>
-                    <span className="rounded-md bg-cyan-50 border border-cyan-200 text-cyan-800 px-2 py-0.5 text-xs font-semibold">
-                      دوام كامل
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    مكتب النخبة للمساحة • 📍 الإسكندرية • خبرة 3-5 سنوات
-                  </div>
-                  <p className="text-slate-600 text-xs mt-2 leading-relaxed">
-                    مسؤول عن الرفع المساحي وتوقيع المحاور ومتابعة أعمال التنفيذ اليومية بالموقع وإعداد التقارير الدورية.
-                  </p>
-                  <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between">
-                    <span className="text-xs text-slate-500">🕒 منذ يومين • 💰 يُحدد بعد المقابلة</span>
-                    <Link
-                      href="/jobs"
-                      className="rounded-lg bg-white border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition shadow-xs"
-                    >
-                      تقديم سريع
-                    </Link>
-                  </div>
-                </article>
-
-                {/* Job 2 */}
-                <article className="rounded-2xl border border-slate-200 bg-[#f4f7fa] p-5 hover:border-cyan-500 hover:bg-white transition-all shadow-sm">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-base font-bold text-slate-900 hover:text-cyan-700 transition-colors">
-                      محلل نظم معلومات جغرافية GIS
-                    </h3>
-                    <span className="rounded-md bg-cyan-50 border border-cyan-200 text-cyan-800 px-2 py-0.5 text-xs font-semibold">
-                      دوام كامل
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    دلتا جيوماتكس • 📍 القاهرة • خبرة 2-4 سنوات
-                  </div>
-                  <p className="text-slate-600 text-xs mt-2 leading-relaxed">
-                    إعداد قواعد بيانات مكانية وخرائط تحليلية للمشروعات ودعم فرق التصميم بالبيانات الجغرافية.
-                  </p>
-                  <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between">
-                    <span className="text-xs text-slate-500">🕒 منذ 4 أيام • 💰 تنافسي</span>
-                    <Link
-                      href="/jobs"
-                      className="rounded-lg bg-white border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition shadow-xs"
-                    >
-                      تقديم سريع
-                    </Link>
-                  </div>
-                </article>
-
-                {/* Job 3 */}
-                <article className="rounded-2xl border border-slate-200 bg-[#f4f7fa] p-5 hover:border-cyan-500 hover:bg-white transition-all shadow-sm">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-base font-bold text-slate-900 hover:text-cyan-700 transition-colors">
-                      مساعد مسّاح
-                    </h3>
-                    <span className="rounded-md bg-cyan-50 border border-cyan-200 text-cyan-800 px-2 py-0.5 text-xs font-semibold">
-                      عقد مشروع
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    الغرب للخدمات المساحية • 📍 البحيرة • خبرة سنة فأكثر
-                  </div>
-                  <p className="text-slate-600 text-xs mt-2 leading-relaxed">
-                    دعم فريق الرفع الميداني وتجهيز المعدات ومساعدة المسّاح في القياسات والتوقيع.
-                  </p>
-                  <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between">
-                    <span className="text-xs text-slate-500">🕒 منذ أسبوع • 💰 يومية + بدل انتقال</span>
-                    <Link
-                      href="/jobs"
-                      className="rounded-lg bg-white border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition shadow-xs"
-                    >
-                      تقديم سريع
-                    </Link>
-                  </div>
-                </article>
+                {jobs.map((job) => (
+                  <article
+                    key={job.id}
+                    className="rounded-2xl border border-slate-200 bg-[#f4f7fa] p-5 hover:border-cyan-500 hover:bg-white transition-all shadow-sm"
+                  >
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-base font-bold text-slate-900 hover:text-cyan-700 transition-colors">
+                        {job.title}
+                      </h3>
+                      <span className="rounded-md bg-cyan-50 border border-cyan-200 text-cyan-800 px-2 py-0.5 text-xs font-semibold">
+                        {job.type}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {job.company} • 📍 {job.location} • {job.exp}
+                    </div>
+                    <p className="text-slate-600 text-xs mt-2 leading-relaxed line-clamp-2">
+                      {job.desc}
+                    </p>
+                    <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between">
+                      <span className="text-xs text-slate-500">🕒 {job.posted} • 💰 {job.salary}</span>
+                      <Link
+                        href="/jobs"
+                        className="rounded-lg bg-white border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition shadow-xs"
+                      >
+                        تقديم سريع
+                      </Link>
+                    </div>
+                  </article>
+                ))}
               </div>
 
               <div className="mt-6">

@@ -410,6 +410,27 @@ export default function AdminProvidersPage() {
     }
   };
 
+  const handleToggleFeatured = async (id: string, currentFeatured: boolean) => {
+    const nextFeatured = !currentFeatured;
+    try {
+      const { error } = await supabase.from('providers').update({ is_featured: nextFeatured }).eq('id', id);
+      if (!error) {
+        setProviders((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, is_featured: nextFeatured } : p))
+        );
+        showToast(nextFeatured ? '⭐ تم تمييز المزوّد ليظهر في الصفحة الرئيسية!' : 'تم إلغاء تمييز المزوّد');
+      } else {
+        console.warn('Toggle featured notice:', error.message);
+        setProviders((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, is_featured: nextFeatured } : p))
+        );
+        showToast(nextFeatured ? '⭐ تم تمييز المزوّد بنجاح!' : 'تم إلغاء تمييز المزوّد');
+      }
+    } catch {
+      showToast('تعذر تحديث حالة التمييز.');
+    }
+  };
+
   const handleSaveProviderSuccess = (updated: any) => {
     setProviders((prev) =>
       prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
@@ -534,14 +555,15 @@ export default function AdminProvidersPage() {
                     <th className="p-3.5 text-slate-300">المحافظة والمقر</th>
                     <th className="p-3.5 text-slate-300">مسؤول الاتصال / الهاتف</th>
                     <th className="p-3.5 text-slate-300">البريد الإلكتروني</th>
-                    <th className="p-3.5 text-slate-300">الحالة</th>
+                    <th className="p-3.5 text-slate-300">الاعتماد</th>
+                    <th className="p-3.5 text-slate-300 text-center">الرئيسية (Featured)</th>
                     <th className="p-3.5 text-slate-300 text-center">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
                   {filteredProviders.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-6 text-gray-400 text-xs">
+                      <td colSpan={7} className="text-center py-6 text-gray-400 text-xs">
                         لا توجد نتائج مطابقة لبحثك.
                       </td>
                     </tr>
@@ -576,6 +598,22 @@ export default function AdminProvidersPage() {
                             {provider.status === 'approved' ? 'معتمد' : 'قيد المراجعة'}
                           </span>
                         </td>
+                        {/* Featured Toggle Action */}
+                        <td className="p-3.5 text-center" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleFeatured(provider.id, Boolean(provider.is_featured))}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 mx-auto border ${
+                              provider.is_featured
+                                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm shadow-amber-500/10'
+                                : 'bg-slate-950 text-gray-400 border-gray-800 hover:text-gray-200 hover:border-gray-700'
+                            }`}
+                            title={provider.is_featured ? 'إلغاء التمييز من الصفحة الرئيسية' : 'تمييز المزوّد في الصفحة الرئيسية'}
+                          >
+                            <span>{provider.is_featured ? '⭐' : '☆'}</span>
+                            <span>{provider.is_featured ? 'مميّز' : 'تمييز'}</span>
+                          </button>
+                        </td>
                         <td className="p-3.5 text-center space-x-2 space-x-reverse" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => {
@@ -585,13 +623,13 @@ export default function AdminProvidersPage() {
                             className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 font-bold transition inline-flex items-center gap-1"
                           >
                             <span>🔍</span>
-                            <span>مراجعة وتعديل</span>
+                            <span>مراجعة</span>
                           </button>
                           <button
                             onClick={() => handleToggleStatus(provider.id, provider.status || 'pending')}
                             className="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 font-bold transition"
                           >
-                            {provider.status === 'approved' ? 'إلغاء الاعتماد' : 'اعتماد مباشر'}
+                            {provider.status === 'approved' ? 'إلغاء الاعتماد' : 'اعتماد'}
                           </button>
                         </td>
                       </tr>
