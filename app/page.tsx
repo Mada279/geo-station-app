@@ -145,42 +145,57 @@ async function getEarlyAccessSetting(): Promise<boolean> {
       .eq('setting_key', 'show_provider_early_access_cta')
       .maybeSingle();
 
-    if (error || !data || data.setting_value === undefined || data.setting_value === null) {
+    if (error) {
+      console.error('[HomePage] Supabase error fetching platform_settings:', error.message || error);
+      return true; // Defensive fallback: show banner if table/row missing
+    }
+
+    if (!data || data.setting_value === undefined || data.setting_value === null) {
       return true; // Default fallback to true
     }
+
     return data.setting_value === true || data.setting_value === 'true';
   } catch (err) {
-    console.warn('[HomePage] Error loading platform setting, defaulting to true:', err);
+    console.error('[HomePage] Unexpected error fetching platform_settings, fallback to true:', err);
     return true;
   }
 }
 
 async function getHomepageEquipment(): Promise<HomepageEquipment[]> {
   try {
-    const { data: eqData } = await supabase
+    const { data: eqData, error } = await supabase
       .from('equipment')
       .select('*')
       .eq('is_flagged_stolen', false)
       .order('created_at', { ascending: false })
       .limit(6);
 
+    if (error) {
+      console.error('[HomePage] Supabase error fetching equipment:', error.message || error);
+      return FALLBACK_EQUIPMENT;
+    }
+
     if (eqData && eqData.length > 0) {
       const provIds = Array.from(new Set(eqData.map((e) => e.provider_id).filter(Boolean)));
       let provMap: Record<string, { name: string; location?: string }> = {};
 
       if (provIds.length > 0) {
-        const { data: provs } = await supabase
-          .from('providers')
-          .select('id, name, company_name, location')
-          .in('id', provIds);
+        try {
+          const { data: provs } = await supabase
+            .from('providers')
+            .select('id, name, company_name, location')
+            .in('id', provIds);
 
-        if (provs) {
-          provs.forEach((p) => {
-            provMap[p.id] = {
-              name: p.company_name || p.name || 'مكتب مساحي معتمد',
-              location: p.location,
-            };
-          });
+          if (provs) {
+            provs.forEach((p) => {
+              provMap[p.id] = {
+                name: p.company_name || p.name || 'مكتب مساحي معتمد',
+                location: p.location,
+              };
+            });
+          }
+        } catch (provErr) {
+          console.error('[HomePage] Error loading provider metadata for equipment:', provErr);
         }
       }
 
@@ -196,7 +211,8 @@ async function getHomepageEquipment(): Promise<HomepageEquipment[]> {
         } else if (item.monthly_price) {
           price_display = `${item.monthly_price} جنيه / شهر`;
         } else if (item.sale_price) {
-          price_display = `${item.sale_price.toLocaleString()} جنيه`;
+          const numPrice = Number(item.sale_price);
+          price_display = !isNaN(numPrice) ? `${numPrice.toLocaleString()} جنيه` : `${item.sale_price} جنيه`;
         }
 
         return {
@@ -224,37 +240,46 @@ async function getHomepageEquipment(): Promise<HomepageEquipment[]> {
       }
     }
   } catch (err) {
-    console.warn('[HomePage] Error loading dynamic equipment:', err);
+    console.error('[HomePage] Error loading dynamic equipment:', err);
   }
   return FALLBACK_EQUIPMENT;
 }
 
 async function getHomepageJobs(): Promise<HomepageJob[]> {
   try {
-    const { data: dbJobs } = await supabase
+    const { data: dbJobs, error } = await supabase
       .from('job_postings')
       .select('*')
       .eq('status', 'open')
       .order('created_at', { ascending: false })
       .limit(6);
 
+    if (error) {
+      console.error('[HomePage] Supabase error fetching jobs:', error.message || error);
+      return FALLBACK_JOBS;
+    }
+
     if (dbJobs && dbJobs.length > 0) {
       const jobProvIds = Array.from(new Set(dbJobs.map((j) => j.provider_id).filter(Boolean)));
       let jobCompanyMap: Record<string, { name: string; location?: string }> = {};
 
       if (jobProvIds.length > 0) {
-        const { data: provs } = await supabase
-          .from('providers')
-          .select('id, name, company_name, location')
-          .in('id', jobProvIds);
+        try {
+          const { data: provs } = await supabase
+            .from('providers')
+            .select('id, name, company_name, location')
+            .in('id', jobProvIds);
 
-        if (provs) {
-          provs.forEach((p) => {
-            jobCompanyMap[p.id] = {
-              name: p.company_name || p.name || 'مكتب مساحي معتمد',
-              location: p.location,
-            };
-          });
+          if (provs) {
+            provs.forEach((p) => {
+              jobCompanyMap[p.id] = {
+                name: p.company_name || p.name || 'مكتب مساحي معتمد',
+                location: p.location,
+              };
+            });
+          }
+        } catch (jobProvErr) {
+          console.error('[HomePage] Error loading provider metadata for jobs:', jobProvErr);
         }
       }
 
@@ -281,17 +306,43 @@ async function getHomepageJobs(): Promise<HomepageJob[]> {
       }
     }
   } catch (err) {
-    console.warn('[HomePage] Error loading dynamic jobs:', err);
+    console.error('[HomePage] Error loading dynamic jobs:', err);
   }
   return FALLBACK_JOBS;
 }
 
 export default async function HomePage() {
-  const [showEarlyAccessCTA, equipment, jobs] = await Promise.all([
-    getEarlyAccessSetting(),
-    getHomepageEquipment(),
-    getHomepageJobs(),
-  ]);
+  let showEarlyAccessCTA = true;
+  let equipment = FALLBACK_EQUIPMENT;
+  let jobs = FALLBACK_JOBS;
+
+  try {
+    const results = await Promise.allSettled([
+      getEarlyAccessSetting(),
+      getHomepageEquipment(),
+      getHomepageJobs(),
+    ]);
+
+    if (results[0].status === 'fulfilled') {
+      showEarlyAccessCTA = results[0].value;
+    } else {
+      console.error('[HomePage] Failed to resolve early access setting:', results[0].reason);
+    }
+
+    if (results[1].status === 'fulfilled') {
+      equipment = results[1].value;
+    } else {
+      console.error('[HomePage] Failed to resolve equipment:', results[1].reason);
+    }
+
+    if (results[2].status === 'fulfilled') {
+      jobs = results[2].value;
+    } else {
+      console.error('[HomePage] Failed to resolve jobs:', results[2].reason);
+    }
+  } catch (err) {
+    console.error('[HomePage] Unexpected error resolving homepage sections:', err);
+  }
 
 
   return (
