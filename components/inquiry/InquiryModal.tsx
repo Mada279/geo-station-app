@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabaseClient';
+import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 export interface InquiryModalProps {
   isOpen: boolean;
@@ -45,6 +46,7 @@ export default function InquiryModal({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   // Pre-fill sender information if authenticated
   useEffect(() => {
@@ -80,6 +82,7 @@ export default function InquiryModal({
       loadSenderInfo();
       setIsSuccess(false);
       setError(null);
+      setPhoneError(null);
     }
   }, [isOpen]);
 
@@ -88,6 +91,7 @@ export default function InquiryModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setPhoneError(null);
     setIsSubmitting(true);
 
     try {
@@ -99,14 +103,21 @@ export default function InquiryModal({
         throw new Error('يرجى إدخال رقم الهاتف / الواتساب للتواصل.');
       }
 
+      const phoneValidation = validateEgyptianPhone(senderPhone);
+      if (!phoneValidation.isValid) {
+        setPhoneError(phoneValidation.error || 'رقم الهاتف غير صالح');
+        throw new Error(phoneValidation.error || 'رقم الهاتف يجب أن يتكون من 11 رقماً ويبدأ بـ 01');
+      }
+      const validSenderPhone = phoneValidation.normalized;
+
       const formattedMessage = `[طريقة التواصل المفضلة: ${
         preferredContact === 'whatsapp' ? 'واتساب' : preferredContact === 'call' ? 'اتصال هاتفي' : 'البريد الإلكتروني'
-      }]\n[بيانات المرسل: ${senderName || 'عميل'} — هاتف: ${senderPhone}]\n\n${cleanMsg}`;
+      }]\n[بيانات المرسل: ${senderName || 'عميل'} — هاتف: ${validSenderPhone}]\n\n${cleanMsg}`;
 
       const inquiryRecord = {
         sender_id: senderId || null,
         sender_name: senderName.trim() || 'عميل مساحة',
-        sender_phone: senderPhone.trim(),
+        sender_phone: validSenderPhone,
         receiver_id: receiverId || null,
         context_type: contextType,
         context_id: contextId || null,
@@ -284,10 +295,19 @@ export default function InquiryModal({
                   type="tel"
                   required
                   value={senderPhone}
-                  onChange={(e) => setSenderPhone(e.target.value)}
+                  onChange={(e) => {
+                    setSenderPhone(e.target.value);
+                    if (phoneError) setPhoneError(null);
+                  }}
                   placeholder="010xxxxxxxx"
-                  className="w-full p-2.5 rounded-xl bg-[#0F253E] border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 font-mono"
+                  dir="ltr"
+                  className={`w-full p-2.5 rounded-xl bg-[#0F253E] border text-white placeholder-gray-500 font-mono text-left focus:outline-none transition ${
+                    phoneError ? 'border-red-500 focus:border-red-400' : 'border-gray-800 focus:border-cyan-500'
+                  }`}
                 />
+                {phoneError && (
+                  <p className="text-red-400 text-xs mt-1 font-semibold">⚠️ {phoneError}</p>
+                )}
               </div>
             </div>
 

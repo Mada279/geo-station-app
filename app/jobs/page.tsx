@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabaseClient';
+import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 export interface PublicJobItem {
   id: string;
@@ -365,10 +366,13 @@ export default function JobsPage() {
       setSubmitError('يرجى إدخال اسمك بالكامل.');
       return;
     }
-    if (!applicantPhone.trim() || applicantPhone.trim().length < 8) {
-      setSubmitError('يرجى إدخال رقم هاتف واتساب صالح للتواصل معك.');
+    const phoneValidation = validateEgyptianPhone(applicantPhone);
+    if (!phoneValidation.isValid) {
+      setSubmitError(phoneValidation.error || 'يرجى إدخال رقم هاتف واتساب مصري صالح (11 رقماً يبدأ بـ 01).');
       return;
     }
+    const validApplicantPhone = phoneValidation.normalized;
+
     if (!applicantCoverLetter.trim()) {
       setSubmitError('يرجى كتابة نبذة مختصرة عن خبراتك في رسالة التقديم.');
       return;
@@ -382,7 +386,7 @@ export default function JobsPage() {
         job_id: appliedJob.id.startsWith('mock-') ? null : appliedJob.id,
         applicant_id: currentUserId || null,
         applicant_name: applicantName.trim(),
-        applicant_phone: applicantPhone.trim(),
+        applicant_phone: validApplicantPhone,
         applicant_email: applicantEmail.trim() || null,
         experience_years: applicantExp.trim(),
         cv_link: applicantCvLink.trim() || null,
@@ -406,7 +410,7 @@ export default function JobsPage() {
             {
               user_id: appliedJob.provider_id,
               title: `طلب توظيف جديد: ${appliedJob.title}`,
-              message: `قدّم المساح/المهندس ${applicantName.trim()} على وظيفة "${appliedJob.title}". رقم الهاتف: ${applicantPhone.trim()}.`,
+              message: `قدّم المساح/المهندس ${applicantName.trim()} على وظيفة "${appliedJob.title}". رقم الهاتف: ${validApplicantPhone}.`,
               type: 'info',
               link: '/provider/jobs',
               is_read: false,
@@ -793,9 +797,13 @@ export default function JobsPage() {
                       type="tel"
                       value={applicantPhone}
                       onChange={(e) => setApplicantPhone(e.target.value)}
-                      placeholder="01xxxxxxxxx"
-                      className="w-full rounded-xl border border-slate-700 bg-slate-950 p-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                      placeholder="010xxxxxxxx"
+                      dir="ltr"
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 p-2.5 text-white placeholder-slate-500 font-mono text-left focus:outline-none focus:border-cyan-500"
                     />
+                    <span className="text-[11px] text-slate-500 mt-1 block">
+                      رقم مصري مكوّن من 11 رقماً يبدأ بـ 01
+                    </span>
                   </div>
                 </div>
 

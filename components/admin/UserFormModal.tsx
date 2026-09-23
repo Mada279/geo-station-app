@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User, UserRole, UserStatus, CreateUserInput, UpdateUserInput } from '@/types/user';
+import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 interface UserFormModalProps {
   isOpen: boolean;
@@ -61,6 +62,15 @@ export default function UserFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (formData.phone && formData.phone.trim()) {
+      const phoneValidation = validateEgyptianPhone(formData.phone);
+      if (!phoneValidation.isValid) {
+        setError(phoneValidation.error || 'رقم الهاتف غير صالح. يجب أن يتكون من 11 رقماً ويبدأ بـ 01.');
+        return;
+      }
+      formData.phone = phoneValidation.normalized;
+    }
+
     setIsSubmitting(true);
 
     try {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabaseClient';
+import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 export interface TeamMember {
   id: string;
@@ -132,6 +133,13 @@ export default function ProviderTeamPage() {
       return;
     }
 
+    const phoneValidation = validateEgyptianPhone(phoneNumber);
+    if (!phoneValidation.isValid) {
+      showToast(`⚠️ ${phoneValidation.error}`);
+      return;
+    }
+    const validPhone = phoneValidation.normalized;
+
     const finalTitle = jobTitle === 'أخرى' ? customRole.trim() || 'عضو فريق العمل' : jobTitle;
 
     setIsSaving(true);
@@ -139,7 +147,7 @@ export default function ProviderTeamPage() {
       const payload: any = {
         full_name: fullName.trim(),
         job_title: finalTitle,
-        phone_number: phoneNumber.trim(),
+        phone_number: validPhone,
         email: email.trim() || null,
         notes: notes.trim() || null,
       };

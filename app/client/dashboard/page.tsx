@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
+import { validateEgyptianPhone } from "@/lib/validations/phone";
 
 interface ClientData {
   id: string;
@@ -193,12 +194,11 @@ export default function ClientDashboardPage() {
         throw new Error("جلسة المستخدم غير صالحة. يرجى إعادة تسجيل الدخول.");
       }
 
-      const cleanPhone = phoneNumber.trim().replace(/\s+/g, '');
-      const phoneDigits = cleanPhone.replace(/\D/g, '');
-
-      if (!cleanPhone || phoneDigits.length < 8) {
-        throw new Error("رقم الهاتف والواتساب إلزامي (8 أرقام على الأقل) لإجراء المعاملات وتأكيد الحجوزات.");
+      const phoneValidation = validateEgyptianPhone(phoneNumber);
+      if (!phoneValidation.isValid) {
+        throw new Error(phoneValidation.error || "رقم الهاتف والواتساب غير صالح. يجب أن يتكون من 11 رقماً ويبدأ بـ 01.");
       }
+      const cleanPhone = phoneValidation.normalized;
 
       const updatePayload = {
         user_id: currentUser.id,

@@ -7,6 +7,7 @@ import { supabase } from '@/utils/supabaseClient';
 import { getEquipmentImageUrl, getDefaultCategoryImage } from '@/utils/helpers';
 import ContactButton from '@/components/ContactButton';
 import InquiryModal from '@/components/inquiry/InquiryModal';
+import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 export interface MarketplaceEquipmentItem {
   id: string;
@@ -96,6 +97,7 @@ export default function EquipmentMarketplacePage() {
   const [projectLocation, setProjectLocation] = useState('القاهرة');
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
+  const [clientPhoneError, setClientPhoneError] = useState<string | null>(null);
   const [clientEmail, setClientEmail] = useState('');
   const [bookingNotes, setBookingNotes] = useState('');
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
@@ -401,6 +403,15 @@ export default function EquipmentMarketplacePage() {
       showToast('⚠️ يرجى إدخال اسمك ورقم هاتفك للتواصل وتأكيد الحجز.');
       return;
     }
+
+    const phoneValidation = validateEgyptianPhone(clientPhone);
+    if (!phoneValidation.isValid) {
+      setClientPhoneError(phoneValidation.error || 'رقم الهاتف غير صالح');
+      showToast(`⚠️ ${phoneValidation.error}`);
+      return;
+    }
+    setClientPhoneError(null);
+    const validPhone = phoneValidation.normalized;
 
     setIsSubmittingBooking(true);
     const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -1069,11 +1080,26 @@ export default function EquipmentMarketplacePage() {
                       <input
                         type="tel"
                         value={clientPhone}
-                        onChange={(e) => setClientPhone(e.target.value)}
+                        onChange={(e) => {
+                          setClientPhone(e.target.value);
+                          if (clientPhoneError) setClientPhoneError(null);
+                        }}
                         placeholder="010xxxxxxxx"
-                        className="w-full p-2.5 rounded-xl bg-[#081933] border border-amber-500/30 text-white focus:outline-none focus:border-amber-400"
+                        dir="ltr"
+                        className={`w-full p-2.5 rounded-xl bg-[#081933] border text-white font-mono text-left focus:outline-none transition ${
+                          clientPhoneError
+                            ? 'border-red-500 focus:border-red-400 ring-1 ring-red-500/30'
+                            : 'border-amber-500/30 focus:border-amber-400'
+                        }`}
                         required
                       />
+                      {clientPhoneError ? (
+                        <p className="text-red-400 text-xs mt-1 font-semibold">⚠️ {clientPhoneError}</p>
+                      ) : (
+                        <span className="text-gray-400 text-[11px] mt-1 block">
+                          رقم مصري مكوّن من 11 رقماً يبدأ بـ 01 (مثل: 01012345678)
+                        </span>
+                      )}
                     </div>
                   </div>
 

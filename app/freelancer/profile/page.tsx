@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabaseClient';
+import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 const PRESET_EQUIPMENT = [
   'Leica Total Station (TS06 / TS09 / TS16)',
@@ -236,6 +237,15 @@ export default function FreelancerProfilePage() {
   // Save Profile to Supabase & Local Cache
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (phoneNumber && phoneNumber.trim()) {
+      const phoneValidation = validateEgyptianPhone(phoneNumber);
+      if (!phoneValidation.isValid) {
+        showToast(`⚠️ ${phoneValidation.error}`);
+        return;
+      }
+    }
+
     setIsSaving(true);
 
     const payload = {

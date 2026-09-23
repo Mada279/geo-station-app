@@ -4,11 +4,13 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabaseClient';
+import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -24,10 +26,19 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPhoneError(null);
     if (!formData.name.trim() || !formData.phone.trim() || !formData.message.trim()) {
       showToast('⚠️ يرجى ملء الحقول المطلوبة (الاسم، الهاتف، الرسالة).');
       return;
     }
+
+    const phoneValidation = validateEgyptianPhone(formData.phone);
+    if (!phoneValidation.isValid) {
+      setPhoneError(phoneValidation.error || 'رقم الهاتف غير صالح');
+      showToast(`⚠️ ${phoneValidation.error}`);
+      return;
+    }
+    const validPhone = phoneValidation.normalized;
 
     setIsSubmitting(true);
     try {
@@ -46,7 +57,7 @@ export default function ContactPage() {
       const inquiryPayload = {
         sender_id: senderId,
         sender_name: formData.name.trim(),
-        sender_phone: formData.phone.trim(),
+        sender_phone: validPhone,
         receiver_id: null, // General platform inquiry targeted at Admin
         context_type: 'general',
         context_id: null,
@@ -198,10 +209,21 @@ export default function ContactPage() {
                           required
                           type="tel"
                           value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          onChange={(e) => {
+                            setFormData({ ...formData, phone: e.target.value });
+                            if (phoneError) setPhoneError(null);
+                          }}
                           placeholder="010xxxxxxxx"
-                          className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-cyan-500 focus:outline-none font-mono"
+                          dir="ltr"
+                          className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none font-mono text-left transition ${
+                            phoneError
+                              ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500/20 bg-red-50/20'
+                              : 'border-slate-300 bg-white focus:border-cyan-500'
+                          }`}
                         />
+                        {phoneError && (
+                          <p className="text-red-500 text-xs mt-1 font-semibold">⚠️ {phoneError}</p>
+                        )}
                       </div>
                     </div>
 

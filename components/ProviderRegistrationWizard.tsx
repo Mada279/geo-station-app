@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { supabase } from '@/utils/supabaseClient';
 import Image from 'next/image';
 import Link from 'next/link';
+import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 interface FormData {
   // Step 1: Basic Info
@@ -11,6 +12,7 @@ interface FormData {
   email: string;
   phone: string;
   password: string;
+  confirmPassword: string;
   // Step 2: Business Details
   organization: string;
   governorate: string;
@@ -46,6 +48,7 @@ export default function ProviderRegistrationWizard() {
     email: '',
     phone: '',
     password: '',
+    confirmPassword: '',
     organization: '',
     governorate: 'القاهرة',
     location: '',
@@ -55,12 +58,11 @@ export default function ProviderRegistrationWizard() {
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // Phone Validation Regex: 11 digits starting with 010, 011, 012, or 015
-  const EGYPT_PHONE_REGEX = /^01[0125][0-9]{8}$/;
 
   const validateStep1 = () => {
     const newErrors: { [key: string]: string } = {};
@@ -68,11 +70,17 @@ export default function ProviderRegistrationWizard() {
     if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'يرجى إدخال بريد إلكتروني صالح للتواصل';
     }
-    if (!formData.phone.trim() || !EGYPT_PHONE_REGEX.test(formData.phone.trim())) {
-      newErrors.phone = 'رقم الهاتف يجب أن يتكون من 11 رقمًا ويبدأ بـ 010 أو 011 أو 012 أو 015';
+    const phoneVal = validateEgyptianPhone(formData.phone);
+    if (!phoneVal.isValid) {
+      newErrors.phone = phoneVal.error || 'رقم الهاتف يجب أن يتكون من 11 رقماً ويبدأ بـ 01 (مثل: 01012345678)';
+    } else {
+      formData.phone = phoneVal.normalized;
     }
     if (!formData.password || formData.password.length < 6) {
       newErrors.password = 'كلمة المرور يجب أن لا تقل عن 6 أحرف أو أرقام';
+    }
+    if (!formData.confirmPassword || formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'كلمتا المرور غير متطابقتين';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -390,19 +398,84 @@ export default function ProviderRegistrationWizard() {
             )}
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-              كلمة المرور *
-            </label>
-            <input
-              type="password"
-              required
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="••••••••"
-              className="w-full rounded-xl border border-gray-800 bg-gray-950 px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-            />
-            {errors.password && <p className="text-red-400 text-xs mt-1 font-semibold">⚠️ {errors.password}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                كلمة المرور *
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="••••••••"
+                  className="w-full rounded-xl border border-gray-800 bg-gray-950 px-4 pl-11 py-2.5 text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition p-1 cursor-pointer"
+                  title={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                  aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                >
+                  {showPassword ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              {errors.password && <p className="text-red-400 text-xs mt-1 font-semibold">⚠️ {errors.password}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-300 mb-1.5 flex items-center justify-between">
+                <span>تأكيد كلمة المرور *</span>
+                {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                  <span className="text-[10px] text-red-400 font-semibold">غير متطابقة ⚠️</span>
+                )}
+                {formData.confirmPassword && formData.password === formData.confirmPassword && (
+                  <span className="text-[10px] text-emerald-400 font-semibold">متطابقة ✓</span>
+                )}
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  placeholder="••••••••"
+                  className="w-full rounded-xl border border-gray-800 bg-gray-950 px-4 pl-11 py-2.5 text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition p-1 cursor-pointer"
+                  title={showConfirmPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                  aria-label={showConfirmPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                >
+                  {showConfirmPassword ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-red-400 text-xs mt-1 font-semibold">⚠️ {errors.confirmPassword}</p>
+              )}
+            </div>
           </div>
 
           <div className="pt-4 flex justify-end">

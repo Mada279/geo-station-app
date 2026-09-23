@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/utils/supabaseClient';
+import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 export type ModuleType = 'client' | 'freelancer' | 'provider';
 
@@ -68,11 +69,27 @@ export default function OnboardingPage() {
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [syncWhatsApp, setSyncWhatsApp] = useState(true);
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Email verification (OTP) states
+  const [authStep, setAuthStep] = useState<'form' | 'verify_otp'>('form');
+  const [otpCode, setOtpCode] = useState('');
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpMessage, setOtpMessage] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [pendingPhone, setPendingPhone] = useState('');
+  const [pendingWa, setPendingWa] = useState('');
+  const [pendingModules, setPendingModules] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function initUser() {
@@ -149,6 +166,15 @@ export default function OnboardingPage() {
     initUser();
   }, []);
 
+  // Resend OTP Cooldown Timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
   const handlePhoneChange = (val: string) => {
     setPhoneNumber(val);
     if (syncWhatsApp) {
@@ -168,175 +194,41 @@ export default function OnboardingPage() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-
-    if (selectedModules.length === 0) {
-      setErrorMessage('يرجى اختيار ميزة أو دور واحد على الأقل لتفعيل حسابك.');
-      return;
-    }
-
-    const cleanEmail = (email || currentUser?.email || '').trim().toLowerCase();
-    const cleanPhone = phoneNumber.trim().replace(/\s+/g, '');
-    const phoneDigits = cleanPhone.replace(/\D/g, '');
-    const finalWa = (syncWhatsApp ? cleanPhone : whatsappNumber).trim().replace(/\s+/g, '');
-    const waDigits = finalWa.replace(/\D/g, '');
-
-    if (!cleanPhone || phoneDigits.length < 8) {
-      setErrorMessage('رقم الهاتف إلزامي لتفعيل الحساب ومتابعة العمليات المساحية (8 أرقام على الأقل).');
-      return;
-    }
-
-    if (!finalWa || waDigits.length < 8) {
-      setErrorMessage('رقم الواتساب إلزامي لتلقي الإشعارات الفورية والمراسلات الميدانية.');
-      return;
-    }
-
-    if (!currentUser && (!cleanEmail || !cleanEmail.includes('@'))) {
-      setErrorMessage('يرجى إدخال بريد إلكتروني صالح لإنشاء الحساب.');
-      return;
-    }
-
-    if (!currentUser && (!password || password.length < 6)) {
-      setErrorMessage('كلمة المرور إلزامية ويجب أن لا تقل عن 6 أحرف.');
-      return;
-    }
-
+  // Finalize setup after email OTP verification or for authenticated users
+  const finalizeAccountSetup = async (
+    targetUserId?: string | null,
+    overrideEmail?: string,
+    overridePhone?: string,
+    overrideWa?: string,
+    overrideModules?: Record<string, string>
+  ) => {
     setIsSubmitting(true);
+    setErrorMessage(null);
+    setOtpError(null);
 
-    // Construct modular approval status dictionary:
-    // Clients & Freelancers get instant active status
-    // Providers are set to pending requiring admin verification
-    const modulesStatus: Record<string, string> = {};
-    selectedModules.forEach((mod) => {
-      modulesStatus[mod] = mod === 'provider' ? 'pending' : 'active';
-    });
+    const activeEmail = overrideEmail || pendingEmail || (email || currentUser?.email || '').trim().toLowerCase();
+    const activePhone = overridePhone || pendingPhone || phoneNumber.trim();
+    const activeWa = overrideWa || pendingWa || (syncWhatsApp ? activePhone : whatsappNumber).trim();
+    const activeMods = overrideModules || pendingModules || (() => {
+      const ms: Record<string, string> = {};
+      selectedModules.forEach((m) => {
+        ms[m] = m === 'provider' ? 'pending' : 'active';
+      });
+      return ms;
+    })();
+
+    let userId = targetUserId || currentUser?.id;
+    const isUUID = userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId);
 
     try {
-      let userId = currentUser?.id;
-
-      // If user not authenticated, register via Supabase Auth or handle rate limit gracefully
-      if (!currentUser?.id) {
-        let isRateLimited = false;
-        let isAlreadyRegistered = false;
-
-        const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password: password.trim(),
-          options: {
-            data: {
-              full_name: fullName.trim(),
-              name: fullName.trim(),
-              phone: cleanPhone,
-              whatsapp: finalWa,
-              active_modules: modulesStatus,
-            },
-          },
-        });
-
-        if (signUpErr) {
-          const rawErr = (signUpErr.message || '').toLowerCase();
-          const is429 = (signUpErr as any).status === 429;
-          if (is429 || rawErr.includes('email rate limit') || rawErr.includes('rate limit')) {
-            isRateLimited = true;
-            console.warn('[Onboarding] Auth rate limit detected. Bypassing email confirmation to direct auth/db sync.');
-          } else if (signUpErr.message.includes('already registered')) {
-            isAlreadyRegistered = true;
-          } else {
-            throw new Error(signUpErr.message);
-          }
-        }
-
-        if (isRateLimited || isAlreadyRegistered) {
-          // Graceful fallback 1: Attempt password sign-in without sending verification email
-          try {
-            const { data: signInData } = await supabase.auth.signInWithPassword({
-              email: cleanEmail,
-              password: password.trim(),
-            });
-
-            if (signInData?.user?.id) {
-              userId = signInData.user.id;
-              try {
-                await supabase.auth.updateUser({
-                  data: {
-                    active_modules: modulesStatus,
-                    full_name: fullName.trim(),
-                    name: fullName.trim(),
-                    phone: cleanPhone,
-                    whatsapp: finalWa,
-                  },
-                });
-              } catch {}
-            }
-          } catch {}
-
-          // Graceful fallback 2: Check existing client record in database
-          if (!userId) {
-            try {
-              const { data: clientRow } = await supabase
-                .from('clients')
-                .select('id, user_id')
-                .eq('email', cleanEmail)
-                .maybeSingle();
-
-              if (clientRow?.user_id) {
-                userId = clientRow.user_id;
-              } else if (clientRow?.id) {
-                userId = clientRow.id;
-              }
-            } catch {}
-          }
-
-          // Graceful fallback 3: Check existing provider record
-          if (!userId) {
-            try {
-              const { data: provRow } = await supabase
-                .from('providers')
-                .select('id')
-                .eq('email', cleanEmail)
-                .maybeSingle();
-
-              if (provRow?.id) {
-                userId = provRow.id;
-              }
-            } catch {}
-          }
-
-          if (!userId) {
-            userId = `usr-${Date.now()}`;
-          }
-        } else {
-          userId = signUpData?.user?.id || `usr-${Date.now()}`;
-        }
-      } else {
-        // Update existing user Auth metadata
-        try {
-          await supabase.auth.updateUser({
-            data: {
-              active_modules: modulesStatus,
-              full_name: fullName.trim(),
-              name: fullName.trim(),
-              phone: cleanPhone,
-              whatsapp: finalWa,
-            },
-          });
-        } catch (updateErr: any) {
-          console.warn('[Onboarding updateUser notice]:', updateErr);
-        }
-      }
-
-      const isUUID = userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId);
-
-      // Upsert into clients table
+      // 1. Upsert into clients table
       const clientPayload: any = {
-        email: cleanEmail,
+        email: activeEmail,
         full_name: fullName.trim() || 'عضو منصة سيرفستا',
-        phone_number: cleanPhone,
-        whatsapp_number: finalWa,
+        phone_number: activePhone,
+        whatsapp_number: activeWa,
         company_name: companyName.trim() || null,
-        active_modules: modulesStatus,
+        active_modules: activeMods,
         updated_at: new Date().toISOString(),
       };
 
@@ -354,13 +246,13 @@ export default function OnboardingPage() {
         upsertErr = retry.error;
       }
 
-      // If provider module was requested, ensure provider record exists with pending status
-      if (selectedModules.includes('provider')) {
+      // 2. If provider module was requested, ensure provider record exists with pending status
+      if (selectedModules.includes('provider') || activeMods['provider']) {
         try {
           const provPayload: any = {
             name: fullName.trim() || 'مزوّد جديد',
-            email: cleanEmail,
-            phone: cleanPhone,
+            email: activeEmail,
+            phone: activePhone,
             company_name: companyName.trim() || fullName.trim(),
             status: 'pending',
           };
@@ -374,7 +266,6 @@ export default function OnboardingPage() {
           }
 
           if (isUUID) {
-            // Send in-app notification: Provider pending review
             await supabase.from('inapp_notifications').insert({
               user_id: userId,
               title: 'حساب المزود قيد المراجعة',
@@ -388,20 +279,20 @@ export default function OnboardingPage() {
         }
       }
 
-      // Send general welcome in-app notification if user is verified in Auth
+      // 3. Welcome notification
       if (isUUID) {
         try {
           await supabase.from('inapp_notifications').insert({
             user_id: userId,
-            title: 'تم إعداد حسابك الموحد بنجاح',
-            message: 'مرحباً بك في منصة Survsta! حسابك مفعل وجاهز لاستكشاف وطلب الأجهزة وإدارة أعمالك المساحية.',
+            title: 'تم إعداد وتفعيل حسابك بنجاح',
+            message: 'مرحباً بك في منصة Survsta! تم تأكيد بريدك الإلكتروني بنجاح وجاهز لاستكشاف وطلب الأجهزة وإدارة أعمالك المساحية.',
             type: 'success',
             link: '/dashboard',
           });
         } catch {}
       }
 
-      // Save locally in localStorage and cookies for seamless client-side experience
+      // 4. Update session storage and cookies
       if (typeof window !== 'undefined') {
         const storedUser = localStorage.getItem('SURVSTA_AUTH_USER');
         const parsed = storedUser ? JSON.parse(storedUser) : {};
@@ -409,57 +300,232 @@ export default function OnboardingPage() {
           ...parsed,
           id: userId || parsed.id || `usr-${Date.now()}`,
           name: fullName.trim() || parsed.name || 'مستخدم سيرفستا',
-          email: cleanEmail,
-          phone: cleanPhone,
-          whatsapp: finalWa,
-          active_modules: modulesStatus,
+          email: activeEmail,
+          phone: activePhone,
+          whatsapp: activeWa,
+          active_modules: activeMods,
         };
         localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify(updated));
-        document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(modulesStatus))}; path=/; max-age=2592000`;
+        document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(activeMods))}; path=/; max-age=2592000`;
         document.cookie = `survsta_session=${encodeURIComponent(JSON.stringify({
           role: selectedModules.includes('provider') ? 'provider' : 'client',
-          email: cleanEmail,
+          email: activeEmail,
           name: fullName.trim(),
-          modules: modulesStatus,
+          modules: activeMods,
         }))}; path=/; max-age=2592000`;
       }
 
-      // Redirect to the unified dashboard
       router.push('/dashboard');
     } catch (err: any) {
-      const errorMsg = String(err?.message || '').toLowerCase();
-      const is429 = err?.status === 429;
-      if (is429 || errorMsg.includes('email rate limit') || errorMsg.includes('rate limit')) {
-        console.warn('[Onboarding outer catch] Bypassing rate limit error cleanly and storing session locally.');
-        if (typeof window !== 'undefined') {
-          const storedUser = localStorage.getItem('SURVSTA_AUTH_USER');
-          const parsed = storedUser ? JSON.parse(storedUser) : {};
-          const fallbackId = parsed.id || `usr-${Date.now()}`;
-          const updated = {
-            ...parsed,
-            id: fallbackId,
-            name: fullName.trim() || parsed.name || 'مستخدم سيرفستا',
-            email: cleanEmail,
+      console.error('[Onboarding finalize error]:', err);
+      if (typeof window !== 'undefined') {
+        document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(activeMods))}; path=/; max-age=2592000`;
+      }
+      router.push('/dashboard');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Verify Supabase Email OTP
+  const handleVerifyOtp = async () => {
+    if (!otpCode || otpCode.trim().length < 6) {
+      setOtpError('يرجى إدخال رمز التحقق المكون من 6 أرقام.');
+      return;
+    }
+
+    setIsVerifyingOtp(true);
+    setOtpError(null);
+
+    try {
+      // 1. Attempt signup OTP verification
+      let verifyRes = await supabase.auth.verifyOtp({
+        email: pendingEmail,
+        token: otpCode.trim(),
+        type: 'signup',
+      });
+
+      // 2. Fallback to email OTP type
+      if (verifyRes.error) {
+        verifyRes = await supabase.auth.verifyOtp({
+          email: pendingEmail,
+          token: otpCode.trim(),
+          type: 'email',
+        });
+      }
+
+      if (verifyRes.error) {
+        throw new Error(verifyRes.error.message || 'رمز التحقق غير صحيح أو منتهي الصلاحية.');
+      }
+
+      const verifiedUser = verifyRes.data?.user;
+      await finalizeAccountSetup(verifiedUser?.id || pendingUserId);
+    } catch (err: any) {
+      const msg = String(err?.message || '');
+      if (msg.includes('expired') || msg.includes('Token has expired')) {
+        setOtpError('انتهت صلاحية رمز التحقق. يرجى طلب رمز جديد بالضغط على إعادة إرسال الرمز.');
+      } else if (msg.includes('invalid') || msg.includes('Invalid')) {
+        setOtpError('رمز التحقق غير صحيح. يرجى مراجعة بريدك الإلكتروني وإعادة المحاولة.');
+      } else {
+        setOtpError(msg || 'تعذر التحقق من الرمز حالياً. يرجى إعادة المحاولة.');
+      }
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  // Check link verification if user clicked email link
+  const handleCheckLinkVerification = async () => {
+    setIsVerifyingOtp(true);
+    setOtpError(null);
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session?.user) {
+        await finalizeAccountSetup(sessionData.session.user.id);
+        return;
+      }
+
+      if (password) {
+        const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+          email: pendingEmail,
+          password: password.trim(),
+        });
+        if (signInData?.user?.id && !signInErr) {
+          await finalizeAccountSetup(signInData.user.id);
+          return;
+        }
+      }
+
+      setOtpError('لم يتم رصد تأكيد البريد بعد. يرجى الضغط على الرابط في الرسالة أو إدخال رمز الـ 6 أرقام.');
+    } catch (err: any) {
+      setOtpError(err?.message || 'لم يتم تأكيد الرابط بعد.');
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  // Resend Email OTP
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
+    setOtpError(null);
+    setOtpMessage(null);
+
+    try {
+      const { error: resendErr } = await supabase.auth.resend({
+        type: 'signup',
+        email: pendingEmail,
+      });
+
+      if (resendErr) {
+        throw new Error(resendErr.message);
+      }
+
+      setResendCooldown(60);
+      setOtpMessage('تمت إعادة إرسال رمز التحقق ورابط التفعيل إلى بريدك الإلكتروني.');
+    } catch (err: any) {
+      setOtpError(err?.message || 'تعذر إعادة إرسال الرمز حالياً. يرجى الانتظار قليلاً ثم المحاولة.');
+    }
+  };
+
+  // Form Submit Handler
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    if (selectedModules.length === 0) {
+      setErrorMessage('يرجى اختيار ميزة أو دور واحد على الأقل لتفعيل حسابك.');
+      return;
+    }
+
+    const cleanEmail = (email || currentUser?.email || '').trim().toLowerCase();
+
+    // 1. Egyptian Phone Number Validations
+    const phoneVal = validateEgyptianPhone(phoneNumber);
+    if (!phoneVal.isValid) {
+      setErrorMessage(phoneVal.error || 'رقم الهاتف غير صالح. يجب أن يتكون من 11 رقماً ويبدأ بـ 01.');
+      return;
+    }
+    const cleanPhone = phoneVal.normalized;
+
+    const rawWa = syncWhatsApp ? cleanPhone : whatsappNumber;
+    const waVal = validateEgyptianPhone(rawWa);
+    if (!waVal.isValid) {
+      setErrorMessage(waVal.error || 'رقم الواتساب غير صالح. يجب أن يتكون من 11 رقماً ويبدأ بـ 01.');
+      return;
+    }
+    const finalWa = waVal.normalized;
+
+    // 2. Email Validation
+    if (!currentUser && (!cleanEmail || !cleanEmail.includes('@'))) {
+      setErrorMessage('يرجى إدخال بريد إلكتروني صالح لإنشاء الحساب.');
+      return;
+    }
+
+    // 3. Password Validations
+    if (!currentUser) {
+      if (!password || password.length < 6) {
+        setErrorMessage('كلمة المرور إلزامية ويجب أن لا تقل عن 6 أحرف.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setErrorMessage('كلمتا المرور غير متطابقتين. يرجى التأكد من تطابق كلمة المرور وتأكيدها.');
+        return;
+      }
+    }
+
+    // Modular approval status dictionary
+    const modulesStatus: Record<string, string> = {};
+    selectedModules.forEach((mod) => {
+      modulesStatus[mod] = mod === 'provider' ? 'pending' : 'active';
+    });
+
+    // If user is already authenticated, finalize directly
+    if (currentUser?.id) {
+      await finalizeAccountSetup(currentUser.id, cleanEmail, cleanPhone, finalWa, modulesStatus);
+      return;
+    }
+
+    // Otherwise, initiate Supabase signup with Email Verification
+    setIsSubmitting(true);
+    try {
+      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: password.trim(),
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            name: fullName.trim(),
             phone: cleanPhone,
             whatsapp: finalWa,
             active_modules: modulesStatus,
-          };
-          localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify(updated));
-          document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(modulesStatus))}; path=/; max-age=2592000`;
-          document.cookie = `survsta_session=${encodeURIComponent(JSON.stringify({
-            role: selectedModules.includes('provider') ? 'provider' : 'client',
-            email: cleanEmail,
-            name: fullName.trim(),
-            modules: modulesStatus,
-          }))}; path=/; max-age=2592000`;
+          },
+        },
+      });
+
+      if (signUpErr) {
+        const rawErr = (signUpErr.message || '').toLowerCase();
+        if (signUpErr.message.includes('already registered')) {
+          setErrorMessage('هذا البريد الإلكتروني مسجل مسبقاً في المنصة. يمكنك تسجيل الدخول مباشرة.');
+          return;
+        } else if ((signUpErr as any).status === 429 || rawErr.includes('rate limit')) {
+          console.warn('[Onboarding] Auth rate limit detected. Transitioning to verification screen.');
+        } else {
+          throw new Error(signUpErr.message);
         }
-        router.push('/dashboard');
-        return;
-      } else if (errorMsg.includes('already registered')) {
-        setErrorMessage('هذا البريد الإلكتروني مسجل مسبقاً في المنصة. يمكنك تسجيل الدخول مباشرة.');
-      } else {
-        setErrorMessage(err.message || 'حدث خطأ أثناء حفظ الإعدادات، يرجى المحاولة مرة أخرى.');
       }
+
+      // Store pending registration data and transition to OTP verification screen
+      setPendingEmail(cleanEmail);
+      setPendingUserId(signUpData?.user?.id || null);
+      setPendingPhone(cleanPhone);
+      setPendingWa(finalWa);
+      setPendingModules(modulesStatus);
+      setResendCooldown(60);
+      setAuthStep('verify_otp');
+      setOtpMessage('تم إرسال رمز التحقق ورابط التفعيل إلى بريدك الإلكتروني بنجاح.');
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة مرة أخرى.');
     } finally {
       setIsSubmitting(false);
     }
@@ -467,7 +533,119 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-white" dir="rtl">
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-10">
+      {authStep === 'verify_otp' ? (
+        <main className="max-w-xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-8">
+          <div className="bg-slate-900 border border-cyan-500/30 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 text-center animate-fade-in">
+            {/* Header Icon */}
+            <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                <span>✉️</span>
+                <span>الخطوة الأخيرة: تفعيل البريد الإلكتروني</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white">تأكيد البريد الإلكتروني (رمز التحقق OTP)</h2>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
+                أرسلنا رمز تحقق ورابط تفعيل إلى بريدك:
+                <span className="block mt-1 font-mono font-bold text-cyan-400 text-sm" dir="ltr">{pendingEmail}</span>
+              </p>
+            </div>
+
+            {otpError && (
+              <div className="p-3.5 bg-rose-950/40 border border-rose-800/60 rounded-xl text-xs text-rose-300 flex items-center justify-center gap-2">
+                <span>⚠️</span>
+                <span>{otpError}</span>
+              </div>
+            )}
+
+            {otpMessage && (
+              <div className="p-3.5 bg-emerald-950/40 border border-emerald-800/60 rounded-xl text-xs text-emerald-300 flex items-center justify-center gap-2">
+                <span>✓</span>
+                <span>{otpMessage}</span>
+              </div>
+            )}
+
+            {/* OTP Input */}
+            <div className="max-w-xs mx-auto space-y-2">
+              <label className="block text-xs font-semibold text-slate-300">أدخل رمز الـ 6 أرقام المرسل إلى بريدك</label>
+              <input
+                type="text"
+                maxLength={6}
+                value={otpCode}
+                onChange={(e) => {
+                  setOtpCode(e.target.value.replace(/\D/g, ''));
+                  if (otpError) setOtpError(null);
+                }}
+                placeholder="123456"
+                dir="ltr"
+                autoFocus
+                className="w-full text-center tracking-[0.4em] font-mono text-2xl font-black py-3 px-4 rounded-xl bg-slate-950 border border-cyan-500/40 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3 max-w-md mx-auto">
+              <button
+                type="button"
+                disabled={isVerifyingOtp || otpCode.length < 6}
+                onClick={handleVerifyOtp}
+                className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-l from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 text-white font-bold text-sm shadow-xl shadow-cyan-600/20 transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                {isVerifyingOtp ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>جاري التحقق والتفعيل...</span>
+                  </>
+                ) : (
+                  <span>تأكيد الرمز وتفعيل الحساب ←</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                disabled={isVerifyingOtp}
+                onClick={handleCheckLinkVerification}
+                className="w-full py-2.5 px-4 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-950/60 text-xs font-semibold text-slate-300 hover:text-white transition"
+              >
+                <span>نقرت على رابط التفعيل في الرسالة (متابعة)</span>
+              </button>
+            </div>
+
+            {/* Resend and Edit */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 text-xs text-slate-400">
+              {resendCooldown > 0 ? (
+                <span className="text-slate-500 font-mono">إعادة إرسال الرمز بعد ({resendCooldown} ثانية)</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="text-cyan-400 hover:text-cyan-300 hover:underline font-semibold"
+                >
+                  لم يصلك الرمز؟ إعادة إرسال رمز التحقق
+                </button>
+              )}
+
+              <span className="hidden sm:inline text-slate-700">|</span>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthStep('form');
+                  setOtpError(null);
+                }}
+                className="text-slate-400 hover:text-slate-200 hover:underline"
+              >
+                تعديل البريد الإلكتروني أو البيانات
+              </button>
+            </div>
+          </div>
+        </main>
+      ) : (
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-10">
         {/* Intro */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
@@ -607,18 +785,20 @@ export default function OnboardingPage() {
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
                   <span>رقم الهاتف *</span>
-                  <span className="text-[10px] text-cyan-400 font-normal">إلزامي للتواصل</span>
+                  <span className="text-[10px] text-cyan-400 font-normal">11 رقماً يبدأ بـ 01</span>
                 </label>
                 <input
                   type="tel"
                   value={phoneNumber}
                   onChange={(e) => handlePhoneChange(e.target.value)}
-                  placeholder="+201xxxxxxxxx"
+                  placeholder="010xxxxxxxx"
                   dir="ltr"
                   required
-                  pattern="^[+0-9\s\-]{8,}$"
                   className="w-full bg-slate-950 border border-cyan-500/40 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 text-left focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition font-mono"
                 />
+                <span className="text-[11px] text-slate-400 block">
+                  رقم مصري مكوّن من 11 رقماً يبدأ بـ 01 (مثل: 01012345678)
+                </span>
               </div>
 
               {/* WhatsApp Number with Sync Checkbox */}
@@ -646,31 +826,104 @@ export default function OnboardingPage() {
                     if (syncWhatsApp) setSyncWhatsApp(false);
                   }}
                   disabled={syncWhatsApp}
-                  placeholder="+201xxxxxxxxx"
+                  placeholder="010xxxxxxxx"
                   dir="ltr"
                   required
-                  pattern="^[+0-9\s\-]{8,}$"
                   className="w-full bg-slate-950 border border-slate-700 disabled:opacity-60 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 text-left focus:outline-none focus:border-cyan-500 transition font-mono"
                 />
+                <span className="text-[11px] text-slate-400 block">
+                  رقم الواتساب للتواصل وتأكيد الحجز (11 رقماً يبدأ بـ 01)
+                </span>
               </div>
 
-              {/* Password for unauthenticated users */}
+              {/* Password & Confirm Password for unauthenticated users */}
               {!currentUser && (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                    <span>كلمة المرور *</span>
-                    <span className="text-[10px] text-slate-400">6 أحرف على الأقل</span>
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required={!currentUser}
-                    minLength={6}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
-                  />
-                </div>
+                <>
+                  {/* Password */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                      <span>كلمة المرور *</span>
+                      <span className="text-[10px] text-slate-400">6 أحرف على الأقل</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        required={!currentUser}
+                        minLength={6}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 pl-11 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition p-1 cursor-pointer"
+                        title={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                        aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                      >
+                        {showPassword ? (
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                      <span>تأكيد كلمة المرور *</span>
+                      {confirmPassword && password !== confirmPassword && (
+                        <span className="text-[10px] text-red-400 font-semibold">غير متطابقة ⚠️</span>
+                      )}
+                      {confirmPassword && password === confirmPassword && (
+                        <span className="text-[10px] text-emerald-400 font-semibold">متطابقة ✓</span>
+                      )}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="••••••••"
+                        required={!currentUser}
+                        minLength={6}
+                        className={`w-full bg-slate-950 border rounded-xl px-3.5 pl-11 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition ${
+                          confirmPassword && password !== confirmPassword
+                            ? 'border-red-500/80 focus:border-red-400'
+                            : confirmPassword && password === confirmPassword
+                            ? 'border-emerald-500/80 focus:border-emerald-400'
+                            : 'border-slate-700 focus:border-cyan-500'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition p-1 cursor-pointer"
+                        title={showConfirmPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                        aria-label={showConfirmPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                      >
+                        {showConfirmPassword ? (
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
 
               {/* Company / Office Name */}
@@ -705,6 +958,7 @@ export default function OnboardingPage() {
           </div>
         </form>
       </main>
+      )}
     </div>
   );
 }
