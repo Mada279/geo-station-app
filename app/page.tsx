@@ -707,9 +707,6 @@ export default async function HomePage() {
                     height={200}
                     src={item.image_url || '/assets/img/hero-engineering-office.jpg'}
                     width={400}
-                    onError={(e) => {
-                      e.currentTarget.src = '/assets/img/hero-engineering-office.jpg';
-                    }}
                   />
                   <div className="absolute top-3 right-3 flex gap-2">
                     {item.listing_type === 'both' ? (
