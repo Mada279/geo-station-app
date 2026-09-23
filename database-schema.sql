@@ -880,6 +880,42 @@ CREATE INDEX IF NOT EXISTS idx_inquiries_context_id ON inquiries (context_id);
 CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries (status);
 CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries (created_at DESC);
 
+-- ============================================================
+-- 10. Table: platform_settings (Feature Flags & System Toggles)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS platform_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  setting_key TEXT UNIQUE NOT NULL,
+  setting_value JSONB NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
+ALTER TABLE platform_settings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read on platform_settings" ON platform_settings;
+CREATE POLICY "Allow public read on platform_settings"
+  ON platform_settings FOR SELECT
+  TO public
+  USING (true);
 
+DROP POLICY IF EXISTS "Allow authenticated insert on platform_settings" ON platform_settings;
+CREATE POLICY "Allow authenticated insert on platform_settings"
+  ON platform_settings FOR INSERT
+  TO public
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow authenticated update on platform_settings" ON platform_settings;
+CREATE POLICY "Allow authenticated update on platform_settings"
+  ON platform_settings FOR UPDATE
+  TO public
+  USING (true);
+
+INSERT INTO platform_settings (setting_key, setting_value, description)
+VALUES (
+  'show_provider_early_access_cta',
+  'true'::jsonb,
+  'Toggle visibility of the early access banner on the homepage'
+)
+ON CONFLICT (setting_key) DO NOTHING;

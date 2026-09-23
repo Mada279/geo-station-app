@@ -1,11 +1,12 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import FeaturedProviders from '@/components/FeaturedProviders';
+import ProviderEarlyAccessCTA from '@/components/ProviderEarlyAccessCTA';
 import { supabase } from '@/utils/supabaseClient';
 import { getEquipmentImageUrl } from '@/utils/helpers';
+
+export const dynamic = 'force-dynamic';
 
 interface HomepageEquipment {
   id: string;
@@ -136,144 +137,162 @@ function formatRelativeTime(dateString?: string): string {
   }
 }
 
-export default function HomePage() {
-  const [equipment, setEquipment] = useState<HomepageEquipment[]>(FALLBACK_EQUIPMENT);
-  const [jobs, setJobs] = useState<HomepageJob[]>(FALLBACK_JOBS);
+async function getEarlyAccessSetting(): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('platform_settings')
+      .select('setting_value')
+      .eq('setting_key', 'show_provider_early_access_cta')
+      .maybeSingle();
 
-  useEffect(() => {
-    let isMounted = true;
+    if (error || !data || data.setting_value === undefined || data.setting_value === null) {
+      return true; // Default fallback to true
+    }
+    return data.setting_value === true || data.setting_value === 'true';
+  } catch (err) {
+    console.warn('[HomePage] Error loading platform setting, defaulting to true:', err);
+    return true;
+  }
+}
 
-    async function loadHomepageData() {
-      try {
-        // 1. Fetch latest active equipment
-        const { data: eqData } = await supabase
-          .from('equipment')
-          .select('*')
-          .eq('is_flagged_stolen', false)
-          .order('created_at', { ascending: false })
-          .limit(6);
+async function getHomepageEquipment(): Promise<HomepageEquipment[]> {
+  try {
+    const { data: eqData } = await supabase
+      .from('equipment')
+      .select('*')
+      .eq('is_flagged_stolen', false)
+      .order('created_at', { ascending: false })
+      .limit(6);
 
-        if (isMounted && eqData && eqData.length > 0) {
-          const provIds = Array.from(new Set(eqData.map((e) => e.provider_id).filter(Boolean)));
-          let provMap: Record<string, { name: string; location?: string }> = {};
+    if (eqData && eqData.length > 0) {
+      const provIds = Array.from(new Set(eqData.map((e) => e.provider_id).filter(Boolean)));
+      let provMap: Record<string, { name: string; location?: string }> = {};
 
-          if (provIds.length > 0) {
-            const { data: provs } = await supabase
-              .from('providers')
-              .select('id, name, company_name, location')
-              .in('id', provIds);
+      if (provIds.length > 0) {
+        const { data: provs } = await supabase
+          .from('providers')
+          .select('id, name, company_name, location')
+          .in('id', provIds);
 
-            if (provs) {
-              provs.forEach((p) => {
-                provMap[p.id] = {
-                  name: p.company_name || p.name || 'مكتب مساحي معتمد',
-                  location: p.location,
-                };
-              });
-            }
-          }
-
-          const mappedEq: HomepageEquipment[] = eqData.map((item) => {
-            const prov = item.provider_id ? provMap[item.provider_id] : null;
-            let listing_type: 'rent' | 'sale' | 'both' = 'rent';
-            if (item.daily_price && item.sale_price) listing_type = 'both';
-            else if (item.sale_price) listing_type = 'sale';
-
-            let price_display = 'حسب العرض';
-            if (item.daily_price) {
-              price_display = `${item.daily_price} جنيه / يوم`;
-            } else if (item.monthly_price) {
-              price_display = `${item.monthly_price} جنيه / شهر`;
-            } else if (item.sale_price) {
-              price_display = `${item.sale_price.toLocaleString()} جنيه`;
-            }
-
-            return {
-              id: item.id,
-              title: item.title || 'جهاز مساحي',
-              category: item.category || 'Total Station',
-              brand: item.brand || '',
-              location: prov?.location || 'مصر',
-              image_url: getEquipmentImageUrl(item.image_url, item.category, item.title),
-              listing_type,
-              status_badge: item.status === 'available' || !item.status ? 'متاح الآن' : item.status,
-              condition: item.condition || 'مستعمل — ممتاز',
-              model_year: item.model ? `موديل ${item.model}` : 'معاير وجاهز',
-              price_display,
-              provider_name: prov?.name || 'مكتب مساحي معتمد',
-              is_available: true,
+        if (provs) {
+          provs.forEach((p) => {
+            provMap[p.id] = {
+              name: p.company_name || p.name || 'مكتب مساحي معتمد',
+              location: p.location,
             };
           });
+        }
+      }
 
-          if (mappedEq.length >= 3) {
-            setEquipment(mappedEq.slice(0, 3));
-          } else {
-            const combined = [...mappedEq, ...FALLBACK_EQUIPMENT.slice(mappedEq.length)];
-            setEquipment(combined.slice(0, 3));
-          }
+      const mappedEq: HomepageEquipment[] = eqData.map((item) => {
+        const prov = item.provider_id ? provMap[item.provider_id] : null;
+        let listing_type: 'rent' | 'sale' | 'both' = 'rent';
+        if (item.daily_price && item.sale_price) listing_type = 'both';
+        else if (item.sale_price) listing_type = 'sale';
+
+        let price_display = 'حسب العرض';
+        if (item.daily_price) {
+          price_display = `${item.daily_price} جنيه / يوم`;
+        } else if (item.monthly_price) {
+          price_display = `${item.monthly_price} جنيه / شهر`;
+        } else if (item.sale_price) {
+          price_display = `${item.sale_price.toLocaleString()} جنيه`;
         }
 
-        // 2. Fetch latest active jobs
-        const { data: dbJobs } = await supabase
-          .from('job_postings')
-          .select('*')
-          .eq('status', 'open')
-          .order('created_at', { ascending: false })
-          .limit(6);
+        return {
+          id: item.id,
+          title: item.title || 'جهاز مساحي',
+          category: item.category || 'Total Station',
+          brand: item.brand || '',
+          location: prov?.location || 'مصر',
+          image_url: getEquipmentImageUrl(item.image_url, item.category, item.title),
+          listing_type,
+          status_badge: item.status === 'available' || !item.status ? 'متاح الآن' : item.status,
+          condition: item.condition || 'مستعمل — ممتاز',
+          model_year: item.model ? `موديل ${item.model}` : 'معاير وجاهز',
+          price_display,
+          provider_name: prov?.name || 'مكتب مساحي معتمد',
+          is_available: true,
+        };
+      });
 
-        if (isMounted && dbJobs && dbJobs.length > 0) {
-          const jobProvIds = Array.from(new Set(dbJobs.map((j) => j.provider_id).filter(Boolean)));
-          let jobCompanyMap: Record<string, { name: string; location?: string }> = {};
-
-          if (jobProvIds.length > 0) {
-            const { data: provs } = await supabase
-              .from('providers')
-              .select('id, name, company_name, location')
-              .in('id', jobProvIds);
-
-            if (provs) {
-              provs.forEach((p) => {
-                jobCompanyMap[p.id] = {
-                  name: p.company_name || p.name || 'مكتب مساحي معتمد',
-                  location: p.location,
-                };
-              });
-            }
-          }
-
-          const mappedJobs: HomepageJob[] = dbJobs.map((j) => {
-            const comp = j.provider_id ? jobCompanyMap[j.provider_id] : null;
-            return {
-              id: j.id,
-              title: j.title || 'وظيفة هندسية',
-              company: comp?.name || 'مكتب مساحي معتمد',
-              location: j.location || comp?.location || 'مصر',
-              type: j.job_type || 'دوام كامل',
-              exp: j.experience_level ? `خبرة ${j.experience_level}` : 'خبرة مطلوبة',
-              desc: j.description || 'فرصة عمل بمجال المساحة والهندسة الميدانية.',
-              posted: formatRelativeTime(j.created_at),
-              salary: j.salary_range || 'يُحدد بعد المقابلة',
-            };
-          });
-
-          if (mappedJobs.length >= 3) {
-            setJobs(mappedJobs.slice(0, 3));
-          } else {
-            const combined = [...mappedJobs, ...FALLBACK_JOBS.slice(mappedJobs.length)];
-            setJobs(combined.slice(0, 3));
-          }
-        }
-      } catch (err) {
-        console.warn('[HomePage] Error loading dynamic data:', err);
+      if (mappedEq.length >= 3) {
+        return mappedEq.slice(0, 3);
+      } else {
+        const combined = [...mappedEq, ...FALLBACK_EQUIPMENT.slice(mappedEq.length)];
+        return combined.slice(0, 3);
       }
     }
+  } catch (err) {
+    console.warn('[HomePage] Error loading dynamic equipment:', err);
+  }
+  return FALLBACK_EQUIPMENT;
+}
 
-    loadHomepageData();
+async function getHomepageJobs(): Promise<HomepageJob[]> {
+  try {
+    const { data: dbJobs } = await supabase
+      .from('job_postings')
+      .select('*')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(6);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    if (dbJobs && dbJobs.length > 0) {
+      const jobProvIds = Array.from(new Set(dbJobs.map((j) => j.provider_id).filter(Boolean)));
+      let jobCompanyMap: Record<string, { name: string; location?: string }> = {};
+
+      if (jobProvIds.length > 0) {
+        const { data: provs } = await supabase
+          .from('providers')
+          .select('id, name, company_name, location')
+          .in('id', jobProvIds);
+
+        if (provs) {
+          provs.forEach((p) => {
+            jobCompanyMap[p.id] = {
+              name: p.company_name || p.name || 'مكتب مساحي معتمد',
+              location: p.location,
+            };
+          });
+        }
+      }
+
+      const mappedJobs: HomepageJob[] = dbJobs.map((j) => {
+        const comp = j.provider_id ? jobCompanyMap[j.provider_id] : null;
+        return {
+          id: j.id,
+          title: j.title || 'وظيفة هندسية',
+          company: comp?.name || 'مكتب مساحي معتمد',
+          location: j.location || comp?.location || 'مصر',
+          type: j.job_type || 'دوام كامل',
+          exp: j.experience_level ? `خبرة ${j.experience_level}` : 'خبرة مطلوبة',
+          desc: j.description || 'فرصة عمل بمجال المساحة والهندسة الميدانية.',
+          posted: formatRelativeTime(j.created_at),
+          salary: j.salary_range || 'يُحدد بعد المقابلة',
+        };
+      });
+
+      if (mappedJobs.length >= 3) {
+        return mappedJobs.slice(0, 3);
+      } else {
+        const combined = [...mappedJobs, ...FALLBACK_JOBS.slice(mappedJobs.length)];
+        return combined.slice(0, 3);
+      }
+    }
+  } catch (err) {
+    console.warn('[HomePage] Error loading dynamic jobs:', err);
+  }
+  return FALLBACK_JOBS;
+}
+
+export default async function HomePage() {
+  const [showEarlyAccessCTA, equipment, jobs] = await Promise.all([
+    getEarlyAccessSetting(),
+    getHomepageEquipment(),
+    getHomepageJobs(),
+  ]);
+
 
   return (
     <div className="min-h-screen bg-[#f4f7fa] text-slate-800">
@@ -468,6 +487,9 @@ export default function HomePage() {
 
         </div>
       </section>
+
+      {/* Dynamic Early Access CTA (Admin Controlled via platform_settings) */}
+      {showEarlyAccessCTA && <ProviderEarlyAccessCTA />}
 
       {/* 2. Categories Section (استكشف المنصة) */}
       <section className="py-16 bg-[#f4f7fa] border-b border-slate-200">

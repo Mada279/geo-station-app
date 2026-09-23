@@ -1,10 +1,88 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-
+import { supabase } from '@/utils/supabaseClient';
 
 export default function AdminSettingsPage() {
+  const [showEarlyAccessCTA, setShowEarlyAccessCTA] = useState<boolean>(true);
+  const [isLoadingSetting, setIsLoadingSetting] = useState<boolean>(true);
+  const [isSavingToggle, setIsSavingToggle] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  useEffect(() => {
+    async function loadSettings() {
+      setIsLoadingSetting(true);
+      try {
+        const { data, error } = await supabase
+          .from('platform_settings')
+          .select('setting_value')
+          .eq('setting_key', 'show_provider_early_access_cta')
+          .maybeSingle();
+
+        if (data && data.setting_value !== undefined && data.setting_value !== null) {
+          // setting_value could be boolean true/false or string 'true'/'false'
+          setShowEarlyAccessCTA(data.setting_value === true || data.setting_value === 'true');
+        }
+      } catch (err) {
+        console.warn('Could not load early access setting, defaulting to true:', err);
+      } finally {
+        setIsLoadingSetting(false);
+      }
+    }
+
+    loadSettings();
+  }, []);
+
+  const handleToggleEarlyAccess = async (nextValue: boolean) => {
+    setIsSavingToggle(true);
+    setShowEarlyAccessCTA(nextValue);
+
+    try {
+      const { error } = await supabase
+        .from('platform_settings')
+        .upsert(
+          {
+            setting_key: 'show_provider_early_access_cta',
+            setting_value: nextValue,
+            description: 'Toggle visibility of the early access banner on the homepage',
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'setting_key' }
+        );
+
+      if (error) {
+        // Fallback update if upsert failed due to missing RLS or constraint
+        const { error: updateErr } = await supabase
+          .from('platform_settings')
+          .update({
+            setting_value: nextValue,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('setting_key', 'show_provider_early_access_cta');
+
+        if (updateErr) throw updateErr;
+      }
+
+      showToast(
+        nextValue
+          ? '✅ تم تفعيل ظهور قسم التسجيل المبكر للمكاتب في الصفحة الرئيسية'
+          : '⚠️ تم إخفاء قسم التسجيل المبكر للمكاتب من الصفحة الرئيسية'
+      );
+    } catch (err) {
+      console.error('Failed to update platform setting:', err);
+      setShowEarlyAccessCTA(!nextValue); // revert state
+      showToast('❌ حدث خطأ أثناء حفظ الإعداد، يرجى المحاولة لاحقاً');
+    } finally {
+      setIsSavingToggle(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       <AdminSidebar />
@@ -18,12 +96,11 @@ export default function AdminSettingsPage() {
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">إعدادات النظام</h1>
             <p className="text-xs sm:text-sm text-gray-400 mt-1">
-              تهيئة وتخصيص سياسات المنصة، بوابات الإشعارات، ومعايير قبول الأجهزة.
+              تهيئة وتخصيص سياسات المنصة، تفعيل الأقسام الديناميكية، وبوابات الإشعارات.
             </p>
           </div>
         </div>
 
-        
         {/* Connection & Health Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
@@ -60,6 +137,60 @@ export default function AdminSettingsPage() {
             </div>
             <div className="text-xl font-bold text-emerald-400">يوميًا (Daily)</div>
             <div className="text-[11px] text-gray-400 mt-1">آخر نسخة: اليوم 03:00 ص</div>
+          </div>
+        </div>
+
+        {/* Dynamic Feature Toggles Section */}
+        <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/90 p-6 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-800 pb-3">
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <span>🚀</span>
+              <span>التحكم في أقسام وميزات الصفحة الرئيسية (Homepage Feature Toggles)</span>
+            </h3>
+            <span className="text-[11px] text-cyan-400 font-medium">
+              تحديث فوري دون الحاجة لإعادة نشر الكود
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {/* Early Access CTA Toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-cyan-500/30 transition">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-white text-sm">
+                    إظهار قسم التسجيل المبكر للمكاتب في الصفحة الرئيسية
+                  </span>
+                  {showEarlyAccessCTA ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                      معروض حالياً
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 border border-slate-700 text-slate-400">
+                      مخفي
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
+                  يتحكم في إظهار أو إخفاء قسم الدعوة الحصرية لمكاتب وشركات المساحة وموردي الأجهزة (Early Access CTA) مباشرة أسفل قسم الهيرو في الصفحة الرئيسية.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                {isSavingToggle && (
+                  <span className="text-xs text-cyan-400 animate-pulse">جاري الحفظ...</span>
+                )}
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showEarlyAccessCTA}
+                    disabled={isLoadingSetting || isSavingToggle}
+                    onChange={(e) => handleToggleEarlyAccess(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -138,6 +269,13 @@ export default function AdminSettingsPage() {
             حفظ إعدادات النظام
           </button>
         </div>
+
+        {/* Feedback Toast Notification */}
+        {toastMessage && (
+          <div className="fixed bottom-6 left-6 z-50 rounded-xl border border-cyan-500/30 bg-gray-900/95 px-5 py-3 text-sm text-cyan-300 shadow-2xl backdrop-blur-md animate-bounce">
+            {toastMessage}
+          </div>
+        )}
 
       </div>
     </div>
