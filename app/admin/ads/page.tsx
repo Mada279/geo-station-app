@@ -17,6 +17,12 @@ export interface AdBannerItem {
   updated_at?: string;
 }
 
+export interface RegisteredEntity {
+  id: string;
+  name: string;
+  location?: string;
+}
+
 const LOCATION_LABELS: Record<AdBannerItem['location'], { label: string; badgeColor: string }> = {
   homepage_hero: {
     label: 'الصفحة الرئيسية — أسفل الهيرو',
@@ -42,6 +48,10 @@ export default function AdminAdsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  // Registered Entities (Providers / Companies) for Auto-population
+  const [entities, setEntities] = useState<RegisteredEntity[]>([]);
+  const [selectedEntityId, setSelectedEntityId] = useState<string>('');
 
   // Modal / Form state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -95,12 +105,34 @@ export default function AdminAdsPage() {
     }
   };
 
+  const fetchEntities = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('providers')
+        .select('id, name, company_name, location')
+        .order('name', { ascending: true });
+
+      if (!error && data) {
+        const formatted: RegisteredEntity[] = data.map((p: any) => ({
+          id: p.id,
+          name: p.company_name || p.name || 'مزوّد غير مسمّى',
+          location: p.location || '',
+        }));
+        setEntities(formatted);
+      }
+    } catch (err) {
+      console.error('Error fetching registered entities for ads:', err);
+    }
+  };
+
   useEffect(() => {
     fetchAds();
+    fetchEntities();
   }, []);
 
   const openCreateModal = () => {
     setEditingAd(null);
+    setSelectedEntityId('');
     setFormData({
       title: '',
       image_url: '',
@@ -113,6 +145,8 @@ export default function AdminAdsPage() {
 
   const openEditModal = (ad: AdBannerItem) => {
     setEditingAd(ad);
+    const matched = entities.find((e) => ad.target_link.includes(e.id));
+    setSelectedEntityId(matched ? matched.id : '');
     setFormData({
       title: ad.title,
       image_url: ad.image_url,
@@ -121,6 +155,18 @@ export default function AdminAdsPage() {
       is_active: ad.is_active,
     });
     setIsModalOpen(true);
+  };
+
+  const handleEntitySelect = (entityId: string) => {
+    setSelectedEntityId(entityId);
+    if (entityId) {
+      const selected = entities.find((e) => e.id === entityId);
+      setFormData((prev) => ({
+        ...prev,
+        target_link: `/directory/${entityId}`,
+        title: prev.title.trim() === '' && selected ? `إعلان ${selected.name}` : prev.title,
+      }));
+    }
   };
 
   // Direct Image Upload to Supabase 'ads' bucket
@@ -578,18 +624,46 @@ export default function AdminAdsPage() {
                   </select>
                 </div>
 
+                {/* Advertiser Dropdown (Auto-populate) */}
+                <div>
+                  <label className="block text-gray-300 mb-1 font-bold">
+                    صاحب الإعلان (ربط تلقائي بالملف الشخصي)
+                  </label>
+                  <select
+                    value={selectedEntityId}
+                    onChange={(e) => handleEntitySelect(e.target.value)}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="">إعلان خارجي / كتابة الرابط يدوياً</option>
+                    {entities.map((entity) => (
+                      <option key={entity.id} value={entity.id}>
+                        {entity.name} {entity.location ? `(${entity.location})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-[11px] text-gray-400">
+                    عند اختيار جهة مسجلة، يتم ملء الرابط تلقائياً برابط ملفها في دليل المنصة مع إمكانية تعديله يدوياً.
+                  </p>
+                </div>
+
                 {/* Target Link */}
                 <div>
                   <label className="block text-gray-300 mb-1 font-bold">
                     رابط التوجيه عند النقر (Target Link) <span className="text-rose-400">*</span>
                   </label>
                   <input
-                    type="url"
+                    type="text"
                     required
-                    placeholder="https://survsta.com/equipment/leica-ts16 أو https://external-link.com"
+                    placeholder="/directory/uuid أو https://external-link.com"
                     value={formData.target_link}
-                    onChange={(e) => setFormData({ ...formData, target_link: e.target.value })}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400 font-mono"
+                    onChange={(e) => {
+                      setFormData({ ...formData, target_link: e.target.value });
+                      if (selectedEntityId && !e.target.value.includes(selectedEntityId)) {
+                        setSelectedEntityId('');
+                      }
+                    }}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400 font-mono text-left"
+                    dir="ltr"
                   />
                 </div>
 
