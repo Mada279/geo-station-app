@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 import { supabase } from '@/utils/supabaseClient';
 
 export interface AdBannerProps {
@@ -9,6 +10,9 @@ export interface AdBannerProps {
 }
 
 export default async function AdBanner({ location, className = '' }: AdBannerProps) {
+  // Opt out of static caching to ensure fresh banner data dynamically on every request
+  noStore();
+
   try {
     const { data: banners, error } = await supabase
       .from('ad_banners')
@@ -17,7 +21,12 @@ export default async function AdBanner({ location, className = '' }: AdBannerPro
       .eq('location', location)
       .order('created_at', { ascending: false });
 
-    if (error || !banners || banners.length === 0) {
+    if (error) {
+      console.error('AdBanner Fetch Error:', error);
+      return null;
+    }
+
+    if (!banners || banners.length === 0) {
       return null;
     }
 
@@ -66,7 +75,7 @@ export default async function AdBanner({ location, className = '' }: AdBannerPro
       </div>
     );
   } catch (err) {
-    console.error(`[AdBanner] Error rendering ad for location "${location}":`, err);
+    console.error('AdBanner Fetch Error:', err);
     return null;
   }
 }

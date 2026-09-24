@@ -34,6 +34,10 @@ export default function AdBannerClient({ location, className = '' }: AdBannerCli
           .eq('location', location)
           .order('created_at', { ascending: false });
 
+        if (error) {
+          console.error('AdBannerClient Fetch Error:', error);
+        }
+
         if (isMounted) {
           if (!error && banners && banners.length > 0) {
             const selected =
@@ -47,7 +51,7 @@ export default function AdBannerClient({ location, className = '' }: AdBannerCli
           setHasLoaded(true);
         }
       } catch (err) {
-        console.warn(`[AdBannerClient] Could not fetch banner for ${location}:`, err);
+        console.error('AdBannerClient Fetch Error:', err);
         if (isMounted) {
           setBanner(null);
           setHasLoaded(true);
