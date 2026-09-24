@@ -136,29 +136,34 @@ export default function AdminAdsPage() {
 
     setIsUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `banner-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-      const filePath = `banners/${fileName}`;
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const filePath = `${Date.now()}-${sanitizedName}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { data, error } = await supabase.storage
         .from('ads')
-        .upload(filePath, file, { cacheControl: '3600', upsert: true });
+        .upload(filePath, file);
 
-      if (uploadError) {
-        throw uploadError;
+      if (error) {
+        console.error('Supabase storage upload error:', error.message, error);
+        showToast(`❌ فشل الرفع: ${error.message}`);
+        return;
       }
 
       const { data: publicUrlData } = supabase.storage
         .from('ads')
         .getPublicUrl(filePath);
 
-      setFormData((prev) => ({ ...prev, image_url: publicUrlData.publicUrl }));
+      const publicUrl = publicUrlData.publicUrl;
+      setFormData((prev) => ({ ...prev, image_url: publicUrl }));
       showToast('✅ تم رفع صورة الإعلان بنجاح');
     } catch (err: any) {
-      console.error('Error uploading image to ads bucket:', err);
-      showToast('⚠️ فشل رفع الصورة، يمكنك وضع رابط مباشر للصورة كبديل');
+      console.error('Unexpected error uploading to ads bucket:', err?.message || err);
+      showToast(`❌ خطأ غير متوقع أثناء الرفع: ${err?.message || 'تعذر الرفع'}`);
     } finally {
       setIsUploading(false);
+      if (e.target) {
+        e.target.value = '';
+      }
     }
   };
 
