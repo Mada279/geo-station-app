@@ -7,6 +7,7 @@ import { supabase } from '@/utils/supabaseClient';
 import { getEquipmentImageUrl, getDefaultCategoryImage } from '@/utils/helpers';
 import ContactButton from '@/components/ContactButton';
 import InquiryModal from '@/components/inquiry/InquiryModal';
+import AdBannerClient from '@/components/ads/AdBannerClient';
 import { validateEgyptianPhone } from '@/lib/validations/phone';
 
 export interface MarketplaceEquipmentItem {
@@ -767,16 +768,16 @@ export default function EquipmentMarketplacePage() {
               {/* Dynamic Equipment Cards */}
               {!isLoading && filteredEquipment.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {filteredEquipment.map((item) => {
+                  {filteredEquipment.map((item, index) => {
                     const hasDaily = item.dailyPrice !== null && item.dailyPrice > 0;
                     const hasMonthly = item.monthlyPrice !== null && item.monthlyPrice > 0;
                     const hasSale = item.salePrice !== null && item.salePrice > 0;
 
                     return (
-                      <div
-                        key={item.id}
-                        className="bg-[#0F253E]/90 rounded-2xl border border-amber-500/20 hover:border-cyan-400/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col justify-between group"
-                      >
+                      <React.Fragment key={item.id}>
+                        <div
+                          className="bg-[#0F253E]/90 rounded-2xl border border-amber-500/20 hover:border-cyan-400/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col justify-between group"
+                        >
                         <div>
                           {/* Image Banner */}
                           <div className="relative h-48 w-full bg-[#081933] overflow-hidden">
@@ -920,8 +921,14 @@ export default function EquipmentMarketplacePage() {
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
+                      {(index === 1 || (index === 0 && filteredEquipment.length === 1)) && (
+                        <div className="col-span-full">
+                          <AdBannerClient location="search_in_feed" />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
                 </div>
               )}
             </div>

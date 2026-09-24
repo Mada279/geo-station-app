@@ -42,6 +42,7 @@ export default function AdminSidebar({ pendingCount = 0, isOpen = false, onClose
         { href: '/admin/providers', label: 'المزوّدون', icon: '🏢' },
         { href: '/admin/users', label: 'المستخدمون والصلاحيات', icon: '👤' },
         { href: '/admin/clients', label: 'العملاء', icon: '👥' },
+        { href: '/admin/ads', label: 'بنرات الإعلانات (Ads)', icon: '📢' },
       ],
     },
     {

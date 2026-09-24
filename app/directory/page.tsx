@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ContactButton from '@/components/ContactButton';
+import AdBannerClient from '@/components/ads/AdBannerClient';
 import { supabase } from '@/utils/supabaseClient';
 import { MOCK_PROFILES } from '@/utils/helpers';
 
@@ -377,6 +378,9 @@ export default function DirectoryPage() {
             {/* Results Grid (3 Cols) */}
             <div className="lg:col-span-3 space-y-6">
               
+              {/* Top Ad Banner for Providers Directory */}
+              <AdBannerClient location="providers_directory" />
+
               {/* Toolbar */}
               <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
                 <span className="font-bold text-slate-700">

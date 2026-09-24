@@ -919,3 +919,52 @@ VALUES (
   'Toggle visibility of the early access banner on the homepage'
 )
 ON CONFLICT (setting_key) DO NOTHING;
+
+-- ============================================================
+-- 11. Table: ad_banners (Dynamic Monetization System)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS ad_banners (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  target_link TEXT NOT NULL,
+  location TEXT NOT NULL CHECK (location IN ('homepage_hero', 'search_in_feed', 'providers_directory', 'equipment_sidebar')),
+  is_active BOOLEAN DEFAULT false,
+  clicks INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE ad_banners ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read on active ad_banners" ON ad_banners;
+CREATE POLICY "Allow public read on active ad_banners"
+  ON ad_banners FOR SELECT
+  TO public
+  USING (is_active = true);
+
+DROP POLICY IF EXISTS "Allow full access for admin on ad_banners" ON ad_banners;
+CREATE POLICY "Allow full access for admin on ad_banners"
+  ON ad_banners FOR ALL
+  TO public
+  USING (true)
+  WITH CHECK (true);
+
+CREATE OR REPLACE FUNCTION increment_ad_clicks(banner_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE ad_banners
+  SET clicks = clicks + 1,
+      updated_at = NOW()
+  WHERE id = banner_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION increment_ad_clicks(UUID) TO anon, authenticated, service_role;
+
+CREATE INDEX IF NOT EXISTS idx_ad_banners_location_active ON ad_banners (location, is_active);
+CREATE INDEX IF NOT EXISTS idx_ad_banners_created_at ON ad_banners (created_at DESC);
+
