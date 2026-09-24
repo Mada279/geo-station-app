@@ -1,10 +1,34 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
-
 export default function AdminAuditPage() {
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const logsData = [
+    { action_type: 'اعتماد مزوّد خدمة جديد', user: 'ahmed@survsta.com', target: 'providers (id: 489)', ip: '197.34.12.89', time: 'منذ 8 دقائق', status: 'ناجح', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+    { action_type: 'تعديل صلاحيات مستخدم', user: 'ahmed@survsta.com', target: 'users (role -> admin)', ip: '197.34.12.89', time: 'منذ 25 دقيقة', status: 'ناجح', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+    { action_type: 'تسجيل مزوّد عبر بوابة الانضمام', user: 'public_lead', target: 'providers (محمد علي)', ip: '156.204.81.12', time: 'منذ ساعتين', status: 'مسجل', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
+    { action_type: 'توليد كود تحقق OTP', user: 'system_auth', target: 'sms_gateway (854921)', ip: '10.0.4.1', time: 'منذ 3 ساعات', status: 'مرسل', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
+  ];
+
+  const handleExportCSV = () => {
+    const headers = ['نوع العملية,المستخدم / المشرف,الهدف / المورد,عنوان IP,الوقت والتاريخ,النتيجة\n'];
+    const rows = logsData.map(l => `"${l.action_type}","${l.user}","${l.target}","${l.ip}","${l.time}","${l.status}"\n`);
+    const blob = new Blob(['\uFEFF' + headers + rows.join('')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `survsta-audit-log-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setToastMessage('✅ تم تصدير سجل التدقيق كملف CSV بنجاح');
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       <AdminSidebar />
@@ -71,7 +95,11 @@ export default function AdminAuditPage() {
               <p className="text-xs text-gray-400 mt-0.5">توثيق كل حركة بالوقت، المنفذ، العنوان البرمجي، والتفاصيل</p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-950 text-xs font-bold text-gray-300 hover:text-white transition">
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                className="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-950 text-xs font-bold text-gray-300 hover:text-white transition cursor-pointer"
+              >
                 تصدير السجل كـ CSV
               </button>
             </div>
@@ -90,12 +118,7 @@ export default function AdminAuditPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
-                {[
-                  { action_type: 'اعتماد مزوّد خدمة جديد', user: 'ahmed@survsta.com', target: 'providers (id: 489)', ip: '197.34.12.89', time: 'منذ 8 دقائق', status: 'ناجح', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
-                  { action_type: 'تعديل صلاحيات مستخدم', user: 'ahmed@survsta.com', target: 'users (role -> admin)', ip: '197.34.12.89', time: 'منذ 25 دقيقة', status: 'ناجح', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
-                  { action_type: 'تسجيل مزوّد عبر بوابة الانضمام', user: 'public_lead', target: 'providers (محمد علي)', ip: '156.204.81.12', time: 'منذ ساعتين', status: 'مسجل', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
-                  { action_type: 'توليد كود تحقق OTP', user: 'system_auth', target: 'sms_gateway (854921)', ip: '10.0.4.1', time: 'منذ 3 ساعات', status: 'مرسل', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
-                ].map((log: any, idx: number) => (
+                {logsData.map((log: any, idx: number) => (
                   <tr key={idx} className="hover:bg-slate-800/50 transition font-mono">
                     <td className="p-3.5 font-sans font-bold text-white">
                       <span>{log.action_type || log.operation || log.type || 'غير محدد'}</span>
@@ -115,6 +138,13 @@ export default function AdminAuditPage() {
             </table>
           </div>
         </div>
+
+        {/* Feedback Toast */}
+        {toastMessage && (
+          <div className="fixed bottom-6 left-6 z-50 rounded-xl border border-cyan-500/30 bg-gray-900/95 px-5 py-3 text-sm text-cyan-300 shadow-2xl backdrop-blur-md animate-bounce">
+            {toastMessage}
+          </div>
+        )}
 
       </div>
     </div>

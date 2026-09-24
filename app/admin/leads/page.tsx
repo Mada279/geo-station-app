@@ -1,10 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
-
 export default function AdminLeadsPage() {
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [selectedLead, setSelectedLead] = useState<any | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       <AdminSidebar />
@@ -71,7 +77,11 @@ export default function AdminLeadsPage() {
               <p className="text-xs text-gray-400 mt-0.5">متابعة الطلبات المفتوحة وتوزيعها جغرافياً على مزوّدي المعدات</p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-3.5 py-2 rounded-xl bg-gradient-to-l from-cyan-500 to-sky-500 text-xs font-bold text-slate-950 shadow-md hover:brightness-110 transition">
+              <button
+                type="button"
+                onClick={() => showToast('ℹ️ يتم استقبال الطلبات تلقائياً عبر متجر الأجهزة ونماذج التواصل')}
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-l from-cyan-500 to-sky-500 text-xs font-bold text-slate-950 shadow-md hover:brightness-110 transition cursor-pointer"
+              >
                 + إنشاء طلب يدوي
               </button>
             </div>
@@ -114,7 +124,11 @@ export default function AdminLeadsPage() {
                       </span>
                     </td>
                     <td className="p-3.5 text-center space-x-2 space-x-reverse">
-                      <button className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 font-bold transition">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLead(lead)}
+                        className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 font-bold transition cursor-pointer"
+                      >
                         عرض التفاصيل
                       </button>
                     </td>
@@ -124,6 +138,62 @@ export default function AdminLeadsPage() {
             </table>
           </div>
         </div>
+
+        {/* Lead Details Modal */}
+        {selectedLead && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 space-y-4 shadow-2xl text-right">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 className="font-bold text-white text-base">تفاصيل الطلب: {selectedLead.id}</h3>
+                <button
+                  type="button"
+                  onClick={() => setSelectedLead(null)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-gray-400 block mb-1">الجهة الطالبة:</span>
+                  <span className="font-bold text-white">{selectedLead.requester_name}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block mb-1">المعدات:</span>
+                  <span className="font-mono text-cyan-300">{selectedLead.equipment}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block mb-1">الموقع والمدة:</span>
+                  <span className="text-slate-200">{selectedLead.location}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block mb-1">الميزانية التقديرية:</span>
+                  <span className="text-emerald-400 font-bold">{selectedLead.budget}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block mb-1">الحالة الحالية:</span>
+                  <span className="text-cyan-300 font-bold">{selectedLead.status}</span>
+                </div>
+              </div>
+              <div className="pt-3 border-t border-slate-800 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setSelectedLead(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-gray-200 text-xs font-bold hover:bg-slate-700 transition"
+                >
+                  إغلاق
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Feedback Toast */}
+        {toastMessage && (
+          <div className="fixed bottom-6 left-6 z-50 rounded-xl border border-cyan-500/30 bg-gray-900/95 px-5 py-3 text-sm text-cyan-300 shadow-2xl backdrop-blur-md animate-bounce">
+            {toastMessage}
+          </div>
+        )}
 
       </div>
     </div>

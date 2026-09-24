@@ -1,11 +1,31 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
-
 export default function AdminVerificationPage() {
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [docsList, setDocsList] = useState([
+    { id: 1, provider_name: 'مكتب الدلتا للهندسة والمساحة', type: 'شهادة معايرة محطة رصد متكاملة TS07', ref: 'CAL-2026-894', date: 'منذ 2 ساعة', status: 'قيد الفحص' },
+    { id: 2, provider_name: 'الشركة الهندسية للتجهيزات الجيوديسية', type: 'السجل التجاري والبطاقة الضريبية', ref: 'CR-104928', date: 'اليوم 10:30 ص', status: 'بانتظار المراجعة' },
+    { id: 3, provider_name: 'سرفاي تك للمقاولات والمساحة', type: 'شهادة معايرة جهاز GNSS R12i', ref: 'CAL-2026-103', date: 'أمس', status: 'معتمد مبدئياً' },
+  ]);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleApprove = (id: number, name: string) => {
+    setDocsList(prev => prev.map(d => d.id === id ? { ...d, status: 'معتمد رسمي ✅' } : d));
+    showToast(`✅ تم اعتماد وثيقة: ${name}`);
+  };
+
+  const handlePreview = (doc: any) => {
+    showToast(`📄 فتح وثيقة: ${doc.type} (${doc.ref})`);
+  };
+
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       <AdminSidebar />
@@ -31,7 +51,6 @@ export default function AdminVerificationPage() {
           </Link>
         </div>
 
-        
         {/* KPI Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="rounded-2xl border border-amber-500/30 bg-slate-900 p-5 shadow-xl backdrop-blur-sm">
@@ -80,7 +99,7 @@ export default function AdminVerificationPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs px-3 py-1.5 rounded-xl bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 font-semibold">
-                12 وثيقة معلقة
+                {docsList.filter(d => d.status !== 'معتمد رسمي ✅').length} وثيقة معلقة
               </span>
             </div>
           </div>
@@ -98,15 +117,11 @@ export default function AdminVerificationPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
-                {[
-                  { provider_name: 'مكتب الدلتا للهندسة والمساحة', type: 'شهادة معايرة محطة رصد متكاملة TS07', ref: 'CAL-2026-894', date: 'منذ 2 ساعة', status: 'قيد الفحص' },
-                  { provider_name: 'الشركة الهندسية للتجهيزات الجيوديسية', type: 'السجل التجاري والبطاقة الضريبية', ref: 'CR-104928', date: 'اليوم 10:30 ص', status: 'بانتظار المراجعة' },
-                  { provider_name: 'سرفاي تك للمقاولات والمساحة', type: 'شهادة معايرة جهاز GNSS R12i', ref: 'CAL-2026-103', date: 'أمس', status: 'معتمد مبدئياً' },
-                ].map((doc: any, idx: number) => (
-                  <tr key={idx} className="hover:bg-slate-800/50 transition">
+                {docsList.map((doc: any) => (
+                  <tr key={doc.id} className="hover:bg-slate-800/50 transition">
                     <td className="p-3.5 font-semibold text-slate-200">
                       <span className="font-semibold text-white">
-                        {doc.provider_name || doc.provider?.company_name || doc.provider?.name || 'مزود غير معروف'}
+                        {doc.provider_name}
                       </span>
                     </td>
                     <td className="p-3.5 text-slate-200">{doc.type}</td>
@@ -114,19 +129,28 @@ export default function AdminVerificationPage() {
                     <td className="p-3.5 text-slate-400">{doc.date}</td>
                     <td className="p-3.5">
                       <span className={`inline-flex items-center justify-center px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border ${
+                        doc.status.includes('معتمد') ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
                         doc.status === 'قيد الفحص' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
-                        doc.status === 'بانتظار المراجعة' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' :
-                        'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                        'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
                       }`}>
                         {doc.status}
                       </span>
                     </td>
                     <td className="p-3.5 text-center space-x-2 space-x-reverse">
-                      <button className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 font-bold transition">
+                      <button
+                        type="button"
+                        onClick={() => handlePreview(doc)}
+                        className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 font-bold transition cursor-pointer"
+                      >
                         معاينة الوثيقة
                       </button>
-                      <button className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold transition">
-                        اعتماد
+                      <button
+                        type="button"
+                        onClick={() => handleApprove(doc.id, doc.provider_name)}
+                        disabled={doc.status.includes('معتمد')}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold transition cursor-pointer disabled:opacity-40"
+                      >
+                        {doc.status.includes('معتمد') ? 'معتمد' : 'اعتماد'}
                       </button>
                     </td>
                   </tr>
@@ -135,6 +159,13 @@ export default function AdminVerificationPage() {
             </table>
           </div>
         </div>
+
+        {/* Feedback Toast */}
+        {toastMessage && (
+          <div className="fixed bottom-6 left-6 z-50 rounded-xl border border-cyan-500/30 bg-gray-900/95 px-5 py-3 text-sm text-cyan-300 shadow-2xl backdrop-blur-md animate-bounce">
+            {toastMessage}
+          </div>
+        )}
 
       </div>
     </div>

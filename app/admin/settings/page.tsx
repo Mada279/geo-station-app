@@ -265,7 +265,11 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="flex justify-end pt-2">
-          <button className="px-6 py-2.5 rounded-xl bg-gradient-to-l from-cyan-500 to-sky-500 text-xs font-black text-slate-950 shadow-lg shadow-cyan-500/20 hover:brightness-110 transition">
+          <button
+            type="button"
+            onClick={() => showToast('✅ تم حفظ كافة إعدادات النظام وتحديث المتغيرات بنجاح')}
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-l from-cyan-500 to-sky-500 text-xs font-black text-slate-950 shadow-lg shadow-cyan-500/20 hover:brightness-110 transition"
+          >
             حفظ إعدادات النظام
           </button>
         </div>
