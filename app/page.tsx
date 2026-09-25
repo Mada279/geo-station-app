@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import FeaturedProviders from '@/components/FeaturedProviders';
@@ -8,6 +9,58 @@ import { supabase } from '@/utils/supabaseClient';
 import { getEquipmentImageUrl } from '@/utils/helpers';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Survsta | سيرفستا - أكبر منصة رقمية للمساحة والجيوماتكس',
+  description: 'سوق الأجهزة المساحية المعتمدة، خدمات الرفع المساحي والمسح الجوي، وفرص عمل المساحين في مصر. احصل على أجهزة معايرة ومضمونة بضغطة زر.',
+  keywords: [
+    'Survsta',
+    'سيرفستا',
+    'منصة سيرفستا',
+    'أجهزة مساحة',
+    'تأجير توتال ستيشن',
+    'Total Station',
+    'GPS RTK',
+    'مكاتب مساحة معتمدة',
+    'مسح جوي وطبوغرافي',
+    'مساحة مصر',
+  ],
+  openGraph: {
+    title: 'Survsta | سيرفستا - أكبر منصة رقمية للمساحة والجيوماتكس',
+    description: 'سوق الأجهزة المساحية المعتمدة، خدمات الرفع المساحي والمسح الجوي، وفرص عمل المساحين في مصر.',
+    url: 'https://survsta.com',
+    siteName: 'Survsta',
+    locale: 'ar_EG',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Survsta - سيرفستا',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Survsta | سيرفستا - أكبر منصة رقمية للمساحة والجيوماتكس',
+    description: 'سوق الأجهزة المساحية المعتمدة، خدمات الرفع المساحي والمسح الجوي، وفرص عمل المساحين في مصر.',
+    images: ['/og-image.jpg'],
+  },
+};
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Survsta',
+  alternateName: 'سيرفستا',
+  url: 'https://survsta.com',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://survsta.com/equipment?search={search_term_string}',
+    'query-input': 'required name=search_term_string',
+  },
+};
 
 interface HomepageEquipment {
   id: string;
@@ -348,6 +401,11 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#f4f7fa] text-slate-800">
+      {/* WebSite Structured Data Schema with Sitelinks Searchbox */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       
       {/* 1. Hero Section (Dark Navy #081933) */}
       <section className="relative overflow-hidden bg-[#081933] text-white py-14 lg:py-20 border-b border-cyan-500/15">

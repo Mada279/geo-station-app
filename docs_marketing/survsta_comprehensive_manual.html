@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الدليل التشغيلي والتسويقي الشامل لمنصة Survsta</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            survsta: {
+              navy: '#081933',
+              dark: '#040C18',
+              surface: '#0F253E',
+              card: '#0B1B36',
+              border: '#1A365D',
+              cyan: '#00D2FF',
+              accent: '#1CA7FF',
+              gold: '#F4B400',
+              goldLight: '#FCD34D',
+            }
+          },
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background-color: white !important;
+        color: black !important;
+      }
+      .print-card {
+        border: 1px solid #ccc !important;
+        background: #fff !important;
+        color: #000 !important;
+        box-shadow: none !important;
+      }
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #040C18;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1A365D;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00D2FF;
+    }
+  </style>
+</head>
+
+<body class="bg-survsta-dark text-slate-200 antialiased selection:bg-survsta-cyan selection:text-slate-950">
+
+  <!-- Top Sticky Navigation Bar -->
+  <nav class="sticky top-0 z-50 bg-survsta-navy/95 backdrop-blur-md border-b border-survsta-cyan/20 px-4 sm:px-8 py-3.5 no-print">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-survsta-cyan to-survsta-accent flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-survsta-cyan/20">
+          S
+        </div>
+        <div>
+          <div class="text-white font-black text-lg tracking-wide flex items-center gap-2">
+            <span>Survsta</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-survsta-cyan/20 text-survsta-cyan border border-survsta-cyan/30">دليل التشغيل والتسويق v1.0</span>
+          </div>
+          <p class="text-[11px] text-slate-400">المنصة الرقمية المتخصصة لقطاع المساحة والجيوماتكس في مصر</p>
+        </div>
+      </div>
+
+      <!-- Quick Section Anchor Links -->
+      <div class="hidden lg:flex items-center gap-5 text-xs font-bold text-slate-300">
+        <a href="#vision" class="hover:text-survsta-cyan transition">الرؤية والقيم المضافة</a>
+        <a href="#onboarding" class="hover:text-survsta-cyan transition">أدلة التسجيل (3 أدوار)</a>
+        <a href="#workflows" class="hover:text-survsta-cyan transition">دورات العمل والتشغيل</a>
+        <a href="#ads" class="hover:text-survsta-cyan transition">نظام الإعلانات والرعاة</a>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button onclick="window.print()" class="px-3.5 py-1.5 rounded-xl border border-slate-700 bg-survsta-surface text-slate-200 text-xs font-bold hover:bg-slate-800 hover:text-white transition flex items-center gap-1.5">
+          <span>🖨️</span>
+          <span>طباعة / حفظ PDF</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Header Section -->
+  <header class="relative overflow-hidden bg-gradient-to-b from-survsta-navy via-survsta-dark to-survsta-dark border-b border-survsta-border py-16 sm:py-24 px-4 sm:px-8">
+    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#00D2FF_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>
+    <div class="max-w-5xl mx-auto text-center relative z-10 space-y-6">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-survsta-cyan/10 border border-survsta-cyan/30 text-survsta-cyan text-xs font-extrabold shadow-sm animate-pulse">
+        <span>📍 جمهورية مصر العربية</span>
+        <span>•</span>
+        <span>المرجع الشامل للإنتاج والتشغيل لعام 2026</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight">
+        الدليل التشغيلي والتسويقي الشامل<br>
+        <span class="bg-gradient-to-l from-survsta-cyan via-survsta-accent to-survsta-gold bg-clip-text text-transparent">
+          لمنصة Survsta
+        </span>
+      </h1>
+
+      <p class="text-slate-300 text-sm sm:text-base lg:text-lg max-w-3xl mx-auto leading-relaxed font-normal">
+        الوثيقة المرجعية الموحدة لعمليات المنصة، رحلات المستخدمين التفاعلية، استراتيجيات التسويق والإنتاج المرئي، ونظام الإعلانات والاستثمار في الأصول المساحية. صُمم هذا الدليل ليكون خارطة طريق للمشرفين، فريق التسويق، ومنشئي المحتوى.
+      </p>
+
+      <!-- Key Metrics Badge Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto pt-6 text-right">
+        <div class="p-4 rounded-2xl bg-survsta-surface/80 border border-survsta-border backdrop-blur shadow-xl">
+          <div class="text-xs text-slate-400 font-semibold mb-1">المسارات المفحوصة</div>
+          <div class="text-2xl font-black text-survsta-cyan font-mono">64 مساراً</div>
+          <div class="text-[11px] text-emerald-400 mt-1 font-bold">✓ Zero Broken Links</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-survsta-surface/80 border border-survsta-border backdrop-blur shadow-xl">
+          <div class="text-xs text-slate-400 font-semibold mb-1">أدوار المستخدمين</div>
+          <div class="text-2xl font-black text-survsta-gold">3 فئات</div>
+          <div class="text-[11px] text-slate-300 mt-1">مزوّد • مستقل • عميل</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-survsta-surface/80 border border-survsta-border backdrop-blur shadow-xl">
+          <div class="text-xs text-slate-400 font-semibold mb-1">منظومة الثقة (KYC)</div>
+          <div class="text-2xl font-black text-emerald-400">تدقيق مزدوج</div>
+          <div class="text-[11px] text-slate-300 mt-1">سجل تجاري + شهادات معايرة</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-survsta-surface/80 border border-survsta-border backdrop-blur shadow-xl">
+          <div class="text-xs text-slate-400 font-semibold mb-1">التوزيع الإعلاني</div>
+          <div class="text-2xl font-black text-purple-400">4 مواقع</div>
+          <div class="text-[11px] text-slate-300 mt-1">ربط تلقائي بالبروفايل</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-8 py-12 space-y-16">
+
+    <!-- Table of Contents (TOC Card) -->
+    <section class="rounded-3xl bg-gradient-to-r from-survsta-surface/90 to-survsta-card border border-survsta-cyan/30 p-6 sm:p-8 shadow-2xl no-print">
+      <div class="flex items-center gap-3 border-b border-survsta-border pb-4 mb-6">
+        <span class="text-2xl">📑</span>
+        <h2 class="text-xl sm:text-2xl font-black text-white">فهرس المحتويات السريع</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="#vision" class="group p-4 rounded-2xl bg-survsta-dark/60 border border-slate-800 hover:border-survsta-cyan transition flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold text-survsta-cyan mb-1 block">القسم الأول</span>
+            <h3 class="font-extrabold text-white text-sm group-hover:text-survsta-cyan transition">الرؤية والقيم المضافة</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">ركائز المنصة وسيناريو الفيديو الترويجي الرسمي.</p>
+          </div>
+          <span class="text-survsta-cyan text-xs font-bold mt-3 inline-flex items-center gap-1">استعراض ←</span>
+        </a>
+
+        <a href="#onboarding" class="group p-4 rounded-2xl bg-survsta-dark/60 border border-slate-800 hover:border-survsta-gold transition flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold text-survsta-gold mb-1 block">القسم الثاني</span>
+            <h3 class="font-extrabold text-white text-sm group-hover:text-survsta-gold transition">أدلة التسجيل والتهيئة</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">خطوات التسجيل والتوثيق للمزوّد والمهندس والعميل.</p>
+          </div>
+          <span class="text-survsta-gold text-xs font-bold mt-3 inline-flex items-center gap-1">استعراض ←</span>
+        </a>
+
+        <a href="#workflows" class="group p-4 rounded-2xl bg-survsta-dark/60 border border-slate-800 hover:border-emerald-400 transition flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold text-emerald-400 mb-1 block">القسم الثالث</span>
+            <h3 class="font-extrabold text-white text-sm group-hover:text-emerald-400 transition">دورات العمل والتشغيل</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">إدارة الأسطول، دورة الطلبات، والتوظيف عبر ATS.</p>
+          </div>
+          <span class="text-emerald-400 text-xs font-bold mt-3 inline-flex items-center gap-1">استعراض ←</span>
+        </a>
+
+        <a href="#ads" class="group p-4 rounded-2xl bg-survsta-dark/60 border border-slate-800 hover:border-purple-400 transition flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold text-purple-400 mb-1 block">القسم الرابع</span>
+            <h3 class="font-extrabold text-white text-sm group-hover:text-purple-400 transition">نظام الإعلانات والرعاة</h3>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">الكروت الثنائية، التوجيه الذكي، وتتبع النقرات.</p>
+          </div>
+          <span class="text-purple-400 text-xs font-bold mt-3 inline-flex items-center gap-1">استعراض ←</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- SECTION 1: CORE FEATURES & MARKETING VISION -->
+    <section id="vision" class="space-y-8 scroll-mt-24">
+      <div class="flex items-center justify-between border-b border-survsta-border pb-4">
+        <div class="flex items-center gap-3">
+          <span class="p-2.5 rounded-2xl bg-survsta-cyan/10 border border-survsta-cyan/30 text-survsta-cyan text-2xl">🌟</span>
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">القسم الأول: الرؤية التسويقية والقيم المضافة</h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-0.5">استراتيجية التحول الرقمي وسيناريو الإنتاج المرئي لحملات الإطلاق</p>
+          </div>
+        </div>
+        <span class="text-xs font-mono font-bold text-survsta-cyan bg-survsta-cyan/10 px-3 py-1 rounded-full border border-survsta-cyan/20">PART 01</span>
+      </div>
+
+      <!-- Core Value Propositions Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-3xl bg-survsta-card border border-survsta-border hover:border-survsta-cyan transition space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl">
+            📡
+          </div>
+          <h3 class="text-lg font-black text-white">أكبر سوق B2B للأجهزة المساحية</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            منصة تداول وتأجير متخصصة تجمع مئات الأجهزة (محطات رصد متكاملة Total Stations، أجهزة GNSS RTK، موازين دقيقة، وماسحات ليزرية 3D). تحول الأجهزة الراكدة في المكاتب إلى عوائد مالية شهرية، وتخفض تكاليف الشراء الرأسمالي لشركات المقاولات بنسبة تصل لـ 60%.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-survsta-card border border-survsta-border hover:border-emerald-400 transition space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl">
+            🛡️
+          </div>
+          <h3 class="text-lg font-black text-white">منظومة توثيق واعتماد صارمة (KYC)</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            تطهير السوق من الكيانات الوهمية والأجهزة المعطوبة؛ فحص دقيق للسجلات التجارية، البطاقات الضريبية، ورخص مزاولة المهنة، مع إلزامية وجود شهادات معايرة سنوية سارية لكل جهاز معروض لضمان الدقة المليمترية في مواقع المشروعات.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-survsta-card border border-survsta-border hover:border-survsta-gold transition space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
+            📈
+          </div>
+          <h3 class="text-lg font-black text-white">إدارة عمليات وأسطول متكاملة</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            لوحات تحكم متطورة تمكن أصحاب المكاتب من تتبع حجوزات الأجهزة، فترات الإيجار، وتواريخ الصيانة، والتحكم في إتاحة المعدات، مع تتبع الإيرادات ونسب التحويل من خلال مؤشرات أداء تفاعلية ولحظية.
+          </p>
+        </div>
+      </div>
+
+      <!-- Video Script Outline Container -->
+      <div class="rounded-3xl bg-survsta-surface border border-survsta-border p-6 sm:p-8 space-y-6">
+        <div class="flex items-center justify-between border-b border-survsta-border pb-3">
+          <h3 class="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+            <span>🎬</span>
+            <span>سيناريو الفيلم الترويجي الرسمي (Promo Video Script Outline)</span>
+          </h3>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold">المدة: 2:15 دقيقة</span>
+        </div>
+
+        <div class="space-y-4 text-xs sm:text-sm">
+          <!-- Scene 1 -->
+          <div class="p-4 rounded-2xl bg-survsta-dark/80 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between font-bold text-rose-400">
+              <span>المشهد 1: التحدي وفوضى السوق التقليدي</span>
+              <span class="font-mono text-xs">0:00 - 0:25</span>
+            </div>
+            <p class="text-slate-300">
+              <strong class="text-white">اللقطات البصرية:</strong> حرارة شمس موقع إنشاءات، مهندس محبط أمام شاشة محطة رصد تظهر خطأ في المعايرة، فوضى مجموعات الواتساب ورسائل "مطلوب GPS إيجار ضروري"، وأجهزة باهظة الثمن مركونة في مكاتب مغلقة.<br>
+              <strong class="text-white">التعليق الصوتي:</strong> "في عالم المشروعات الكبرى... الملليمتر يحسم الموقف. لكن لسنوات ظل قطاع المساحة يعاني من معدات معطلة، وأجهزة غير معايرة، ووسطاء بلا ضمانات."
+            </p>
+          </div>
+
+          <!-- Scene 2 -->
+          <div class="p-4 rounded-2xl bg-survsta-dark/80 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between font-bold text-survsta-cyan">
+              <span>المشهد 2: بزوغ الحل الرقمي — منصة Survsta</span>
+              <span class="font-mono text-xs">0:25 - 0:45</span>
+            </div>
+            <p class="text-slate-300">
+              <strong class="text-white">اللقطات البصرية:</strong> وميض ضوئي فخم لشعار Survsta، انتقال سلس ثلاثي الأبعاد إلى خريطة مصر التفاعلية تضيء بنقاط انتشار المكاتب المساحية من الإسكندرية إلى أسوان.<br>
+              <strong class="text-white">التعليق الصوتي:</strong> "حان وقت التغيير. مرحباً بكم في Survsta — أول منصة رقمية متكاملة لقطاع المساحة والجيوماتكس في مصر؛ حيث يلتقي أصحاب المكاتب، بشركات المقاولات، بنخبة المهندسين المساحيين."
+            </p>
+          </div>
+
+          <!-- Scene 3 -->
+          <div class="p-4 rounded-2xl bg-survsta-dark/80 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between font-bold text-emerald-400">
+              <span>المشهد 3: جولة في قلب الميزات والسوق الموثوق</span>
+              <span class="font-mono text-xs">0:45 - 1:25</span>
+            </div>
+            <p class="text-slate-300">
+              <strong class="text-white">اللقطات البصرية:</strong> تصفح مرن لسوق الأجهزة (Leica, Trimble, Topcon)، ظهور بادج التوثيق الأخضر المضيء (KYC Approved)، ولوحة تحكم المزوّد وهي تستقبل وتدير الحجوزات بضغطة زر.<br>
+              <strong class="text-white">التعليق الصوتي:</strong> "أضخم كتالوج للمعدات بأحدث شهادات المعايرة السارية، توثيق قانوني صارم، لوحات تشغيل ذكية تدر عوائد مستمرة، ومساحات إعلانية موجهة تضع علامتك في الصدارة."
+            </p>
+          </div>
+
+          <!-- Scene 4 -->
+          <div class="p-4 rounded-2xl bg-survsta-dark/80 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between font-bold text-purple-400">
+              <span>المشهد 4: تمكين الكفاءات الهندسية وملتقى التوظيف</span>
+              <span class="font-mono text-xs">1:25 - 1:45</span>
+            </div>
+            <p class="text-slate-300">
+              <strong class="text-white">اللقطات البصرية:</strong> مهندس مساحة شاب يلتقط نقاطاً بدقة في الميدان، استعراض ملفه الشخصي على المنصة بتقييم 4.9 نجوم وسابقة أعماله، والتقديم الفوري على وظيفة بمشروع قومي عبر نظام ATS.<br>
+              <strong class="text-white">التعليق الصوتي:</strong> "ولأن المهندس هو أساس النجاح؛ تفتح Survsta آفاقاً غير محدودة لمهندسي المساحة لبناء سيرة مهنية معتمدة، والوصول المباشر لكبرى المشروعات."
+            </p>
+          </div>
+
+          <!-- Scene 5 -->
+          <div class="p-4 rounded-2xl bg-survsta-dark/80 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between font-bold text-survsta-gold">
+              <span>المشهد 5: نداء العمل الملحمي (Call to Action)</span>
+              <span class="font-mono text-xs">1:45 - 2:15</span>
+            </div>
+            <p class="text-slate-300">
+              <strong class="text-white">اللقطات البصرية:</strong> لابتوب وهاتف ذكي يعرضان المنصة وتطبيق الموبايل، ظهور روابط التحميل وأيقونات App Store و Google Play، ولمعان شعار الموقع الرسمي survsta.com.<br>
+              <strong class="text-white">التعليق الصوتي:</strong> "سواء كنت صاحب مكتب مساحي، شركة مقاولات، أو مهندساً طموحاً... مستقبل الجيوماتكس يبدأ الآن. سجّل اليوم مجاناً. Survsta — لأن دقة مشروعك تبدأ من هنا!"
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: REGISTRATION & ONBOARDING GUIDES -->
+    <section id="onboarding" class="space-y-8 scroll-mt-24">
+      <div class="flex items-center justify-between border-b border-survsta-border pb-4">
+        <div class="flex items-center gap-3">
+          <span class="p-2.5 rounded-2xl bg-survsta-gold/10 border border-survsta-gold/30 text-survsta-gold text-2xl">👤</span>
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">القسم الثاني: أدلة التسجيل والتهيئة (3 أدوار رئيسية)</h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-0.5">خطوات الانضمام المفصلة المدعومة بنظام Supabase Auth والتحقق الصارم</p>
+          </div>
+        </div>
+        <span class="text-xs font-mono font-bold text-survsta-gold bg-survsta-gold/10 px-3 py-1 rounded-full border border-survsta-gold/20">PART 02</span>
+      </div>
+
+      <!-- Role 1: Provider Card -->
+      <div class="rounded-3xl bg-survsta-card border border-survsta-gold/40 p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">🏢</span>
+            <div>
+              <span class="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">الدور الأول</span>
+              <h3 class="text-xl sm:text-2xl font-black text-white mt-1">مزود خدمة / مكتب وشركة مساحية (Provider / Company)</h3>
+            </div>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">مسار التسجيل: /onboarding -> /provider/verification</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">1</div>
+            <h4 class="font-bold text-white text-sm">اختيار النشاط</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              الدخول لصفحة الانضمام واختيار كرت "مزود خدمة / شركة تأجير" لتهيئة لوحة تحكم الأجهزة والمبيعات.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">2</div>
+            <h4 class="font-bold text-white text-sm">البيانات والهاتف</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              إدخال اسم المسؤول، اسم المكتب، البريد الرسمي، ورقم هاتف مصري معتمد مع تفعيل مزامنة الواتساب لتلقي إشعارات الحجز.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">3</div>
+            <h4 class="font-bold text-white text-sm">رمز التحقق (OTP)</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              تأكيد البريد الإلكتروني عبر كود الأمان OTP المكون من 6 أرقام للتحقق من هوية المفوض وضمان أمان الحساب.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">4</div>
+            <h4 class="font-bold text-white text-sm">التوثيق ورفع KYC</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              رفع السجل التجاري والبطاقة الضريبية وشعار المكتب لنيل شارة الاعتماد الذهبية وتفعيل الكتالوج أمام المستأجرين.
+            </p>
+          </div>
+        </div>
+
+        <!-- Provider Equipment Listing Step -->
+        <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs sm:text-sm text-slate-200 space-y-2">
+          <strong class="text-amber-300 font-bold block text-sm">📡 خطوات إضافة الأجهزة والمعدات للكتالوج:</strong>
+          <p>
+            من خلال لوحة التحكم (<code class="bg-slate-900 px-1.5 py-0.5 rounded text-cyan-300 font-mono">/provider/dashboard#equipment</code>)، يضغط المزوّد على <strong>"+ إضافة جهاز جديد"</strong> ويحدد:
+            (الماركة والموديل • الرقم التسلسلي Serial Number • ملحقات الجهاز كالحوامل والعواكس • تاريخ شهادة المعايرة السارية • أسعار الإيجار اليومية والأسبوعية والشهرية بالجنيه المصري • ورفع صور واضحة للحالة الواقعية للجهاز).
+          </p>
+        </div>
+      </div>
+
+      <!-- Role 2: Freelance Surveyor Card -->
+      <div class="rounded-3xl bg-survsta-card border border-emerald-500/40 p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">📐</span>
+            <div>
+              <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">الدور الثاني</span>
+              <h3 class="text-xl sm:text-2xl font-black text-white mt-1">مهندس / فني مساحة حر (Freelance Surveyor)</h3>
+            </div>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">مسار التسجيل: /onboarding -> /freelancer/profile</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">1</div>
+            <h4 class="font-bold text-white text-sm">اختيار صفة مستقل</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              اختيار حساب "مستقل / توظيف" لتفعيل بوابة البحث عن الوظائف، وتقديم الاستشارات وعروض الرفع المساحي الميداني.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">2</div>
+            <h4 class="font-bold text-white text-sm">بناء الملف المهني (CV)</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              إدراج سنوات الخبرة، رقم القيد بنقابة المهندسين، رخص القيادة، المهارات البرمجية (Civil 3D, ArcGIS, TBC)، والأجهزة المتقنة (GPS RTK, Total Station).
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">3</div>
+            <h4 class="font-bold text-white text-sm">التقديم وتتبع الـ ATS</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              تصفح شواغر بوابة <code class="bg-slate-900 px-1 py-0.5 rounded text-cyan-300 font-mono">/jobs</code>، التقديم الفوري بملف المنصة، ومتابعة ردود الشركات في نظام التتبع <code class="bg-slate-900 px-1 py-0.5 rounded text-cyan-300 font-mono">/freelancer/applications</code>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role 3: Client / Contractor Card -->
+      <div class="rounded-3xl bg-survsta-card border border-survsta-cyan/40 p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">🏗️</span>
+            <div>
+              <span class="text-[11px] font-bold text-survsta-cyan bg-survsta-cyan/10 px-2.5 py-0.5 rounded-full border border-survsta-cyan/20">الدور الثالث</span>
+              <h3 class="text-xl sm:text-2xl font-black text-white mt-1">طالب خدمة / شركة مقاولات (Client / Contractor)</h3>
+            </div>
+          </div>
+          <span class="text-xs text-slate-400 font-mono">مسار التسجيل: /onboarding -> /client/dashboard</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">1</div>
+            <h4 class="font-bold text-white text-sm">تسجيل حساب العميل</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              إنشاء حساب سريع برقم الهاتف والبريد للوصول الفوري لكافة عروض الأسعار وقوائم الأجهزة المتاحة في السوق.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">2</div>
+            <h4 class="font-bold text-white text-sm">البحث والفلترة الذكية</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              استكشاف بوابة الأجهزة <code class="bg-slate-900 px-1 py-0.5 rounded text-cyan-300 font-mono">/equipment</code> مع الفلترة حسب المحافظة، دقة الجهاز، الميزانية، ووجود شهادات المعايرة السارية.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-survsta-surface border border-slate-800 space-y-2">
+            <div class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">3</div>
+            <h4 class="font-bold text-white text-sm">طلب عرض سعر وتتبع الحجز</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              إرسال طلب الحجز مع تحديد مدة المشروع وتاريخ البدء وموقع التسليم، ومتابعة عروض المزوّدين داخل لوحة الطلبات الموحدة.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: COMPLETE OPERATIONAL WORKFLOW -->
+    <section id="workflows" class="space-y-8 scroll-mt-24">
+      <div class="flex items-center justify-between border-b border-survsta-border pb-4">
+        <div class="flex items-center gap-3">
+          <span class="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-2xl">⚙️</span>
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">القسم الثالث: دورات العمل والتشغيل الميداني</h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-0.5">المخطط المتكامل لإدارة الأسطول، دورة الطلبات، والتوظيف الذكي</p>
+          </div>
+        </div>
+        <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">PART 03</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Workflow 1: Equipment Fleet Lifecycle -->
+        <div class="rounded-3xl bg-survsta-card border border-survsta-border p-6 space-y-4">
+          <div class="flex items-center gap-2 text-cyan-400 font-extrabold text-base border-b border-slate-800 pb-3">
+            <span>📡</span>
+            <span>دورة حياة الأجهزة والمعدات (Fleet Lifecycle)</span>
+          </div>
+
+          <ol class="relative border-r border-slate-800 pr-5 space-y-4 text-xs">
+            <li class="relative">
+              <span class="absolute -right-[27px] top-1 w-3 h-3 rounded-full bg-cyan-400"></span>
+              <strong class="text-white block font-bold text-sm">1. الإدراج والمطابقة الفنية:</strong>
+              <span class="text-slate-300 leading-relaxed block mt-0.5">
+                يقوم المزوّد بإدراج الجهاز ومرفقاته وشهادة المعايرة الدورية وصور الجهاز من كافة الجوانب.
+              </span>
+            </li>
+            <li class="relative">
+              <span class="absolute -right-[27px] top-1 w-3 h-3 rounded-full bg-amber-400"></span>
+              <strong class="text-white block font-bold text-sm">2. المراجعة الإدارية (Admin Queue):</strong>
+              <span class="text-slate-300 leading-relaxed block mt-0.5">
+                يدخل الجهاز طابور المراجعة في لوحة الإدارة للتأكد من أصالة السيريال وصلاحية المعايرة واعتماده للنشر.
+              </span>
+            </li>
+            <li class="relative">
+              <span class="absolute -right-[27px] top-1 w-3 h-3 rounded-full bg-emerald-400"></span>
+              <strong class="text-white block font-bold text-sm">3. الظهور والطلب (Live Marketplace):</strong>
+              <span class="text-slate-300 leading-relaxed block mt-0.5">
+                يظهر الجهاز في دليل الأجهزة والخريطة التفاعلية مع إمكانية استلام طلبات التأجير وتنسيق الاستلام.
+              </span>
+            </li>
+            <li class="relative">
+              <span class="absolute -right-[27px] top-1 w-3 h-3 rounded-full bg-purple-400"></span>
+              <strong class="text-white block font-bold text-sm">4. الفحص والتسليم وإشعار المعايرة:</strong>
+              <span class="text-slate-300 leading-relaxed block mt-0.5">
+                محضر استلام رقمي، ومراقبة النظام الآلي لمواعيد انتهاء المعايرة مع إرسال تنبيه قبل 15 يوماً من انتهائها.
+              </span>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Workflow 2: Order & Lead Management Lifecycle -->
+        <div class="rounded-3xl bg-survsta-card border border-survsta-border p-6 space-y-4">
+          <div class="flex items-center gap-2 text-amber-400 font-extrabold text-base border-b border-slate-800 pb-3">
+            <span>📥</span>
+            <span>دورة حياة الطلبات وعروض الأسعار (Orders & Leads)</span>
+          </div>
+
+          <ol class="relative border-r border-slate-800 pr-5 space-y-4 text-xs">
+            <li class="relative">
+              <span class="absolute -right-[27px] top-1 w-3 h-3 rounded-full bg-amber-400"></span>
+              <strong class="text-white block font-bold text-sm">1. إنشاء الطلب (Request Creation):</strong>
+              <span class="text-slate-300 leading-relaxed block mt-0.5">
+                يقوم المقاول أو العميل بتحديد نوع المعدات، المدة، الموقع الجغرافي، والميزانية المتوقعة للطلب.
+              </span>
+            </li>
+            <li class="relative">
+              <span class="absolute -right-[27px] top-1 w-3 h-3 rounded-full bg-cyan-400"></span>
+              <strong class="text-white block font-bold text-sm">2. التوجيه الذكي للمزوّدين (Smart Routing):</strong>
+              <span class="text-slate-300 leading-relaxed block mt-0.5">
+                توجيه الطلب للمكاتب المساحية الأقرب جغرافياً والأعلى تقييماً لتلقي عروض الأسعار المنافسة.
+              </span>
+            </li>
+            <li class="relative">
+              <span class="absolute -right-[27px] top-1 w-3 h-3 rounded-full bg-purple-400"></span>
+              <strong class="text-white block font-bold text-sm">3. التفاوض والاعتماد (Negotiation):</strong>
+              <span class="text-slate-300 leading-relaxed block mt-0.5">
+                مقارنة العروض في شاشة الطلبات، والتواصل المباشر لإقرار شروط التأمين وتفاصيل التوريد.
+              </span>
+            </li>
+            <li class="relative">
+              <span class="absolute -right-[27px] top-1 w-3 h-3 rounded-full bg-emerald-400"></span>
+              <strong class="text-white block font-bold text-sm">4. الإغلاق والتقييم (Close & Review):</strong>
+              <span class="text-slate-300 leading-relaxed block mt-0.5">
+                تأكيد التسليم الميداني، وإتاحة التقييم المتبادل (Reviews) لتوثيق جودة الخدمة وسلامة الجهاز.
+              </span>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: AD BANNERS & SPONSORSHIPS -->
+    <section id="ads" class="space-y-8 scroll-mt-24">
+      <div class="flex items-center justify-between border-b border-survsta-border pb-4">
+        <div class="flex items-center gap-3">
+          <span class="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 text-2xl">📢</span>
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-black text-white">القسم الرابع: نظام البنرات الإعلانية والرعاة (Ad System)</h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-0.5">المنظومة التسويقية الذكية للظهور الاستراتيجي وتتبع النقرات والتحويلات</p>
+          </div>
+        </div>
+        <span class="text-xs font-mono font-bold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">PART 04</span>
+      </div>
+
+      <!-- Features Breakdown -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-3xl bg-survsta-card border border-survsta-border space-y-3">
+          <div class="text-2xl">🎴</div>
+          <h3 class="text-base font-bold text-white">كروت إعلانية ثنائية (Side-by-Side)</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            تصميم عصري يقسم مساحة الكرت بنسبة 50% للنص والعنوان التسويقي الجذاب و 50% للصورة الترويجية المعبرة، مع إمكانية عرض إعلانين متجاورين في الشبكة لزيادة فرص المعلنين.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-survsta-card border border-survsta-border space-y-3">
+          <div class="text-2xl">🔗</div>
+          <h3 class="text-base font-bold text-white">الربط التلقائي ببروفايل المعلن</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            قائمة منسدلة ذكية في لوحة الإدارة تمكن المسؤول من اختيار المكتب المسجل، ليتم ملء رابط التوجيه تلقائياً إلى صفحة المكتب العامة (<code class="text-cyan-300 font-mono">/directory/[id]</code>) مع الحفاظ على مرونة التعديل اليدوي الكامل لأي رابط خارجي.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-survsta-card border border-survsta-border space-y-3">
+          <div class="text-2xl">📊</div>
+          <h3 class="text-base font-bold text-white">تتبع النقرات الآلي اللحظي</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            توجيه كافة النقرات عبر مسار برمجي آمن (<code class="text-cyan-300 font-mono">/api/ads/click?id=...</code>) يقوم بتسجيل عدد النقرات بدقة في قاعدة البيانات قبل إعادة التوجيه للوجهة النهائية بسرعة فائقة.
+          </p>
+        </div>
+      </div>
+
+      <!-- Placements Table Card -->
+      <div class="rounded-3xl bg-survsta-surface border border-survsta-border p-6 sm:p-8 space-y-4">
+        <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+          <span>🎯</span>
+          <span>أماكن الظهور الاستراتيجية المعتمدة (Ad Placements)</span>
+        </h3>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs text-slate-200">
+            <thead class="bg-survsta-navy text-slate-400 border-b border-slate-800 font-bold">
+              <tr>
+                <th class="p-3.5">الموقع البرمجي (Placement Key)</th>
+                <th class="p-3.5">المكان في الواجهة</th>
+                <th class="p-3.5">الجمهور المستهدف</th>
+                <th class="p-3.5">طريقة العرض</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-medium">
+              <tr>
+                <td class="p-3.5 font-mono text-cyan-300 font-bold">homepage_hero</td>
+                <td class="p-3.5 text-white">الصفحة الرئيسية — أسفل الهيرو مباشرة</td>
+                <td class="p-3.5 text-slate-300">كافة زوار المنصة والمستثمرين الجدد</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[11px] font-bold">شبكة ثنائية (Side-by-Side)</span></td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-mono text-amber-300 font-bold">search_in_feed</td>
+                <td class="p-3.5 text-white">سوق الأجهزة — بين نتائج البحث (In-Feed)</td>
+                <td class="p-3.5 text-slate-300">المهندسون والمقاولون الباحثون عن معدات للشراء/الإيجار</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[11px] font-bold">بطاقة ترويجية مدمجة</span></td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-mono text-purple-300 font-bold">providers_directory</td>
+                <td class="p-3.5 text-white">دليل المكاتب والشركات — أعلى القائمة</td>
+                <td class="p-3.5 text-slate-300">الشركات الباحثة عن مكاتب استشارية معتمدة</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 text-[11px] font-bold">بنر رعاية رئيسي</span></td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-mono text-emerald-300 font-bold">equipment_sidebar</td>
+                <td class="p-3.5 text-white">الشريط الجانبي لصفحة تفاصيل الجهاز</td>
+                <td class="p-3.5 text-slate-300">المستخدمون أثناء مرحلة اتخاذ قرار الاستئجار</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold">كرت إعلاني عمودي</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Document Footer -->
+  <footer class="border-t border-survsta-border bg-survsta-dark py-12 px-4 sm:px-8 text-center text-xs text-slate-500 space-y-3">
+    <div class="flex items-center justify-center gap-2 font-black text-white text-base">
+      <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-survsta-cyan to-survsta-accent flex items-center justify-center text-slate-950 text-xs">S</div>
+      <span>Survsta — ثورة التحول الرقمي للجيوماتكس والمساحة</span>
+    </div>
+    <p>تم إعداد هذا الدليل الموحد لفرق الإدارة والتشغيل والإنتاج المرئي والتسويق لعام 2026.</p>
+    <div class="pt-2 text-[11px] text-slate-600">
+      جميع الحقوق محفوظة لمنصة Survsta © 2026 • مشغلة بواسطة Coreviazone
+    </div>
+  </footer>
+
+</body>
+</html>

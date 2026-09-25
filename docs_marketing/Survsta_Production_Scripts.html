@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ملف الإنتاج البصري والصوتي لفيديوهات منصة Survsta</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Tajawal -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            survsta: {
+              dark: '#060f1e',
+              primary: '#0b1e3d',
+              surface: '#0f2952',
+              card: '#0c2244',
+              border: '#1a3c6e',
+              cyan: '#00e5ff',
+              gold: '#ffd700',
+            }
+          },
+          fontFamily: {
+            tajawal: ['Tajawal', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Tajawal', sans-serif;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      table {
+        border-color: #333333 !important;
+        color: #000000 !important;
+      }
+      th {
+        background-color: #e5e7eb !important;
+        color: #000000 !important;
+      }
+      td {
+        border-color: #cccccc !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-survsta-dark text-slate-100 antialiased min-h-screen selection:bg-survsta-cyan selection:text-slate-950 pb-16">
+
+  <!-- Top Bar -->
+  <div class="bg-survsta-primary/95 border-b border-survsta-border sticky top-0 z-50 backdrop-blur-md px-4 sm:px-8 py-3.5 no-print">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-survsta-cyan to-blue-500 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-survsta-cyan/20">
+          S
+        </div>
+        <div>
+          <span class="font-black text-white text-lg tracking-wide">Survsta Studio</span>
+          <span class="text-[11px] text-survsta-cyan font-bold block">Audio / Visual Production Scripts (AV)</span>
+        </div>
+      </div>
+
+      <!-- Quick Links to Videos -->
+      <div class="hidden md:flex items-center gap-3 text-xs font-bold text-slate-300">
+        <a href="#video1" class="hover:text-survsta-cyan transition px-2.5 py-1 rounded-lg bg-survsta-surface/60 border border-survsta-border">فيديو 1 (50 ث)</a>
+        <a href="#video2" class="hover:text-survsta-gold transition px-2.5 py-1 rounded-lg bg-survsta-surface/60 border border-survsta-border">فيديو 2 (35 ث)</a>
+        <a href="#video3" class="hover:text-survsta-cyan transition px-2.5 py-1 rounded-lg bg-survsta-surface/60 border border-survsta-border">فيديو 3 (45 ث)</a>
+        <a href="#video4" class="hover:text-survsta-gold transition px-2.5 py-1 rounded-lg bg-survsta-surface/60 border border-survsta-border">فيديو 4 (40 ث)</a>
+      </div>
+
+      <button onclick="window.print()" class="px-3.5 py-1.5 rounded-xl border border-slate-700 bg-survsta-surface hover:bg-slate-800 text-xs font-bold text-slate-200 transition flex items-center gap-1.5">
+        <span>🖨️</span>
+        <span>طباعة / PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Header Section -->
+  <header class="max-w-7xl mx-auto px-4 sm:px-8 pt-10 pb-8 space-y-6">
+    <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-l from-survsta-primary via-survsta-card to-survsta-surface border border-survsta-border shadow-2xl relative overflow-hidden">
+      <div class="absolute -top-16 -left-16 w-56 h-56 bg-survsta-cyan/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-16 -right-16 w-56 h-56 bg-survsta-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 space-y-4">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-survsta-cyan/15 border border-survsta-cyan/30 text-survsta-cyan text-xs font-bold">
+          <span>🎬 مستند الإنتاج الفني والموشن غرافيك</span>
+          <span>•</span>
+          <span>نسخة التسجيل والاستوديو 2026</span>
+        </div>
+
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
+          ملف الإنتاج البصري والصوتي لفيديوهات منصة Survsta
+        </h1>
+
+        <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-medium">
+          سيناريوهات إعلانية (AV Scripts) مخصصة لمنصات التواصل السريع (Reels, TikTok, Shorts - 9:16).
+        </p>
+
+        <!-- Brand Audio Identity Box -->
+        <div class="pt-3 border-t border-survsta-border/80 flex flex-wrap items-center gap-4 text-xs">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60">
+            <span class="text-survsta-gold text-base">🎵</span>
+            <span class="text-slate-400">الهوية الصوتية (Brand Audio Identity):</span>
+            <span class="font-bold text-white">موسيقى حماسية تقنية (Corporate Upbeat)</span>
+          </div>
+
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60">
+            <span class="text-survsta-cyan text-base">🎙️</span>
+            <span class="text-slate-400">المعلق الصوتي (Voiceover):</span>
+            <span class="font-bold text-white">معلق صوتي واثق وسريع الإيقاع</span>
+          </div>
+
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60">
+            <span class="text-rose-400 text-base">📐</span>
+            <span class="text-slate-400">الأبعاد والمقاس:</span>
+            <span class="font-bold text-white">Vertical (9:16) 1080x1920</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content: 4 AV Script Tables -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-8 space-y-12">
+
+    <!-- Video 1 -->
+    <section id="video1" class="rounded-3xl bg-survsta-card border border-survsta-border overflow-hidden shadow-2xl space-y-4">
+      <!-- Section Header -->
+      <div class="p-6 bg-gradient-to-l from-survsta-primary to-survsta-surface border-b border-survsta-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-survsta-cyan/20 text-survsta-cyan flex items-center justify-center font-black text-lg border border-survsta-cyan/30">
+            1
+          </div>
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-white">فيديو 1: الدليل الشامل والتسجيل</h2>
+            <p class="text-xs text-slate-300">التعريف بالمنصة، رحلة التسجيل المجاني، توثيق السجل التجاري، وحماية الأجهزة المسروقة</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full bg-survsta-cyan/20 text-survsta-cyan border border-survsta-cyan/40 text-xs font-bold font-mono">
+            ⏱️ 50 ثانية
+          </span>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold">
+            📱 9:16 Vertical
+          </span>
+        </div>
+      </div>
+
+      <!-- Table 1 -->
+      <div class="p-4 sm:p-6 overflow-x-auto">
+        <table class="w-full text-right text-xs sm:text-sm border-collapse rounded-2xl overflow-hidden border border-survsta-border">
+          <thead>
+            <tr class="bg-survsta-cyan text-slate-950 font-black">
+              <th class="p-3.5 border border-survsta-cyan/60 w-[14%] whitespace-nowrap">التوقيت</th>
+              <th class="p-3.5 border border-survsta-cyan/60 w-[30%]">النص المنطوق (Voiceover)</th>
+              <th class="p-3.5 border border-survsta-cyan/60 w-[30%]">اللقطة البصرية المقترحة (Visuals)</th>
+              <th class="p-3.5 border border-survsta-cyan/60 w-[26%]">المؤثرات والغرافيك (SFX & Motion)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-survsta-border/70 text-slate-200">
+            <tr class="bg-survsta-primary/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:00 - 00:05</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                عايز تدير شغلك المساحي صح وتوصل لعملاء في كل محافظات مصر؟ الخطوة الأولى بتبدأ من هنا.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                لقطة سريعة لمهندس مساحة في موقع عمل يمسك بجهاز، ثم ينتقل المشهد لخريطة مصر تضيء بدبابيس في محافظات مختلفة.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                تأثير صوتي "وووش" سريع. نص متحرك: "إدارة ذكية + عملاء في كل مصر".
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-dark/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:05 - 00:15</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                ادخل على Survsta وسجل حسابك مجاناً. اختار دورك: طالب خدمة، مهندس مستقل، أو مكتب مساحي.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                تصوير لشاشة موبايل تفتح Survsta.com، ويظهر الماوس يضغط على "تسجيل مجاني"، ثم يختار بين الأدوار الثلاثة.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                عمل زووم (Zoom-in) على الخيارات أثناء نطقها. ظهور كلمة "تسجيل مجاني 100%".
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-primary/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:15 - 00:25</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                من لوحة التحكم، هتقدر تدير أسطول أجهزتك بالكامل وتحدد أسعار الإيجار.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                استعراض سريع للوحة التحكم يوضح قائمة بالأجهزة وبجانب كل جهاز السعر وتغيير حالته (متاح / مؤجر).
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                حركة رسومية تُظهر مؤشرات أرباح ترتفع لتأكيد سهولة الإدارة.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-dark/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:25 - 00:35</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                والأهم؟ ارفع سجلك التجاري عشان تاخد "شارة الاعتماد" اللي بتدور عليها كبرى شركات المقاولات.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                الشاشة تظهر عملية رفع السجل التجاري، وفوراً تظهر "شارة توثيق خضراء" بجانب اسم المكتب.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                تأثير صوتي "رنين نجاح". كتابة خط عريض: "شارة الاعتماد = ثقة".
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-primary/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:35 - 00:40</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                ولو لا قدر الله جهازك اتسرق؟ سجل السيريال بتاعه على المنصة فوراً عشان نحمي السوق كله ونمنع تداوله!
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                الخلفية تتحول للون أحمر تحذيري خفيف، يظهر جهاز مساحي وعليه قفل، وكتابة السيريال في خانة مسروق.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                صوت تحذيري خفيف. ظهور درع حماية يلتف حول الجهاز.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-dark/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:40 - 00:50</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                سجل دلوقتي.. وامتلك نافذتك الرقمية في أكبر مجتمع مساحي في مصر!
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                شاشة النهاية: لوجو Survsta بارز، تحته الرابط، مع لقطة سريعة لمهندسين يبتسمون.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                الموسيقى تصل لذروتها. يظهر الباركود (QR Code) للمسح.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Video 2 -->
+    <section id="video2" class="rounded-3xl bg-survsta-card border border-survsta-border overflow-hidden shadow-2xl space-y-4">
+      <!-- Section Header -->
+      <div class="p-6 bg-gradient-to-l from-survsta-primary to-survsta-surface border-b border-survsta-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-survsta-gold/20 text-survsta-gold flex items-center justify-center font-black text-lg border border-survsta-gold/30">
+            2
+          </div>
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-white">فيديو 2: للمكاتب ومزودي الخدمات</h2>
+            <p class="text-xs text-slate-300">استثمار الأجهزة المعطلة، كسب ثقة شركات المقاولات، والربط الفوري عبر واتساب</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full bg-survsta-gold/20 text-survsta-gold border border-survsta-gold/40 text-xs font-bold font-mono">
+            ⏱️ 35 ثانية
+          </span>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold">
+            📱 9:16 Vertical
+          </span>
+        </div>
+      </div>
+
+      <!-- Table 2 -->
+      <div class="p-4 sm:p-6 overflow-x-auto">
+        <table class="w-full text-right text-xs sm:text-sm border-collapse rounded-2xl overflow-hidden border border-survsta-border">
+          <thead>
+            <tr class="bg-survsta-gold text-slate-950 font-black">
+              <th class="p-3.5 border border-survsta-gold/60 w-[14%] whitespace-nowrap">التوقيت</th>
+              <th class="p-3.5 border border-survsta-gold/60 w-[30%]">النص المنطوق (Voiceover)</th>
+              <th class="p-3.5 border border-survsta-gold/60 w-[30%]">اللقطة البصرية المقترحة (Visuals)</th>
+              <th class="p-3.5 border border-survsta-gold/60 w-[26%]">المؤثرات والغرافيك (SFX & Motion)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-survsta-border/70 text-slate-200">
+            <tr class="bg-survsta-primary/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-gold border border-survsta-border/70 whitespace-nowrap">00:00 - 00:05</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                كام شركة مقاولات في القاهرة أو إسكندرية بتدور على أجهزتك المساحية.. وأنت مش ظاهر قدامهم؟
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                لقطة من أعلى لموقع بناء ضخم (درون)، ثم تظهر واجهة مكتب مساحي مغلق وبه أجهزة مركونة يعلوها الغبار.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                زووم إن سريع. ظهور علامات استفهام حمراء حول الأجهزة المعطلة.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-dark/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-gold border border-survsta-border/70 whitespace-nowrap">00:05 - 00:20</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                فكك من جروبات السوشيال ميديا العشوائية! سجل مكتبك مجاناً على Survsta، اعرض أجهزتك بشهادات المعايرة، وخليك الاختيار الأول.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                شخص يتصفح جروبات فيسبوك بإحباط، ثم تنتقل الشاشة فجأة لمنصة Survsta الأنيقة. تظهر واجهة إضافة جهاز.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                تأثير "Glitch" عند الانتقال للمنصة. ظهور ختم "معاير ومضمون".
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-primary/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-gold border border-survsta-border/70 whitespace-nowrap">00:20 - 00:30</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                العميل هيقدر يشوفك ويتواصل معاك بضغطة زر، سواء باتصال مباشر أو رسالة واتساب.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                شاشة موبايل تظهر بروفايل المكتب، ويضغط العميل على أيقونة "واتساب" ليفتح محادثة مباشرة مع المكتب.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                صوت إشعار رسالة (Pop). أيقونة الواتساب تنبض بالأخضر.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-dark/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-gold border border-survsta-border/70 whitespace-nowrap">00:30 - 00:35</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                ضاعف أرباح أجهزتك المركونة.. انضم لـ Survsta وكبّر مكتبك النهارده!
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                لوجو Survsta مع زر "سجل مكتبك الآن". رسم بياني للأرباح يرتفع لأعلى.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                ضربة موسيقى ختامية حماسية.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Video 3 -->
+    <section id="video3" class="rounded-3xl bg-survsta-card border border-survsta-border overflow-hidden shadow-2xl space-y-4">
+      <!-- Section Header -->
+      <div class="p-6 bg-gradient-to-l from-survsta-primary to-survsta-surface border-b border-survsta-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-survsta-cyan/20 text-survsta-cyan flex items-center justify-center font-black text-lg border border-survsta-cyan/30">
+            3
+          </div>
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-white">فيديو 3: للعملاء والمهندسين الأحرار</h2>
+            <p class="text-xs text-slate-300">إيجار الأجهزة المضمونة، طلب الرفع المساحي والمسح الجوي، وتوفير تكاليف المشروع</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full bg-survsta-cyan/20 text-survsta-cyan border border-survsta-cyan/40 text-xs font-bold font-mono">
+            ⏱️ 45 ثانية
+          </span>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold">
+            📱 9:16 Vertical
+          </span>
+        </div>
+      </div>
+
+      <!-- Table 3 -->
+      <div class="p-4 sm:p-6 overflow-x-auto">
+        <table class="w-full text-right text-xs sm:text-sm border-collapse rounded-2xl overflow-hidden border border-survsta-border">
+          <thead>
+            <tr class="bg-survsta-cyan text-slate-950 font-black">
+              <th class="p-3.5 border border-survsta-cyan/60 w-[14%] whitespace-nowrap">التوقيت</th>
+              <th class="p-3.5 border border-survsta-cyan/60 w-[30%]">النص المنطوق (Voiceover)</th>
+              <th class="p-3.5 border border-survsta-cyan/60 w-[30%]">اللقطة البصرية المقترحة (Visuals)</th>
+              <th class="p-3.5 border border-survsta-cyan/60 w-[26%]">المؤثرات والغرافيك (SFX & Motion)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-survsta-border/70 text-slate-200">
+            <tr class="bg-survsta-primary/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:00 - 00:05</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                لو شغلك في المساحة، أكيد بتدوخ على حاجة من تلاتة: جهاز للإيجار، خدمة رفع مساحي، أو مهندس متخصص!
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                مهندس يمسك لوحة في الموقع ويبدو حائراً. تظهر 3 أيقونات (جهاز Total Station، خريطة رفع، خوذة مهندس).
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                مؤثر Pop-up لكل أيقونة مع صوت Click متتالي.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-dark/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:05 - 00:25</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                على Survsta الاختيارات كتير، والأهم إنها "مضمونة". مش هتأجر جهاز غير لما تتأكد من تاريخ المعايرة وتقييم المكتب.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                شاشة متصفح تبحث في سوق الأجهزة. التركيز على الفلاتر، وتكبير صورة جهاز بجواره تاريخ المعايرة وتقييم 5 نجوم.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                تظليل أصفر على الفلاتر. صوت (Ting) ذهبي.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-primary/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:25 - 00:35</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                محتاج مسح جوي أو رفع طبوغرافي؟ حدد محافظتك، قارن بين المكاتب المعتمدة، وتواصل فوراً بأمان.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                كتابة "مسح جوي بالإسكندرية" في شريط البحث، ظهور عدة مكاتب، والضغط على زر التواصل لأحدها.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                حركة ماوس سريعة وسلسة توضح سرعة البحث.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-dark/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-cyan border border-survsta-border/70 whitespace-nowrap">00:35 - 00:45</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                وفر وقتك وفلوس مشروعك.. ادخل على Survsta، واختار الشريك المساحي "الصح" بضغطة زر.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                اللوجو يظهر بشكل فخم مع عبارة "وفر وقتك وميزانيتك".
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                موسيقى تحفيزية للختام.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Video 4 -->
+    <section id="video4" class="rounded-3xl bg-survsta-card border border-survsta-border overflow-hidden shadow-2xl space-y-4">
+      <!-- Section Header -->
+      <div class="p-6 bg-gradient-to-l from-survsta-primary to-survsta-surface border-b border-survsta-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-survsta-gold/20 text-survsta-gold flex items-center justify-center font-black text-lg border border-survsta-gold/30">
+            4
+          </div>
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-white">فيديو 4: الخلاصة والرؤية الشاملة</h2>
+            <p class="text-xs text-slate-300">التموضع الريادي، منصة الجيوماتكس الرقمية الشاملة، والوصول للاختيار الموثوق في ثوانٍ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full bg-survsta-gold/20 text-survsta-gold border border-survsta-gold/40 text-xs font-bold font-mono">
+            ⏱️ 40 ثانية
+          </span>
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold">
+            📱 9:16 Vertical
+          </span>
+        </div>
+      </div>
+
+      <!-- Table 4 -->
+      <div class="p-4 sm:p-6 overflow-x-auto">
+        <table class="w-full text-right text-xs sm:text-sm border-collapse rounded-2xl overflow-hidden border border-survsta-border">
+          <thead>
+            <tr class="bg-survsta-gold text-slate-950 font-black">
+              <th class="p-3.5 border border-survsta-gold/60 w-[14%] whitespace-nowrap">التوقيت</th>
+              <th class="p-3.5 border border-survsta-gold/60 w-[30%]">النص المنطوق (Voiceover)</th>
+              <th class="p-3.5 border border-survsta-gold/60 w-[30%]">اللقطة البصرية المقترحة (Visuals)</th>
+              <th class="p-3.5 border border-survsta-gold/60 w-[26%]">المؤثرات والغرافيك (SFX & Motion)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-survsta-border/70 text-slate-200">
+            <tr class="bg-survsta-primary/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-gold border border-survsta-border/70 whitespace-nowrap">00:00 - 00:08</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                في قطاع المساحة والجيوماتكس في مصر.. المشكلة عمرها ما كانت في الاختيارات، المشكلة إنك توصل للاختيار "الصح".
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                لقطات سريعة جداً لمعدات مساحية، ومشاريع طرق. تظهر كلمة "الموثوقية" في منتصف الشاشة بخط بارز.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                إيقاع موسيقي سريع (Beat drop) مع تغير كل لقطة.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-dark/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-gold border border-survsta-border/70 whitespace-nowrap">00:08 - 00:25</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                هنا بتيجي Survsta.. منصة واحدة بتجمع عالم المساحة كله: مكاتب معتمدة، أجهزة معايرة، وظائف هندسية.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                واجهة المنصة تفتح بشكل ثلاثي الأبعاد. تخرج منها بطاقات تمثل (الأجهزة، الوظائف، المكاتب) وتدور حول الشاشة.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                مؤثرات 3D سلسة وفخمة تبرز حجم المنصة.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-primary/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-gold border border-survsta-border/70 whitespace-nowrap">00:25 - 00:35</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                حدد موقعك، قارن بين أفضل الكيانات، واوصل للي محتاجه في ثواني بدون وسطاء.
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                خريطة تفاعلية لمصر عليها نقاط زرقاء مضيئة، يتم اختيار نقطة لتظهر تفاصيل مكتب مساحي.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                تأثير "Zoom" في الخريطة يوضح التغطية الجغرافية.
+              </td>
+            </tr>
+
+            <tr class="bg-survsta-dark/50 hover:bg-survsta-surface/70 transition">
+              <td class="p-3.5 font-mono font-bold text-survsta-gold border border-survsta-border/70 whitespace-nowrap">00:35 - 00:40</td>
+              <td class="p-3.5 font-medium leading-relaxed border border-survsta-border/70">
+                Survsta.. نبض قطاع المساحة الرقمي. سجل مجاناً واكتشف مستقبل الجيوماتكس دلوقتي!
+              </td>
+              <td class="p-3.5 text-slate-300 leading-relaxed border border-survsta-border/70">
+                شاشة النهاية الاحترافية مع الروابط.
+              </td>
+              <td class="p-3.5 text-slate-400 leading-relaxed border border-survsta-border/70">
+                لمعان (Light Sweep) يمر على شعار المنصة.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Document Footer -->
+  <footer class="max-w-7xl mx-auto px-4 sm:px-8 pt-8 text-center text-xs text-slate-500 space-y-2 border-t border-survsta-border/60 mt-12">
+    <div class="flex items-center justify-center gap-2 text-slate-300 font-bold">
+      <span>Survsta Motion Graphics & Voiceover Production Kit</span>
+      <span>•</span>
+      <span>2026</span>
+    </div>
+    <p>هذا المستند معتمد للتسليم المباشر لاستوديوهات التعليق الصوتي وفِرق الموشن غرافيك ومونتاج الفيديو.</p>
+  </footer>
+
+</body>
+</html>

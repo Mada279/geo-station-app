@@ -12,6 +12,20 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://survsta.com'),
   title: 'Survsta — المنصة الرقمية لقطاع المساحة والجيوماتكس',
   description: 'سوق الأجهزة المساحية والخدمات والوظائف الهندسية في مصر والشرق الأوسط',
+  keywords: [
+    'Survsta',
+    'سيرفستا',
+    'أجهزة مساحة',
+    'تأجير محطات رصد',
+    'Total Station',
+    'GPS RTK',
+    'مكاتب مساحة معتمدة',
+    'وظائف مساحة مصر',
+    'Geomatics Egypt',
+  ],
+  alternates: {
+    canonical: 'https://survsta.com',
+  },
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
@@ -25,6 +39,20 @@ export const metadata: Metadata = {
     siteName: 'Survsta',
     locale: 'ar_EG',
     type: 'website',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Survsta Platform',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Survsta | سيرفستا',
+    description: 'سوق الأجهزة المساحية والخدمات الهندسية',
+    images: ['/og-image.jpg'],
   },
 };
 
