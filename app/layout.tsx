@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FloatingAdButton from '@/components/FloatingAdButton';
@@ -95,6 +96,7 @@ export default function RootLayout({
         <main className="flex-grow">{children}</main>
         <Footer />
         <FloatingAdButton />
+        <GoogleAnalytics gaId="G-FFCDYX5JBS" />
       </body>
     </html>
   );
