@@ -13,6 +13,8 @@ export interface ClientItem {
   company_name?: string;
   category?: string;
   status?: string;
+  trust_level?: 'trusted' | 'new' | 'risky' | string;
+  completed_rentals?: number;
   active_modules?: string[];
   preferences?: Record<string, any>;
   created_at?: string;
@@ -86,6 +88,60 @@ export default function AdminClientsPage() {
       showToast('❌ تعذر الاتصال ببوابة إرسال البريد');
     } finally {
       setSendingWelcomeEmailId(null);
+    }
+  };
+
+  // Override Client Trust Level & Completed Rentals (Super Admin Control)
+  const handleUpdateTrustLevel = async (
+    clientId: string,
+    nextTrustLevel: string,
+    nextCompletedRentals?: number
+  ) => {
+    try {
+      const payload: Record<string, any> = {
+        trust_level: nextTrustLevel,
+      };
+      if (nextCompletedRentals !== undefined) {
+        payload.completed_rentals = Math.max(0, nextCompletedRentals);
+      }
+
+      const { error } = await supabase
+        .from('clients')
+        .update(payload)
+        .eq('id', clientId);
+
+      if (error) {
+        console.error('Failed to update trust level in Supabase:', error);
+        showToast('❌ تعذر تحديث مستوى الثقة في قاعدة البيانات');
+        return;
+      }
+
+      setClients((prev) =>
+        prev.map((c) =>
+          c.id === clientId
+            ? {
+                ...c,
+                trust_level: nextTrustLevel,
+                completed_rentals:
+                  nextCompletedRentals !== undefined
+                    ? nextCompletedRentals
+                    : c.completed_rentals ?? 0,
+              }
+            : c
+        )
+      );
+
+      const label =
+        nextTrustLevel === 'trusted'
+          ? '🛡️ موثوق (Trusted)'
+          : nextTrustLevel === 'risky'
+          ? '🚨 عالي المخاطرة (Risky)'
+          : '⚠️ جديد (New)';
+
+      showToast(`✅ تم تحديث مؤشر ثقة العميل إلى "${label}"`);
+    } catch (err) {
+      console.error('Exception updating client trust level:', err);
+      showToast('❌ حدث خطأ غير متوقع أثناء الحفظ');
     }
   };
 
@@ -366,6 +422,7 @@ export default function AdminClientsPage() {
                   <th className="p-3.5 text-slate-300">مسؤول الاتصال</th>
                   <th className="p-3.5 text-slate-300">البريد الإلكتروني</th>
                   <th className="p-3.5 text-slate-300">الهاتف والواتساب</th>
+                  <th className="p-3.5 text-slate-300">مؤشر الثقة والمخاطر</th>
                   <th className="p-3.5 text-slate-300">الحالة</th>
                   <th className="p-3.5 text-slate-300 text-center">الإجراءات</th>
                 </tr>
@@ -373,14 +430,14 @@ export default function AdminClientsPage() {
               <tbody className="divide-y divide-slate-800/50">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-gray-400">
+                    <td colSpan={8} className="p-8 text-center text-gray-400">
                       <span className="inline-block animate-spin text-xl ml-2">⏳</span>
                       جارٍ جلب بيانات العملاء من السحابة...
                     </td>
                   </tr>
                 ) : filteredClients.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-10 text-center">
+                    <td colSpan={8} className="p-10 text-center">
                       <div className="space-y-3 max-w-md mx-auto">
                         <span className="text-3xl block">👥</span>
                         <div className="text-white font-bold text-sm">لا توجد سجلات عملاء مطابقة حالياً</div>
@@ -485,6 +542,44 @@ export default function AdminClientsPage() {
                           ) : (
                             <span className="text-gray-500 font-mono text-xs">غير مسجل</span>
                           )}
+                        </td>
+
+                        {/* Trust & Risk Indicator Control */}
+                        <td className="p-3.5">
+                          <div className="space-y-1.5 min-w-[155px]">
+                            <select
+                              value={client.trust_level || 'new'}
+                              onChange={(e) => handleUpdateTrustLevel(client.id, e.target.value)}
+                              className={`w-full rounded-xl px-2.5 py-1 text-xs font-bold border focus:outline-none cursor-pointer transition ${
+                                client.trust_level === 'trusted'
+                                  ? 'bg-emerald-950/70 text-emerald-300 border-emerald-500/50 shadow-sm shadow-emerald-950/40'
+                                  : client.trust_level === 'risky'
+                                  ? 'bg-rose-950/80 text-rose-300 border-rose-500/60 shadow-sm shadow-rose-950/50 animate-pulse font-black'
+                                  : 'bg-amber-950/70 text-amber-300 border-amber-500/50'
+                              }`}
+                            >
+                              <option value="trusted">🛡️ موثوق (Trusted)</option>
+                              <option value="new">⚠️ جديد (New)</option>
+                              <option value="risky">🚨 عالي المخاطرة (Risky)</option>
+                            </select>
+
+                            <div className="flex items-center justify-between text-[10px] text-gray-400 bg-slate-950/60 px-2 py-0.5 rounded-lg border border-slate-800">
+                              <span>إيجارات مكتملة:</span>
+                              <input
+                                type="number"
+                                min={0}
+                                value={client.completed_rentals ?? 0}
+                                onChange={(e) =>
+                                  handleUpdateTrustLevel(
+                                    client.id,
+                                    client.trust_level || 'new',
+                                    parseInt(e.target.value) || 0
+                                  )
+                                }
+                                className="w-12 rounded bg-slate-900 border border-slate-700 px-1 py-0.5 text-center text-white font-mono text-[11px] focus:outline-none focus:border-cyan-400"
+                              />
+                            </div>
+                          </div>
                         </td>
 
                         <td className="p-3.5">

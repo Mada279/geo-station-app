@@ -5,6 +5,7 @@ import Link from 'next/link';
 import FeaturedProviders from '@/components/FeaturedProviders';
 import ProviderEarlyAccessCTA from '@/components/ProviderEarlyAccessCTA';
 import AdBanner from '@/components/ads/AdBanner';
+import TrustMarquee from '@/components/ui/TrustMarquee';
 import { supabase } from '@/utils/supabaseClient';
 import { getEquipmentImageUrl } from '@/utils/helpers';
 
@@ -597,6 +598,9 @@ export default async function HomePage() {
 
         </div>
       </section>
+
+      {/* Infinite Scrolling Trust & Payment Marquee */}
+      <TrustMarquee />
 
       {/* Ad Banner - Homepage Hero Placement */}
       <div className="container mx-auto px-6 lg:px-12 -mb-2">

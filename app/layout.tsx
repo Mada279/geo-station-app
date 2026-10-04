@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -8,6 +8,13 @@ import './styles/tokens.css';
 import './styles/style.css';
 import './styles/portal.css';
 import '@/app/globals.css';
+
+export const viewport: Viewport = {
+  themeColor: '#0B1528',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://survsta.com'),
@@ -30,9 +37,14 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
-    apple: '/images/Designer.png',
+    apple: '/icons/icon-192x192.png',
   },
-  manifest: '/manifest.json',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Survsta',
+  },
   openGraph: {
     title: 'Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر',
     description: 'المنصة الرائدة لربط المهندسين والمقاولين بمزودي أجهزة Total Station و GPS RTK ومكاتب المساحة المعتمدة.',

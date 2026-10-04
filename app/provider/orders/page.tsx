@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabaseClient';
+import ClientTrustBadge, { ClientTrustLevel } from '@/components/provider/ClientTrustBadge';
+import OrderDetailsModal, { ModalOrderData } from '@/components/provider/OrderDetailsModal';
+import OrdersTable from '@/components/provider/OrdersTable';
 
 export interface IncomingOrder {
   id: string;
@@ -23,6 +26,8 @@ export interface IncomingOrder {
     email?: string;
     whatsapp_number?: string;
     company_name?: string;
+    trust_level?: ClientTrustLevel | string;
+    completed_rentals?: number;
   };
 }
 
@@ -85,6 +90,8 @@ export default function ProviderOrdersPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
+  const [selectedModalOrder, setSelectedModalOrder] = useState<ModalOrderData | null>(null);
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [activeProviderId, setActiveProviderId] = useState<string | null>(null);
@@ -215,7 +222,7 @@ export default function ProviderOrdersPage() {
       if (clientIds.length > 0) {
         const { data: clientsData, error: clientsError } = await supabase
           .from('clients')
-          .select('id, full_name, phone_number, email, whatsapp_number, company_name')
+          .select('id, full_name, phone_number, email, whatsapp_number, company_name, trust_level, completed_rentals')
           .in('id', clientIds);
 
         if (!clientsError && clientsData) {
@@ -239,11 +246,19 @@ export default function ProviderOrdersPage() {
           total_price: order.total_price,
           status: order.status || 'pending',
           created_at: order.created_at || new Date().toISOString(),
-          client: clientInfo || {
-            full_name: order.client_email ? order.client_email.split('@')[0] : 'عميل معتمد',
-            phone_number: '201000000000',
-            email: order.client_email,
-          },
+          client: clientInfo
+            ? {
+                ...clientInfo,
+                trust_level: clientInfo.trust_level || 'new',
+                completed_rentals: Number(clientInfo.completed_rentals) || 0,
+              }
+            : {
+                full_name: order.client_email ? order.client_email.split('@')[0] : 'عميل معتمد',
+                phone_number: '201000000000',
+                email: order.client_email,
+                trust_level: 'new',
+                completed_rentals: 0,
+              },
         };
       });
 
@@ -441,9 +456,36 @@ export default function ProviderOrdersPage() {
               )}
             </div>
 
-            {/* Total Filter Counter */}
-            <div className="text-xs text-gray-400 font-medium">
-              النتائج المعروضة: <span className="text-amber-400 font-bold font-mono">{filteredOrders.length}</span> من إجمالي <span className="text-white font-bold font-mono">{orders.length}</span>
+            {/* View Mode & Filter Counter */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center bg-[#081933] border border-gray-700 rounded-xl p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('cards')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                    viewMode === 'cards'
+                      ? 'bg-cyan-500 text-slate-950 shadow'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  🗂️ بطاقات
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('table')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                    viewMode === 'table'
+                      ? 'bg-cyan-500 text-slate-950 shadow'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  📋 جدول
+                </button>
+              </div>
+
+              <div className="text-xs text-gray-400 font-medium">
+                النتائج المعروضة: <span className="text-amber-400 font-bold font-mono">{filteredOrders.length}</span> من إجمالي <span className="text-white font-bold font-mono">{orders.length}</span>
+              </div>
             </div>
           </div>
 
@@ -501,10 +543,19 @@ export default function ProviderOrdersPage() {
           </div>
         )}
 
-        {/* Orders Listing Grid / Cards */}
+        {/* Orders Listing Grid / Cards OR Table */}
         {!isLoading && filteredOrders.length > 0 && (
-          <div className="space-y-4">
-            {filteredOrders.map((order) => {
+          viewMode === 'table' ? (
+            <OrdersTable
+              orders={filteredOrders}
+              isLoading={isLoading}
+              onViewOrder={(ord) => setSelectedModalOrder(ord)}
+              onUpdateStatus={handleUpdateStatus}
+              updatingOrderId={updatingOrderId}
+            />
+          ) : (
+            <div className="space-y-4">
+              {filteredOrders.map((order) => {
               const statusMeta = ORDER_STATUS_MAP[order.status] || {
                 label: order.status,
                 badgeClass: 'bg-gray-700/40 text-gray-300 border-gray-700',
@@ -565,9 +616,16 @@ export default function ProviderOrdersPage() {
                       )}
                     </div>
 
-                    {/* Column 2: Client Contact Details */}
-                    <div className="space-y-1.5 rounded-xl border border-gray-800 bg-[#081933]/60 p-3">
-                      <span className="text-[11px] font-semibold text-cyan-300">بيانات العميل وطالب الخدمة:</span>
+                    {/* Column 2: Client Contact Details & Trust Badge */}
+                    <div className="space-y-2 rounded-xl border border-gray-800 bg-[#081933]/60 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-semibold text-cyan-300">بيانات العميل:</span>
+                        <ClientTrustBadge
+                          trustLevel={order.client?.trust_level || 'new'}
+                          completedRentals={order.client?.completed_rentals ?? 0}
+                          compact={true}
+                        />
+                      </div>
                       <div className="text-xs font-bold text-white flex items-center gap-1.5">
                         <span>👤</span>
                         <span>{clientName}</span>
@@ -589,7 +647,16 @@ export default function ProviderOrdersPage() {
 
                     {/* Column 3: Fast Action Buttons & Status Update */}
                     <div className="space-y-2.5 flex flex-col justify-center">
-                      <span className="text-[11px] font-semibold text-gray-400">إجراءات سريعة وتحديث الحالة:</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-gray-400">إجراءات سريعة:</span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedModalOrder(order)}
+                          className="text-[11px] text-cyan-300 hover:text-white font-bold transition flex items-center gap-1"
+                        >
+                          <span>🔍 عرض التفاصيل ومؤشر الأمان</span>
+                        </button>
+                      </div>
                       
                       {/* WhatsApp & Call Buttons */}
                       <div className="flex items-center gap-2">
@@ -638,9 +705,19 @@ export default function ProviderOrdersPage() {
               );
             })}
           </div>
-        )}
+        )
+      )}
 
       </div>
+
+      {/* Order Details & Client Trust Assessment Modal */}
+      <OrderDetailsModal
+        order={selectedModalOrder}
+        isOpen={Boolean(selectedModalOrder)}
+        onClose={() => setSelectedModalOrder(null)}
+        onUpdateStatus={handleUpdateStatus}
+        isUpdatingStatus={updatingOrderId === selectedModalOrder?.id}
+      />
 
       {/* Floating Toast Notification */}
       {toastMessage && (

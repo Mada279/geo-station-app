@@ -8,6 +8,7 @@ import { supabase } from '@/utils/supabaseClient';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import { GlobalAnnouncement } from '@/services/announcementService';
 import { normalizeUser, AuthenticatedUser } from '@/lib/auth/userNormalizer';
+import InstallPwaButton from '@/components/InstallPwaButton';
 
 interface NavbarProps {
   user?: AuthenticatedUser | null;
@@ -267,7 +268,7 @@ export default function Navbar({
               <span>نخدم حالياً: الإسكندرية والقاهرة والجيزة — التوسع تباعاً لباقي المحافظات</span>
             </div>
             <div className="flex items-center gap-3 sm:gap-5 text-[12px] font-medium text-slate-300 shrink-0">
-              <Link href="/mobile-app" className="hover:text-white transition whitespace-nowrap">حمل التطبيق</Link>
+              <InstallPwaButton variant="topbar" />
               <Link href="/help" className="hover:text-white transition whitespace-nowrap">المساعدة</Link>
               <Link href="/contact" className="hover:text-white transition whitespace-nowrap">تواصل معنا</Link>
               {isAuthResolved && currentUser ? (
@@ -450,6 +451,7 @@ export default function Navbar({
               <div className="h-9 w-28 opacity-0 pointer-events-none" />
             ) : currentUser ? (
               <div className="flex items-center gap-3">
+                <InstallPwaButton variant="navbar" />
                 <NotificationBell userId={currentUser.id} />
 
                 {/* Dashboard Quick Button */}
@@ -594,6 +596,7 @@ export default function Navbar({
               </div>
             ) : (
               <>
+                <InstallPwaButton variant="navbar" />
                 <Link
                   href="/onboarding"
                   className="rounded-lg bg-[#F4B400] px-5 py-2 text-sm font-bold text-black shadow-sm hover:brightness-105 transition whitespace-nowrap"
@@ -707,6 +710,7 @@ export default function Navbar({
             </Link>
 
             <div className="pt-3 border-t border-gray-800 flex flex-col gap-2">
+              <InstallPwaButton variant="mobile" />
               {!isAuthResolved ? (
                 <div className="h-10 w-full opacity-0 pointer-events-none" />
               ) : currentUser ? (

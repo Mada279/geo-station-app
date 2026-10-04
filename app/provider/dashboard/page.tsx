@@ -7,9 +7,11 @@ import { supabase } from '@/utils/supabaseClient';
 import { MASTER_CATALOG, MasterCatalogItem } from '@/data/masterCatalog';
 import SecureEmailUpdateModal from '@/components/auth/SecureEmailUpdateModal';
 import WalletTopUpModal from '@/components/provider/WalletTopUpModal';
+import InstallPwaButton from '@/components/InstallPwaButton';
+import TrustMarquee from '@/components/ui/TrustMarquee';
 
-const ProviderOnboardingTour = dynamic(
-  () => import('@/components/ProviderOnboardingTour'),
+const DashboardTour = dynamic(
+  () => import('@/components/provider/DashboardTour'),
   { ssr: false }
 );
 
@@ -68,8 +70,6 @@ export default function ProviderDashboardPage() {
   const [isSavingService, setIsSavingService] = useState<boolean>(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [tourKey, setTourKey] = useState(0);
-  const [runTour, setRunTour] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Modal Form State (Driven by Master Catalog)
@@ -1043,24 +1043,18 @@ export default function ProviderDashboardPage() {
     fetchStolenReports();
   }, []);
 
-  // Callback from ProviderOnboardingTour when step advances
-  const handleTourStepChange = (stepIndex: number) => {
-    if (stepIndex >= 1) {
-      setIsModalOpen(true);
-    }
-  };
-
-  const handleRestartTour = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('survsta_provider_tour_seen', 'manual_run');
-    }
-    setRunTour(false);
+  // Trigger interactive SaaS Dashboard Tour manually
+  const handleRestartTour = async () => {
     setIsModalOpen(false);
-    setTimeout(() => {
-      setTourKey((prev) => prev + 1);
-      setRunTour(true);
-      showToast('🧭 بدأت الجولة التعريفية التفاعلية.');
-    }, 150);
+    setIsWalletModalOpen(false);
+    setIsReportStolenModalOpen(false);
+    try {
+      const { startDashboardTour } = await import('@/components/provider/DashboardTour');
+      startDashboardTour(0);
+      showToast('🧭 انطلقت الجولة التعريفية التفاعلية.');
+    } catch (err) {
+      console.error('Failed to start dashboard tour:', err);
+    }
   };
 
   const handleSaveDevice = async (e: React.FormEvent) => {
@@ -1352,22 +1346,19 @@ export default function ProviderDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#081933] text-right text-gray-100 p-4 sm:p-8">
-      {/* Interactive Joyride Tour Component */}
-      <ProviderOnboardingTour
-        key={tourKey}
-        runTour={runTour}
-        onStepChange={handleTourStepChange}
-        onTourEnd={() => {}}
-      />
+      {/* Interactive SaaS Driver.js Tour Component */}
+      <DashboardTour autoStart={true} />
 
       <div className="mx-auto max-w-7xl space-y-6">
+        {/* Trust & Payment Gateways Marquee Banner */}
+        <TrustMarquee className="rounded-2xl border border-cyan-500/20" />
 
         {/* Dashboard Topbar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-amber-500/20 pb-5">
           <div className="flex items-center gap-3">
             {/* Step 1 Target: Add Device/Service button */}
             <button
-              id="tour-add-button"
+              id="tour-add-equipment"
               onClick={() => setIsModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-l from-amber-500 to-[#F4B400] px-5 py-2.5 text-sm font-bold text-[#081933] shadow-lg shadow-amber-500/20 hover:brightness-110 transition focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
@@ -1375,8 +1366,9 @@ export default function ProviderDashboardPage() {
               <span>إضافة جهاز أو خدمة جديدة</span>
             </button>
 
-            {/* Wallet Top-Up Button */}
+            {/* Step 2 Target: Wallet Top-Up Button */}
             <button
+              id="tour-wallet-button"
               type="button"
               onClick={() => setIsWalletModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/60 px-4 py-2.5 text-xs sm:text-sm font-bold text-emerald-300 transition shadow-lg shadow-emerald-950/30 cursor-pointer"
@@ -1415,6 +1407,9 @@ export default function ProviderDashboardPage() {
               <span>🌐</span>
               <span>الموقع العام</span>
             </Link>
+
+            {/* PWA Install Button */}
+            <InstallPwaButton variant="navbar" />
           </div>
 
           <div>
@@ -1454,6 +1449,7 @@ export default function ProviderDashboardPage() {
         {/* Dashboard KPI Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <Link
+            id="tour-revenue-card"
             href="/provider/analytics"
             className="rounded-2xl border border-emerald-500/20 bg-[#0F253E]/80 p-4 backdrop-blur-md hover:border-emerald-400/50 transition group block cursor-pointer"
           >
@@ -1490,6 +1486,7 @@ export default function ProviderDashboardPage() {
           </div>
 
           <Link
+            id="tour-inbox-card"
             href="/provider/orders"
             className="rounded-2xl border border-amber-500/20 bg-[#0F253E]/80 p-4 backdrop-blur-md hover:border-cyan-400/50 transition group block cursor-pointer"
           >
