@@ -391,6 +391,24 @@ export default function AdminProvidersPage() {
       showToast(nextStatus === 'approved' ? '✅ تم اعتماد وتوثيق المزوّد بنجاح!' : '⏳ تم تحويل المزوّد لقيد المراجعة.');
 
       if (nextStatus === 'approved') {
+        // Automatically dispatch official welcome/approval email via Resend
+        if (provider.email && provider.email.includes('@')) {
+          try {
+            await fetch('/api/admin/notify-provider', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                providerEmail: provider.email,
+                providerName: provider.contact_person || provider.name || 'شريكنا العزيز',
+                actionType: 'approved',
+                userType: 'provider',
+              }),
+            });
+          } catch (e) {
+            console.error('[Admin Providers] Failed to auto-dispatch approval email:', e);
+          }
+        }
+
         setCommTarget({
           provider,
           actionType: 'approved',

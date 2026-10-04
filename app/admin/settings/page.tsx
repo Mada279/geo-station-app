@@ -677,10 +677,10 @@ export default function AdminSettingsPage() {
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <span>✉️</span>
-                <span>تخصيص قالب إيميل الترحيب الرسمي للمزوّدين (Welcome Email Template)</span>
+                <span>محرر رسالة الترحيب (Welcome Email Editor)</span>
               </h3>
               <p className="text-xs text-gray-400 mt-1">
-                تعديل رسالة الترحيب التي تصل للمزود عند اعتماده، وتخصيص زر الدعوة لإضافة الأجهزة (Add Equipment CTA).
+                تخصيص رسالة الترحيب الرسمية التي تصل للمزوّد تلقائياً فور اعتماده، وضبط أزرار الإجراء (CTA) لإضافة الأجهزة والمعدات المساحية.
               </p>
             </div>
 
@@ -714,7 +714,7 @@ export default function AdminSettingsPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-gray-300 mb-1.5">عنوان الرسالة (Email Subject)</label>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1.5">موضوع الرسالة (Subject)</label>
                   <input
                     type="text"
                     value={emailTemplate.subject}
@@ -735,7 +735,7 @@ export default function AdminSettingsPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-                  عنوان الترحيب الرئيسي (Greeting Title)
+                  العنوان الرئيسي (Title)
                   <span className="text-[11px] text-cyan-400 font-normal mr-2">
                     (يمكنك استخدام المتغير: {'{recipient_name}'})
                   </span>
@@ -749,7 +749,7 @@ export default function AdminSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1.5">نص الرسالة الترحيبية (Message Body)</label>
+                <label className="block text-xs font-semibold text-gray-300 mb-1.5">نص الترحيب (Main Message)</label>
                 <textarea
                   rows={4}
                   value={emailTemplate.main_message}
@@ -767,7 +767,7 @@ export default function AdminSettingsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-300 mb-1.5">نص الزر الرئيسي (Primary CTA)</label>
+                    <label className="block text-xs font-semibold text-gray-300 mb-1.5">نص زر الإجراء (CTA Button Text)</label>
                     <input
                       type="text"
                       value={emailTemplate.cta_text}

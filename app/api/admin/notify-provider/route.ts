@@ -15,6 +15,88 @@ interface NotifyRequestBody {
   suspendedUntil?: string;
 }
 
+// Fetch dynamic template from platform_settings with standard fallback
+async function getDynamicProviderWelcomeContent(recipientName: string) {
+  let subject = '🌟 أهلاً بك في منصة Survsta | بوابتك الرقمية المتكاملة لقطاع المساحة والجيوماتكس';
+  let badgeText = 'شريك معتمد جديد';
+  let badgeBg = '#0284c7';
+  let title = `أهلاً ومرحباً بك معنا، ${recipientName} 👋`;
+  let mainMessage = `
+    يسعدنا ويشرفنا انضمامك إلى <strong>منصة Survsta</strong> — المنظومة الرقمية الأولى والأشمل في مصر المتخصصة في خدمات وأجهزة المساحة والجيوماتكس.<br/><br/>
+    <strong>آفاق جديدة لتنمية أعمال مكتبك المساحي:</strong>
+    <ul style="margin: 12px 0; padding-right: 20px; line-height: 1.9; color: #334155;">
+      <li><strong>عرض أجهزتك وتأجيرها:</strong> انشر معداتك المساحية لتصل إلى آلاف المهندسين وشركات المقاولات الباحثة عن أجهزة للإيجار يومياً.</li>
+      <li><strong>حضور رسمي وتوثيق مهني:</strong> احجز مكان مكتبك في دليل المساحة المعتمد لتعزيز ثقة العملاء وزيادة العقود المباشرة.</li>
+      <li><strong>فرص عمل واستقطاب كوادر:</strong> أعلن عن الشواغر الوظيفية في مكتبك واستقطب أكفأ مهندسي وفنيي المساحة.</li>
+    </ul>
+    <p style="margin-top: 14px;">ابدأ الآن بإضافة أول جهاز مساحي إلى كتالوج مكتبك لتفعيل ظهورك الفوري بالسوق وتلقي طلبات الحجز المباشرة.</p>
+  `;
+  let actionButtonText = '➕ أضف معداتك وأجهزتك المساحية الآن';
+  let actionButtonUrl = 'https://survsta.com/provider/dashboard#equipment';
+  let secondaryButtonText = 'الدخول إلى لوحة التحكم';
+  let secondaryButtonUrl = 'https://survsta.com/provider/dashboard';
+
+  try {
+    const { data: settingRow } = await supabase
+      .from('platform_settings')
+      .select('setting_value')
+      .eq('setting_key', 'template_welcome_email')
+      .maybeSingle();
+
+    if (settingRow?.setting_value) {
+      const tpl =
+        typeof settingRow.setting_value === 'string'
+          ? JSON.parse(settingRow.setting_value)
+          : settingRow.setting_value;
+
+      if (tpl.subject) {
+        subject = tpl.subject.replace(/\{recipient_name\}|\{provider_name\}/g, recipientName);
+      }
+      if (tpl.badge_text) {
+        badgeText = tpl.badge_text;
+      }
+      if (tpl.badge_bg) {
+        badgeBg = tpl.badge_bg;
+      }
+      if (tpl.title) {
+        title = tpl.title.replace(/\{recipient_name\}|\{provider_name\}/g, recipientName);
+      }
+      if (tpl.main_message) {
+        mainMessage = tpl.main_message
+          .replace(/\{recipient_name\}|\{provider_name\}/g, recipientName)
+          .replace(/\n\n/g, '<br/><br/>')
+          .replace(/\n/g, '<br/>');
+      }
+      if (tpl.cta_text) {
+        actionButtonText = tpl.cta_text;
+      }
+      if (tpl.cta_url) {
+        actionButtonUrl = tpl.cta_url;
+      }
+      if (tpl.secondary_cta_text) {
+        secondaryButtonText = tpl.secondary_cta_text;
+      }
+      if (tpl.secondary_cta_url) {
+        secondaryButtonUrl = tpl.secondary_cta_url;
+      }
+    }
+  } catch (dbErr) {
+    console.warn('[NotifyProviderAPI] Failed reading dynamic welcome template from DB:', dbErr);
+  }
+
+  return {
+    subject,
+    badgeText,
+    badgeBg,
+    title,
+    mainMessage,
+    actionButtonText,
+    actionButtonUrl,
+    secondaryButtonText,
+    secondaryButtonUrl,
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: NotifyRequestBody = await request.json();
@@ -30,14 +112,13 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       console.warn('[NotifyProviderAPI] RESEND_API_KEY is not defined in environment variables.');
       return NextResponse.json(
-        { warning: 'لم يتم العثور على مفتاح RESEND_API_KEY في ملف البيئة. تم تسجيل الإجراء.' },
+        { warning: 'لم يتم العثور على مفتاح RESEND_API_KEY في ملف البيئة. تم تسجيل الإجراء دون إرسال.' },
         { status: 200 }
       );
     }
 
     const resend = new Resend(apiKey);
 
-    // Build email content based on action type
     let subject = '';
     let badgeText = '';
     let badgeBg = '';
@@ -50,7 +131,8 @@ export async function POST(request: NextRequest) {
 
     switch (actionType) {
       case 'welcome':
-        if (userType === 'client') {
+      case 'approved':
+        if (actionType === 'welcome' && userType === 'client') {
           subject = '🌟 أهلاً بك في منصة Survsta | بوابتك الرقمية المتكاملة لقطاع المساحة والجيوماتكس';
           badgeText = 'أهلاً بك في مجتمعنا';
           badgeBg = '#0284c7';
@@ -70,63 +152,17 @@ export async function POST(request: NextRequest) {
           secondaryButtonText = 'لوحة التحكم';
           secondaryButtonUrl = 'https://survsta.com/client/dashboard';
         } else {
-          // Provider Welcome - Try fetching dynamic template from platform_settings
-          let dynamicLoaded = false;
-          try {
-            const { data: settingRow } = await supabase
-              .from('platform_settings')
-              .select('setting_value')
-              .eq('setting_key', 'template_welcome_email')
-              .maybeSingle();
-
-            if (settingRow?.setting_value) {
-              const tpl = typeof settingRow.setting_value === 'string'
-                ? JSON.parse(settingRow.setting_value)
-                : settingRow.setting_value;
-
-              subject = (tpl.subject || '').replace(/\{recipient_name\}|\{provider_name\}/g, recipientName) ||
-                '🌟 أهلاً بك في منصة Survsta | بوابتك الرقمية المتكاملة لقطاع المساحة والجيوماتكس';
-              badgeText = tpl.badge_text || 'شريك معتمد جديد';
-              badgeBg = tpl.badge_bg || '#0284c7';
-              title = (tpl.title || '').replace(/\{recipient_name\}|\{provider_name\}/g, recipientName) ||
-                `أهلاً ومرحباً بك معنا، ${recipientName} 👋`;
-
-              const rawMsg = tpl.main_message || '';
-              mainMessage = rawMsg
-                .replace(/\{recipient_name\}|\{provider_name\}/g, recipientName)
-                .replace(/\n\n/g, '<br/><br/>')
-                .replace(/\n/g, '<br/>');
-
-              actionButtonText = tpl.cta_text || '➕ أضف معداتك وأجهزتك المساحية الآن';
-              actionButtonUrl = tpl.cta_url || 'https://survsta.com/provider/dashboard#equipment';
-              secondaryButtonText = tpl.secondary_cta_text || 'الدخول إلى لوحة التحكم';
-              secondaryButtonUrl = tpl.secondary_cta_url || 'https://survsta.com/provider/dashboard';
-              dynamicLoaded = true;
-            }
-          } catch (dbErr) {
-            console.warn('[NotifyProviderAPI] Failed reading dynamic welcome template from DB:', dbErr);
-          }
-
-          if (!dynamicLoaded) {
-            subject = '🌟 أهلاً بك في منصة Survsta | بوابتك الرقمية المتكاملة لقطاع المساحة والجيوماتكس';
-            badgeText = 'أهلاً بك شريكنا العزيز';
-            badgeBg = '#0284c7';
-            title = `أهلاً ومرحباً بك معنا، ${recipientName} 👋`;
-            mainMessage = `
-              يسعدنا ويشرفنا انضمامك إلى <strong>منصة Survsta</strong> — المنظومة الرقمية الأولى والأشمل في مصر المتخصصة في خدمات وأجهزة المساحة والجيوماتكس.<br/><br/>
-              <strong>آفاق جديدة لتنمية أعمال مكتبك المساحي:</strong>
-              <ul style="margin: 12px 0; padding-right: 20px; line-height: 1.9; color: #334155;">
-                <li><strong>عرض أجهزتك وتأجيرها:</strong> انشر معداتك المساحية لتصل إلى آلاف المهندسين وشركات المقاولات الباحثة عن أجهزة للإيجار يومياً.</li>
-                <li><strong>حضور رسمي وتوثيق مهني:</strong> احجز مكان مكتبك في دليل المساحة المعتمد لتعزيز ثقة العملاء وزيادة العقود المباشرة.</li>
-                <li><strong>فرص عمل واستقطاب كوادر:</strong> أعلن عن الشواغر الوظيفية في مكتبك واستقطب أكفأ مهندسي وفنيي المساحة.</li>
-              </ul>
-              <p style="margin-top: 14px;">ابدأ الآن بإضافة أول جهاز مساحي إلى كتالوج مكتبك لتفعيل ظهورك الفوري بالسوق وتلقي طلبات الحجز المباشرة.</p>
-            `;
-            actionButtonText = '➕ أضف معداتك وأجهزتك المساحية الآن';
-            actionButtonUrl = 'https://survsta.com/provider/dashboard#equipment';
-            secondaryButtonText = 'الدخول إلى لوحة التحكم';
-            secondaryButtonUrl = 'https://survsta.com/provider/dashboard';
-          }
+          // Provider Welcome / Approval: Strictly fetch from platform_settings
+          const dynamicTpl = await getDynamicProviderWelcomeContent(recipientName);
+          subject = dynamicTpl.subject;
+          badgeText = dynamicTpl.badgeText;
+          badgeBg = dynamicTpl.badgeBg;
+          title = dynamicTpl.title;
+          mainMessage = dynamicTpl.mainMessage;
+          actionButtonText = dynamicTpl.actionButtonText;
+          actionButtonUrl = dynamicTpl.actionButtonUrl;
+          secondaryButtonText = dynamicTpl.secondaryButtonText;
+          secondaryButtonUrl = dynamicTpl.secondaryButtonUrl;
         }
         break;
 
@@ -145,21 +181,6 @@ export async function POST(request: NextRequest) {
         actionButtonUrl = 'https://survsta.com/contact';
         secondaryButtonText = '';
         secondaryButtonUrl = '';
-        break;
-
-      case 'approved':
-        subject = '🎉 تهانينا! تم اعتماد حساب المزود الخاص بكم رسمياً في Survsta';
-        badgeText = 'اعتماد رسمي معتمد';
-        badgeBg = '#10b981';
-        title = `أهلاً بك شريكنا المعتمد: ${recipientName}`;
-        mainMessage = `
-          يسعدنا إبلاغكم بأنه تمت مراجعة واعتماد أوراق مكتبكم المساحي بنجاح من قِبل إدارة منصة <strong>Survsta</strong>.<br/>
-          حسابكم الآن نشط وموثق بالكامل، ويمكنكم رفع معداتكم واستقبال طلبات الإيجار والشراء المباشرة من شركات المقاولات والمهندسين في كافة محافظات مصر.
-        `;
-        actionButtonText = '➕ أضف معداتك وأجهزتك المساحية الآن';
-        actionButtonUrl = 'https://survsta.com/provider/dashboard#equipment';
-        secondaryButtonText = 'إدارة الأجهزة من لوحة التحكم';
-        secondaryButtonUrl = 'https://survsta.com/provider/dashboard';
         break;
 
       case 'restored':
@@ -227,8 +248,8 @@ export async function POST(request: NextRequest) {
                   <a href="${secondaryButtonUrl}" style="color: #64748b; font-size: 13px; text-decoration: underline;">${secondaryButtonText}</a>
                 </div>` : ''}
               </div>
-              <p style="font-size: 12px; color: #94a3b8; margin-top: 24px; border-top: 1px solid #f1f5f9; pt: 16px;">
-                هذه الرسالة آلية من إدارة منصة Survsta لشركائها المعتمدين. إذا كان لديك أي استفسار، يرجى الرد على هذا البريد أو التواصل عبر قنوات الدعم الرسمية.
+              <p style="font-size: 12px; color: #94a3b8; margin-top: 24px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+                هذه الرسالة رسمية من إدارة منصة Survsta لشركائها المعتمدين. إذا كان لديك أي استفسار، يرجى الرد على هذا البريد أو التواصل عبر قنوات الدعم الرسمية.
               </p>
             </div>
             <div class="footer">
@@ -239,12 +260,29 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
+    // Attempt delivery with standard domain and graceful fallback
+    const fromAddress = process.env.RESEND_FROM_EMAIL || 'Survsta Platform <notifications@survsta.com>';
     const sendRes = await resend.emails.send({
-      from: 'Survsta Platform <notifications@survsta.com>',
+      from: fromAddress,
       to: [recipientEmail],
       subject,
       html: htmlContent,
     });
+
+    if (sendRes.error) {
+      console.warn('[NotifyProviderAPI] Resend returned error with primary fromAddress:', sendRes.error);
+      // Fallback to resend default testing domain if custom domain is not yet verified in Resend account
+      if (sendRes.error.message?.includes('domain') || sendRes.error.name === 'validation_error') {
+        const fallbackRes = await resend.emails.send({
+          from: 'Survsta Platform <onboarding@resend.dev>',
+          to: [recipientEmail],
+          subject,
+          html: htmlContent,
+        });
+        return NextResponse.json({ success: true, data: fallbackRes });
+      }
+      return NextResponse.json({ error: sendRes.error.message }, { status: 400 });
+    }
 
     return NextResponse.json({ success: true, data: sendRes });
   } catch (err: any) {
