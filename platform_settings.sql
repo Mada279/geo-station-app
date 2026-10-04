@@ -74,3 +74,16 @@ VALUES (
 )
 ON CONFLICT (setting_key) DO NOTHING;
 
+-- Insert Default Row for Dynamic Manual Payment Methods Config
+INSERT INTO platform_settings (setting_key, setting_value, description)
+VALUES (
+  'payment_methods_config',
+  '{
+    "wallets": { "number": "01147554019", "networks": "Vodafone, Etisalat, Orange, WE", "isActive": true },
+    "instapay": { "handle": "ahmed.elsayed.74@instapay", "link": "https://ipn.eg/S/ahmed.elsayed.74/instapay/0YEQtW", "isActive": true }
+  }'::jsonb,
+  'Dynamic configuration for manual payment methods (E-Wallets and InstaPay)'
+)
+ON CONFLICT (setting_key) DO NOTHING;
+
+

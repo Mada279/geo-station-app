@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/utils/supabaseClient';
+import { PaymentMethodsConfig, DEFAULT_PAYMENT_CONFIG } from '@/lib/payment/paymentConfig';
 
 interface WalletTopUpModalProps {
   isOpen: boolean;
@@ -31,6 +33,10 @@ export default function WalletTopUpModal({
 }: WalletTopUpModalProps) {
   const [activeTab, setActiveTab] = useState<'form' | 'history'>('form');
 
+  // Dynamic Payment Configuration State
+  const [paymentConfig, setPaymentConfig] = useState<PaymentMethodsConfig>(DEFAULT_PAYMENT_CONFIG);
+  const [isLoadingConfig, setIsLoadingConfig] = useState<boolean>(true);
+
   // Form State
   const [amount, setAmount] = useState<string>('500');
   const [paymentMethod, setPaymentMethod] = useState<'vodafone_cash' | 'instapay'>('vodafone_cash');
@@ -41,19 +47,52 @@ export default function WalletTopUpModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [showDesktopQr, setShowDesktopQr] = useState<boolean>(false);
 
   // History State
   const [historyItems, setHistoryItems] = useState<PaymentRequestHistory[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
 
-  // Static Platform Transfer Details
-  const VODAFONE_NUMBER = '01012345678';
-  const INSTAPAY_HANDLE = 'survsta@instapay';
-
   useEffect(() => {
+    async function loadPaymentConfig() {
+      setIsLoadingConfig(true);
+      try {
+        const { data } = await supabase
+          .from('platform_settings')
+          .select('setting_value')
+          .eq('setting_key', 'payment_methods_config')
+          .maybeSingle();
+
+        if (data?.setting_value) {
+          const parsed =
+            typeof data.setting_value === 'string'
+              ? JSON.parse(data.setting_value)
+              : data.setting_value;
+
+          const merged: PaymentMethodsConfig = {
+            wallets: { ...DEFAULT_PAYMENT_CONFIG.wallets, ...(parsed.wallets || {}) },
+            instapay: { ...DEFAULT_PAYMENT_CONFIG.instapay, ...(parsed.instapay || {}) },
+          };
+          setPaymentConfig(merged);
+
+          // Auto-select the available method if one is inactive
+          if (!merged.wallets.isActive && merged.instapay.isActive) {
+            setPaymentMethod('instapay');
+          } else if (!merged.instapay.isActive && merged.wallets.isActive) {
+            setPaymentMethod('vodafone_cash');
+          }
+        }
+      } catch (err) {
+        console.warn('[WalletTopUpModal] Error loading payment config:', err);
+      } finally {
+        setIsLoadingConfig(false);
+      }
+    }
+
     if (isOpen) {
       setErrorMessage(null);
       setSuccessToast(null);
+      loadPaymentConfig();
       if (activeTab === 'history') {
         fetchHistory();
       }
@@ -150,7 +189,7 @@ export default function WalletTopUpModal({
     }
 
     if (!transferReference.trim()) {
-      setErrorMessage('يرجى إدخال رقم المحفظة المحول منها أو كود العملية.');
+      setErrorMessage('يرجى إدخال رقم المحفظة المحول منها أو معرف إنستاباي لسرعة المطابقة.');
       return;
     }
 
@@ -202,6 +241,8 @@ export default function WalletTopUpModal({
     }
   };
 
+  const hasAnyActiveMethod = paymentConfig.wallets.isActive || paymentConfig.instapay.isActive;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
@@ -215,7 +256,7 @@ export default function WalletTopUpModal({
             <span className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 text-xl">💳</span>
             <div>
               <h3 className="text-base sm:text-lg font-black text-white">شحن محفظة الحساب (Wallet Top-Up)</h3>
-              <p className="text-[11px] text-gray-400">إيداع فوري عبر فودافون كاش أو إنستاباي لفتح الليدات والطلبات</p>
+              <p className="text-[11px] text-gray-400">إيداع فوري عبر المحافظ الإلكترونية أو إنستاباي لتفعيل طلبات الإيجار والخدمات</p>
             </div>
           </div>
           <button
@@ -280,206 +321,310 @@ export default function WalletTopUpModal({
 
         {activeTab === 'form' ? (
           <form onSubmit={handleSubmit} className="space-y-4">
-            
-            {/* Step 1: Transfer Channels */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-cyan-300">
-                1. اختر وسيلة التحويل وحول المبلغ المطلوب:
-              </label>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Vodafone Cash Card */}
-                <div
-                  onClick={() => setPaymentMethod('vodafone_cash')}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition relative ${
-                    paymentMethod === 'vodafone_cash'
-                      ? 'border-rose-500 bg-rose-950/20 shadow-md ring-1 ring-rose-500/50'
-                      : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-bold text-xs text-white flex items-center gap-1.5">
-                      <span className="text-rose-500 font-black">🔴</span> فودافون كاش
-                    </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono">
-                      Vodafone
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-gray-400 mb-2">رقم محفظة المنصة المعتمدة:</div>
-                  <div className="flex items-center justify-between bg-black/40 p-1.5 rounded-lg border border-slate-800">
-                    <span className="font-mono text-xs font-bold text-white" dir="ltr">{VODAFONE_NUMBER}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopy(VODAFONE_NUMBER, 'voda');
-                      }}
-                      className="px-2 py-0.5 rounded bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-bold transition"
-                    >
-                      {copiedKey === 'voda' ? 'تم النسخ ✓' : 'نسخ الرقم'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* InstaPay Card */}
-                <div
-                  onClick={() => setPaymentMethod('instapay')}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition relative ${
-                    paymentMethod === 'instapay'
-                      ? 'border-purple-500 bg-purple-950/20 shadow-md ring-1 ring-purple-500/50'
-                      : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-bold text-xs text-white flex items-center gap-1.5">
-                      <span className="text-purple-400 font-black">⚡</span> إنستاباي (InstaPay)
-                    </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">
-                      IPA Handle
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-gray-400 mb-2">معرف الدفع اللحظي الرسمي:</div>
-                  <div className="flex items-center justify-between bg-black/40 p-1.5 rounded-lg border border-slate-800">
-                    <span className="font-mono text-xs font-bold text-purple-300" dir="ltr">{INSTAPAY_HANDLE}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopy(INSTAPAY_HANDLE, 'insta');
-                      }}
-                      className="px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold transition"
-                    >
-                      {copiedKey === 'insta' ? 'تم النسخ ✓' : 'نسخ المعرف'}
-                    </button>
-                  </div>
-                </div>
-              </div>
+            {/* Mandatory Instructional Microcopy Alert */}
+            <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 text-xs flex items-start gap-2.5 shadow-inner">
+              <span className="text-base shrink-0 mt-0.5">⚠️</span>
+              <p className="leading-relaxed font-medium">
+                برجاء التأكد من تحويل المبلغ أولاً قبل رفع الإيصال. قم بإدخال الرقم أو المعرف الذي قمت بالتحويل منه لسرعة المطابقة.
+              </p>
             </div>
 
-            {/* Step 2: Form Inputs */}
-            <div className="space-y-3 pt-2 border-t border-slate-800">
-              <label className="block text-xs font-bold text-cyan-300">
-                2. أدخل بيانات الحوالة وارفع صورة الإيصال:
-              </label>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-300 mb-1">
-                    المبلغ المحول (EGP) <span className="text-cyan-400">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="50"
-                    step="50"
-                    placeholder="مثال: 500"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 font-mono"
-                  />
-                  <div className="flex gap-1.5 mt-1.5">
-                    {['200', '500', '1000', '2500'].map((quick) => (
-                      <button
-                        type="button"
-                        key={quick}
-                        onClick={() => setAmount(quick)}
-                        className="px-2 py-0.5 rounded text-[10px] bg-slate-900 border border-slate-800 text-gray-300 hover:text-white hover:border-cyan-500/40 font-mono transition"
-                      >
-                        {quick} ج.م
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-gray-300 mb-1">
-                    رقم المحفظة / معرف التحويل <span className="text-cyan-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    dir="ltr"
-                    placeholder={paymentMethod === 'vodafone_cash' ? '010XXXXXXXX' : 'username@instapay'}
-                    value={transferReference}
-                    onChange={(e) => setTransferReference(e.target.value)}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 font-mono text-left"
-                  />
-                  <p className="text-[10px] text-gray-500 mt-1">الرقم أو المعرف الذي قمت بالتحويل منه للمطابقة</p>
-                </div>
+            {!hasAnyActiveMethod ? (
+              <div className="text-center py-8 rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-2">
+                <span className="text-3xl">⏳</span>
+                <p className="text-sm font-bold text-white">بوابات الدفع اليدوية قيد التحديث مؤقتاً</p>
+                <p className="text-xs text-slate-400">يرجى التواصل مع خدمة عملاء المنصة لإتمام عملية الشحن.</p>
               </div>
+            ) : (
+              <>
+                {/* Step 1: Transfer Channels */}
+                <div className="space-y-2.5">
+                  <label className="block text-xs font-bold text-cyan-300">
+                    1. اختر وسيلة التحويل وحوّل المبلغ المطلوب:
+                  </label>
 
-              {/* Receipt File Upload */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1">
-                  صورة إيصال التحويل (Screenshot) <span className="text-cyan-400">*</span>
-                </label>
-
-                {receiptUrl ? (
-                  <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="text-emerald-400 font-bold">✓ تم إرفاق صورة الإيصال بنجاح</span>
-                      <a
-                        href={receiptUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-cyan-400 underline text-[11px]"
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    
+                    {/* E-Wallets Card (Only rendered if isActive is true) */}
+                    {paymentConfig.wallets.isActive && (
+                      <div
+                        onClick={() => setPaymentMethod('vodafone_cash')}
+                        className={`p-3.5 rounded-xl border cursor-pointer transition relative flex flex-col justify-between ${
+                          paymentMethod === 'vodafone_cash'
+                            ? 'border-cyan-400 bg-cyan-950/20 shadow-md ring-1 ring-cyan-400/50'
+                            : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                        }`}
                       >
-                        معاينة الصورة
-                      </a>
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-bold text-xs text-white flex items-center gap-1.5">
+                              <span>📱</span>
+                              <span>المحافظ الإلكترونية</span>
+                            </span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold">
+                              E-Wallets
+                            </span>
+                          </div>
+
+                          {/* 4 Network Visual Color Badges */}
+                          <div className="flex items-center gap-1 flex-wrap mb-2.5">
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-500/15 border border-red-500/40 text-red-400">
+                              فودافون كاش
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/15 border border-emerald-500/40 text-emerald-400">
+                              اتصالات كاش
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-orange-500/15 border border-orange-500/40 text-orange-400">
+                              أورنج كاش
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/15 border border-purple-500/40 text-purple-400">
+                              وي باي
+                            </span>
+                          </div>
+
+                          <div className="text-[11px] text-gray-400 mb-1.5">رقم محفظة المنصة المعتمدة:</div>
+                        </div>
+
+                        <div className="flex items-center justify-between bg-black/50 p-2 rounded-lg border border-slate-800 mt-1">
+                          <span className="font-mono text-sm font-bold text-white" dir="ltr">
+                            {paymentConfig.wallets.number}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopy(paymentConfig.wallets.number, 'wallets');
+                            }}
+                            className="px-2.5 py-1 rounded bg-cyan-600 hover:bg-cyan-500 text-slate-950 text-[10px] font-black transition cursor-pointer"
+                          >
+                            {copiedKey === 'wallets' ? 'تم النسخ ✓' : 'نسخ الرقم'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* InstaPay Card (Only rendered if isActive is true) */}
+                    {paymentConfig.instapay.isActive && (
+                      <div
+                        onClick={() => setPaymentMethod('instapay')}
+                        className={`p-3.5 rounded-xl border cursor-pointer transition relative flex flex-col justify-between ${
+                          paymentMethod === 'instapay'
+                            ? 'border-purple-500 bg-purple-950/30 shadow-md ring-1 ring-purple-500/50'
+                            : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-bold text-xs text-white flex items-center gap-1.5">
+                              <span className="text-purple-400 font-black">⚡</span>
+                              <span>إنستاباي (InstaPay)</span>
+                            </span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">
+                              تحويل لحظي IPN
+                            </span>
+                          </div>
+
+                          <div className="text-[11px] text-gray-400 mb-1.5">معرف الدفع اللحظي الرسمي:</div>
+                          <div className="flex items-center justify-between bg-black/50 p-2 rounded-lg border border-slate-800 mb-2.5">
+                            <span className="font-mono text-xs font-bold text-purple-300 truncate max-w-[170px]" dir="ltr">
+                              {paymentConfig.instapay.handle}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopy(paymentConfig.instapay.handle, 'insta');
+                              }}
+                              className="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold transition shrink-0 cursor-pointer"
+                            >
+                              {copiedKey === 'insta' ? 'تم النسخ ✓' : 'نسخ المعرف'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Deep Link & QR Code Innovations */}
+                        <div className="space-y-2 pt-1 border-t border-purple-500/20">
+                          {paymentConfig.instapay.link && (
+                            <a
+                              href={paymentConfig.instapay.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-full py-2 px-3 rounded-lg bg-gradient-to-l from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-[11px] shadow-md shadow-purple-900/30 flex items-center justify-center gap-1.5 transition text-center"
+                            >
+                              <span>⚡</span>
+                              <span>الدفع المباشر عبر تطبيق إنستاباي ↗</span>
+                            </a>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowDesktopQr(!showDesktopQr);
+                            }}
+                            className="w-full text-center text-[10px] text-purple-300 hover:text-purple-200 underline font-medium"
+                          >
+                            {showDesktopQr ? 'إخفاء رمز QR للمسح ▲' : 'عرض رمز QR لمسح التحويل بالهاتف ▼'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* QR Code Presentation Box (when toggled on Desktop) */}
+                  {showDesktopQr && paymentConfig.instapay.isActive && paymentConfig.instapay.link && (
+                    <div className="p-4 rounded-xl border border-purple-500/40 bg-[#0B1528] flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in zoom-in-95 duration-200">
+                      <div className="p-2.5 bg-white rounded-xl shadow-lg shrink-0">
+                        <QRCodeSVG
+                          value={paymentConfig.instapay.link}
+                          size={100}
+                          bgColor="#FFFFFF"
+                          fgColor="#000000"
+                          level="M"
+                        />
+                      </div>
+                      <div className="text-right space-y-1 max-w-xs">
+                        <p className="text-xs font-bold text-white">امسح الكود عبر تطبيق إنستاباي أو كاميرا هاتفك</p>
+                        <p className="text-[11px] text-slate-300 leading-relaxed">
+                          سيتم توجيهك فوراً إلى صفحة التحويل في إنستاباي مع تحديد المستلم تلقائياً دون كتابة يدوية.
+                        </p>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setReceiptUrl('')}
-                      className="text-gray-400 hover:text-rose-400 text-xs transition"
-                    >
-                      تغيير الملف ✕
-                    </button>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-slate-700 bg-slate-950/60 hover:border-cyan-500/50 hover:bg-slate-950 transition cursor-pointer text-center">
-                    <span className="text-2xl mb-1">📸</span>
-                    <span className="text-xs font-bold text-slate-300">
-                      {isUploadingReceipt ? 'جاري رفع الإيصال...' : 'اضغط لاختيار صورة إيصال التحويل'}
-                    </span>
-                    <span className="text-[10px] text-gray-500 mt-0.5">
-                      يدعم JPG, PNG, WEBP أو PDF (الحد الأقصى 10MB)
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*,application/pdf"
-                      disabled={isUploadingReceipt}
-                      onChange={handleReceiptUpload}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
+                  )}
+                </div>
 
-            {/* Submit Action */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition"
-              >
-                إلغاء
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting || isUploadingReceipt}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-l from-emerald-500 to-teal-500 text-xs font-black text-slate-950 shadow-lg shadow-emerald-500/20 hover:brightness-110 transition disabled:opacity-50 flex items-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
-                    <span>جاري إرسال الإيصال...</span>
-                  </>
-                ) : (
-                  <span>إرسال الإيصال للاعتماد والشحن ←</span>
-                )}
-              </button>
-            </div>
+                {/* Step 2: Form Inputs */}
+                <div className="space-y-3 pt-3 border-t border-slate-800">
+                  <label className="block text-xs font-bold text-cyan-300">
+                    2. أدخل بيانات الحوالة وارفع صورة الإيصال:
+                  </label>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-300 mb-1">
+                        المبلغ المحول (EGP) <span className="text-cyan-400">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        min="50"
+                        step="50"
+                        placeholder="مثال: 500"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 font-mono"
+                      />
+                      <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                        {['200', '500', '1000', '2500'].map((quick) => (
+                          <button
+                            type="button"
+                            key={quick}
+                            onClick={() => setAmount(quick)}
+                            className="px-2 py-0.5 rounded text-[10px] bg-slate-900 border border-slate-800 text-gray-300 hover:text-white hover:border-cyan-500/40 font-mono transition"
+                          >
+                            {quick} ج.م
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-300 mb-1">
+                        {paymentMethod === 'vodafone_cash'
+                          ? 'رقم المحفظة التي قمت بالتحويل منها'
+                          : 'معرف / رقم إنستاباي المحول منه'}{' '}
+                        <span className="text-cyan-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        dir="ltr"
+                        placeholder={paymentMethod === 'vodafone_cash' ? '010XXXXXXXX' : 'username@instapay'}
+                        value={transferReference}
+                        onChange={(e) => setTransferReference(e.target.value)}
+                        className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 font-mono text-left"
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">الرقم أو المعرف الذي قمت بالتحويل منه لسرعة المطابقة الفورية</p>
+                    </div>
+                  </div>
+
+                  {/* Receipt File Upload */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 mb-1">
+                      صورة إيصال التحويل (Screenshot) <span className="text-cyan-400">*</span>
+                    </label>
+
+                    {receiptUrl ? (
+                      <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-emerald-400 font-bold">✓ تم إرفاق صورة الإيصال بنجاح</span>
+                          <a
+                            href={receiptUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-cyan-400 underline text-[11px]"
+                          >
+                            معاينة الصورة
+                          </a>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setReceiptUrl('')}
+                          className="text-gray-400 hover:text-rose-400 text-xs transition"
+                        >
+                          تغيير الملف ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-slate-700 bg-slate-950/60 hover:border-cyan-500/50 hover:bg-slate-950 transition cursor-pointer text-center">
+                        <span className="text-2xl mb-1">📸</span>
+                        <span className="text-xs font-bold text-slate-300">
+                          {isUploadingReceipt ? 'جاري رفع الإيصال...' : 'اضغط لاختيار صورة إيصال التحويل'}
+                        </span>
+                        <span className="text-[10px] text-gray-500 mt-0.5">
+                          يدعم JPG, PNG, WEBP أو PDF (الحد الأقصى 10MB)
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          disabled={isUploadingReceipt}
+                          onChange={handleReceiptUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                {/* Submit Action */}
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || isUploadingReceipt}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-l from-emerald-500 to-teal-500 text-xs font-black text-slate-950 shadow-lg shadow-emerald-500/20 hover:brightness-110 transition disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
+                        <span>جاري إرسال الإيصال...</span>
+                      </>
+                    ) : (
+                      <span>إرسال الإيصال للاعتماد والشحن ←</span>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
           </form>
         ) : (
           /* History Tab */
@@ -506,7 +651,7 @@ export default function WalletTopUpModal({
                           {Number(item.amount).toLocaleString('en-US')} ج.م
                         </span>
                         <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-gray-400">
-                          {item.payment_method === 'vodafone_cash' ? 'فودافون كاش' : 'إنستاباي'}
+                          {item.payment_method === 'vodafone_cash' ? 'محافظ إلكترونية' : 'إنستاباي'}
                         </span>
                         {item.status === 'approved' ? (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">

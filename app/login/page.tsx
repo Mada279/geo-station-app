@@ -51,6 +51,14 @@ function LoginForm() {
             org: 'Survsta Admin',
             av: 'أح'
           }));
+
+          try {
+            if ('BroadcastChannel' in window) {
+              const bc = new BroadcastChannel('survsta_auth_channel');
+              bc.postMessage({ type: 'AUTH_STATE_CHANGED', email: 'ahmed@survsta.com' });
+              bc.close();
+            }
+          } catch {}
         }
 
         if (callbackUrl && callbackUrl.startsWith('/admin')) {
@@ -188,6 +196,14 @@ function LoginForm() {
             org,
             av: name.slice(0, 2)
           }));
+
+          try {
+            if ('BroadcastChannel' in window) {
+              const bc = new BroadcastChannel('survsta_auth_channel');
+              bc.postMessage({ type: 'AUTH_STATE_CHANGED', email: cleanEmail });
+              bc.close();
+            }
+          } catch {}
         }
 
         if (callbackUrl && callbackUrl.startsWith('/')) {
@@ -220,6 +236,14 @@ function LoginForm() {
           org: user.organization,
           av: user.name.slice(0, 2)
         }));
+
+        try {
+          if ('BroadcastChannel' in window) {
+            const bc = new BroadcastChannel('survsta_auth_channel');
+            bc.postMessage({ type: 'AUTH_STATE_CHANGED', email: user.email });
+            bc.close();
+          }
+        } catch {}
       }
 
       if (callbackUrl && callbackUrl.startsWith('/')) {

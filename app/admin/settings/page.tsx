@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
+import { PaymentMethodsConfig, DEFAULT_PAYMENT_CONFIG } from '@/lib/payment/paymentConfig';
 
 interface WelcomeEmailTemplate {
   subject: string;
@@ -36,10 +37,15 @@ export default function AdminSettingsPage() {
   const [isSavingAutoApprove, setIsSavingAutoApprove] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Manual Payment Gateways State
+  const [paymentConfig, setPaymentConfig] = useState<PaymentMethodsConfig>(DEFAULT_PAYMENT_CONFIG);
+  const [isSavingPayments, setIsSavingPayments] = useState<boolean>(false);
+
   // Email Template State
   const [emailTemplate, setEmailTemplate] = useState<WelcomeEmailTemplate>(DEFAULT_WELCOME_TEMPLATE);
   const [templateTab, setTemplateTab] = useState<'edit' | 'preview'>('edit');
   const [isSavingTemplate, setIsSavingTemplate] = useState<boolean>(false);
+
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -88,12 +94,36 @@ export default function AdminSettingsPage() {
             ...parsed,
           });
         }
+
+        // 4. Load Dynamic Payment Gateways Configuration
+        const { data: payData } = await supabase
+          .from('platform_settings')
+          .select('setting_value')
+          .eq('setting_key', 'payment_methods_config')
+          .maybeSingle();
+
+        if (payData?.setting_value) {
+          const parsed = typeof payData.setting_value === 'string'
+            ? JSON.parse(payData.setting_value)
+            : payData.setting_value;
+          setPaymentConfig({
+            wallets: {
+              ...DEFAULT_PAYMENT_CONFIG.wallets,
+              ...(parsed.wallets || {}),
+            },
+            instapay: {
+              ...DEFAULT_PAYMENT_CONFIG.instapay,
+              ...(parsed.instapay || {}),
+            },
+          });
+        }
       } catch (err) {
         console.warn('Could not load settings from Supabase:', err);
       } finally {
         setIsLoadingSetting(false);
       }
     }
+
 
     loadSettings();
   }, []);
@@ -225,6 +255,73 @@ export default function AdminSettingsPage() {
     showToast('🔄 تمت استعادة القالب الافتراضي (اضغط حفظ لتأكيد التغيير)');
   };
 
+  const handleSavePaymentConfig = async (overrideConfig?: PaymentMethodsConfig) => {
+    setIsSavingPayments(true);
+    const configToSave = overrideConfig || paymentConfig;
+    try {
+      const { error } = await supabase
+        .from('platform_settings')
+        .upsert(
+          {
+            setting_key: 'payment_methods_config',
+            setting_value: configToSave,
+            description: 'Dynamic configuration for manual payment methods (E-Wallets and InstaPay)',
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'setting_key' }
+        );
+
+      if (error) {
+        const { error: updateErr } = await supabase
+          .from('platform_settings')
+          .update({
+            setting_value: configToSave,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('setting_key', 'payment_methods_config');
+
+        if (updateErr) throw updateErr;
+      }
+
+      showToast('✅ تم حفظ إعدادات بوابات الدفع اليدوية بنجاح');
+    } catch (err) {
+      console.error('Failed to save payment methods config:', err);
+      showToast('❌ حدث خطأ أثناء حفظ إعدادات بوابات الدفع');
+    } finally {
+      setIsSavingPayments(false);
+    }
+  };
+
+  const handleToggleWallet = (isActive: boolean) => {
+    const updated: PaymentMethodsConfig = {
+      ...paymentConfig,
+      wallets: {
+        ...paymentConfig.wallets,
+        isActive,
+      },
+    };
+    setPaymentConfig(updated);
+    handleSavePaymentConfig(updated);
+  };
+
+  const handleToggleInstapay = (isActive: boolean) => {
+    const updated: PaymentMethodsConfig = {
+      ...paymentConfig,
+      instapay: {
+        ...paymentConfig.instapay,
+        isActive,
+      },
+    };
+    setPaymentConfig(updated);
+    handleSavePaymentConfig(updated);
+  };
+
+  const handleResetPayments = () => {
+    setPaymentConfig(DEFAULT_PAYMENT_CONFIG);
+    handleSavePaymentConfig(DEFAULT_PAYMENT_CONFIG);
+  };
+
+
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
       <AdminSidebar />
@@ -331,6 +428,244 @@ export default function AdminSettingsPage() {
                   />
                   <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
                 </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Manual Payment Gateways Configuration Section */}
+        <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/90 p-6 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold mb-1.5">
+                <span>💳 البوابات اليدوية والمعاملات المالية</span>
+              </div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <span>إعدادات بوابات الدفع اليدوية (Manual Payment Gateways)</span>
+              </h3>
+              <p className="text-xs text-gray-400 mt-1">
+                إدارة أرقام وعناوين التحويل المباشر المعروضة للمزوّدين لشحن المحفظة (فودافون كاش، محافظ المحمول، وإنستاباي).
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleResetPayments}
+                disabled={isSavingPayments}
+                className="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition"
+              >
+                استعادة الافتراضي
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSavePaymentConfig()}
+                disabled={isSavingPayments}
+                className="px-5 py-2 rounded-xl bg-gradient-to-l from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {isSavingPayments ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>جاري الحفظ...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>💾</span>
+                    <span>حفظ إعدادات بوابات الدفع</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* E-Wallets Card */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-5 space-y-4 hover:border-slate-700 transition">
+              {/* Card Header & Master Toggle */}
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">📱</span>
+                    <span className="font-bold text-sm text-white">المحافظ الإلكترونية (E-Wallets)</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">فودافون كاش، أورنج كاش، اتصالات كاش، وي باي</p>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                    paymentConfig.wallets.isActive
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                  }`}>
+                    {paymentConfig.wallets.isActive ? 'مفعّلة' : 'معطّلة'}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={paymentConfig.wallets.isActive}
+                      disabled={isSavingPayments}
+                      onChange={(e) => handleToggleWallet(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Supported Network Badges */}
+              <div className="flex items-center gap-2 flex-wrap pt-1">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/15 border border-red-500/30 text-red-400">
+                  Vodafone Cash
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                  Etisalat Cash
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/15 border border-orange-500/30 text-orange-400">
+                  Orange Money
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/15 border border-purple-500/30 text-purple-400">
+                  WE Pay
+                </span>
+              </div>
+
+              {/* Inputs */}
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    رقم محفظة التحويل (Wallet Number)
+                  </label>
+                  <input
+                    type="text"
+                    dir="ltr"
+                    value={paymentConfig.wallets.number}
+                    onChange={(e) =>
+                      setPaymentConfig({
+                        ...paymentConfig,
+                        wallets: { ...paymentConfig.wallets, number: e.target.value.trim() },
+                      })
+                    }
+                    placeholder="01147554019"
+                    className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs text-white font-mono font-bold focus:outline-none focus:border-cyan-400 text-left"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">الرقم الذي سيقوم المزود بتحويل مبلغ الشحن إليه عبر أي محفظة إلكترونية.</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    الشبكات المدعومة / ملاحظة التوجيه
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentConfig.wallets.networks}
+                    onChange={(e) =>
+                      setPaymentConfig({
+                        ...paymentConfig,
+                        wallets: { ...paymentConfig.wallets, networks: e.target.value },
+                      })
+                    }
+                    placeholder="Vodafone, Etisalat, Orange, WE"
+                    className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* InstaPay Card */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-5 space-y-4 hover:border-slate-700 transition">
+              {/* Card Header & Master Toggle */}
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg text-purple-400">⚡</span>
+                    <span className="font-bold text-sm text-white">إنستاباي (InstaPay IPN)</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">التحويل اللحظي المباشر عبر البنك المركزي المصري</p>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                    paymentConfig.instapay.isActive
+                      ? 'bg-purple-500/10 border-purple-500/30 text-purple-400'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                  }`}>
+                    {paymentConfig.instapay.isActive ? 'مفعّل' : 'معطّل'}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={paymentConfig.instapay.isActive}
+                      disabled={isSavingPayments}
+                      onChange={(e) => handleToggleInstapay(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* InstaPay Branding Pill */}
+              <div className="flex items-center gap-2 pt-1">
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/15 border border-purple-500/40 text-purple-300">
+                  Instant Payment Network (IPN)
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">
+                  يدعم التحويل من كافة البنوك المصرية
+                </span>
+              </div>
+
+              {/* Inputs */}
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                    عنوان الدفع اللحظي (InstaPay Handle / Address)
+                  </label>
+                  <input
+                    type="text"
+                    dir="ltr"
+                    value={paymentConfig.instapay.handle}
+                    onChange={(e) =>
+                      setPaymentConfig({
+                        ...paymentConfig,
+                        instapay: { ...paymentConfig.instapay, handle: e.target.value.trim() },
+                      })
+                    }
+                    placeholder="ahmed.elsayed.74@instapay"
+                    className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs text-purple-300 font-mono font-bold focus:outline-none focus:border-purple-400 text-left"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">المعرف الرسمي الذي يُدخل في خانة التحويل بتطبيق إنستاباي.</p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-300">
+                      رابط الدفع المباشر (InstaPay Direct Deep Link)
+                    </label>
+                    {paymentConfig.instapay.link && (
+                      <a
+                        href={paymentConfig.instapay.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] text-cyan-400 hover:text-cyan-300 underline font-medium"
+                      >
+                        اختبار الرابط ↗
+                      </a>
+                    )}
+                  </div>
+                  <input
+                    type="url"
+                    dir="ltr"
+                    value={paymentConfig.instapay.link}
+                    onChange={(e) =>
+                      setPaymentConfig({
+                        ...paymentConfig,
+                        instapay: { ...paymentConfig.instapay, link: e.target.value.trim() },
+                      })
+                    }
+                    placeholder="https://ipn.eg/S/..."
+                    className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs text-white font-mono focus:outline-none focus:border-purple-400 text-left"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">رابط مباشر يفتح تطبيق إنستاباي على هاتف المستخدم أو يولد QR للمسح من الديسكتوب.</p>
+                </div>
               </div>
             </div>
           </div>

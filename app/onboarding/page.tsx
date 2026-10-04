@@ -175,6 +175,79 @@ export default function OnboardingPage() {
     return () => clearInterval(interval);
   }, [resendCooldown]);
 
+  // Multi-tab and Realtime session listener while waiting for OTP or email verification
+  useEffect(() => {
+    if (authStep !== 'verify_otp') return;
+
+    let authChannel: BroadcastChannel | null = null;
+    let isMounted = true;
+
+    // 1. Listen via BroadcastChannel for multi-tab auth confirmation
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        authChannel = new BroadcastChannel('survsta_auth_channel');
+        authChannel.onmessage = async (msgEvent) => {
+          if (
+            msgEvent.data?.type === 'AUTH_STATE_CHANGED' ||
+            (msgEvent.data?.email && msgEvent.data.email.toLowerCase() === pendingEmail.toLowerCase())
+          ) {
+            const { data: sData } = await supabase.auth.getSession();
+            if (sData?.session?.user && isMounted) {
+              await finalizeAccountSetup(sData.session.user.id);
+            }
+          }
+        };
+      }
+    } catch {}
+
+    // 2. Real-time auth state listener on this tab
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (
+        session?.user &&
+        session.user.email?.toLowerCase() === pendingEmail.toLowerCase() &&
+        isMounted
+      ) {
+        await finalizeAccountSetup(session.user.id);
+      }
+    });
+
+    // 3. Periodic heartbeat polling check (every 3.5 seconds) to auto-detect if the user confirmed in another tab
+    const intervalId = setInterval(async () => {
+      if (!isMounted) return;
+      try {
+        const { data: sess } = await supabase.auth.getSession();
+        if (
+          sess?.session?.user &&
+          sess.session.user.email?.toLowerCase() === pendingEmail.toLowerCase()
+        ) {
+          clearInterval(intervalId);
+          await finalizeAccountSetup(sess.session.user.id);
+          return;
+        }
+
+        // Silent try to signIn with password if available
+        if (password && pendingEmail) {
+          const { data: signInRes, error: signInErr } = await supabase.auth.signInWithPassword({
+            email: pendingEmail,
+            password: password.trim(),
+          });
+          if (signInRes?.user && !signInErr) {
+            clearInterval(intervalId);
+            await finalizeAccountSetup(signInRes.user.id);
+          }
+        }
+      } catch {}
+    }, 3500);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+      authListener.subscription.unsubscribe();
+      if (authChannel) authChannel.close();
+    };
+  }, [authStep, pendingEmail, password]);
+
+
   const handlePhoneChange = (val: string) => {
     setPhoneNumber(val);
     if (syncWhatsApp) {
@@ -348,6 +421,7 @@ export default function OnboardingPage() {
       }
 
       // 4. Update session storage and cookies
+      const assignedRole = (selectedModules.includes('provider') || activeMods['provider']) ? 'provider' : 'client';
       if (typeof window !== 'undefined') {
         const storedUser = localStorage.getItem('SURVSTA_AUTH_USER');
         const parsed = storedUser ? JSON.parse(storedUser) : {};
@@ -358,31 +432,47 @@ export default function OnboardingPage() {
           email: activeEmail,
           phone: activePhone,
           whatsapp: activeWa,
+          role: assignedRole,
           active_modules: activeMods,
         };
         localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify(updated));
-        document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(activeMods))}; path=/; max-age=2592000`;
+        document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(activeMods))}; path=/; max-age=2592000; SameSite=Lax`;
+        document.cookie = `user_role=${assignedRole}; path=/; max-age=2592000; SameSite=Lax`;
         document.cookie = `survsta_session=${encodeURIComponent(JSON.stringify({
-          role: selectedModules.includes('provider') ? 'provider' : 'client',
+          id: userId || parsed.id,
+          role: assignedRole,
           email: activeEmail,
           name: fullName.trim(),
           modules: activeMods,
-        }))}; path=/; max-age=2592000`;
+        }))}; path=/; max-age=2592000; SameSite=Lax`;
+
+        // Broadcast session change to all other open tabs (e.g., Navbar)
+        try {
+          if ('BroadcastChannel' in window) {
+            const bc = new BroadcastChannel('survsta_auth_channel');
+            bc.postMessage({ type: 'AUTH_STATE_CHANGED', email: activeEmail });
+            bc.close();
+          }
+        } catch {}
       }
 
-      router.push('/dashboard');
+      const destination = assignedRole === 'provider' ? '/provider/dashboard' : '/dashboard';
+      router.push(destination);
     } catch (err: any) {
       console.error('[Onboarding finalize error]:', err);
+      const assignedRole = (selectedModules.includes('provider') || activeMods['provider']) ? 'provider' : 'client';
       if (typeof window !== 'undefined') {
-        document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(activeMods))}; path=/; max-age=2592000`;
+        document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(activeMods))}; path=/; max-age=2592000; SameSite=Lax`;
+        document.cookie = `user_role=${assignedRole}; path=/; max-age=2592000; SameSite=Lax`;
       }
-      router.push('/dashboard');
+      const destination = assignedRole === 'provider' ? '/provider/dashboard' : '/dashboard';
+      router.push(destination);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Verify Supabase Email OTP
+  // Verify Supabase Email OTP with Smart Fallback
   const handleVerifyOtp = async () => {
     if (!otpCode || otpCode.trim().length < 6) {
       setOtpError('يرجى إدخال رمز التحقق المكون من 6 أرقام.');
@@ -409,7 +499,34 @@ export default function OnboardingPage() {
         });
       }
 
+      // 3. SMART FALLBACK: If token expired/consumed, check if user clicked the email link
       if (verifyRes.error) {
+        // Attempt sign-in with password (if user clicked link, email is confirmed and signIn succeeds)
+        if (password) {
+          try {
+            const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+              email: pendingEmail,
+              password: password.trim(),
+            });
+            if (signInData?.user?.id && !signInErr) {
+              await finalizeAccountSetup(signInData.user.id);
+              return;
+            }
+          } catch {}
+        }
+
+        // Check if an active confirmed session already exists
+        try {
+          const { data: curSession } = await supabase.auth.getSession();
+          if (
+            curSession?.session?.user &&
+            curSession.session.user.email?.toLowerCase() === pendingEmail.toLowerCase()
+          ) {
+            await finalizeAccountSetup(curSession.session.user.id);
+            return;
+          }
+        } catch {}
+
         throw new Error(verifyRes.error.message || 'رمز التحقق غير صحيح أو منتهي الصلاحية.');
       }
 
@@ -418,7 +535,11 @@ export default function OnboardingPage() {
     } catch (err: any) {
       const msg = String(err?.message || '');
       if (msg.includes('expired') || msg.includes('Token has expired')) {
-        setOtpError('انتهت صلاحية رمز التحقق. يرجى طلب رمز جديد بالضغط على إعادة إرسال الرمز.');
+        setOtpError('انتهت صلاحية الرمز. إذا قمت بالنقر على الرابط في رسالة البريد، جاري المتابعة تلقائياً...');
+        // Auto retry check after brief delay
+        setTimeout(() => {
+          handleCheckLinkVerification();
+        }, 800);
       } else if (msg.includes('invalid') || msg.includes('Invalid')) {
         setOtpError('رمز التحقق غير صحيح. يرجى مراجعة بريدك الإلكتروني وإعادة المحاولة.');
       } else {
@@ -436,7 +557,10 @@ export default function OnboardingPage() {
 
     try {
       const { data: sessionData } = await supabase.auth.getSession();
-      if (sessionData?.session?.user) {
+      if (
+        sessionData?.session?.user &&
+        sessionData.session.user.email?.toLowerCase() === pendingEmail.toLowerCase()
+      ) {
         await finalizeAccountSetup(sessionData.session.user.id);
         return;
       }
