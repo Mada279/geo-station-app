@@ -130,13 +130,29 @@ export default function ProviderRegistrationWizard() {
           localStorage.setItem('SURVSTA_PROVIDER_CRED_' + cleanEmail, formData.password);
         }
 
-        // 3. Insert record into providers table with status 'pending'
+        // 3. Check auto_approve_providers setting
+        let isAutoApproved = false;
+        try {
+          const { data: autoApproveRow } = await supabase
+            .from('platform_settings')
+            .select('setting_value')
+            .eq('setting_key', 'auto_approve_providers')
+            .maybeSingle();
+
+          if (autoApproveRow && autoApproveRow.setting_value !== undefined) {
+            isAutoApproved = autoApproveRow.setting_value === true || autoApproveRow.setting_value === 'true';
+          }
+        } catch (setEx) {
+          console.warn('[Wizard] Error checking auto_approve_providers:', setEx);
+        }
+
+        // 4. Insert record into providers table
         const insertPayload: Record<string, any> = {
           name: displayName,
           email: cleanEmail,
           phone: formData.phone.trim(),
           location: fullLocation,
-          status: 'pending',
+          status: isAutoApproved ? 'approved' : 'pending',
           logo_url: formData.equipmentPhotos.length > 0 ? formData.equipmentPhotos[0] : null,
           equipment_photos: formData.equipmentPhotos,
         };
@@ -151,7 +167,7 @@ export default function ProviderRegistrationWizard() {
             email: cleanEmail,
             phone: formData.phone.trim(),
             location: fullLocation,
-            status: 'pending',
+            status: isAutoApproved ? 'approved' : 'pending',
           };
           const res = await supabase.from('providers').insert([basicPayload]);
           error = res.error;
@@ -161,6 +177,22 @@ export default function ProviderRegistrationWizard() {
           console.error('[Supabase Registration Error]', error);
           setSubmitError('تعذر إرسال البيانات إلى السحابة: ' + (error.message || 'يرجى المحاولة لاحقاً'));
           return;
+        }
+
+        // 5. Fire official welcome email via Resend gateway
+        try {
+          await fetch('/api/admin/notify-provider', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              providerEmail: cleanEmail,
+              providerName: displayName,
+              actionType: isAutoApproved ? 'approved' : 'welcome',
+              userType: 'provider',
+            }),
+          });
+        } catch (mailEx) {
+          console.warn('[Wizard] Failed to dispatch registration welcome email:', mailEx);
         }
 
         setStep('success');

@@ -4,11 +4,42 @@ import React, { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
 
+interface WelcomeEmailTemplate {
+  subject: string;
+  badge_text: string;
+  badge_bg: string;
+  title: string;
+  main_message: string;
+  cta_text: string;
+  cta_url: string;
+  secondary_cta_text: string;
+  secondary_cta_url: string;
+}
+
+const DEFAULT_WELCOME_TEMPLATE: WelcomeEmailTemplate = {
+  subject: '🌟 أهلاً بك في منصة Survsta | بوابتك الرقمية المتكاملة لقطاع المساحة والجيوماتكس',
+  badge_text: 'شريك معتمد جديد',
+  badge_bg: '#0284c7',
+  title: 'أهلاً ومرحباً بك معنا، {recipient_name} 👋',
+  main_message: `يسعدنا ويشرفنا انضمامك إلى منصة Survsta — المنظومة الرقمية الأولى والأشمل في مصر المتخصصة في خدمات وأجهزة المساحة والجيوماتكس.\n\nابدأ الآن بعرض معداتك وأجهزتك المساحية لتصل إلى آلاف المهندسين وشركات المقاولات الباحثة عن أجهزة للإيجار يومياً.`,
+  cta_text: '➕ أضف معداتك وأجهزتك المساحية الآن',
+  cta_url: 'https://survsta.com/provider/dashboard#equipment',
+  secondary_cta_text: 'الدخول إلى لوحة التحكم',
+  secondary_cta_url: 'https://survsta.com/provider/dashboard',
+};
+
 export default function AdminSettingsPage() {
   const [showEarlyAccessCTA, setShowEarlyAccessCTA] = useState<boolean>(true);
+  const [autoApproveProviders, setAutoApproveProviders] = useState<boolean>(false);
   const [isLoadingSetting, setIsLoadingSetting] = useState<boolean>(true);
   const [isSavingToggle, setIsSavingToggle] = useState<boolean>(false);
+  const [isSavingAutoApprove, setIsSavingAutoApprove] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Email Template State
+  const [emailTemplate, setEmailTemplate] = useState<WelcomeEmailTemplate>(DEFAULT_WELCOME_TEMPLATE);
+  const [templateTab, setTemplateTab] = useState<'edit' | 'preview'>('edit');
+  const [isSavingTemplate, setIsSavingTemplate] = useState<boolean>(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -19,18 +50,46 @@ export default function AdminSettingsPage() {
     async function loadSettings() {
       setIsLoadingSetting(true);
       try {
-        const { data, error } = await supabase
+        // 1. Load Early Access CTA setting
+        const { data: eaData } = await supabase
           .from('platform_settings')
           .select('setting_value')
           .eq('setting_key', 'show_provider_early_access_cta')
           .maybeSingle();
 
-        if (data && data.setting_value !== undefined && data.setting_value !== null) {
-          // setting_value could be boolean true/false or string 'true'/'false'
-          setShowEarlyAccessCTA(data.setting_value === true || data.setting_value === 'true');
+        if (eaData && eaData.setting_value !== undefined && eaData.setting_value !== null) {
+          setShowEarlyAccessCTA(eaData.setting_value === true || eaData.setting_value === 'true');
+        }
+
+        // 2. Load Auto-Approve Providers setting
+        const { data: autoData } = await supabase
+          .from('platform_settings')
+          .select('setting_value')
+          .eq('setting_key', 'auto_approve_providers')
+          .maybeSingle();
+
+        if (autoData && autoData.setting_value !== undefined && autoData.setting_value !== null) {
+          setAutoApproveProviders(autoData.setting_value === true || autoData.setting_value === 'true');
+        }
+
+        // 3. Load Dynamic Welcome Email Template
+        const { data: tplData } = await supabase
+          .from('platform_settings')
+          .select('setting_value')
+          .eq('setting_key', 'template_welcome_email')
+          .maybeSingle();
+
+        if (tplData?.setting_value) {
+          const parsed = typeof tplData.setting_value === 'string'
+            ? JSON.parse(tplData.setting_value)
+            : tplData.setting_value;
+          setEmailTemplate({
+            ...DEFAULT_WELCOME_TEMPLATE,
+            ...parsed,
+          });
         }
       } catch (err) {
-        console.warn('Could not load early access setting, defaulting to true:', err);
+        console.warn('Could not load settings from Supabase:', err);
       } finally {
         setIsLoadingSetting(false);
       }
@@ -57,7 +116,6 @@ export default function AdminSettingsPage() {
         );
 
       if (error) {
-        // Fallback update if upsert failed due to missing RLS or constraint
         const { error: updateErr } = await supabase
           .from('platform_settings')
           .update({
@@ -75,12 +133,96 @@ export default function AdminSettingsPage() {
           : '⚠️ تم إخفاء قسم التسجيل المبكر للمكاتب من الصفحة الرئيسية'
       );
     } catch (err) {
-      console.error('Failed to update platform setting:', err);
-      setShowEarlyAccessCTA(!nextValue); // revert state
+      console.error('Failed to update early access platform setting:', err);
+      setShowEarlyAccessCTA(!nextValue);
       showToast('❌ حدث خطأ أثناء حفظ الإعداد، يرجى المحاولة لاحقاً');
     } finally {
       setIsSavingToggle(false);
     }
+  };
+
+  const handleToggleAutoApprove = async (nextValue: boolean) => {
+    setIsSavingAutoApprove(true);
+    setAutoApproveProviders(nextValue);
+
+    try {
+      const { error } = await supabase
+        .from('platform_settings')
+        .upsert(
+          {
+            setting_key: 'auto_approve_providers',
+            setting_value: nextValue,
+            description: 'Toggle automatic approval of newly registered providers',
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'setting_key' }
+        );
+
+      if (error) {
+        const { error: updateErr } = await supabase
+          .from('platform_settings')
+          .update({
+            setting_value: nextValue,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('setting_key', 'auto_approve_providers');
+
+        if (updateErr) throw updateErr;
+      }
+
+      showToast(
+        nextValue
+          ? '⚡ تم تفعيل الاعتماد التلقائي للمزوّدين (الموافقة الفورية عند التسجيل)'
+          : '🛡️ تم تفعيل المراجعة اليدوية (يتطلب موافقة الإدارة من طابور الاعتمادات)'
+      );
+    } catch (err) {
+      console.error('Failed to update auto approve setting:', err);
+      setAutoApproveProviders(!nextValue);
+      showToast('❌ حدث خطأ أثناء حفظ إعداد الاعتماد التلقائي');
+    } finally {
+      setIsSavingAutoApprove(false);
+    }
+  };
+
+  const handleSaveEmailTemplate = async () => {
+    setIsSavingTemplate(true);
+    try {
+      const { error } = await supabase
+        .from('platform_settings')
+        .upsert(
+          {
+            setting_key: 'template_welcome_email',
+            setting_value: emailTemplate,
+            description: 'Dynamic welcome email template for newly registered providers',
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'setting_key' }
+        );
+
+      if (error) {
+        const { error: updateErr } = await supabase
+          .from('platform_settings')
+          .update({
+            setting_value: emailTemplate,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('setting_key', 'template_welcome_email');
+
+        if (updateErr) throw updateErr;
+      }
+
+      showToast('✅ تم حفظ قالب إيميل الترحيب وتحديث نصوص الـ CTA بنجاح');
+    } catch (err) {
+      console.error('Failed to save email template:', err);
+      showToast('❌ حدث خطأ أثناء حفظ قالب الإيميل');
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  };
+
+  const handleResetTemplate = () => {
+    setEmailTemplate(DEFAULT_WELCOME_TEMPLATE);
+    showToast('🔄 تمت استعادة القالب الافتراضي (اضغط حفظ لتأكيد التغيير)');
   };
 
   return (
@@ -94,49 +236,10 @@ export default function AdminSettingsPage() {
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[11px] font-bold mb-2">
               <span>⚙️ تفضيلات المنصة والربط التقني</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">إعدادات النظام</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">إعدادات النظام والاعتمادات</h1>
             <p className="text-xs sm:text-sm text-gray-400 mt-1">
-              تهيئة وتخصيص سياسات المنصة، تفعيل الأقسام الديناميكية، وبوابات الإشعارات.
+              تهيئة سياسات المنصة، تفعيل الاعتماد التلقائي للمزوّدين، وتخصيص قوالب الإشعارات الرسمية.
             </p>
-          </div>
-        </div>
-
-        {/* Connection & Health Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
-              <span>قاعدة بيانات Supabase</span>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            </div>
-            <div className="text-xl font-bold text-emerald-400">متصلة (Live)</div>
-            <div className="text-[11px] text-gray-400 mt-1 font-mono">Latency: 38ms</div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
-              <span>بوابة الدفع والفوترة</span>
-              <span className="p-1 rounded-md bg-cyan-500/10 text-cyan-400 text-xs">💳</span>
-            </div>
-            <div className="text-xl font-bold text-white">نشطة</div>
-            <div className="text-[11px] text-cyan-300 mt-1">الجنيه المصري (EGP)</div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
-              <span>خدمة الرسائل SMS OTP</span>
-              <span className="p-1 rounded-md bg-purple-500/10 text-purple-400 text-xs">📱</span>
-            </div>
-            <div className="text-xl font-bold text-white">مفعلة</div>
-            <div className="text-[11px] text-purple-300 mt-1">رصيد الرسائل: 8,420</div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
-              <span>النسخ الاحتياطي التلقائي</span>
-              <span className="p-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs">🛡️</span>
-            </div>
-            <div className="text-xl font-bold text-emerald-400">يوميًا (Daily)</div>
-            <div className="text-[11px] text-gray-400 mt-1">آخر نسخة: اليوم 03:00 ص</div>
           </div>
         </div>
 
@@ -145,7 +248,7 @@ export default function AdminSettingsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-800 pb-3">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <span>🚀</span>
-              <span>التحكم في أقسام وميزات الصفحة الرئيسية (Homepage Feature Toggles)</span>
+              <span>التحكم في سياسات التسجيل والظهور (Platform Feature Toggles)</span>
             </h3>
             <span className="text-[11px] text-cyan-400 font-medium">
               تحديث فوري دون الحاجة لإعادة نشر الكود
@@ -153,6 +256,45 @@ export default function AdminSettingsPage() {
           </div>
 
           <div className="space-y-4">
+            {/* Auto-Approval Toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-cyan-500/30 transition">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-white text-sm">
+                    ⚡ الاعتماد التلقائي الفوري للمزوّدين (Auto-Approve Providers)
+                  </span>
+                  {autoApproveProviders ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                      مفعل (اعتماد فوري)
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                      مراجعة يدوية (طابور الاعتمادات)
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
+                  عند التفعيل، يتم اعتماد حساب أي مزوّد جديد فور تسجيله بنجاح وتفعيل كتالوجه وإرسال إيميل الترحيب الرسمي فوراً بدون انتظار موافقة الإدارة اليدوية.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                {isSavingAutoApprove && (
+                  <span className="text-xs text-cyan-400 animate-pulse">جاري الحفظ...</span>
+                )}
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={autoApproveProviders}
+                    disabled={isLoadingSetting || isSavingAutoApprove}
+                    onChange={(e) => handleToggleAutoApprove(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+              </div>
+            </div>
+
             {/* Early Access CTA Toggle */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-cyan-500/30 transition">
               <div className="space-y-1">
@@ -194,84 +336,233 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        {/* Configuration Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* General Platform Settings */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-white border-b border-slate-800/50 pb-3 flex items-center gap-2">
-              <span>🌐</span>
-              <span>الإعدادات العامة وسياسات التأجير</span>
-            </h3>
-            <div className="space-y-3 text-xs">
+        {/* Dynamic Welcome Email Template Editor */}
+        <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/90 p-6 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <span>✉️</span>
+                <span>تخصيص قالب إيميل الترحيب الرسمي للمزوّدين (Welcome Email Template)</span>
+              </h3>
+              <p className="text-xs text-gray-400 mt-1">
+                تعديل رسالة الترحيب التي تصل للمزود عند اعتماده، وتخصيص زر الدعوة لإضافة الأجهزة (Add Equipment CTA).
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setTemplateTab('edit')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  templateTab === 'edit'
+                    ? 'bg-cyan-500 text-slate-950 font-black'
+                    : 'bg-slate-800 text-slate-300 hover:text-white'
+                }`}
+              >
+                ✏️ تحرير القالب
+              </button>
+              <button
+                type="button"
+                onClick={() => setTemplateTab('preview')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                  templateTab === 'preview'
+                    ? 'bg-cyan-500 text-slate-950 font-black'
+                    : 'bg-slate-800 text-slate-300 hover:text-white'
+                }`}
+              >
+                👁️ معاينة مباشرة
+              </button>
+            </div>
+          </div>
+
+          {templateTab === 'edit' ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-semibold text-gray-300 mb-1.5">عنوان الرسالة (Email Subject)</label>
+                  <input
+                    type="text"
+                    value={emailTemplate.subject}
+                    onChange={(e) => setEmailTemplate({ ...emailTemplate, subject: e.target.value })}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1.5">شارة الترحيب (Badge Text)</label>
+                  <input
+                    type="text"
+                    value={emailTemplate.badge_text}
+                    onChange={(e) => setEmailTemplate({ ...emailTemplate, badge_text: e.target.value })}
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-gray-400 mb-1 font-semibold">اسم المنصة الرسمي</label>
+                <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                  عنوان الترحيب الرئيسي (Greeting Title)
+                  <span className="text-[11px] text-cyan-400 font-normal mr-2">
+                    (يمكنك استخدام المتغير: {'{recipient_name}'})
+                  </span>
+                </label>
                 <input
                   type="text"
-                  defaultValue="Survsta — منصة الأجهزة والخدمات المساحية"
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400"
+                  value={emailTemplate.title}
+                  onChange={(e) => setEmailTemplate({ ...emailTemplate, title: e.target.value })}
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400"
                 />
               </div>
-              <div>
-                <label className="block text-gray-400 mb-1 font-semibold">الحد الأدنى لمدة حجز الأجهزة</label>
-                <select className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none">
-                  <option>يوم واحد (24 ساعة)</option>
-                  <option>3 أيام</option>
-                  <option>أسبوع كامل</option>
-                </select>
-              </div>
-              <div className="pt-2 flex items-center justify-between border-t border-slate-800/50">
-                <div>
-                  <div className="font-bold text-white">إلزامية شهادة المعايرة السنوية</div>
-                  <div className="text-gray-400 text-[11px]">منع إدراج أي جهاز لا يحمل شهادة معايرة سارية</div>
-                </div>
-                <input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-cyan-500 cursor-pointer" />
-              </div>
-            </div>
-          </div>
 
-          {/* Security & Sessions */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-white border-b border-slate-800/50 pb-3 flex items-center gap-2">
-              <span>🔒</span>
-              <span>أمان المشرفين وإدارة الجلسات</span>
-            </h3>
-            <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-gray-400 mb-1 font-semibold">مهلة انتهاء الجلسة عند عدم النشاط</label>
-                <select className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none">
-                  <option>ساعتان (موصى به)</option>
-                  <option>4 ساعات</option>
-                  <option>8 ساعات</option>
-                  <option>24 ساعة</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-gray-400 mb-1 font-semibold">البريد الإلكتروني للإشعارات العاجلة</label>
-                <input
-                  type="email"
-                  defaultValue="ahmed@survsta.com"
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400"
+                <label className="block text-xs font-semibold text-gray-300 mb-1.5">نص الرسالة الترحيبية (Message Body)</label>
+                <textarea
+                  rows={4}
+                  value={emailTemplate.main_message}
+                  onChange={(e) => setEmailTemplate({ ...emailTemplate, main_message: e.target.value })}
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 p-3.5 text-xs text-white focus:outline-none focus:border-cyan-400 leading-relaxed"
                 />
               </div>
-              <div className="pt-2 flex items-center justify-between border-t border-slate-800/50">
-                <div>
-                  <div className="font-bold text-white">تسجيل التدقيق الصارم (Strict Audit)</div>
-                  <div className="text-gray-400 text-[11px]">حفظ كافة استعلامات القراءة والكتابة وعناوين IP</div>
+
+              {/* CTAs Section */}
+              <div className="p-4 rounded-xl border border-cyan-500/20 bg-slate-950/80 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-cyan-300">🎯 أزرار الإجراء السريع (Call To Action - CTA)</h4>
+                  <span className="text-[10px] text-gray-400">يوجه المزود مباشرة لإضافة معداته</span>
                 </div>
-                <input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-cyan-500 cursor-pointer" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 mb-1.5">نص الزر الرئيسي (Primary CTA)</label>
+                    <input
+                      type="text"
+                      value={emailTemplate.cta_text}
+                      onChange={(e) => setEmailTemplate({ ...emailTemplate, cta_text: e.target.value })}
+                      placeholder="➕ أضف معداتك وأجهزتك المساحية الآن"
+                      className="w-full rounded-xl border border-cyan-500/40 bg-slate-900 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-300 font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 mb-1.5">رابط الزر الرئيسي (Target URL)</label>
+                    <input
+                      type="text"
+                      dir="ltr"
+                      value={emailTemplate.cta_url}
+                      onChange={(e) => setEmailTemplate({ ...emailTemplate, cta_url: e.target.value })}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs text-cyan-300 focus:outline-none focus:border-cyan-300 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 mb-1.5">نص الزر الثانوي (Secondary Link)</label>
+                    <input
+                      type="text"
+                      value={emailTemplate.secondary_cta_text}
+                      onChange={(e) => setEmailTemplate({ ...emailTemplate, secondary_cta_text: e.target.value })}
+                      placeholder="الدخول إلى لوحة التحكم"
+                      className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs text-gray-300 focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 mb-1.5">رابط الزر الثانوي</label>
+                    <input
+                      type="text"
+                      dir="ltr"
+                      value={emailTemplate.secondary_cta_url}
+                      onChange={(e) => setEmailTemplate({ ...emailTemplate, secondary_cta_url: e.target.value })}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs text-gray-400 focus:outline-none focus:border-cyan-400 font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="button"
+                  onClick={handleResetTemplate}
+                  className="px-4 py-2 rounded-xl border border-slate-700 text-xs font-semibold text-gray-400 hover:text-white hover:bg-slate-800 transition"
+                >
+                  استعادة القالب الافتراضي
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isSavingTemplate}
+                  onClick={handleSaveEmailTemplate}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-l from-cyan-500 to-sky-500 text-xs font-black text-slate-950 shadow-lg shadow-cyan-500/20 hover:brightness-110 transition disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSavingTemplate ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
+                      <span>جاري حفظ القالب...</span>
+                    </>
+                  ) : (
+                    <span>💾 حفظ وتطبيق قالب الإيميل</span>
+                  )}
+                </button>
               </div>
             </div>
-          </div>
-        </div>
+          ) : (
+            /* Live Email Preview */
+            <div className="rounded-2xl border border-slate-700 bg-slate-950 p-6 flex justify-center">
+              <div className="w-full max-w-xl bg-white text-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 text-right" style={{ direction: 'rtl' }}>
+                <div className="bg-[#081933] p-6 text-center border-b-2 border-cyan-500">
+                  <div className="text-xl font-black text-white">
+                    Surv<span className="text-cyan-400">sta</span>.com
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-1">
+                    المنصة الرقمية المتخصصة لقطاع المساحة والجيوماتكس
+                  </div>
+                </div>
 
-        <div className="flex justify-end pt-2">
-          <button
-            type="button"
-            onClick={() => showToast('✅ تم حفظ كافة إعدادات النظام وتحديث المتغيرات بنجاح')}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-l from-cyan-500 to-sky-500 text-xs font-black text-slate-950 shadow-lg shadow-cyan-500/20 hover:brightness-110 transition"
-          >
-            حفظ إعدادات النظام
-          </button>
+                <div className="p-6 sm:p-8 space-y-4">
+                  <div>
+                    <span className="inline-block bg-sky-600 text-white text-[11px] font-bold px-3 py-1 rounded-full">
+                      {emailTemplate.badge_text || 'شريك معتمد جديد'}
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg font-bold text-slate-900">
+                    {(emailTemplate.title || '').replace('{recipient_name}', 'م. أحمد مهدي')}
+                  </h3>
+
+                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                    {(emailTemplate.main_message || '').replace('{recipient_name}', 'م. أحمد مهدي')}
+                  </div>
+
+                  <div className="py-6 text-center space-y-2 border-t border-b border-slate-100 my-4">
+                    <a
+                      href="#"
+                      onClick={(e) => e.preventDefault()}
+                      className="inline-block bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-sm px-7 py-3 rounded-xl shadow-md transition"
+                    >
+                      {emailTemplate.cta_text || '➕ أضف معداتك وأجهزتك المساحية الآن'} ←
+                    </a>
+                    {emailTemplate.secondary_cta_url && (
+                      <div>
+                        <a
+                          href="#"
+                          onClick={(e) => e.preventDefault()}
+                          className="text-xs text-slate-500 hover:text-slate-800 underline"
+                        >
+                          {emailTemplate.secondary_cta_text || 'الدخول إلى لوحة التحكم'}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="text-[11px] text-slate-400 pt-2">
+                    هذه الرسالة آلية من إدارة منصة Survsta لشركائها المعتمدين في جمهورية مصر العربية.
+                  </p>
+                </div>
+
+                <div className="bg-slate-100 p-4 text-center text-[10px] text-slate-500 border-t border-slate-200">
+                  جميع الحقوق محفوظة © {new Date().getFullYear()} منصة Survsta
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Feedback Toast Notification */}
@@ -285,3 +576,4 @@ export default function AdminSettingsPage() {
     </div>
   );
 }
+

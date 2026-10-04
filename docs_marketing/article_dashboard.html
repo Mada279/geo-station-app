@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary Meta Tags -->
+  <title id="pageTitle">Survsta | سيرفستا - لوحة مقالات الـ SEO وسوق أجهزة المساحة</title>
+  <meta name="title" content="Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر" id="metaTitle">
+  <meta name="description" content="المنصة الرائدة لربط المهندسين والمقاولين بمزودي أجهزة Total Station و GPS RTK ومكاتب المساحة المعتمدة." id="metaDesc">
+  <link rel="canonical" href="https://survsta.com" id="canonicalLink">
+
+  <!-- Open Graph / Facebook / LinkedIn -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://survsta.com" id="ogUrl">
+  <meta property="og:title" content="Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر" id="ogTitle">
+  <meta property="og:description" content="المنصة الرائدة لربط المهندسين والمقاولين بمزودي أجهزة Total Station و GPS RTK ومكاتب المساحة المعتمدة." id="ogDesc">
+  <meta property="og:image" content="https://survsta.com/images/survsta-og-banner.jpg" id="ogImage">
+  <meta property="og:locale" content="ar_EG">
+  <meta property="og:site_name" content="Survsta | سيرفستا">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://survsta.com" id="twUrl">
+  <meta name="twitter:title" content="Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر" id="twTitle">
+  <meta name="twitter:description" content="المنصة الرائدة لربط المهندسين والمقاولين بمزودي أجهزة Total Station و GPS RTK ومكاتب المساحة المعتمدة." id="twDesc">
+  <meta name="twitter:image" content="https://survsta.com/images/survsta-og-banner.jpg" id="twImage">
+  
+  <!-- Google Fonts: Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            survsta: {
+              darkest: '#050D1A',
+              bg: '#08172E',
+              panel: '#0D2245',
+              panelLight: '#142E5C',
+              border: '#1E3E75',
+              cyan: '#00D2FF',
+              cyanHover: '#33DBFF',
+              gold: '#F4B400',
+              goldHover: '#FFC21A',
+              textMuted: '#94A3B8'
+            }
+          },
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Marked.js for Markdown Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- KaTeX for Geodetic Formulas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body);"></script>
+
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #061021;
+      color: #F8FAFC;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #08172E;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E3E75;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00D2FF;
+    }
+
+    /* Markdown Rendered Typography */
+    .prose-survsta h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #00D2FF;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+      border-bottom: 2px solid #1E3E75;
+      padding-bottom: 0.75rem;
+    }
+    .prose-survsta h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #F4B400;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      position: relative;
+      padding-right: 0.85rem;
+    }
+    .prose-survsta h2::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 15%;
+      height: 70%;
+      width: 4px;
+      background: #F4B400;
+      border-radius: 2px;
+    }
+    .prose-survsta h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #38BDF8;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .prose-survsta p {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: #E2E8F0;
+      margin-bottom: 1.25rem;
+    }
+    .prose-survsta ul, .prose-survsta ol {
+      margin-right: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.02rem;
+      line-height: 1.8;
+      color: #CBD5E1;
+    }
+    .prose-survsta ul {
+      list-style-type: disc;
+    }
+    .prose-survsta ol {
+      list-style-type: decimal;
+    }
+    .prose-survsta li {
+      margin-bottom: 0.5rem;
+    }
+    .prose-survsta blockquote {
+      border-right: 4px solid #00D2FF;
+      background: rgba(0, 210, 255, 0.06);
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .prose-survsta blockquote p {
+      margin-bottom: 0.5rem;
+      color: #F1F5F9;
+    }
+    .prose-survsta code {
+      background: #11254A;
+      color: #38BDF8;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .prose-survsta hr {
+      border-color: #1E3E75;
+      margin: 2rem 0;
+    }
+
+    /* Active Card Highlight */
+    .article-card.active {
+      background: linear-gradient(90deg, rgba(0, 210, 255, 0.15) 0%, rgba(13, 34, 69, 1) 100%);
+      border-right: 4px solid #00D2FF;
+      box-shadow: 0 4px 20px rgba(0, 210, 255, 0.12);
+    }
+
+    /* ========================================================= */
+    /* CLEAN PRINT & PDF EXPORT STYLES (@media print)            */
+    /* ========================================================= */
+    @media print {
+      @page {
+        margin: 1.5cm;
+        size: A4 portrait;
+      }
+
+      /* Hide interactive web UI components */
+      header, 
+      #sidebar, 
+      #actionToolbar, 
+      #socialShareCard, 
+      #toast, 
+      #rawContentArea, 
+      #toggleMobileSidebarBtn,
+      #headerTargetUrlBtn {
+        display: none !important;
+      }
+
+      /* Reset body & reading pane */
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-size: 11pt !important;
+        line-height: 1.6 !important;
+      }
+
+      main {
+        overflow: visible !important;
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      .max-w-4xl {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      #articleHeader {
+        background: #ffffff !important;
+        border-bottom: 2pt solid #0f172a !important;
+        padding: 0 0 12pt 0 !important;
+        margin-bottom: 16pt !important;
+        box-shadow: none !important;
+      }
+
+      #headerArticleTitle {
+        color: #0b1e3d !important;
+        font-size: 20pt !important;
+        font-weight: 800 !important;
+        line-height: 1.3 !important;
+      }
+
+      #featuredImageContainer {
+        max-height: 240px !important;
+        border-radius: 8px !important;
+        margin-bottom: 16pt !important;
+        border: 1pt solid #cbd5e1 !important;
+      }
+
+      #featuredImageEl {
+        max-height: 240px !important;
+      }
+
+      .prose-survsta {
+        color: #0f172a !important;
+      }
+
+      .prose-survsta h1 {
+        display: none !important; /* Already rendered in header */
+      }
+
+      .prose-survsta h2 {
+        color: #b45309 !important;
+        font-size: 14pt !important;
+        font-weight: 700 !important;
+        margin-top: 18pt !important;
+        margin-bottom: 8pt !important;
+        border-bottom: 1pt solid #e2e8f0 !important;
+        padding-bottom: 4pt !important;
+        break-after: avoid;
+      }
+
+      .prose-survsta h2::before {
+        display: none !important;
+      }
+
+      .prose-survsta h3 {
+        color: #0369a1 !important;
+        font-size: 12pt !important;
+        break-after: avoid;
+      }
+
+      .prose-survsta p, .prose-survsta li {
+        color: #1e293b !important;
+        font-size: 10.5pt !important;
+        line-height: 1.7 !important;
+      }
+
+      .prose-survsta blockquote {
+        background: #f8fafc !important;
+        border-right: 3pt solid #0284c7 !important;
+        color: #0f172a !important;
+        padding: 8pt 12pt !important;
+        break-inside: avoid;
+      }
+
+      .prose-survsta blockquote p {
+        color: #0f172a !important;
+      }
+
+      .prose-survsta code {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        border: 1pt solid #e2e8f0 !important;
+      }
+
+      /* Print watermark header & footer */
+      #printWatermarkHeader {
+        display: flex !important;
+      }
+      #printWatermarkFooter {
+        display: flex !important;
+      }
+
+      table, figure, img, blockquote {
+        break-inside: avoid;
+      }
+    }
+  </style>
+
+  <!-- External offline data script -->
+  <script src="articles_data.js"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-[#061021]">
+
+  <!-- Top Navbar -->
+  <header class="bg-[#091B38] border-b border-[#1E3E75] sticky top-0 z-40 px-4 py-3 flex items-center justify-between shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00D2FF] to-[#F4B400] flex items-center justify-center font-black text-black text-xl shadow-md">
+        S
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-extrabold text-lg text-white tracking-wide">SURVSTA</h1>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-[#00D2FF]/20 text-[#00D2FF] font-semibold border border-[#00D2FF]/30">SEO Matrix</span>
+        </div>
+        <p class="text-xs text-survsta-textMuted font-medium">لوحة المراجعة والتحكم في الـ 100 مقال الحصري لمنصة سيرفستا</p>
+      </div>
+    </div>
+
+    <!-- Quick Stats & Actions in Header -->
+    <div class="flex items-center gap-4">
+      <div class="hidden md:flex items-center gap-3 bg-[#0D2245] px-4 py-1.5 rounded-lg border border-[#1E3E75]">
+        <span class="text-xs text-gray-400">إجمالي المقالات:</span>
+        <span id="totalStatsBadge" class="text-sm font-bold text-[#00D2FF]">100</span>
+        <span class="text-gray-600">|</span>
+        <span class="text-xs text-gray-400">P1 أولوية قصوى:</span>
+        <span id="p1StatsBadge" class="text-sm font-bold text-[#F4B400]">40</span>
+      </div>
+
+      <button id="toggleMobileSidebarBtn" class="md:hidden p-2 rounded-lg bg-[#0D2245] text-white border border-[#1E3E75]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- SIDEBAR: Articles List, Search, and Filters -->
+    <aside id="sidebar" class="w-full md:w-[380px] lg:w-[420px] bg-[#091A36] border-l border-[#1E3E75] flex flex-col flex-shrink-0 z-30 transition-all duration-300 md:relative absolute inset-y-0 right-0 max-md:-translate-x-full">
+      
+      <!-- Filters Top Section -->
+      <div class="p-3 bg-[#0A1F42] border-b border-[#1E3E75] space-y-2.5">
+        <!-- Search Input -->
+        <div class="relative">
+          <input 
+            type="text" 
+            id="searchInput"
+            placeholder="ابحث بالعنوان، الكلمة، المعرف (SV-001)..." 
+            class="w-full bg-[#061224] text-sm text-white placeholder-gray-400 rounded-lg pr-9 pl-3 py-2 border border-[#1E3E75] focus:outline-none focus:border-[#00D2FF] transition"
+          >
+          <div class="absolute right-3 top-2.5 text-gray-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Filter Row 1: Cluster & Priority -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <label class="text-gray-400 block mb-1">التصنيف (Cluster):</label>
+            <select id="clusterFilter" class="w-full bg-[#061224] text-white rounded-md py-1.5 px-2 border border-[#1E3E75] focus:outline-none focus:border-[#00D2FF]">
+              <option value="ALL">جميع التصنيفات (الكل)</option>
+              <option value="Equipment">الأجهزة (Equipment)</option>
+              <option value="Calibration">المعايرة (Calibration)</option>
+              <option value="Surveyors">المساحون (Surveyors)</option>
+              <option value="Offices">المكاتب (Offices)</option>
+              <option value="Training">التدريب والبرامج (Training)</option>
+              <option value="Jobs">الوظائف والمهنة (Jobs)</option>
+              <option value="Local SEO">المناطق والمدن (Local SEO)</option>
+              <option value="Maintenance">الصيانة (Maintenance)</option>
+              <option value="Trust">الثقة والأمان (Trust)</option>
+              <option value="Marketplace">السوق والمنصة (Marketplace)</option>
+              <option value="Knowledge">الأدلة المعرفية (Knowledge)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-gray-400 block mb-1">الأولوية (Priority):</label>
+            <select id="priorityFilter" class="w-full bg-[#061224] text-white rounded-md py-1.5 px-2 border border-[#1E3E75] focus:outline-none focus:border-[#00D2FF]">
+              <option value="ALL">كل الأولويات</option>
+              <option value="P1">P1 - أولوية قصوى</option>
+              <option value="P2">P2 - أولوية متوسطة</option>
+              <option value="P3">P3 - أولوية منخفضة</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filter Results Bar -->
+        <div class="flex items-center justify-between text-xs pt-1 text-gray-400">
+          <div>
+            النتائج: <span id="filteredCount" class="font-bold text-[#00D2FF]">100</span> من 100 مقال
+          </div>
+          <button id="resetFiltersBtn" class="text-gray-400 hover:text-[#F4B400] transition underline">
+            إعادة الضبط
+          </button>
+        </div>
+      </div>
+
+      <!-- Articles Cards Scrollable List -->
+      <div id="articlesList" class="flex-1 overflow-y-auto divide-y divide-[#132A52] p-2 space-y-1">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+    </aside>
+
+    <!-- MAIN READING & ACTION PANE -->
+    <main class="flex-1 flex flex-col bg-[#061021] overflow-hidden">
+      
+      <!-- Print Watermark Header (visible only during print/PDF) -->
+      <div id="printWatermarkHeader" class="hidden justify-between items-center pb-4 mb-4 border-b border-gray-300 text-xs text-gray-600">
+        <div class="font-bold text-gray-900 text-sm">SURVSTA | منصة سيرفستا للمساحة والجيوماتكس في مصر</div>
+        <div id="printArticleDate" class="font-mono"></div>
+      </div>
+
+      <!-- Article Metadata Header -->
+      <div id="articleHeader" class="bg-[#0B1E3D] border-b border-[#1E3E75] p-4 lg:p-6 shadow-md flex-shrink-0">
+        <!-- Breadcrumbs & Badges -->
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span id="headerIdBadge" class="px-2.5 py-0.5 rounded font-mono font-bold text-xs bg-[#00D2FF]/20 text-[#00D2FF] border border-[#00D2FF]/40">
+              SV-001
+            </span>
+            <span id="headerClusterBadge" class="text-xs px-2.5 py-0.5 rounded bg-[#163363] text-gray-200 border border-[#1E3E75]">
+              Equipment &gt; Total Station
+            </span>
+            <span id="headerPriorityBadge" class="text-xs px-2 py-0.5 rounded font-bold bg-[#F4B400]/20 text-[#F4B400] border border-[#F4B400]/30">
+              P1
+            </span>
+            <span id="headerCityBadge" class="text-xs px-2 py-0.5 rounded bg-gray-800 text-gray-300">
+              القاهرة
+            </span>
+          </div>
+
+          <!-- Target Platform URL button -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400 hidden sm:inline">مسار التحويل:</span>
+            <a id="headerTargetUrlBtn" href="#" target="_blank" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#00D2FF]/15 text-[#00D2FF] hover:bg-[#00D2FF] hover:text-black border border-[#00D2FF]/30 transition shadow-sm">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+              <span id="headerTargetUrlText">/equipment</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Article Title & Keyword -->
+        <h2 id="headerArticleTitle" class="text-xl lg:text-2xl font-black text-white leading-snug mb-2">
+          تأجير Total Station في القاهرة: الأسعار وما يجب فحصه
+        </h2>
+
+        <div class="flex flex-wrap items-center gap-4 text-xs text-gray-400">
+          <div>
+            <span class="text-gray-500">الكلمة المفتاحية:</span>
+            <span id="headerKeyword" class="text-gray-200 font-medium">تأجير Total Station في القاهرة</span>
+          </div>
+          <div>
+            <span class="text-gray-500">النية البحثية:</span>
+            <span id="headerIntent" class="text-emerald-400 font-medium">تجارية | Commercial</span>
+          </div>
+          <div>
+            <span class="text-gray-500">مرحلة القمع:</span>
+            <span id="headerFunnel" class="text-purple-300 font-medium">Consideration</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Toolbar -->
+      <div id="actionToolbar" class="bg-[#0A1A33] border-b border-[#1E3E75] px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 flex-shrink-0 text-xs">
+        <div class="flex items-center gap-2">
+          <!-- View Toggle -->
+          <button id="viewRenderedBtn" class="px-3 py-1.5 rounded-md font-semibold bg-[#00D2FF] text-black shadow-sm transition">
+            المقال المنسق
+          </button>
+          <button id="viewRawBtn" class="px-3 py-1.5 rounded-md font-semibold bg-[#0D2245] text-gray-300 hover:text-white border border-[#1E3E75] transition">
+            كود Markdown
+          </button>
+        </div>
+
+        <!-- Action / Export Buttons -->
+        <div class="flex items-center gap-2">
+          <!-- Print / PDF Button -->
+          <button id="printArticleBtn" onclick="window.print()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#0D2245] hover:bg-[#16376E] text-[#F4B400] hover:text-white border border-[#F4B400]/40 transition shadow-sm font-semibold">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            <span>طباعة / تصدير PDF</span>
+          </button>
+
+          <!-- Copy Markdown -->
+          <button id="copyMarkdownBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#0D2245] hover:bg-[#16376E] text-gray-200 border border-[#1E3E75] transition">
+            <svg class="w-3.5 h-3.5 text-[#00D2FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+            </svg>
+            <span>نسخ Markdown</span>
+          </button>
+
+          <!-- Download .md -->
+          <button id="downloadMdBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#0D2245] hover:bg-[#16376E] text-gray-200 border border-[#1E3E75] transition">
+            <svg class="w-3.5 h-3.5 text-[#F4B400]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <span>تحميل .md</span>
+          </button>
+
+          <!-- Download standalone HTML -->
+          <button id="downloadHtmlBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#0D2245] hover:bg-[#16376E] text-gray-200 border border-[#1E3E75] transition">
+            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span>تحميل HTML مستقل</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Article Content Body -->
+      <div class="flex-1 overflow-y-auto p-4 lg:p-8 bg-[#061021]">
+        <div class="max-w-4xl mx-auto">
+          
+          <!-- FEATURED IMAGE RESPONSIVE BANNER -->
+          <div id="featuredImageContainer" class="relative w-full h-44 sm:h-56 md:h-72 rounded-2xl overflow-hidden border border-[#1E3E75] shadow-2xl mb-6 group">
+            <img 
+              id="featuredImageEl" 
+              src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80" 
+              alt="صورة المقال الهندسية" 
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              onerror="this.src='https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80'"
+            >
+            <div class="absolute inset-0 bg-gradient-to-t from-[#061021] via-[#061021]/40 to-transparent"></div>
+            <div class="absolute bottom-4 right-4 flex items-center gap-2">
+              <span id="bannerClusterTag" class="text-xs px-3 py-1 rounded-full bg-[#00D2FF]/20 text-[#00D2FF] font-bold backdrop-blur-md border border-[#00D2FF]/40 shadow-sm">
+                Equipment
+              </span>
+              <span id="bannerCityTag" class="text-xs px-3 py-1 rounded-full bg-black/60 text-gray-200 font-semibold backdrop-blur-md border border-white/10 shadow-sm">
+                القاهرة
+              </span>
+            </div>
+          </div>
+
+          <!-- SOCIAL MEDIA SHARE & DISTRIBUTION BOX -->
+          <div id="socialShareCard" class="bg-[#0B1E3D] border border-[#1E3E75] rounded-xl p-4 mb-6 shadow-lg">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-[#1E3E75]">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#00D2FF] animate-pulse"></span>
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider">
+                  منشور شبكات التواصل الاجتماعي (Social Media Copy)
+                </h3>
+              </div>
+              <div class="flex items-center gap-2 text-xs">
+                <button id="copySocialTitleBtn" class="px-2.5 py-1 rounded bg-[#0D2245] hover:bg-[#163363] text-gray-200 border border-[#1E3E75] transition">
+                  نسخ عنوان المنشور
+                </button>
+                <button id="copySocialSummaryBtn" class="px-2.5 py-1 rounded bg-[#00D2FF]/20 hover:bg-[#00D2FF] text-[#00D2FF] hover:text-black font-semibold border border-[#00D2FF]/30 transition">
+                  نسخ نص المنشور كاملاً
+                </button>
+              </div>
+            </div>
+
+            <!-- Display Social Title & Summary -->
+            <div class="space-y-2 text-xs">
+              <div class="flex items-baseline gap-2">
+                <span class="text-gray-400 font-semibold min-w-[75px] flex-shrink-0">العنوان المقترح:</span>
+                <span id="socialTitleText" class="text-[#F4B400] font-bold"></span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span class="text-gray-400 font-semibold min-w-[75px] flex-shrink-0">نص المنشور:</span>
+                <p id="socialSummaryText" class="text-gray-300 leading-relaxed"></p>
+              </div>
+            </div>
+
+            <!-- Social Share Links (Facebook & LinkedIn) -->
+            <div class="flex items-center gap-3 mt-3 pt-3 border-t border-[#1E3E75]/60 text-xs">
+              <span class="text-gray-400">مشاركة سريعة:</span>
+              <a id="shareFacebookBtn" href="#" target="_blank" class="flex items-center gap-1.5 px-3 py-1 rounded bg-[#1877F2]/20 hover:bg-[#1877F2] text-[#1877F2] hover:text-white font-medium border border-[#1877F2]/30 transition">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.5 5H18V0h-3.808C10.598 0 9 1.582 9 4.615V8z"/></svg>
+                <span>Facebook</span>
+              </a>
+              <a id="shareLinkedInBtn" href="#" target="_blank" class="flex items-center gap-1.5 px-3 py-1 rounded bg-[#0A66C2]/20 hover:bg-[#0A66C2] text-[#0A66C2] hover:text-white font-medium border border-[#0A66C2]/30 transition">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                <span>LinkedIn</span>
+              </a>
+            </div>
+          </div>
+          
+          <!-- Rendered View Area -->
+          <div id="renderedContentArea" class="prose-survsta">
+            <!-- Rendered by Marked.js -->
+          </div>
+
+          <!-- Raw Markdown View Area (Hidden by default) -->
+          <div id="rawContentArea" class="hidden">
+            <div class="relative bg-[#09172E] p-4 rounded-xl border border-[#1E3E75]">
+              <pre id="rawMarkdownPre" class="text-xs text-gray-300 font-mono whitespace-pre-wrap leading-relaxed select-all overflow-x-auto"></pre>
+            </div>
+          </div>
+
+          <!-- Print Watermark Footer (visible only during print/PDF) -->
+          <div id="printWatermarkFooter" class="hidden justify-between items-center pt-6 mt-8 border-t border-gray-300 text-xs text-gray-500">
+            <div>منصة سيرفستا - المنظومة الهندسية للمساحة والمعدات في مصر (https://survsta.com)</div>
+            <div>صفحة وثيقة رسمية معتمدة</div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-[#00D2FF] text-black font-bold px-4 py-2.5 rounded-lg shadow-2xl flex items-center gap-2 text-sm pointer-events-none">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    <span id="toastMsg">تم النسخ بنجاح!</span>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    // State
+    let allArticles = [];
+    let filteredArticles = [];
+    let selectedArticleIndex = 0;
+    let currentView = 'rendered'; // 'rendered' or 'raw'
+
+    // Configure Marked.js with custom link renderer for interactive internal links
+    const renderer = new marked.Renderer();
+    renderer.link = function(href, title, text) {
+      if (!href) return text;
+      const isInternal = href.startsWith('/') || href.includes('survsta.com');
+
+      if (isInternal) {
+        const fullUrl = href.startsWith('/') ? 'https://survsta.com' + href : href;
+        const displayPath = href.startsWith('/') ? href : (function() {
+          try { return new URL(href).pathname; } catch(e) { return href; }
+        })();
+
+        return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1 my-1 rounded-lg bg-[#0D2245] text-[#F4B400] hover:text-[#00D2FF] border border-[#F4B400]/40 hover:border-[#00D2FF] font-semibold text-xs tracking-wide transition shadow-sm hover:shadow-[0_0_12px_rgba(0,210,255,0.25)] no-underline group/link">
+          <svg class="w-3.5 h-3.5 text-[#00D2FF] group-hover/link:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+          <span class="font-bold underline decoration-dotted decoration-[#F4B400] underline-offset-2">${text}</span>
+          <span class="text-[10px] text-gray-400 font-mono bg-black/40 px-1.5 py-0.5 rounded border border-gray-700/50">${displayPath}</span>
+        </a>`;
+      }
+
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-[#00D2FF] underline hover:text-[#F4B400] font-semibold transition">${text}</a>`;
+    };
+
+    marked.setOptions({
+      breaks: true,
+      gfm: true,
+      renderer: renderer
+    });
+
+    // Show Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2500);
+    }
+
+    // Load Data
+    async function loadData() {
+      // 1. Check if window.SURVSTA_ARTICLES exists (from articles_data.js)
+      if (window.SURVSTA_ARTICLES && Array.isArray(window.SURVSTA_ARTICLES) && window.SURVSTA_ARTICLES.length > 0) {
+        allArticles = window.SURVSTA_ARTICLES;
+        initDashboard();
+        return;
+      }
+
+      // 2. Fetch fallback from JSON file
+      try {
+        const response = await fetch('generated_articles.json');
+        if (response.ok) {
+          allArticles = await response.json();
+          initDashboard();
+          return;
+        }
+      } catch (e) {
+        console.warn('Fetch generated_articles.json error:', e);
+      }
+
+      // 3. Fallback error display
+      document.getElementById('articlesList').innerHTML = `
+        <div class="p-4 text-center text-sm text-red-400 bg-red-950/30 rounded-lg border border-red-800">
+          لم يتم العثور على قاعدة المقالات. يرجى تشغيل الأمر:
+          <code class="block mt-2 text-xs bg-black/50 p-2 rounded text-yellow-300">python update_articles_schema.py</code>
+        </div>
+      `;
+    }
+
+    // Initialize Dashboard
+    function initDashboard() {
+      // Update quick badges
+      document.getElementById('totalStatsBadge').textContent = allArticles.length;
+      const p1Count = allArticles.filter(a => a.metadata && a.metadata.Priority === 'P1').length;
+      document.getElementById('p1StatsBadge').textContent = p1Count;
+
+      applyFilters();
+      setupEventListeners();
+    }
+
+    // Filter Logic
+    function applyFilters() {
+      const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+      const clusterVal = document.getElementById('clusterFilter').value;
+      const priorityVal = document.getElementById('priorityFilter').value;
+
+      filteredArticles = allArticles.filter(item => {
+        const meta = item.metadata || {};
+        const title = (meta['Article Title'] || '').toLowerCase();
+        const kw = (meta['Keyword'] || '').toLowerCase();
+        const id = (meta['ID'] || '').toLowerCase();
+        const city = (meta['City'] || '').toLowerCase();
+        const cluster = meta['Cluster'] || '';
+        const priority = meta['Priority'] || '';
+
+        // Search match
+        const matchesSearch = !searchVal || 
+          title.includes(searchVal) || 
+          kw.includes(searchVal) || 
+          id.includes(searchVal) || 
+          city.includes(searchVal);
+
+        // Cluster match
+        const matchesCluster = (clusterVal === 'ALL') || (cluster === clusterVal);
+
+        // Priority match
+        const matchesPriority = (priorityVal === 'ALL') || (priority === priorityVal);
+
+        return matchesSearch && matchesCluster && matchesPriority;
+      });
+
+      document.getElementById('filteredCount').textContent = filteredArticles.length;
+      renderArticlesList();
+
+      if (filteredArticles.length > 0) {
+        selectArticle(0);
+      } else {
+        renderEmptyArticle();
+      }
+    }
+
+    // Render Sidebar List
+    function renderArticlesList() {
+      const listEl = document.getElementById('articlesList');
+      if (filteredArticles.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-8 text-center text-gray-500 text-sm">
+            لا توجد مقالات مطابقة لشروط البحث والفلترة.
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = filteredArticles.map((item, idx) => {
+        const meta = item.metadata || {};
+        const id = meta['ID'] || `SV-${idx+1}`;
+        const title = (meta['Article Title'] || '').split('|')[0].trim();
+        const cluster = meta['Cluster'] || 'General';
+        const priority = meta['Priority'] || 'P2';
+        const dest = meta['Primary Existing Destination'] || meta['Recommended URL'] || '/equipment';
+
+        const priorityColor = priority === 'P1' 
+          ? 'bg-[#F4B400]/20 text-[#F4B400] border-[#F4B400]/40' 
+          : 'bg-[#00D2FF]/20 text-[#00D2FF] border-[#00D2FF]/40';
+
+        return `
+          <div 
+            onclick="selectArticle(${idx})" 
+            data-index="${idx}"
+            class="article-card cursor-pointer p-3 rounded-xl border border-[#183461] hover:border-[#00D2FF]/50 hover:bg-[#0E2447] transition group ${idx === selectedArticleIndex ? 'active' : 'bg-[#0A1B36]'}"
+          >
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-black/40 text-gray-200 border border-gray-700">
+                  ${id}
+                </span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded ${priorityColor} border font-bold">
+                  ${priority}
+                </span>
+              </div>
+              <span class="text-[11px] text-gray-400 group-hover:text-gray-300">
+                ${cluster}
+              </span>
+            </div>
+            
+            <h4 class="text-xs font-bold text-gray-100 group-hover:text-[#00D2FF] line-clamp-2 leading-snug mb-1.5 transition">
+              ${title}
+            </h4>
+
+            <div class="flex items-center justify-between text-[10px] text-gray-400">
+              <span class="bg-[#122A54] px-1.5 py-0.5 rounded text-gray-300 font-mono">
+                ${dest}
+              </span>
+              <span class="text-gray-500">
+                ${meta['City'] ? meta['City'].split('|')[0].trim() : 'مصر'}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Select and Display Article
+    function selectArticle(idx) {
+      if (!filteredArticles[idx]) return;
+      selectedArticleIndex = idx;
+
+      // Update active highlight in sidebar
+      document.querySelectorAll('.article-card').forEach((card, i) => {
+        card.classList.toggle('active', i === idx);
+        card.classList.toggle('bg-[#0A1B36]', i !== idx);
+      });
+
+      const current = filteredArticles[idx];
+      const meta = current.metadata || {};
+      const id = meta['ID'] || 'SV-000';
+      const title = (meta['Article Title'] || '').split('|')[0].trim();
+      const kw = (meta['Keyword'] || '').split('|')[0].trim();
+      const cluster = meta['Cluster'] || 'Equipment';
+      const subcluster = meta['Subcluster'] || '';
+      const priority = meta['Priority'] || 'P2';
+      const city = (meta['City'] || 'مصر').split('|')[0].trim();
+      const dest = meta['Primary Existing Destination'] || meta['Recommended URL'] || '/equipment';
+      const intent = meta['Search Intent'] || 'Commercial';
+      const funnel = meta['Funnel Stage'] || 'Consideration';
+      const publishDate = meta['Publish Date'] || '2026-10-01';
+
+      // Schema values
+      const featuredImage = current.featured_image || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80';
+      const socialTitle = current.social_title || title;
+      const socialSummary = current.social_summary || `دليل هندسي متخصص من منصة سيرفستا يغطي معايير ${title}.`;
+
+      // 1. Dynamic Open Graph & Meta Tags Update
+      document.getElementById('pageTitle').textContent = `${title} | منصة سيرفستا`;
+      document.getElementById('metaTitle').setAttribute('content', `${title} | Survsta`);
+      document.getElementById('metaDesc').setAttribute('content', socialSummary);
+      document.getElementById('ogTitle').setAttribute('content', socialTitle);
+      document.getElementById('ogDesc').setAttribute('content', socialSummary);
+      document.getElementById('ogImage').setAttribute('content', featuredImage);
+      document.getElementById('twTitle').setAttribute('content', socialTitle);
+      document.getElementById('twDesc').setAttribute('content', socialSummary);
+      document.getElementById('twImage').setAttribute('content', featuredImage);
+
+      // 2. Header UI
+      document.getElementById('headerIdBadge').textContent = id;
+      document.getElementById('headerClusterBadge').textContent = `${cluster} > ${subcluster}`;
+      document.getElementById('headerPriorityBadge').textContent = priority;
+      document.getElementById('headerCityBadge').textContent = city;
+      document.getElementById('headerArticleTitle').textContent = title;
+      document.getElementById('headerKeyword').textContent = kw;
+      document.getElementById('headerIntent').textContent = intent;
+      document.getElementById('headerFunnel').textContent = funnel;
+
+      // 3. Featured Image Banner
+      const featImg = document.getElementById('featuredImageEl');
+      featImg.src = featuredImage;
+      featImg.alt = title;
+      document.getElementById('bannerClusterTag').textContent = `${cluster} • ${subcluster || 'عام'}`;
+      document.getElementById('bannerCityTag').textContent = city;
+
+      // 4. Social Share Card
+      document.getElementById('socialTitleText').textContent = socialTitle;
+      document.getElementById('socialSummaryText').textContent = socialSummary;
+
+      const articleShareUrl = encodeURIComponent(`https://survsta.com${dest}`);
+      const encodedSocialTitle = encodeURIComponent(socialTitle);
+      document.getElementById('shareFacebookBtn').href = `https://www.facebook.com/sharer/sharer.php?u=${articleShareUrl}&quote=${encodedSocialTitle}`;
+      document.getElementById('shareLinkedInBtn').href = `https://www.linkedin.com/sharing/share-offsite/?url=${articleShareUrl}`;
+
+      // Print date & info
+      document.getElementById('printArticleDate').textContent = `كود المقال: ${id} | تاريخ النشر: ${publishDate}`;
+
+      const targetBtn = document.getElementById('headerTargetUrlBtn');
+      targetBtn.href = 'https://survsta.com' + dest;
+      document.getElementById('headerTargetUrlText').textContent = dest;
+
+      // 5. Content Rendering
+      let rawMd = current.markdown || '';
+      let cleanBody = rawMd;
+      if (rawMd.startsWith('---')) {
+        const parts = rawMd.split('---');
+        if (parts.length >= 3) {
+          cleanBody = parts.slice(2).join('---').trim();
+        }
+      }
+
+      // Parse with custom Marked renderer (which auto-formats internal links!)
+      const htmlContent = marked.parse(cleanBody);
+      document.getElementById('renderedContentArea').innerHTML = htmlContent;
+      document.getElementById('rawMarkdownPre').textContent = rawMd;
+
+      // Render Math if KaTeX is loaded
+      if (window.renderMathInElement) {
+        window.renderMathInElement(document.getElementById('renderedContentArea'), {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+
+      // Scroll reader to top
+      document.querySelector('main > div:last-child').scrollTop = 0;
+    }
+
+    function renderEmptyArticle() {
+      document.getElementById('headerArticleTitle').textContent = 'لا توجد نتائج';
+      document.getElementById('renderedContentArea').innerHTML = `
+        <div class="py-16 text-center text-gray-400">
+          <p class="text-lg">يرجى تعديل مصطلحات البحث أو الفلاتر لعرض المقالات.</p>
+        </div>
+      `;
+      document.getElementById('rawMarkdownPre').textContent = '';
+      document.getElementById('featuredImageContainer').style.display = 'none';
+      document.getElementById('socialShareCard').style.display = 'none';
+    }
+
+    // Event Listeners
+    function setupEventListeners() {
+      // Search with debounce
+      let searchTimeout;
+      document.getElementById('searchInput').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(applyFilters, 150);
+      });
+
+      // Filter dropdowns
+      document.getElementById('clusterFilter').addEventListener('change', applyFilters);
+      document.getElementById('priorityFilter').addEventListener('change', applyFilters);
+
+      // Reset
+      document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('clusterFilter').value = 'ALL';
+        document.getElementById('priorityFilter').value = 'ALL';
+        applyFilters();
+      });
+
+      // Toggle View Buttons
+      const renderedBtn = document.getElementById('viewRenderedBtn');
+      const rawBtn = document.getElementById('viewRawBtn');
+      const renderedArea = document.getElementById('renderedContentArea');
+      const rawArea = document.getElementById('rawContentArea');
+
+      renderedBtn.addEventListener('click', () => {
+        currentView = 'rendered';
+        renderedBtn.className = 'px-3 py-1.5 rounded-md font-semibold bg-[#00D2FF] text-black shadow-sm transition';
+        rawBtn.className = 'px-3 py-1.5 rounded-md font-semibold bg-[#0D2245] text-gray-300 hover:text-white border border-[#1E3E75] transition';
+        renderedArea.classList.remove('hidden');
+        rawArea.classList.add('hidden');
+      });
+
+      rawBtn.addEventListener('click', () => {
+        currentView = 'raw';
+        rawBtn.className = 'px-3 py-1.5 rounded-md font-semibold bg-[#00D2FF] text-black shadow-sm transition';
+        renderedBtn.className = 'px-3 py-1.5 rounded-md font-semibold bg-[#0D2245] text-gray-300 hover:text-white border border-[#1E3E75] transition';
+        rawArea.classList.remove('hidden');
+        renderedArea.classList.add('hidden');
+      });
+
+      // Copy Markdown Button
+      document.getElementById('copyMarkdownBtn').addEventListener('click', () => {
+        const current = filteredArticles[selectedArticleIndex];
+        if (!current) return;
+        navigator.clipboard.writeText(current.markdown || '').then(() => {
+          showToast('تم نسخ المقال كاملاً بصيغة Markdown!');
+        }).catch(err => {
+          showToast('فشل النسخ التلقائي: يرجى نسخه يدوياً');
+        });
+      });
+
+      // Copy Social Title Button
+      document.getElementById('copySocialTitleBtn').addEventListener('click', () => {
+        const current = filteredArticles[selectedArticleIndex];
+        if (!current) return;
+        const text = current.social_title || document.getElementById('socialTitleText').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('تم نسخ عنوان المنشور بنجاح!');
+        });
+      });
+
+      // Copy Social Summary Button
+      document.getElementById('copySocialSummaryBtn').addEventListener('click', () => {
+        const current = filteredArticles[selectedArticleIndex];
+        if (!current) return;
+        const text = current.social_summary || document.getElementById('socialSummaryText').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('تم نسخ نص المنشور بالكامل!');
+        });
+      });
+
+      // Download Markdown (.md)
+      document.getElementById('downloadMdBtn').addEventListener('click', () => {
+        const current = filteredArticles[selectedArticleIndex];
+        if (!current) return;
+        const filename = current.filename || `${current.id || 'article'}.md`;
+        const blob = new Blob([current.markdown || ''], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`تم تنزيل ${filename}`);
+      });
+
+      // Download Standalone Styled HTML
+      document.getElementById('downloadHtmlBtn').addEventListener('click', () => {
+        const current = filteredArticles[selectedArticleIndex];
+        if (!current) return;
+        const meta = current.metadata || {};
+        const title = (meta['Article Title'] || 'مقالة سيرفستا').split('|')[0].trim();
+        const bodyHtml = document.getElementById('renderedContentArea').innerHTML;
+        const featImg = current.featured_image || '';
+
+        const standaloneHtml = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>${title} | منصة سيرفستا</title>
+  <meta name="description" content="${current.social_summary || ''}">
+  <meta property="og:title" content="${current.social_title || title}">
+  <meta property="og:description" content="${current.social_summary || ''}">
+  <meta property="og:image" content="${featImg}">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; background: #08172E; color: #F8FAFC; max-width: 860px; margin: 40px auto; padding: 0 24px; line-height: 1.8; }
+    h1 { color: #00D2FF; font-size: 2rem; border-bottom: 2px solid #1E3E75; padding-bottom: 12px; }
+    h2 { color: #F4B400; font-size: 1.4rem; margin-top: 2rem; }
+    h3 { color: #38BDF8; font-size: 1.15rem; }
+    blockquote { border-right: 4px solid #00D2FF; background: rgba(0,210,255,0.06); padding: 12px 18px; margin: 20px 0; }
+    a { color: #F4B400; text-decoration: none; font-weight: bold; }
+    a:hover { color: #00D2FF; }
+    code { background: #11254A; padding: 2px 6px; border-radius: 4px; color: #38BDF8; }
+    .banner { width: 100%; height: 260px; object-fit: cover; border-radius: 12px; margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+  ${featImg ? `<img src="${featImg}" class="banner" alt="${title}">` : ''}
+  ${bodyHtml}
+</body>
+</html>`;
+
+        const filename = `${current.id || 'article'}_${meta['Cluster'] || 'seo'}.html`;
+        const blob = new Blob([standaloneHtml], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`تم تنزيل ${filename}`);
+      });
+
+      // Mobile Sidebar Toggle
+      const mobileBtn = document.getElementById('toggleMobileSidebarBtn');
+      const sidebar = document.getElementById('sidebar');
+      mobileBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('max-md:-translate-x-full');
+      });
+
+      // Keyboard navigation
+      window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        if (e.key === 'ArrowDown' || e.key === 'j') {
+          if (selectedArticleIndex < filteredArticles.length - 1) {
+            selectArticle(selectedArticleIndex + 1);
+          }
+        } else if (e.key === 'ArrowUp' || e.key === 'k') {
+          if (selectedArticleIndex > 0) {
+            selectArticle(selectedArticleIndex - 1);
+          }
+        }
+      });
+    }
+
+    // Launch
+    window.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>

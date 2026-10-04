@@ -45,3 +45,32 @@ VALUES (
   'Toggle visibility of the early access banner on the homepage'
 )
 ON CONFLICT (setting_key) DO NOTHING;
+
+-- Insert Default Row for Auto-Approval of Providers
+INSERT INTO platform_settings (setting_key, setting_value, description)
+VALUES (
+  'auto_approve_providers',
+  'false'::jsonb,
+  'Toggle automatic approval of newly registered providers'
+)
+ON CONFLICT (setting_key) DO NOTHING;
+
+-- Insert Default Row for Dynamic Welcome Email Template
+INSERT INTO platform_settings (setting_key, setting_value, description)
+VALUES (
+  'template_welcome_email',
+  '{
+    "subject": "🌟 أهلاً بك في منصة Survsta | بوابتك الرقمية المتكاملة لقطاع المساحة والجيوماتكس",
+    "badge_text": "شريك معتمد جديد",
+    "badge_bg": "#0284c7",
+    "title": "أهلاً ومرحباً بك معنا، {recipient_name} 👋",
+    "main_message": "يسعدنا ويشرفنا انضمامك إلى منصة Survsta — المنظومة الرقمية الأولى والأشمل في مصر المتخصصة في خدمات وأجهزة المساحة والجيوماتكس.\n\nابدأ الآن بعرض معداتك وأجهزتك المساحية لتصل إلى آلاف المهندسين وشركات المقاولات الباحثة عن أجهزة للإيجار يومياً.",
+    "cta_text": "➕ أضف معداتك وأجهزتك المساحية الآن",
+    "cta_url": "https://survsta.com/provider/dashboard#equipment",
+    "secondary_cta_text": "الدخول إلى لوحة التحكم",
+    "secondary_cta_url": "https://survsta.com/provider/dashboard"
+  }'::jsonb,
+  'Dynamic welcome email template for newly registered providers and clients'
+)
+ON CONFLICT (setting_key) DO NOTHING;
+

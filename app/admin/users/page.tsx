@@ -26,6 +26,7 @@ export default function UserManagementPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [sendingWelcomeId, setSendingWelcomeId] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -93,6 +94,38 @@ export default function UserManagementPage() {
       }
     } catch (err: any) {
       showToast(err.message || 'تعذر تغيير حالة الحساب.');
+    }
+  };
+
+  const handleSendWelcome = async (user: User) => {
+    if (!user.email || !user.email.includes('@')) {
+      showToast('⚠️ لا يوجد بريد إلكتروني صالح لهذا المستخدم');
+      return;
+    }
+
+    setSendingWelcomeId(user.id);
+    try {
+      const res = await fetch('/api/admin/notify-provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerEmail: user.email,
+          providerName: user.name || 'شريكنا العزيز',
+          actionType: 'welcome',
+          userType: user.role === 'provider' ? 'provider' : 'client',
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`✉️ تم إرسال إيميل الترحيب الرسمي بنجاح إلى "${user.name}" (${user.email}) 🎉`);
+      } else {
+        showToast(`❌ فشل إرسال الترحيب: ${data.error || data.warning || 'خطأ غير متوقع'}`);
+      }
+    } catch {
+      showToast('❌ تعذر الاتصال ببوابة إرسال البريد');
+    } finally {
+      setSendingWelcomeId(null);
     }
   };
 
@@ -171,6 +204,8 @@ export default function UserManagementPage() {
             onEdit={handleStartEdit}
             onDelete={(user) => setDeletingUser(user)}
             onToggleSuspend={handleToggleSuspend}
+            onSendWelcome={handleSendWelcome}
+            sendingWelcomeId={sendingWelcomeId}
           />
         )}
 

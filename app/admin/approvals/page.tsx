@@ -22,6 +22,7 @@ export default function AdminApprovalsPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [actionToast, setActionToast] = useState<string | null>(null);
   const [activeRevisionItem, setActiveRevisionItem] = useState<PendingItem | null>(null);
+  const [isSendingEmail, setIsSendingEmail] = useState<boolean>(false);
 
   const showToast = (msg: string) => {
     setActionToast(msg);
@@ -107,6 +108,23 @@ export default function AdminApprovalsPage() {
         });
       } catch {}
 
+      // Dispatch automated official email via Resend gateway
+      if (approvedItem?.email && approvedItem.email.includes('@')) {
+        try {
+          await fetch('/api/admin/notify-provider', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              providerEmail: approvedItem.email,
+              providerName: approvedItem.name,
+              actionType: 'approved',
+            }),
+          });
+        } catch (e) {
+          console.error('[Approvals] Failed to dispatch automated approval email:', e);
+        }
+      }
+
       // Update clients table active_modules if client entry exists
       if (approvedItem?.email && approvedItem.email !== '—') {
         try {
@@ -131,7 +149,7 @@ export default function AdminApprovalsPage() {
       }
     } catch {}
     setItems((prev) => prev.filter((item) => item.id !== id));
-    showToast(`تم اعتماد المزوّد (${name}) بنجاح ونقله إلى القائمة المعتمدة وإرسال إشعار التفعيل ✅`);
+    showToast(`تم اعتماد المزوّد (${name}) بنجاح ونقله إلى القائمة المعتمدة وإرسال إشعار التفعيل الرسمي ✅`);
   };
 
   const handleMarkNeedsRevision = async (id: string, name: string) => {
@@ -142,6 +160,41 @@ export default function AdminApprovalsPage() {
       prev.map((item) => (item.id === id ? { ...item, status: 'needs_revision' } : item))
     );
     showToast(`تم إشعار المزوّد وتحديث حالة (${name}) إلى: بانتظار التعديل 📝`);
+  };
+
+  const handleSendAutomatedRevisionEmail = async () => {
+    if (!activeRevisionItem) return;
+    if (!activeRevisionItem.email || !activeRevisionItem.email.includes('@')) {
+      showToast('⚠️ البريد الإلكتروني للمزود غير متوفر أو غير صالح');
+      return;
+    }
+
+    setIsSendingEmail(true);
+    try {
+      const res = await fetch('/api/admin/notify-provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerEmail: activeRevisionItem.email,
+          providerName: activeRevisionItem.name,
+          actionType: 'needs_revision',
+          reason: getRevisionMessage(activeRevisionItem),
+        }),
+      });
+
+      if (res.ok) {
+        await handleMarkNeedsRevision(activeRevisionItem.id, activeRevisionItem.name);
+        showToast(`✉️ تم إرسال إشعار التعديل الرسمي تلقائياً عبر Resend إلى (${activeRevisionItem.email})`);
+        setActiveRevisionItem(null);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(`❌ فشل إرسال البريد: ${err.error || 'خطأ غير متوقع'}`);
+      }
+    } catch {
+      showToast('❌ تعذر الاتصال ببوابة إرسال البريد');
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const handleReject = async (id: string, name: string) => {
@@ -345,6 +398,26 @@ export default function AdminApprovalsPage() {
 
               {/* Action Links */}
               <div className="space-y-2 pt-1">
+                {/* Automated Resend Email Button */}
+                <button
+                  type="button"
+                  disabled={isSendingEmail || !activeRevisionItem.email || !activeRevisionItem.email.includes('@')}
+                  onClick={handleSendAutomatedRevisionEmail}
+                  className="w-full rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 text-white py-2.5 px-4 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20"
+                >
+                  {isSendingEmail ? (
+                    <span className="flex items-center gap-2">
+                      <span className="animate-spin h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full" />
+                      جاري إرسال الإيميل التلقائي...
+                    </span>
+                  ) : (
+                    <>
+                      <span>⚡</span>
+                      <span>إرسال إيميل رسمي تلقائي (Resend Automated Gateway)</span>
+                    </>
+                  )}
+                </button>
+
                 {/* WhatsApp Link */}
                 <a
                   href={`https://wa.me/${formatWhatsAppNumber(activeRevisionItem.phone)}?text=${encodeURIComponent(
@@ -353,13 +426,13 @@ export default function AdminApprovalsPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => handleMarkNeedsRevision(activeRevisionItem.id, activeRevisionItem.name)}
-                  className="w-full rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white py-2.5 px-4 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                  className="w-full rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white py-2 px-4 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
                 >
                   <span>💬</span>
                   <span>إرسال عبر الواتساب (Via WhatsApp)</span>
                 </a>
 
-                {/* Email Link */}
+                {/* Manual Fallback Email Link */}
                 <a
                   href={`mailto:${
                     activeRevisionItem.email && activeRevisionItem.email !== '—' ? activeRevisionItem.email : ''
@@ -369,10 +442,10 @@ export default function AdminApprovalsPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => handleMarkNeedsRevision(activeRevisionItem.id, activeRevisionItem.name)}
-                  className="w-full rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white py-2.5 px-4 text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20"
+                  className="w-full rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 py-1.5 px-4 text-[11px] font-medium transition flex items-center justify-center gap-2 border border-slate-700"
                 >
                   <span>✉️</span>
-                  <span>إرسال عبر الإيميل (Via Email)</span>
+                  <span>فتح تطبيق البريد اليدوي (Manual mailto Fallback)</span>
                 </a>
               </div>
 

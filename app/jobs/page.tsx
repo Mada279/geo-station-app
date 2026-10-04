@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabaseClient';
 import { validateEgyptianPhone } from '@/lib/validations/phone';
+import { getProvidersSuspensionMetaMap, isProviderActiveSuspended } from '@/services/providerControlService';
 
 export interface PublicJobItem {
   id: string;
@@ -213,15 +214,23 @@ export default function JobsPage() {
         const providerIds = Array.from(new Set(dbJobs.map((j) => j.provider_id).filter(Boolean)));
         let companyMap: Record<string, { name: string; location?: string }> = {};
 
+        const suspensionMap = await getProvidersSuspensionMetaMap();
+        const suspendedProviderIds = new Set<string>();
+
         if (providerIds.length > 0) {
           // Fetch from providers table
           const { data: provs } = await supabase
             .from('providers')
-            .select('id, name, company_name, location')
+            .select('id, name, company_name, location, status')
             .in('id', providerIds);
 
           if (provs) {
             provs.forEach((p) => {
+              const pid = String(p.id);
+              const meta = suspensionMap.get(pid);
+              if (isProviderActiveSuspended(meta) || p.status === 'suspended' || (p as any).is_suspended === true) {
+                suspendedProviderIds.add(pid);
+              }
               companyMap[p.id] = {
                 name: p.company_name || p.name || 'مكتب مساحي معتمد',
                 location: p.location,
@@ -232,11 +241,18 @@ export default function JobsPage() {
           // Fetch from clients table (unified profiles acting as providers)
           const { data: clientsData } = await supabase
             .from('clients')
-            .select('id, user_id, full_name, company_name')
+            .select('id, user_id, full_name, company_name, status')
             .in('id', providerIds);
 
           if (clientsData) {
             clientsData.forEach((c) => {
+              const cid = String(c.id);
+              const userKey = c.user_id ? String(c.user_id) : null;
+              const meta = suspensionMap.get(cid) || (userKey ? suspensionMap.get(userKey) : null);
+              if (isProviderActiveSuspended(meta) || c.status === 'suspended' || (c as any).is_suspended === true) {
+                suspendedProviderIds.add(cid);
+                if (userKey) suspendedProviderIds.add(userKey);
+              }
               const name = c.company_name || c.full_name || 'مكتب مساحي معتمد';
               if (c.id && !companyMap[c.id]) companyMap[c.id] = { name };
               if (c.user_id && !companyMap[c.user_id]) companyMap[c.user_id] = { name };
@@ -244,7 +260,15 @@ export default function JobsPage() {
           }
         }
 
-        dynamicJobs = dbJobs.map((j) => {
+        // Filter out jobs belonging to suspended providers
+        const activeJobs = dbJobs.filter((j) => {
+          if (j.provider_id && suspendedProviderIds.has(String(j.provider_id))) {
+            return false; // HIDE JOBS OF SUSPENDED PROVIDER
+          }
+          return true;
+        });
+
+        dynamicJobs = activeJobs.map((j) => {
           const comp = j.provider_id ? companyMap[j.provider_id] : null;
           const reqs = Array.isArray(j.requirements)
             ? j.requirements

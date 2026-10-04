@@ -1,5 +1,6 @@
 import { User, CreateUserInput, UpdateUserInput } from '@/types/user';
 import { supabase } from '@/utils/supabaseClient';
+import { getProvidersSuspensionMetaMap, isProviderActiveSuspended, setProviderSuspension } from '@/services/providerControlService';
 
 export const ADMIN_EMAIL = 'ahmed@survsta.com';
 
@@ -44,9 +45,32 @@ export async function authenticateUser(email: string, password?: string): Promis
       .maybeSingle();
 
     if (prov) {
-      if (prov.status === 'suspended' || prov.is_suspended) {
-        throw new Error('تم إيقاف هذا الحساب من قبل إدارة المنصة. يرجى التواصل مع الدعم الفني.');
+      const suspensionMap = await getProvidersSuspensionMetaMap();
+      const meta = suspensionMap.get(String(prov.id));
+
+      if (meta && meta.is_suspended && meta.suspended_until) {
+        const expiry = new Date(meta.suspended_until);
+        if (new Date() >= expiry) {
+          // LAZY AUTO-RESTORE: Suspension period has elapsed!
+          await setProviderSuspension({
+            providerId: String(prov.id),
+            isSuspended: false,
+            providerEmail: cleanEmail,
+          });
+        } else {
+          const daysLeft = Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          throw new Error(
+            `تم إيقاف هذا الحساب مؤقتاً حتى ${expiry.toLocaleDateString('ar-EG')} (متبقي ${daysLeft} يوم).${
+              meta.suspension_reason ? ` السبب: ${meta.suspension_reason}` : ''
+            }`
+          );
+        }
+      } else if (prov.status === 'suspended' || (prov as any).is_suspended) {
+        throw new Error(
+          `تم إيقاف هذا الحساب من قبل إدارة المنصة.${meta?.suspension_reason ? ` السبب: ${meta.suspension_reason}` : ''} يرجى التواصل مع الدعم الفني.`
+        );
       }
+
       if (prov.status === 'blocked' || prov.status === 'rejected') {
         throw new Error('هذا الحساب معطل أو تم رفضه من قبل إدارة المنصة.');
       }
@@ -64,7 +88,25 @@ export async function authenticateUser(email: string, password?: string): Promis
       .maybeSingle();
 
     if (client) {
-      if (client.status === 'suspended' || client.is_suspended) {
+      const suspensionMap = await getProvidersSuspensionMetaMap();
+      const meta = suspensionMap.get(String(client.id)) || (client.user_id ? suspensionMap.get(String(client.user_id)) : null);
+
+      if (meta && meta.is_suspended && meta.suspended_until) {
+        const expiry = new Date(meta.suspended_until);
+        if (new Date() >= expiry) {
+          // Lazy auto-restore
+          await setProviderSuspension({
+            providerId: String(client.id),
+            isSuspended: false,
+            providerEmail: cleanEmail,
+          });
+        } else {
+          const daysLeft = Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          throw new Error(
+            `تم إيقاف هذا الحساب مؤقتاً حتى ${expiry.toLocaleDateString('ar-EG')} (متبقي ${daysLeft} يوم).`
+          );
+        }
+      } else if (client.status === 'suspended' || (client as any).is_suspended) {
         throw new Error('تم إيقاف هذا الحساب من قبل إدارة المنصة. يرجى التواصل مع الدعم الفني.');
       }
     }
@@ -218,6 +260,18 @@ export async function toggleUserSuspension(user: User): Promise<User> {
       .eq('email', user.email.toLowerCase().trim());
   } catch (pErr) {
     console.warn('[userService] Notice updating provider status:', pErr);
+  }
+
+  // 3. Keep God Mode suspension metadata synchronized
+  if (user.id) {
+    try {
+      await setProviderSuspension({
+        providerId: user.id,
+        isSuspended: newSuspended,
+        providerEmail: user.email,
+        suspensionReason: newSuspended ? 'إيقاف إداري من لوحة المستخدمين' : null,
+      });
+    } catch {}
   }
 
   return {

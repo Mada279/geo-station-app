@@ -9,6 +9,7 @@ import ContactButton from '@/components/ContactButton';
 import InquiryModal from '@/components/inquiry/InquiryModal';
 import AdBannerClient from '@/components/ads/AdBannerClient';
 import { validateEgyptianPhone } from '@/lib/validations/phone';
+import { getProvidersSuspensionMetaMap, isProviderActiveSuspended } from '@/services/providerControlService';
 
 export interface MarketplaceEquipmentItem {
   id: string;
@@ -171,31 +172,44 @@ export default function EquipmentMarketplacePage() {
           console.warn('[EquipmentMarketplace] Error fetching equipment:', eqError.message);
         }
 
-        // 2. Fetch providers to join full_name, company_name, location, coverage_areas
+        // 2. Fetch providers to join full_name, company_name, location, coverage_areas, status, is_suspended
         const { data: provData } = await supabase
           .from('providers')
-          .select('id, name, company_name, phone, location, coverage_areas');
+          .select('id, name, company_name, phone, location, coverage_areas, status');
+
+        // Fetch suspension control metadata map for God Mode overrides & auto-restore
+        const suspensionMap = await getProvidersSuspensionMetaMap();
 
         // Also fetch clients in case provider registered via clients table
         const { data: clientData } = await supabase
           .from('clients')
-          .select('id, user_id, full_name, company_name, phone_number, coverage_areas');
+          .select('id, user_id, full_name, company_name, phone_number, coverage_areas, status');
 
         const provMap = new Map<string, any>();
+        const suspendedProviderIds = new Set<string>();
 
         if (provData) {
           provData.forEach((p) => {
+            const pid = String(p.id);
+            const meta = suspensionMap.get(pid);
+            const isSuspended = isProviderActiveSuspended(meta) || p.status === 'suspended' || (p as any).is_suspended === true;
+
+            if (isSuspended) {
+              suspendedProviderIds.add(pid);
+            }
+
             const parsedCoverage = Array.isArray(p.coverage_areas)
               ? p.coverage_areas
               : typeof p.coverage_areas === 'string'
               ? JSON.parse(p.coverage_areas || '[]')
               : [];
-            provMap.set(String(p.id), {
+            provMap.set(pid, {
               name: p.company_name || p.name || 'مكتب مساحي معتمد',
               company_name: p.company_name,
               phone: p.phone,
               location: p.location || 'القاهرة والجيزة',
               coverage_areas: parsedCoverage,
+              is_suspended: isSuspended,
             });
           });
         }
@@ -209,12 +223,21 @@ export default function EquipmentMarketplacePage() {
               : [];
             const key = String(c.id);
             const userKey = c.user_id ? String(c.user_id) : null;
+            const meta = suspensionMap.get(key) || (userKey ? suspensionMap.get(userKey) : null);
+            const isSuspended = isProviderActiveSuspended(meta) || c.status === 'suspended' || (c as any).is_suspended === true;
+
+            if (isSuspended) {
+              suspendedProviderIds.add(key);
+              if (userKey) suspendedProviderIds.add(userKey);
+            }
+
             const profile = {
               name: c.company_name || c.full_name || 'مكتب مساحي معتمد',
               company_name: c.company_name,
               phone: c.phone_number,
               location: 'جمهورية مصر العربية',
               coverage_areas: parsedCoverage,
+              is_suspended: isSuspended,
             };
             if (!provMap.has(key)) provMap.set(key, profile);
             if (userKey && !provMap.has(userKey)) provMap.set(userKey, profile);
@@ -222,9 +245,13 @@ export default function EquipmentMarketplacePage() {
         }
 
         if (isMounted && eqData && eqData.length > 0) {
-          // Filter available for rent (excluding rented or stolen)
+          // Cascading Visibility: Filter available for rent (excluding rented, stolen, OR belonging to suspended providers)
           const availableItems = eqData.filter((row: any) => {
             if (row.is_flagged_stolen) return false;
+            const provIdStr = row.provider_id ? String(row.provider_id) : null;
+            if (provIdStr && suspendedProviderIds.has(provIdStr)) {
+              return false; // HIDE ASSET OF SUSPENDED PROVIDER!
+            }
             const st = (row.status || '').trim();
             if (st === 'مؤجر' || st === 'rented' || st === 'قيد الصيانة' || st === 'مرفوض') {
               return false;

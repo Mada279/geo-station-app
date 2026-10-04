@@ -8,6 +8,8 @@ interface UserTableProps {
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onToggleSuspend?: (user: User) => void;
+  onSendWelcome?: (user: User) => void;
+  sendingWelcomeId?: string | null;
 }
 
 const roleBadges: Record<UserRole, { label: string; class: string }> = {
@@ -22,7 +24,14 @@ const statusBadges: Record<UserStatus, { label: string; class: string }> = {
   suspended: { label: 'موقوف', class: 'bg-gray-500/20 text-gray-400 font-bold border border-gray-500/30 whitespace-nowrap' },
 };
 
-export default function UserTable({ users, onEdit, onDelete, onToggleSuspend }: UserTableProps) {
+export default function UserTable({
+  users,
+  onEdit,
+  onDelete,
+  onToggleSuspend,
+  onSendWelcome,
+  sendingWelcomeId,
+}: UserTableProps) {
   if (users.length === 0) {
     return (
       <div className="rounded-xl border border-slate-800 bg-[#0a192f] p-12 text-center text-gray-400">
@@ -93,6 +102,27 @@ export default function UserTable({ users, onEdit, onDelete, onToggleSuspend }: 
               {/* Actions */}
               <td className="px-6 py-4 whitespace-nowrap text-left">
                 <div className="flex items-center justify-end gap-2">
+                  {onSendWelcome && user.email && (
+                    <button
+                      type="button"
+                      disabled={sendingWelcomeId === user.id}
+                      onClick={() => onSendWelcome(user)}
+                      className="rounded-lg bg-blue-500/10 px-2.5 py-1.5 text-xs font-semibold text-blue-300 border border-blue-500/30 hover:bg-blue-500/20 disabled:opacity-40 transition flex items-center gap-1"
+                      title={`إرسال إيميل ترحيب رسمي إلى ${user.email}`}
+                    >
+                      {sendingWelcomeId === user.id ? (
+                        <span className="flex items-center gap-1">
+                          <span className="animate-spin h-3 w-3 border-2 border-blue-300 border-t-transparent rounded-full" />
+                          <span>إرسال...</span>
+                        </span>
+                      ) : (
+                        <>
+                          <span>✉️</span>
+                          <span>ترحيب</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                   {onToggleSuspend && user.role !== 'admin' && (
                     <button
                       onClick={() => onToggleSuspend(user)}

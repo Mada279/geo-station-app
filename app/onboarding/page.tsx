@@ -246,15 +246,31 @@ export default function OnboardingPage() {
         upsertErr = retry.error;
       }
 
-      // 2. If provider module was requested, ensure provider record exists with pending status
+      // 2. If provider module was requested, ensure provider record exists
       if (selectedModules.includes('provider') || activeMods['provider']) {
         try {
+          // Check auto_approve_providers platform setting
+          let isAutoApproved = false;
+          try {
+            const { data: autoApproveRow } = await supabase
+              .from('platform_settings')
+              .select('setting_value')
+              .eq('setting_key', 'auto_approve_providers')
+              .maybeSingle();
+
+            if (autoApproveRow && autoApproveRow.setting_value !== undefined) {
+              isAutoApproved = autoApproveRow.setting_value === true || autoApproveRow.setting_value === 'true';
+            }
+          } catch (settingErr) {
+            console.warn('[Onboarding] Error checking auto_approve_providers:', settingErr);
+          }
+
           const provPayload: any = {
             name: fullName.trim() || 'مزوّد جديد',
             email: activeEmail,
             phone: activePhone,
             company_name: companyName.trim() || fullName.trim(),
-            status: 'pending',
+            status: isAutoApproved ? 'approved' : 'pending',
           };
           if (isUUID) {
             provPayload.id = userId;
@@ -265,14 +281,53 @@ export default function OnboardingPage() {
             await supabase.from('providers').upsert(provPayload, { onConflict: 'email' });
           }
 
+          if (isAutoApproved) {
+            activeMods['provider'] = 'active';
+            // Also update clients table active_modules
+            if (isUUID) {
+              try {
+                await supabase
+                  .from('clients')
+                  .update({ active_modules: activeMods })
+                  .eq('user_id', userId);
+              } catch {}
+            }
+          }
+
           if (isUUID) {
-            await supabase.from('inapp_notifications').insert({
-              user_id: userId,
-              title: 'حساب المزود قيد المراجعة',
-              message: 'تم استلام طلب تفعيل دور مزود الخدمة. الحساب قيد التدقيق حالياً من قبل الإدارة وسيتم إشعارك فور الاعتماد.',
-              type: 'warning',
-              link: '/provider/dashboard',
+            if (isAutoApproved) {
+              await supabase.from('inapp_notifications').insert({
+                user_id: userId,
+                title: 'تم اعتماد حسابك كمزود خدمة فورياً! 🎉',
+                message: 'تهانينا! تم تفعيل واعتماد حساب المزود الخاص بك بنجاح. أضف معداتك المساحية الآن لبدء استقبال طلبات الإيجار.',
+                type: 'approval',
+                link: '/provider/dashboard#equipment',
+              });
+            } else {
+              await supabase.from('inapp_notifications').insert({
+                user_id: userId,
+                title: 'حساب المزود قيد المراجعة',
+                message: 'تم استلام طلب تفعيل دور مزود الخدمة. الحساب قيد التدقيق حالياً من قبل الإدارة وسيتم إشعارك فور الاعتماد.',
+                type: 'warning',
+                link: '/provider/dashboard',
+              });
+            }
+          }
+
+          // Instantly dispatch official welcome email via Resend gateway
+          try {
+            await fetch('/api/admin/notify-provider', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                providerEmail: activeEmail,
+                providerName: fullName.trim() || companyName.trim() || 'شريكنا العزيز',
+                actionType: isAutoApproved ? 'welcome' : 'welcome',
+                userType: 'provider',
+              }),
             });
+          } catch (emailErr) {
+            console.warn('[Onboarding] Error dispatching welcome email:', emailErr);
           }
         } catch (provErr) {
           console.warn('[Onboarding Provider Record Notice]:', provErr);

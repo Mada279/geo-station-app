@@ -37,6 +37,7 @@ export default function AdminClientsPage() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [sendingWelcomeEmailId, setSendingWelcomeEmailId] = useState<string | null>(null);
 
   // Modals state
   const [selectedClientForOrders, setSelectedClientForOrders] = useState<ClientItem | null>(null);
@@ -54,6 +55,38 @@ export default function AdminClientsPage() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleSendClientWelcome = async (client: ClientItem) => {
+    if (!client.email || !client.email.includes('@') || client.email === '—') {
+      showToast('⚠️ لا يوجد بريد إلكتروني صالح لهذا العميل');
+      return;
+    }
+
+    setSendingWelcomeEmailId(client.id);
+    try {
+      const res = await fetch('/api/admin/notify-provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerEmail: client.email,
+          providerName: client.full_name || 'عميلنا العزيز',
+          actionType: 'welcome',
+          userType: 'client',
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`✉️ تم إرسال إيميل الترحيب الرسمي بنجاح إلى "${client.full_name}" (${client.email}) 🎉`);
+      } else {
+        showToast(`❌ فشل إرسال الترحيب: ${data.error || data.warning || 'خطأ غير متوقع'}`);
+      }
+    } catch {
+      showToast('❌ تعذر الاتصال ببوابة إرسال البريد');
+    } finally {
+      setSendingWelcomeEmailId(null);
+    }
   };
 
   // Fetch live clients from Supabase
@@ -464,14 +497,37 @@ export default function AdminClientsPage() {
                           </span>
                         </td>
 
-                        <td className="p-3.5 text-center">
-                          <button
-                            onClick={() => setSelectedClientForOrders(client)}
-                            className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 font-bold transition inline-flex items-center gap-1"
-                          >
-                            <span>📋</span>
-                            <span>سجل الطلبات</span>
-                          </button>
+                        <td className="p-3.5 text-center whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-1.5">
+                            {/* Send Welcome Email */}
+                            <button
+                              type="button"
+                              disabled={sendingWelcomeEmailId === client.id || !client.email || !client.email.includes('@')}
+                              onClick={() => handleSendClientWelcome(client)}
+                              className="px-2.5 py-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 font-bold transition inline-flex items-center gap-1 disabled:opacity-40 text-xs shadow-sm"
+                              title={client.email ? `إرسال إيميل ترحيب رسمي عبر Resend إلى ${client.email}` : 'لا يوجد بريد إلكتروني مسجل'}
+                            >
+                              {sendingWelcomeEmailId === client.id ? (
+                                <span className="flex items-center gap-1 text-[11px]">
+                                  <span className="animate-spin h-3 w-3 border-2 border-blue-300 border-t-transparent rounded-full" />
+                                  <span>إرسال...</span>
+                                </span>
+                              ) : (
+                                <>
+                                  <span>✉️</span>
+                                  <span>إرسال ترحيب</span>
+                                </>
+                              )}
+                            </button>
+
+                            <button
+                              onClick={() => setSelectedClientForOrders(client)}
+                              className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 font-bold transition inline-flex items-center gap-1 text-xs"
+                            >
+                              <span>📋</span>
+                              <span>سجل الطلبات</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

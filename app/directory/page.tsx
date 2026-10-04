@@ -7,6 +7,7 @@ import ContactButton from '@/components/ContactButton';
 import AdBannerClient from '@/components/ads/AdBannerClient';
 import { supabase } from '@/utils/supabaseClient';
 import { MOCK_PROFILES } from '@/utils/helpers';
+import { getProvidersSuspensionMetaMap, isProviderActiveSuspended } from '@/services/providerControlService';
 
 interface Provider {
   id: string | number;
@@ -51,11 +52,21 @@ export default function DirectoryPage() {
           .eq('status', 'approved')
           .order('created_at', { ascending: false });
 
+        const suspensionMap = await getProvidersSuspensionMetaMap();
+
         if (error) {
           console.warn('[DirectoryPage] Supabase error:', error.message);
         }
 
         if (isMounted && data && data.length > 0) {
+          const activeProviders = data.filter((p: any) => {
+            const meta = suspensionMap.get(String(p.id));
+            if (isProviderActiveSuspended(meta) || p.status === 'suspended' || p.is_suspended === true) {
+              return false; // HIDE SUSPENDED PROVIDER FROM PUBLIC DIRECTORY
+            }
+            return true;
+          });
+
           const defaultImages = [
             '/assets/img/hero-engineering-office.jpg',
             '/assets/img/office-survey-team.jpg',
@@ -65,7 +76,7 @@ export default function DirectoryPage() {
             '/assets/img/office-cad-workstation.jpg',
           ];
 
-          const mapped: Provider[] = data.map((p: any, idx: number) => {
+          const mapped: Provider[] = activeProviders.map((p: any, idx: number) => {
             // Extract governorate and city
             const loc = p.location || 'القاهرة';
             let gov = p.governorate || '';

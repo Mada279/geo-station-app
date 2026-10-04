@@ -34,26 +34,26 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   openGraph: {
-    title: 'Survsta — المنصة الرقمية لقطاع المساحة والجيوماتكس',
-    description: 'سوق الأجهزة المساحية والخدمات والوظائف الهندسية في مصر والشرق الأوسط',
+    title: 'Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر',
+    description: 'المنصة الرائدة لربط المهندسين والمقاولين بمزودي أجهزة Total Station و GPS RTK ومكاتب المساحة المعتمدة.',
     url: 'https://survsta.com',
-    siteName: 'Survsta',
+    siteName: 'Survsta | سيرفستا',
     locale: 'ar_EG',
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: 'https://survsta.com/images/survsta-og-banner.jpg',
         width: 1200,
         height: 630,
-        alt: 'Survsta Platform',
+        alt: 'Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Survsta | سيرفستا',
-    description: 'سوق الأجهزة المساحية والخدمات الهندسية',
-    images: ['/og-image.jpg'],
+    title: 'Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر',
+    description: 'المنصة الرائدة لربط المهندسين والمقاولين بمزودي أجهزة Total Station و GPS RTK ومكاتب المساحة المعتمدة.',
+    images: ['https://survsta.com/images/survsta-og-banner.jpg'],
   },
 };
 

@@ -160,7 +160,33 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      showToast(`🎉 تم اعتماد وتفعيل حساب "${p ? p.name : providerId}" بنجاح في Supabase!`);
+      // Send in-app notification
+      try {
+        await supabase.from('inapp_notifications').insert({
+          user_id: providerId,
+          title: 'تم اعتماد حسابك كمزود خدمة بنجاح! 🎉',
+          message: 'تهانينا! تمت مراجعة واعتماد حساب المزود الخاص بك من قبل الإدارة. يمكنك الآن نشر أجهزتك ومعداتك واستقبال طلبات الحجز.',
+          type: 'approval',
+          link: '/provider/dashboard',
+        });
+      } catch {}
+
+      // Dispatch automated official email via Resend
+      if (p?.email && p.email.includes('@')) {
+        try {
+          await fetch('/api/admin/notify-provider', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              providerEmail: p.email,
+              providerName: p.name,
+              actionType: 'approved',
+            }),
+          });
+        } catch {}
+      }
+
+      showToast(`🎉 تم اعتماد وتفعيل حساب "${p ? p.name : providerId}" بنجاح وإرسال إشعار التفعيل!`);
       setSelectedProvider(null);
       await loadAll();
     } catch (err) {

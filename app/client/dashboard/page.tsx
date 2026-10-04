@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
 import { validateEgyptianPhone } from "@/lib/validations/phone";
+import SecureEmailUpdateModal from "@/components/auth/SecureEmailUpdateModal";
 
 interface ClientData {
   id: string;
@@ -43,6 +44,7 @@ export default function ClientDashboardPage() {
   const [companyName, setCompanyName] = useState("");
   const [notificationPref, setNotificationPref] = useState("all");
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [profileMessage, setProfileMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Security / Password Update State
@@ -508,17 +510,27 @@ export default function ClientDashboardPage() {
                     />
                   </div>
 
-                  {/* Email (Read-Only) */}
+                  {/* Email (Read-Only with Secure OTP Action) */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-                      البريد الإلكتروني المسجل
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium text-slate-300">
+                        البريد الإلكتروني المسجل
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsEmailModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition cursor-pointer"
+                      >
+                        <span>🔐</span>
+                        <span>تحديث البريد (OTP)</span>
+                      </button>
+                    </div>
                     <input
                       type="email"
                       value={clientProfile?.email || ""}
                       readOnly
                       dir="ltr"
-                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-400 cursor-not-allowed text-left font-mono"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 cursor-default text-left font-mono"
                     />
                   </div>
                 </div>
@@ -780,6 +792,20 @@ export default function ClientDashboardPage() {
           </div>
         </div>
       </main>
+
+      {/* Secure OTP Email Update Modal */}
+      <SecureEmailUpdateModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        currentEmail={clientProfile?.email || ""}
+        userId={clientProfile?.user_id || currentUser?.id || undefined}
+        role="client"
+        onSuccess={(updatedEmail) => {
+          setClientProfile((prev) => (prev ? { ...prev, email: updatedEmail } : null));
+          setProfileMessage({ type: "success", text: "تم تحديث وتوثيق بريدك الإلكتروني بنجاح!" });
+          setTimeout(() => setProfileMessage(null), 4000);
+        }}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/utils/supabaseClient';
 import { MASTER_CATALOG, MasterCatalogItem } from '@/data/masterCatalog';
+import SecureEmailUpdateModal from '@/components/auth/SecureEmailUpdateModal';
 
 const ProviderOnboardingTour = dynamic(
   () => import('@/components/ProviderOnboardingTour'),
@@ -219,6 +220,7 @@ export default function ProviderDashboardPage() {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -1995,20 +1997,31 @@ export default function ProviderDashboardPage() {
                   <p className="text-[11px] text-gray-400 mt-1">يحدد نطاق ظهور أجهزتك في الفلاتر الجغرافية للدليل العام.</p>
                 </div>
 
-                {/* Email (Readonly Auth Field) */}
+                {/* Email (Readonly Auth Field with Secure OTP Change Action) */}
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 flex items-center justify-between">
-                    <span>البريد الإلكتروني المسجل للحساب</span>
-                    <span className="text-[10px] text-amber-400 font-normal">🔒 مرتبط بحساب المصادقة</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-gray-300">
+                      البريد الإلكتروني المسجل للحساب
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsEmailModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition cursor-pointer"
+                    >
+                      <span>🔐</span>
+                      <span>تحديث البريد الآمن (OTP)</span>
+                    </button>
+                  </div>
                   <input
                     type="email"
-                    disabled
+                    readOnly
                     dir="ltr"
                     value={profileData.email}
-                    className="w-full rounded-xl border border-gray-800 bg-[#061429] px-4 py-2.5 text-xs text-gray-400 cursor-not-allowed font-mono opacity-80"
+                    className="w-full rounded-xl border border-slate-700 bg-[#061429] px-4 py-2.5 text-xs text-slate-200 font-mono text-left opacity-90 cursor-default"
                   />
-                  <p className="text-[11px] text-gray-500 mt-1">البريد الإلكتروني الأساسي المستخدم لتسجيل الدخول وإشعارات الطلبات.</p>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    البريد المستخدم لتسجيل الدخول. لتغييره، يتم إرسال رمز تحقق سري (OTP) إلى بريدك الجديد لحماية الحساب.
+                  </p>
                 </div>
               </div>
 
@@ -2579,6 +2592,20 @@ export default function ProviderDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Secure OTP Email Update Modal */}
+      <SecureEmailUpdateModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        currentEmail={profileData.email}
+        providerId={profileData.id || undefined}
+        userId={profileData.id || undefined}
+        role="provider"
+        onSuccess={(updatedEmail) => {
+          setProfileData((prev) => ({ ...prev, email: updatedEmail }));
+          showToast('✅ تم توثيق واعتماد بريدك الإلكتروني الجديد بنجاح!');
+        }}
+      />
 
       {/* Floating Toast Notification */}
       {toastMessage && (
