@@ -33,6 +33,7 @@ export default function AdminSidebar({ pendingCount = 0, isOpen = false, onClose
           badgeColor: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
         },
         { href: '/admin/equipment', label: 'مراجعة الأجهزة', icon: '📡' },
+        { href: '/admin/payments', label: 'إيصالات الشحن (Payments)', icon: '💳' },
         { href: '/admin/kyc', label: 'توثيق الشركات (KYC)', icon: '🛡️' },
       ],
     },

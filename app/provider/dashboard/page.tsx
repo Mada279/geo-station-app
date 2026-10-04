@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { supabase } from '@/utils/supabaseClient';
 import { MASTER_CATALOG, MasterCatalogItem } from '@/data/masterCatalog';
 import SecureEmailUpdateModal from '@/components/auth/SecureEmailUpdateModal';
+import WalletTopUpModal from '@/components/provider/WalletTopUpModal';
 
 const ProviderOnboardingTour = dynamic(
   () => import('@/components/ProviderOnboardingTour'),
@@ -221,6 +222,8 @@ export default function ProviderDashboardPage() {
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState<boolean>(false);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -873,6 +876,10 @@ export default function ProviderDashboardPage() {
           location: locVal || 'تغطية شاملة',
         });
 
+        if (data.wallet_balance !== undefined && data.wallet_balance !== null) {
+          setWalletBalance(Number(data.wallet_balance) || 0);
+        }
+
         // Sync back to localStorage
         if (typeof window !== 'undefined') {
           try {
@@ -1366,6 +1373,17 @@ export default function ProviderDashboardPage() {
             >
               <span>+</span>
               <span>إضافة جهاز أو خدمة جديدة</span>
+            </button>
+
+            {/* Wallet Top-Up Button */}
+            <button
+              type="button"
+              onClick={() => setIsWalletModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/60 px-4 py-2.5 text-xs sm:text-sm font-bold text-emerald-300 transition shadow-lg shadow-emerald-950/30 cursor-pointer"
+              title="شحن رصيد المحفظة عبر فودافون كاش أو إنستاباي"
+            >
+              <span>💳</span>
+              <span>شحن المحفظة ({walletBalance.toLocaleString('en-US')} ج.م)</span>
             </button>
 
             {/* Step: Report Stolen Device button */}
@@ -2604,6 +2622,18 @@ export default function ProviderDashboardPage() {
         onSuccess={(updatedEmail) => {
           setProfileData((prev) => ({ ...prev, email: updatedEmail }));
           showToast('✅ تم توثيق واعتماد بريدك الإلكتروني الجديد بنجاح!');
+        }}
+      />
+
+      {/* Wallet Top-Up Modal (Vodafone Cash & InstaPay) */}
+      <WalletTopUpModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+        providerId={providerId || profileData.id}
+        currentBalance={walletBalance}
+        onSuccess={() => {
+          fetchProviderProfile();
+          showToast('✅ تم استلام طلب شحن المحفظة وإرساله للإدارة بنجاح!');
         }}
       />
 
