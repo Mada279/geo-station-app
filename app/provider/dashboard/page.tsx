@@ -1259,21 +1259,17 @@ export default function ProviderDashboardPage() {
     }
 
     try {
-      // 2. Perform Supabase deletion and verify that a row was actually deleted
-      const { data: deletedRows, error } = await supabase
-        .from('equipment')
-        .delete()
-        .eq('id', id)
-        .select('id');
+      // 2. Perform deletion via Secure API Route (Bypasses RLS mismatches safely)
+      const res = await fetch('/api/equipment', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
 
-      if (error) {
-        console.error('[ProviderDashboard] Delete error:', error);
-        throw error;
-      }
+      const json = await res.json().catch(() => ({}));
 
-      // If RLS blocked the deletion silently, 0 rows were affected
-      if (!deletedRows || deletedRows.length === 0) {
-        throw new Error('لم يتم حذف السجل من الخادم (قد لا تملك صلاحية حذف هذا الجهاز).');
+      if (!res.ok) {
+        throw new Error(json.error || `فشل حذف الجهاز من الخادم (${res.status})`);
       }
 
       // 3. ONLY update the React state AFTER successful database deletion
