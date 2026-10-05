@@ -64,6 +64,27 @@ export default function UnifiedDashboardPage() {
               setOrdersCount(count);
             }
           }
+
+          // Check providers table to detect provider role
+          const cleanEmail = (user.email || '').toLowerCase().trim();
+          try {
+            const { data: provRow } = await supabase
+              .from('providers')
+              .select('id, name, status')
+              .or(`email.eq.${cleanEmail},user_id.eq.${user.id}`)
+              .maybeSingle();
+
+            if (provRow && provRow.status !== 'blocked' && provRow.status !== 'rejected') {
+              setActiveModules((prev) => Array.from(new Set([...prev, 'provider'])));
+              setModulesMap((prev) => ({
+                ...prev,
+                provider: provRow.status === 'pending' ? 'pending' : 'active',
+              }));
+              if (provRow.name) setUserName((prev) => (prev === 'مستخدم سيرفستا' ? provRow.name : prev));
+            }
+          } catch (pErr) {
+            console.warn('[Dashboard providers check]:', pErr);
+          }
         } else if (typeof window !== 'undefined') {
           const stored = localStorage.getItem('SURVSTA_AUTH_USER');
           if (stored) {
@@ -74,8 +95,18 @@ export default function UnifiedDashboardPage() {
               if (parsed.active_modules) {
                 parseModulesData(parsed.active_modules);
               }
+              if (parsed.role === 'provider') {
+                setActiveModules((prev) => Array.from(new Set([...prev, 'provider'])));
+                setModulesMap((prev) => ({ ...prev, provider: 'active' }));
+              }
             } catch {}
           }
+        }
+
+        // Direct cookie check for provider role
+        if (typeof document !== 'undefined' && document.cookie.includes('user_role=provider')) {
+          setActiveModules((prev) => Array.from(new Set([...prev, 'provider'])));
+          setModulesMap((prev) => ({ ...prev, provider: prev['provider'] || 'active' }));
         }
       } catch (e) {
         console.error('Error loading dashboard overview:', e);
@@ -135,6 +166,38 @@ export default function UnifiedDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Prominent Provider Banner for Direct Access to Equipment & Provider Portal */}
+      {hasProvider && !isProviderPending && (
+        <div className="relative overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#0F253E] to-[#0B1528] p-5 sm:p-6 shadow-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 animate-in fade-in duration-200">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl shadow-inner shrink-0">
+              🔭
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  مزوّد خدمة معتمد ✓
+                </span>
+                <span className="text-xs text-slate-400">لوحة التحكم التشغيلية</span>
+              </div>
+              <h3 className="text-base sm:text-lg font-black text-white mt-1">
+                مرحباً بك! أنت مسجّل كمزوّد معتمد في Survsta
+              </h3>
+              <p className="text-xs text-slate-300 mt-0.5 max-w-xl leading-relaxed">
+                يمكنك الانتقال فوراً إلى لوحة تحكم المزود لإدارة كتالوج أجهزتك المساحية، متابعة طلبات التأجير الواردة، واستعراض أرباحك ومحفظتك.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/provider/dashboard"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-l from-amber-500 to-[#F4B400] text-slate-950 font-black text-xs hover:brightness-110 transition shadow-lg shadow-amber-500/20 shrink-0"
+          >
+            <span>لوحة تحكم المزود ومعداتك</span>
+            <span className="text-sm">←</span>
+          </Link>
+        </div>
+      )}
 
       {/* Active Modules Overview Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -281,13 +344,13 @@ export default function UnifiedDashboardPage() {
                 hasProvider
                   ? isProviderPending
                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                    : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                    : 'bg-amber-500/15 text-amber-300 border-amber-500/40'
                   : 'bg-slate-800 text-slate-400 border-slate-700'
               }`}>
                 {hasProvider
                   ? isProviderPending
                     ? 'قيد المراجعة ⏳'
-                    : 'مفعّل في حسابك'
+                    : 'مفعّل في حسابك ✓'
                   : 'غير مفعل'}
               </span>
             </div>
@@ -308,7 +371,7 @@ export default function UnifiedDashboardPage() {
                     <span>بانتظار الاعتماد من الإدارة</span>
                   </span>
                 ) : (
-                  <span className="font-bold text-amber-400">إدارة الأجهزة والأسعار</span>
+                  <span className="font-bold text-amber-400">معتمد ونشط ✓</span>
                 )}
               </div>
             )}
@@ -318,13 +381,13 @@ export default function UnifiedDashboardPage() {
             {hasProvider ? (
               <Link
                 href="/provider/dashboard"
-                className={`w-full text-center py-2 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-2 ${
+                className={`w-full text-center py-2.5 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-2 ${
                   isProviderPending
                     ? 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-300'
-                    : 'bg-amber-600/20 hover:bg-amber-600/30 border-amber-500/30 text-amber-300'
+                    : 'bg-gradient-to-l from-amber-500 to-[#F4B400] text-slate-950 hover:brightness-110 shadow-lg shadow-amber-500/20 font-black'
                 }`}
               >
-                <span>{isProviderPending ? 'متابعة حالة الاعتماد ⏳' : 'كتالوج ومبيعات المزود ←'}</span>
+                <span>{isProviderPending ? 'متابعة حالة الاعتماد ⏳' : 'الدخول إلى لوحة المزود ومعداتي ←'}</span>
               </Link>
             ) : (
               <Link

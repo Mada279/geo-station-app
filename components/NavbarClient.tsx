@@ -151,7 +151,21 @@ export default function Navbar({
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user && isMounted) {
-          const norm = normalizeUser(session.user);
+          const fallbackRole = local?.role || currentUser?.role;
+          let norm = normalizeUser(session.user, fallbackRole);
+          if (norm && norm.role !== 'admin' && norm.role !== 'provider' && session.user.email) {
+            try {
+              const { data: provRow } = await supabase
+                .from('providers')
+                .select('id, name, status')
+                .eq('email', session.user.email.toLowerCase().trim())
+                .maybeSingle();
+              if (provRow && provRow.status !== 'blocked' && provRow.status !== 'rejected') {
+                norm.role = 'provider';
+                if (provRow.name) norm.organization = provRow.name;
+              }
+            } catch {}
+          }
           if (norm) {
             setCurrentUser(norm);
             syncUserToCookiesAndStorage(norm);
@@ -171,12 +185,27 @@ export default function Navbar({
     checkAuth();
 
     // 3. Supabase Auth real-time listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         setCurrentUser(null);
         syncUserToCookiesAndStorage(null);
       } else if (session?.user) {
-        const norm = normalizeUser(session.user);
+        const local = getActiveSession();
+        const fallbackRole = local?.role || currentUser?.role;
+        let norm = normalizeUser(session.user, fallbackRole);
+        if (norm && norm.role !== 'admin' && norm.role !== 'provider' && session.user.email) {
+          try {
+            const { data: provRow } = await supabase
+              .from('providers')
+              .select('id, name, status')
+              .eq('email', session.user.email.toLowerCase().trim())
+              .maybeSingle();
+            if (provRow && provRow.status !== 'blocked' && provRow.status !== 'rejected') {
+              norm.role = 'provider';
+              if (provRow.name) norm.organization = provRow.name;
+            }
+          } catch {}
+        }
         if (norm) {
           setCurrentUser(norm);
           syncUserToCookiesAndStorage(norm);
@@ -535,24 +564,23 @@ export default function Navbar({
 
                       {/* Dropdown Links */}
                       <div className="space-y-1 text-xs font-medium">
-                        <Link
-                          href={dashboardHref}
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-200 hover:text-white hover:bg-white/5 transition"
-                        >
-                          <span>📊</span>
-                          <span>لوحة التحكم الرئيسية</span>
-                        </Link>
-
-                        {currentUser.role === 'provider' && (
+                        {currentUser.role === 'provider' ? (
                           <>
+                            <Link
+                              href="/provider/dashboard"
+                              onClick={() => setIsProfileDropdownOpen(false)}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 font-bold transition shadow-sm"
+                            >
+                              <span>🔭</span>
+                              <span>لوحة تحكم المزود ومعداتي</span>
+                            </Link>
                             <Link
                               href="/provider/dashboard#equipment"
                               onClick={() => setIsProfileDropdownOpen(false)}
                               className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-200 hover:text-white hover:bg-white/5 transition"
                             >
-                              <span>🔭</span>
-                              <span>كتالوج ومعداتي المساحية</span>
+                              <span>📦</span>
+                              <span>كتالوج ومخزون الأجهزة</span>
                             </Link>
                             <Link
                               href="/provider/locations"
@@ -562,7 +590,25 @@ export default function Navbar({
                               <span>📍</span>
                               <span>مناطق التغطية الجغرافية</span>
                             </Link>
+                            <div className="my-1 border-t border-white/5" />
+                            <Link
+                              href="/dashboard"
+                              onClick={() => setIsProfileDropdownOpen(false)}
+                              className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition text-[11px]"
+                            >
+                              <span>📊</span>
+                              <span>تخصيص الأدوار (اللوحة العامة)</span>
+                            </Link>
                           </>
+                        ) : (
+                          <Link
+                            href={dashboardHref}
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-200 hover:text-white hover:bg-white/5 transition"
+                          >
+                            <span>📊</span>
+                            <span>لوحة التحكم الرئيسية</span>
+                          </Link>
                         )}
 
                         {currentUser.role === 'admin' && (
