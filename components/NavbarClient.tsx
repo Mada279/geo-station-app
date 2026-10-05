@@ -256,6 +256,17 @@ export default function Navbar({
       await supabase.auth.signOut();
     } catch {}
 
+    // Explicitly clear cookies with path=/
+    document.cookie = 'survsta_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'user_role=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+    // Clear localStorage
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem('SURVSTA_AUTH_USER');
+      localStorage.removeItem('SURVSTA_LOGGED_OUT');
+      localStorage.removeItem('GS_LOGGED_OUT');
+    }
+
     syncUserToCookiesAndStorage(null);
     setCurrentUser(null);
 
@@ -268,7 +279,7 @@ export default function Navbar({
       }
     } catch {}
 
-    window.location.href = '/login';
+    window.location.replace('/login');
   };
 
   const dashboardHref =

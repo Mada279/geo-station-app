@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { supabase } from '@/utils/supabaseClient';
 
 interface ProviderSidebarProps {
   equipmentCount?: number;
@@ -247,14 +248,30 @@ export default function ProviderSidebar({
     showToast('سيتم تفعيل هذه الخاصية قريباً في التحديث القادم');
   };
 
-  const handleLogout = () => {
-    document.cookie = 'survsta_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch {}
+
+    // Explicitly delete cookies with max-age=0 and path=/
+    document.cookie = 'survsta_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'user_role=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
     if (typeof window !== 'undefined') {
       localStorage.removeItem('SURVSTA_AUTH_USER');
-      localStorage.setItem('SURVSTA_LOGGED_OUT', '1');
-      window.location.href = '/login';
+      localStorage.removeItem('SURVSTA_LOGGED_OUT');
+      localStorage.removeItem('GS_LOGGED_OUT');
     }
+
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        const bc = new BroadcastChannel('survsta_auth_channel');
+        bc.postMessage({ type: 'LOGOUT' });
+        bc.close();
+      }
+    } catch {}
+
+    window.location.replace('/login');
   };
 
   const isActive = (href: string) => {

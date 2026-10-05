@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -16,6 +16,60 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Active Session Guard: Immediately redirect away from /login if user is already authenticated
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkExistingSession() {
+      // 1. Check localStorage first
+      if (typeof window !== 'undefined' && window.localStorage) {
+        try {
+          const stored = localStorage.getItem('SURVSTA_AUTH_USER');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && parsed.role) {
+              const target =
+                callbackUrl && callbackUrl.startsWith('/')
+                  ? callbackUrl
+                  : parsed.role === 'admin'
+                  ? '/admin'
+                  : parsed.role === 'provider'
+                  ? '/provider/dashboard'
+                  : '/provider/dashboard';
+              window.location.replace(target);
+              return;
+            }
+          }
+        } catch {}
+      }
+
+      // 2. Check live Supabase Auth session
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user && isMounted) {
+          let role = session.user.user_metadata?.role || '';
+          if (!role && typeof document !== 'undefined') {
+            const match = document.cookie.match(/(?:^|;\s*)user_role=([^;]+)/);
+            if (match && match[1]) role = decodeURIComponent(match[1]);
+          }
+          const target =
+            callbackUrl && callbackUrl.startsWith('/')
+              ? callbackUrl
+              : role === 'admin' || session.user.email === 'ahmed@survsta.com'
+              ? '/admin'
+              : '/provider/dashboard';
+          window.location.replace(target);
+        }
+      } catch {}
+    }
+
+    checkExistingSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,11 +115,8 @@ function LoginForm() {
           } catch {}
         }
 
-        if (callbackUrl && callbackUrl.startsWith('/admin')) {
-          router.push(callbackUrl);
-        } else {
-          router.push('/admin');
-        }
+        const targetUrl = callbackUrl && callbackUrl.startsWith('/admin') ? callbackUrl : '/admin';
+        window.location.replace(targetUrl);
         return;
       }
 
@@ -206,11 +257,8 @@ function LoginForm() {
           } catch {}
         }
 
-        if (callbackUrl && callbackUrl.startsWith('/')) {
-          router.push(callbackUrl);
-        } else {
-          router.push('/provider/dashboard');
-        }
+        const targetUrl = callbackUrl && callbackUrl.startsWith('/') ? callbackUrl : '/provider/dashboard';
+        window.location.replace(targetUrl);
         return;
       }
 
@@ -246,17 +294,16 @@ function LoginForm() {
         } catch {}
       }
 
-      if (callbackUrl && callbackUrl.startsWith('/')) {
-        router.push(callbackUrl);
-      } else {
-        if (user.role === 'admin') {
-          router.push('/admin');
-        } else if (user.role === 'provider') {
-          router.push('/provider/dashboard');
-        } else {
-          router.push('/');
-        }
-      }
+      const targetUrl =
+        callbackUrl && callbackUrl.startsWith('/')
+          ? callbackUrl
+          : user.role === 'admin'
+          ? '/admin'
+          : user.role === 'provider'
+          ? '/provider/dashboard'
+          : '/';
+      window.location.replace(targetUrl);
+      return;
     } catch (err: unknown) {
       setError(
         err instanceof Error
