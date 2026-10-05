@@ -89,26 +89,26 @@ export default function TrustMarquee({
 }: TrustMarqueeProps) {
   return (
     <div
-      className={`relative w-full overflow-hidden border-y border-white/5 bg-[#071326]/80 py-3.5 backdrop-blur-md group ${className}`}
+      className={`relative w-full overflow-hidden border-b border-white/10 bg-[#071326]/95 backdrop-blur-md group flex items-center ${className}`}
       dir="ltr"
     >
       {/* Subtle edge fade gradient mask */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#071326] via-[#071326]/80 to-transparent sm:w-36" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#071326] via-[#071326]/80 to-transparent sm:w-36" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#071326] via-[#071326]/80 to-transparent sm:w-28" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#071326] via-[#071326]/80 to-transparent sm:w-28" />
 
       {/* Marquee Wrapper: 2 identical flex items side by side for seamless loop */}
-      <div className="flex w-max [mask-image:linear-gradient(to_right,transparent_0%,black_100px,black_calc(100%-100px),transparent_100%)]">
+      <div className="flex w-max items-center [mask-image:linear-gradient(to_right,transparent_0%,black_60px,black_calc(100%-60px),transparent_100%)]">
         {/* Set 1 */}
-        <div className={`flex shrink-0 items-center gap-4 sm:gap-6 px-3 ${speedClass} group-hover:[animation-play-state:paused]`}>
+        <div className={`flex shrink-0 items-center gap-3 sm:gap-5 px-3 ${speedClass} group-hover:[animation-play-state:paused]`}>
           {MARQUEE_ITEMS.map((item) => (
             <div
               key={`marquee-1-${item.id}`}
-              className={`inline-flex items-center gap-2.5 rounded-full border px-4 py-1.5 text-xs font-bold transition shadow-sm ${item.colorClass}`}
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-0.5 text-xs font-bold transition shadow-sm ${item.colorClass}`}
             >
-              <span className="text-sm">{item.icon}</span>
-              <span className="whitespace-nowrap font-black">{item.title}</span>
+              <span className="text-sm leading-none">{item.icon}</span>
+              <span className="whitespace-nowrap font-black leading-none">{item.title}</span>
               {item.badge && (
-                <span className="hidden sm:inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/80">
+                <span className="hidden sm:inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/80 leading-none">
                   {item.badge}
                 </span>
               )}
@@ -119,17 +119,17 @@ export default function TrustMarquee({
         {/* Set 2 (Duplicate for infinite seamless loop) */}
         <div
           aria-hidden="true"
-          className={`flex shrink-0 items-center gap-4 sm:gap-6 px-3 ${speedClass} group-hover:[animation-play-state:paused]`}
+          className={`flex shrink-0 items-center gap-3 sm:gap-5 px-3 ${speedClass} group-hover:[animation-play-state:paused]`}
         >
           {MARQUEE_ITEMS.map((item) => (
             <div
               key={`marquee-2-${item.id}`}
-              className={`inline-flex items-center gap-2.5 rounded-full border px-4 py-1.5 text-xs font-bold transition shadow-sm ${item.colorClass}`}
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-0.5 text-xs font-bold transition shadow-sm ${item.colorClass}`}
             >
-              <span className="text-sm">{item.icon}</span>
-              <span className="whitespace-nowrap font-black">{item.title}</span>
+              <span className="text-sm leading-none">{item.icon}</span>
+              <span className="whitespace-nowrap font-black leading-none">{item.title}</span>
               {item.badge && (
-                <span className="hidden sm:inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/80">
+                <span className="hidden sm:inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/80 leading-none">
                   {item.badge}
                 </span>
               )}

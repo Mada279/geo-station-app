@@ -5,7 +5,6 @@ import Link from 'next/link';
 import FeaturedProviders from '@/components/FeaturedProviders';
 import ProviderEarlyAccessCTA from '@/components/ProviderEarlyAccessCTA';
 import AdBanner from '@/components/ads/AdBanner';
-import TrustMarquee from '@/components/ui/TrustMarquee';
 import { supabase } from '@/utils/supabaseClient';
 import { getEquipmentImageUrl } from '@/utils/helpers';
 
@@ -421,7 +420,7 @@ export default async function HomePage() {
           />
         </div>
 
-        <div className="relative z-10 container mx-auto px-6 lg:px-12">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-12">
           
           {/* Two-Column Hero Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[65vh]">
@@ -461,14 +460,14 @@ export default async function HomePage() {
                 </Link>
                 <Link
                   href="/directory"
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-bold text-white hover:bg-white/10 transition"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-bold text-white hover:bg-white/10 transition"
                 >
                   <span>استكشف الدليل الهندسي</span>
                 </Link>
               </div>
 
               {/* Unified Search Component (Pill-style with glassmorphism) */}
-              <div className="rounded-full border border-white/20 bg-white/10 p-2 backdrop-blur-xl shadow-2xl">
+              <div className="rounded-2xl sm:rounded-full border border-white/20 bg-white/10 p-2 backdrop-blur-xl shadow-2xl">
                 <form action="/directory" method="GET" className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                   <div className="flex flex-1 items-center gap-2.5 px-4 w-full">
                     <span className="text-cyan-400 text-base">🔍</span>
@@ -598,9 +597,6 @@ export default async function HomePage() {
 
         </div>
       </section>
-
-      {/* Infinite Scrolling Trust & Payment Marquee */}
-      <TrustMarquee />
 
       {/* Ad Banner - Homepage Hero Placement */}
       <div className="container mx-auto px-6 lg:px-12 -mb-2">

@@ -355,7 +355,7 @@ export default function Navbar({
       )}
 
       {/* Main Header / Sticky Navbar */}
-      <header className="sticky top-0 z-[60] border-b border-cyan-500/15 bg-[#081933] text-white shadow-xl transition-colors">
+      <header className="sticky top-10 z-[60] border-b border-cyan-500/15 bg-[#081933] text-white shadow-xl transition-colors">
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           
           {/* Brand Logo */}

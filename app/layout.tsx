@@ -3,6 +3,8 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import FloatingAdButton from '@/components/FloatingAdButton';
+import TrustMarquee from '@/components/ui/TrustMarquee';
+import PwaInstallPrompt from '@/components/PwaInstallPrompt';
 import './styles/font.css';
 import './styles/tokens.css';
 import './styles/style.css';
@@ -13,7 +15,8 @@ export const viewport: Viewport = {
   themeColor: '#0B1528',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export const metadata: Metadata = {
@@ -103,11 +106,14 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
-      <body className="min-h-screen bg-[#f4f7fa] text-slate-800 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between">
+      <body className="min-h-screen bg-[#f4f7fa] text-slate-800 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between pt-10">
+        {/* Global Fixed Sticky Trust & Instant Settlement Marquee */}
+        <TrustMarquee className="fixed top-0 left-0 w-full z-[100] h-10" />
         <Navbar />
         <main className="flex-grow">{children}</main>
         <Footer />
         <FloatingAdButton />
+        <PwaInstallPrompt />
         <GoogleAnalytics gaId="G-FFCDYX5JBS" />
       </body>
     </html>

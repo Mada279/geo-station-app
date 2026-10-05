@@ -235,3 +235,5 @@ function IosInstallModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+
+export { default as PwaInstallPrompt } from './PwaInstallPrompt';

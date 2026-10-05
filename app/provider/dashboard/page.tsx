@@ -8,7 +8,6 @@ import { MASTER_CATALOG, MasterCatalogItem } from '@/data/masterCatalog';
 import SecureEmailUpdateModal from '@/components/auth/SecureEmailUpdateModal';
 import WalletTopUpModal from '@/components/provider/WalletTopUpModal';
 import InstallPwaButton from '@/components/InstallPwaButton';
-import TrustMarquee from '@/components/ui/TrustMarquee';
 
 const DashboardTour = dynamic(
   () => import('@/components/provider/DashboardTour'),
@@ -1350,8 +1349,6 @@ export default function ProviderDashboardPage() {
       <DashboardTour autoStart={true} />
 
       <div className="mx-auto max-w-7xl space-y-6">
-        {/* Trust & Payment Gateways Marquee Banner */}
-        <TrustMarquee className="rounded-2xl border border-cyan-500/20" />
 
         {/* Dashboard Topbar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-amber-500/20 pb-5">
