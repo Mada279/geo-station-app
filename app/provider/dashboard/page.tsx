@@ -294,7 +294,10 @@ export default function ProviderDashboardPage() {
           try {
             const parsed = JSON.parse(stored);
             activeUserId = parsed.id || null;
-            if (activeUserId) setProviderId(activeUserId);
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(activeUserId || '');
+            if (activeUserId && isUuid) {
+              setProviderId((prev) => prev || activeUserId);
+            }
           } catch {}
         }
       }
@@ -879,6 +882,13 @@ export default function ProviderDashboardPage() {
           setWalletBalance(Number(data.wallet_balance) || 0);
         }
 
+        // Ensure providers.user_id is linked with current auth.uid() so RLS policies always succeed
+        if (authData?.user?.id && (!data.user_id || data.user_id !== authData.user.id)) {
+          try {
+            await supabase.from('providers').update({ user_id: authData.user.id }).eq('id', data.id);
+          } catch {}
+        }
+
         // Sync back to localStorage
         if (typeof window !== 'undefined') {
           try {
@@ -1239,16 +1249,41 @@ export default function ProviderDashboardPage() {
   const handleDeleteDevice = async (id: string, title: string) => {
     if (!confirm(`هل أنت متأكد من رغبتك في حذف "${title}"؟`)) return;
 
-    try {
-      const { error } = await supabase.from('equipment').delete().eq('id', id);
-      if (error) {
-        console.warn('[ProviderDashboard] Delete error:', error);
-      }
+    // 1. Handle Non-UUID Fallbacks (e.g. temporary local IDs like 'EQ-123')
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (!isUuid || id.startsWith('EQ-')) {
       setEquipment((prev) => prev.filter((item) => item.id !== id));
       setUploadedEquipmentCount((prev) => Math.max(0, prev - 1));
-      showToast('🗑️ تم حذف الجهاز من القائمة.');
-    } catch (err) {
-      showToast('❌ تعذر الحذف حالياً.');
+      showToast('🗑️ تم حذف الجهاز من القائمة المحلية.');
+      return;
+    }
+
+    try {
+      // 2. Perform Supabase deletion and verify that a row was actually deleted
+      const { data: deletedRows, error } = await supabase
+        .from('equipment')
+        .delete()
+        .eq('id', id)
+        .select('id');
+
+      if (error) {
+        console.error('[ProviderDashboard] Delete error:', error);
+        throw error;
+      }
+
+      // If RLS blocked the deletion silently, 0 rows were affected
+      if (!deletedRows || deletedRows.length === 0) {
+        throw new Error('لم يتم حذف السجل من الخادم (قد لا تملك صلاحية حذف هذا الجهاز).');
+      }
+
+      // 3. ONLY update the React state AFTER successful database deletion
+      setEquipment((prev) => prev.filter((item) => item.id !== id));
+      setUploadedEquipmentCount((prev) => Math.max(0, prev - 1));
+      showToast('🗑️ تم حذف الجهاز بنجاح من قاعدة البيانات.');
+    } catch (err: any) {
+      console.error('[ProviderDashboard] Delete exception:', err);
+      const errorMsg = err?.message || 'قد لا تملك صلاحية حذف هذا الجهاز من الخادم.';
+      showToast(`❌ تعذر الحذف: ${errorMsg}`);
     }
   };
 
