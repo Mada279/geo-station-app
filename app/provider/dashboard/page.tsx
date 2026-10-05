@@ -1048,7 +1048,8 @@ export default function ProviderDashboardPage() {
     setIsWalletModalOpen(false);
     setIsReportStolenModalOpen(false);
     try {
-      const { startDashboardTour } = await import('@/components/provider/DashboardTour');
+      const { startDashboardTour, resetTourState } = await import('@/components/provider/DashboardTour');
+      resetTourState();
       startDashboardTour(0);
       showToast('🧭 انطلقت الجولة التعريفية التفاعلية.');
     } catch (err) {
@@ -1351,8 +1352,8 @@ export default function ProviderDashboardPage() {
       <div className="mx-auto max-w-7xl space-y-6">
 
         {/* Dashboard Topbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-amber-500/20 pb-5">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-amber-500/20 pb-5">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             {/* Step 1 Target: Add Device/Service button */}
             <button
               id="tour-add-equipment"
@@ -1388,12 +1389,13 @@ export default function ProviderDashboardPage() {
 
             {/* Restart Tour button */}
             <button
+              id="tour-restart-button"
               type="button"
               onClick={handleRestartTour}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-[#0F253E] px-4 py-2.5 text-xs sm:text-sm font-semibold text-amber-300 hover:bg-[#163659] transition"
-              title="إعادة تشغيل الجولة الإرشادية"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-950/40 hover:bg-amber-900/60 px-4 py-2.5 text-xs sm:text-sm font-bold text-amber-300 transition shadow-md shadow-amber-950/20 cursor-pointer"
+              title="إعادة تشغيل الجولة الإرشادية التفاعلية"
             >
-              <span>🧭</span>
+              <span className="text-sm">🧭</span>
               <span>جولة تعريفية (Tour)</span>
             </button>
 

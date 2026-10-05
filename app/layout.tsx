@@ -10,6 +10,7 @@ import './styles/tokens.css';
 import './styles/style.css';
 import './styles/portal.css';
 import '@/app/globals.css';
+import 'driver.js/dist/driver.css';
 
 export const viewport: Viewport = {
   themeColor: '#0B1528',
