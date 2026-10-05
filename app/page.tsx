@@ -459,6 +459,13 @@ export default async function HomePage() {
                   <span className="text-base">←</span>
                 </Link>
                 <Link
+                  href="/demo"
+                  className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/50 bg-[#0F253E] px-5 py-3 text-sm font-bold text-cyan-300 hover:bg-cyan-950/80 hover:border-cyan-300 hover:text-white transition shadow-lg shadow-cyan-950/30"
+                >
+                  <span>🧭</span>
+                  <span>استكشف لوحة التحكم (بدون تسجيل)</span>
+                </Link>
+                <Link
                   href="/directory"
                   className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-bold text-white hover:bg-white/10 transition"
                 >
