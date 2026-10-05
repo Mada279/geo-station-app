@@ -89,7 +89,7 @@ export default function TrustMarquee({
 }: TrustMarqueeProps) {
   return (
     <div
-      className={`relative w-full overflow-hidden border-b border-white/10 bg-[#071326]/95 backdrop-blur-md group flex items-center ${className}`}
+      className={`relative w-full h-10 overflow-hidden border-b border-white/10 bg-[#071326] backdrop-blur-md group flex items-center ${className}`}
       dir="ltr"
     >
       {/* Subtle edge fade gradient mask */}

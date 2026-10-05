@@ -106,10 +106,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
-      <body className="min-h-screen bg-[#f4f7fa] text-slate-800 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between pt-10">
-        {/* Global Fixed Sticky Trust & Instant Settlement Marquee */}
-        <TrustMarquee className="fixed top-0 left-0 w-full z-[100] h-10" />
-        <Navbar />
+      <body className="min-h-screen bg-[#f4f7fa] text-slate-800 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between">
+        {/* Unified Sticky Header: Trust Marquee & Navbar welded together */}
+        <header className="sticky top-0 z-[100] w-full flex flex-col bg-[#0B1528] shadow-lg">
+          <TrustMarquee />
+          <Navbar />
+        </header>
         <main className="flex-grow">{children}</main>
         <Footer />
         <FloatingAdButton />
