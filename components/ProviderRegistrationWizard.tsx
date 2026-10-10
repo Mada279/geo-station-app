@@ -225,7 +225,7 @@ export default function ProviderRegistrationWizard() {
       
       {/* Brand Header */}
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center justify-center w-auto shrink-0 mx-auto transition-opacity hover:opacity-90 outline-none focus:outline-none focus-visible:outline-none" style={{ minWidth: '200px' }}>
+        <Link href="/" className="inline-flex items-center justify-center w-auto shrink-0 mx-auto transition-opacity hover:opacity-90 outline-none focus:outline-none focus-visible:outline-none">
           <Image
             alt="Survsta"
             className="object-contain w-[180px] sm:w-[220px] h-auto mx-auto"
@@ -628,7 +628,7 @@ export default function ProviderRegistrationWizard() {
                         ) : (
                           <span>📷</span>
                         )}
-                        <span className="truncate max-w-[120px] font-mono text-[11px]">صورة {idx + 1}</span>
+                        <span className="truncate font-mono text-[11px]">صورة {idx + 1}</span>
                         <button
                           type="button"
                           onClick={() => removePhoto(idx)}

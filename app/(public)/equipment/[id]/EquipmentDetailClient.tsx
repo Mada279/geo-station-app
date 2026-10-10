@@ -171,7 +171,7 @@ export default function EquipmentDetailClient({
 
   return (
     <div className="min-h-screen bg-[#081933] text-gray-100 py-8 px-4 sm:px-6 lg:px-8" dir="rtl">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs text-gray-400">
           <Link href="/" className="hover:text-cyan-400 transition">الرئيسية</Link>

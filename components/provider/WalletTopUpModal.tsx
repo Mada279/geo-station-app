@@ -433,7 +433,7 @@ export default function WalletTopUpModal({
 
                           <div className="text-[11px] text-gray-400 mb-1.5">معرف الدفع اللحظي الرسمي:</div>
                           <div className="flex items-center justify-between bg-black/50 p-2 rounded-lg border border-slate-800 mb-2.5">
-                            <span className="font-mono text-xs font-bold text-purple-300 truncate max-w-[170px]" dir="ltr">
+                            <span className="font-mono text-xs font-bold text-purple-300 truncate" dir="ltr">
                               {paymentConfig.instapay.handle}
                             </span>
                             <button

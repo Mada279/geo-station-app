@@ -663,7 +663,7 @@ export default function EquipmentMarketplacePage() {
                   <label className="block text-xs font-bold text-gray-300 mb-1.5">
                     نوع العملية المطلوبة:
                   </label>
-                  <div className="grid grid-cols-3 gap-1.5 text-xs">
+                  <div className="grid grid-cols-3 gap-1 sm:gap-1.5 text-[11px] sm:text-xs">
                     <button
                       type="button"
                       onClick={() => setSelectedPriceMode('all')}
@@ -841,9 +841,9 @@ export default function EquipmentMarketplacePage() {
 
                             {/* Provider & Location Overlay */}
                             <div className="absolute bottom-3 right-3 left-3 flex items-center justify-between z-10">
-                              <span className="bg-[#081933]/90 text-amber-300 text-[11px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-md border border-amber-500/30 flex items-center gap-1">
+                              <span className="bg-[#081933]/90 text-amber-300 text-[11px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-md border border-amber-500/30 flex items-center gap-1 min-w-0">
                                 <span>🏢</span>
-                                <span className="truncate max-w-[130px]">{item.providerName}</span>
+                                <span className="truncate">{item.providerName}</span>
                               </span>
                               <span className="bg-[#081933]/90 text-cyan-300 text-[11px] font-medium px-2 py-1 rounded-lg backdrop-blur-md border border-cyan-500/30">
                                 📍 {item.providerLocation.split('—')[0]}
@@ -927,7 +927,7 @@ export default function EquipmentMarketplacePage() {
                             )}
                           </div>
 
-                          <div className="grid grid-cols-3 gap-2 pt-1">
+                          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-1 text-[11px] sm:text-xs">
                             <button
                               type="button"
                               onClick={() => setDetailItem(item)}
@@ -1044,7 +1044,7 @@ export default function EquipmentMarketplacePage() {
 
                 <form onSubmit={handleSubmitBooking} className="space-y-4 text-xs">
                   {/* Duration & Rental Type */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-gray-300 font-semibold mb-1">نظام التأجير</label>
                       <select
@@ -1078,7 +1078,7 @@ export default function EquipmentMarketplacePage() {
                   </div>
 
                   {/* Start Date & Location */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-gray-300 font-semibold mb-1">تاريخ استلام الجهاز</label>
                       <input
@@ -1107,7 +1107,7 @@ export default function EquipmentMarketplacePage() {
                   </div>
 
                   {/* Client Contact Info */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-gray-300 font-semibold mb-1">
                         اسم المهندس / الجهة الطالبة <span className="text-amber-400">*</span>
@@ -1250,7 +1250,7 @@ export default function EquipmentMarketplacePage() {
                 </p>
 
                 {/* Specs Grid */}
-                <div className="bg-[#081933] p-3.5 rounded-xl border border-gray-800 grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-[#081933] p-3.5 rounded-xl border border-gray-800 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div>
                     <span className="text-gray-400 block text-[11px]">الماركة:</span>
                     <span className="font-bold text-white font-mono">{detailItem.brand}</span>

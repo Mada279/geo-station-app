@@ -27,7 +27,7 @@ export default function ProviderStatsCards({
   reviewCount,
 }: ProviderStatsCardsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
       {/* 1. Revenue Card */}
       <Link
         id="tour-revenue-card"
@@ -123,7 +123,7 @@ export default function ProviderStatsCards({
       {/* 5. Provider Rating Card */}
       <Link
         href="/provider/reviews"
-        className="rounded-2xl border border-white/5 bg-[#0A192F] p-4 backdrop-blur-md hover:border-yellow-500/40 hover:shadow-[0_0_25px_rgba(234,179,8,0.08)] transition-all group block cursor-pointer"
+        className="sm:col-span-2 md:col-span-1 rounded-2xl border border-white/5 bg-[#0A192F] p-4 backdrop-blur-md hover:border-yellow-500/40 hover:shadow-[0_0_25px_rgba(234,179,8,0.08)] transition-all group block cursor-pointer"
       >
         <div className="flex justify-between items-center text-xs text-gray-400 mb-1">
           <span className="group-hover:text-yellow-300 transition font-semibold">تقييم المزوّد</span>

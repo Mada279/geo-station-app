@@ -24,7 +24,7 @@ export default function ProviderHeader({
   return (
     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-white/5 pb-5">
       {/* Action Buttons & Quick Nav */}
-      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+      <div className="order-2 lg:order-1 flex flex-wrap items-center gap-2.5 sm:gap-3">
         {/* Wallet Top-Up Button */}
         <button
           id="tour-wallet-button"
@@ -72,18 +72,18 @@ export default function ProviderHeader({
       </div>
 
       {/* Provider Title & Organization Badge */}
-      <div>
-        <div className="flex items-center gap-2 justify-end">
+      <div className="order-1 lg:order-2">
+        <div className="flex items-center gap-2 justify-start lg:justify-end">
           <span className="rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-bold">
             ✓ مزوّد معتمد وموثّق
           </span>
           <h1 className="text-xl sm:text-2xl font-black text-white">بوابة المزوّد — لوحة التحكم</h1>
         </div>
-        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1.5 justify-end flex-wrap leading-relaxed">
+        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1.5 justify-start lg:justify-end flex-wrap leading-relaxed">
           <span>{providerProfile.org} • {providerProfile.name}</span>
           <Link
             href="/provider/locations"
-            className="inline-flex items-center gap-1 text-cyan-300 hover:text-cyan-200 font-semibold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 mr-1 transition"
+            className="inline-flex items-center gap-1 text-cyan-300 hover:text-cyan-200 font-semibold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 ms-1 transition"
             title="تعديل وتحديد المحافظات المغطاة"
           >
             <span>📍</span>

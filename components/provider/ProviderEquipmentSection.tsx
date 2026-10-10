@@ -262,7 +262,7 @@ export default function ProviderEquipmentSection({
             <tbody className="divide-y divide-white/5 text-gray-200">
               {equipment.map((item) => (
                 <tr key={item.id} className="hover:bg-white/[0.02] transition">
-                  <td className="px-4 py-3.5 font-mono text-cyan-400 font-semibold truncate max-w-[100px] dir-ltr text-right">
+                  <td className="px-4 py-3.5 font-mono text-cyan-400 font-semibold truncate dir-ltr text-right">
                     {item.id.length > 10 ? item.id.slice(0, 8) + '…' : item.id}
                   </td>
                   <td className="px-4 py-3.5">
@@ -619,7 +619,7 @@ export default function ProviderEquipmentSection({
                 <span className="text-xl">💰</span>
                 <div>
                   <h3 className="text-base font-black text-white">تعديل أسعار التأجير</h3>
-                  <p className="text-[11px] text-gray-400 truncate max-w-[240px]">
+                  <p className="text-[11px] text-gray-400 truncate">
                     {editingItem.title}
                   </p>
                 </div>

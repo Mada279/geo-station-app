@@ -422,7 +422,7 @@ export default async function HomePage() {
           />
         </div>
 
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-12">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Two-Column Hero Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[65vh]">
@@ -608,7 +608,7 @@ export default async function HomePage() {
       </section>
 
       {/* Ad Banner - Homepage Hero Placement */}
-      <div className="container mx-auto px-6 lg:px-12 -mb-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mb-2">
         <AdBanner location="homepage_hero" />
       </div>
 
@@ -617,7 +617,7 @@ export default async function HomePage() {
 
       {/* 2. Categories Section (استكشف المنصة) */}
       <section className="py-16 bg-[#f4f7fa] border-b border-slate-200">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
             <div>
               <span className="text-xs font-extrabold text-cyan-700 uppercase tracking-wider block mb-1">استكشف المنصة</span>
@@ -725,7 +725,7 @@ export default async function HomePage() {
 
       {/* 3. Featured Verified Providers (الأكثر طلباً) */}
       <section className="py-16 bg-white border-b border-slate-200">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
             <div>
               <span className="text-xs font-extrabold text-cyan-700 uppercase tracking-wider block mb-1">الأكثر طلباً</span>
@@ -749,7 +749,7 @@ export default async function HomePage() {
 
       {/* 4. Featured Equipment Marketplace (سوق الأجهزة) */}
       <section className="py-16 bg-[#f4f7fa] border-b border-slate-200">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
             <div>
               <span className="text-xs font-extrabold text-cyan-700 uppercase tracking-wider block mb-1">Marketplace</span>
@@ -767,7 +767,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {equipment.map((item) => (
               <article
                 key={item.id}
@@ -837,7 +837,7 @@ export default async function HomePage() {
 
       {/* 5. How It Works Section (كيف تعمل المنصة) */}
       <section className="py-20 bg-white border-b border-slate-200">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             {/* Steps Column */}
@@ -927,7 +927,7 @@ export default async function HomePage() {
 
       {/* 6. Services Showcase (الخدمات) */}
       <section className="py-16 bg-[#f4f7fa] border-b border-slate-200">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
             <div>
               <span className="text-xs font-extrabold text-cyan-700 uppercase tracking-wider block mb-1">الخدمات</span>
@@ -1083,7 +1083,7 @@ export default async function HomePage() {
 
       {/* 7. Dual Section: Academy (قريباً) + Latest Jobs (أحدث الفرص) */}
       <section className="py-16 bg-white border-b border-slate-200">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             
             {/* Left: Academy */}
@@ -1244,7 +1244,7 @@ export default async function HomePage() {
 
       {/* 8. Trust Value Proposition Band */}
       <section className="py-16 bg-[#f4f7fa] border-b border-slate-200">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="text-3xl mb-3">✅</div>
@@ -1283,7 +1283,7 @@ export default async function HomePage() {
 
       {/* 9. Provider CTA Band */}
       <section className="py-16 bg-[#f4f7fa] border-b border-slate-200">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl border border-cyan-500/20 bg-gradient-to-r from-[#0a2033] to-[#12455f] text-white p-8 md:p-12 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="max-w-2xl space-y-4">
               <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider block">
@@ -1325,7 +1325,7 @@ export default async function HomePage() {
 
       {/* 10. Need Request CTA Band */}
       <section className="py-16 bg-white">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl border border-slate-200 bg-[#f4f7fa] p-8 md:p-12 shadow-md flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="max-w-2xl space-y-3">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
@@ -1356,4 +1356,5 @@ export default async function HomePage() {
     </div>
   );
 }
+
 
