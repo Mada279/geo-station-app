@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { logoutAndRedirect } from '@/utils/logout';
 import { supabase } from '@/utils/supabaseClient';
 
 interface ProviderSidebarProps {
@@ -23,30 +24,111 @@ export default function ProviderSidebar({
     org: string;
     role: string;
     av: string;
+    isVerified: boolean;
+    loading: boolean;
   }>({
-    name: 'م. أحمد النجار',
-    org: 'مكتب النخبة للمساحة',
-    role: 'مدير الحساب',
-    av: 'أن',
+    name: '',
+    org: '',
+    role: 'شريك معتمد',
+    av: '',
+    isVerified: false,
+    loading: true,
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    let isMounted = true;
+
+    async function loadRealSessionProfile() {
       try {
-        const stored = localStorage.getItem('SURVSTA_AUTH_USER');
-        if (stored) {
-          const parsed = JSON.parse(stored);
+        const { data: authData } = await supabase.auth.getUser();
+        const user = authData?.user;
+
+        if (!user) {
+          if (isMounted) {
+            setUserProfile({
+              name: 'زائر',
+              org: 'منصة Survsta',
+              role: 'غير مسجل',
+              av: 'ز',
+              isVerified: false,
+              loading: false,
+            });
+          }
+          return;
+        }
+
+        // Query the provider row matching auth user_id or email
+        const userEmail = (user.email || '').toLowerCase();
+        const filters: string[] = [`user_id.eq.${user.id}`];
+        if (userEmail) filters.push(`email.eq.${userEmail}`);
+
+        const { data: providerData } = await supabase
+          .from('providers')
+          .select('id, name, company_name, organization, status, verification_status')
+          .or(filters.join(','))
+          .maybeSingle();
+
+        const rawName =
+          providerData?.name ||
+          (user.user_metadata?.full_name as string) ||
+          (user.user_metadata?.name as string) ||
+          (userEmail ? userEmail.split('@')[0] : '') ||
+          'مزوّد معتمد';
+
+        const rawOrg =
+          providerData?.company_name ||
+          providerData?.organization ||
+          providerData?.name ||
+          'مكتب مساحي معتمد';
+
+        const isVerified =
+          providerData?.status === 'approved' ||
+          providerData?.verification_status === 'verified';
+
+        const roleTitle =
+          user.app_metadata?.role === 'admin' || user.user_metadata?.role === 'admin'
+            ? 'مدير المنصة'
+            : isVerified
+            ? 'شريك موثّق'
+            : 'شريك معتمد';
+
+        const initials =
+          rawName
+            .trim()
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((part: string) => part[0])
+            .join('') || rawName.slice(0, 2) || 'م';
+
+        if (isMounted) {
           setUserProfile({
-            name: parsed.name || 'م. أحمد النجار',
-            org: parsed.org || parsed.organization || 'مكتب النخبة للمساحة',
-            role: parsed.role === 'admin' ? 'مدير النظام' : 'شريك معتمد',
-            av: parsed.av || (parsed.name ? parsed.name.slice(0, 2) : 'أن'),
+            name: rawName,
+            org: rawOrg,
+            role: roleTitle,
+            av: initials,
+            isVerified,
+            loading: false,
           });
         }
-      } catch {
-        // fallback
+      } catch (err) {
+        console.error('[ProviderSidebar auth load error]', err);
+        if (isMounted) {
+          setUserProfile((prev) => ({ ...prev, loading: false }));
+        }
       }
     }
+
+    loadRealSessionProfile();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      loadRealSessionProfile();
+    });
+
+    return () => {
+      isMounted = false;
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const navGroups = [
@@ -96,7 +178,7 @@ export default function ProviderSidebar({
           href: '/provider/dashboard#profile',
           label: 'ملف الجهة والمكتب',
           icon: '🏢',
-          badge: 'موثّق ✓',
+          badge: userProfile.isVerified ? 'موثّق ✓' : undefined,
           badgeColor: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
         },
         {
@@ -144,7 +226,7 @@ export default function ProviderSidebar({
           badgeColor: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30',
         },
         {
-          href: '/provider/dashboard#ads',
+          href: '/provider/analytics',
           label: 'الظهور المميّز والإعلانات',
           icon: '📣',
         },
@@ -154,14 +236,14 @@ export default function ProviderSidebar({
       title: 'النظام والمساعدة',
       items: [
         {
-          href: '/provider/dashboard#notifications',
+          href: '/notifications',
           label: 'الإشعارات والتنبيهات',
           icon: '🔔',
           badge: '3',
           badgeColor: 'bg-sky-500/20 text-sky-300 border border-sky-500/30',
         },
         {
-          href: '/provider/dashboard#settings',
+          href: '/provider/dashboard#profile',
           label: 'إعدادات الحساب والأمان',
           icon: '⚙️',
         },
@@ -169,128 +251,39 @@ export default function ProviderSidebar({
     },
   ];
 
-  const [sidebarToast, setSidebarToast] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setSidebarToast(msg);
-    setTimeout(() => setSidebarToast(null), 3500);
-  };
-
   const handleNavClick = (e: React.MouseEvent, item: { href: string; label: string }) => {
-    if (item.label === 'إدارة الأجهزة والمعدات') {
-      if (onClose) onClose();
-      const el = document.getElementById('equipment') || document.getElementById('equipment-section');
-      if (el) {
-        e.preventDefault();
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-      return;
-    }
-
-    if (item.label === 'الخدمات المساحية') {
-      if (onClose) onClose();
-      const el = document.getElementById('services') || document.getElementById('services-section');
-      if (el) {
-        e.preventDefault();
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-      return;
-    }
-
-    if (
-      item.label === 'صندوق الطلبات الواردة' ||
-      item.href === '/provider/orders' ||
-      item.label === 'صندوق الاستفسارات والوارد' ||
-      item.href === '/provider/inbox'
-    ) {
-      if (onClose) onClose();
-      return;
-    }
-
-    if (item.label === 'المواقع والتغطية الجغرافية' || item.href === '/provider/locations') {
-      if (onClose) onClose();
-      return;
-    }
-
-    if (
-      item.label === 'الوظائف الهندسية المنشورة' ||
-      item.href === '/provider/jobs' ||
-      item.label === 'المتقدمون للوظائف (ATS)' ||
-      item.href === '/provider/jobs/applications'
-    ) {
-      if (onClose) onClose();
-      return;
-    }
-
-    if (item.label === 'الفريق ومسؤولو الاتصال' || item.href === '/provider/team') {
-      if (onClose) onClose();
-      return;
-    }
-
-    if (item.label === 'التقييمات وآراء العملاء' || item.href === '/provider/reviews') {
-      if (onClose) onClose();
-      return;
-    }
-
-    if (item.label === 'تقارير التحليلات والمشاهدات' || item.href === '/provider/analytics') {
-      if (onClose) onClose();
-      return;
-    }
-
-    if (item.label === 'لوحة التحكم العامة') {
-      if (onClose) onClose();
-      return;
-    }
-
-    // Secondary MVP feature links
-    e.preventDefault();
     if (onClose) onClose();
-    showToast('سيتم تفعيل هذه الخاصية قريباً في التحديث القادم');
-  };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch {}
-
-    // Explicitly delete cookies with max-age=0 and path=/
-    document.cookie = 'survsta_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'user_role=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('SURVSTA_AUTH_USER');
-      localStorage.removeItem('SURVSTA_LOGGED_OUT');
-      localStorage.removeItem('GS_LOGGED_OUT');
-    }
-
-    try {
-      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-        const bc = new BroadcastChannel('survsta_auth_channel');
-        bc.postMessage({ type: 'LOGOUT' });
-        bc.close();
+    // If clicking an anchor link targeting the dashboard (e.g. /provider/dashboard#equipment)
+    if (item.href.includes('#')) {
+      const [routePath, hashId] = item.href.split('#');
+      
+      // If user is currently on the dashboard page, smooth scroll to the target ID
+      if (pathname === '/provider/dashboard' || pathname === routePath) {
+        const el = document.getElementById(hashId);
+        if (el) {
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
       }
-    } catch {}
-
-    window.location.replace('/login');
+      // If user is on another route (e.g. /provider/orders), let Next.js navigate to /provider/dashboard#...
+      return;
+    }
   };
+
+  const handleLogout = () => logoutAndRedirect('/login');
 
   const isActive = (href: string) => {
     if (href === '/provider/dashboard') {
       return pathname === '/provider/dashboard';
     }
-    return pathname?.startsWith(href);
+    const cleanHref = href.split('#')[0];
+    return pathname === cleanHref || pathname?.startsWith(cleanHref + '/');
   };
 
   return (
     <>
-      {/* Toast Notification */}
-      {sidebarToast && (
-        <div className="fixed top-5 left-5 z-[99999] rounded-xl bg-gradient-to-r from-amber-500 to-[#F4B400] text-gray-950 font-bold px-4 py-3 shadow-2xl text-xs flex items-center gap-2 animate-bounce border border-amber-400">
-          <span>ℹ️</span>
-          <span>{sidebarToast}</span>
-        </div>
-      )}
-
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
@@ -334,11 +327,23 @@ export default function ProviderSidebar({
           <div className="rounded-xl border border-amber-500/20 bg-[#0F253E] p-3 text-right">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-amber-400">بوابة المزوّد</span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                شريك نشط
+              <span
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  userProfile.isVerified
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                }`}
+              >
+                {userProfile.isVerified ? 'شريك موثّق ✓' : 'حساب نشط'}
               </span>
             </div>
-            <div className="text-[11px] text-gray-400 mt-1 truncate">{userProfile.org}</div>
+            <div className="text-[11px] text-gray-400 mt-1 truncate">
+              {userProfile.loading ? (
+                <div className="h-3 w-28 bg-white/10 rounded animate-pulse my-0.5" />
+              ) : (
+                userProfile.org || 'مكتب مساحي معتمد'
+              )}
+            </div>
           </div>
 
           {/* Navigation Links */}
@@ -387,11 +392,19 @@ export default function ProviderSidebar({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-bold text-gray-950 text-xs shadow-md">
-                {userProfile.av}
+                {userProfile.loading ? (
+                  <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-950 border-t-transparent animate-spin" />
+                ) : (
+                  userProfile.av || 'م'
+                )}
               </div>
               <div className="text-right">
                 <div className="text-xs font-bold text-white truncate max-w-[110px]">
-                  {userProfile.name}
+                  {userProfile.loading ? (
+                    <div className="h-3 w-16 bg-white/10 rounded animate-pulse mb-1" />
+                  ) : (
+                    userProfile.name || 'المزوّد'
+                  )}
                 </div>
                 <div className="text-[10px] text-gray-400">{userProfile.role}</div>
               </div>

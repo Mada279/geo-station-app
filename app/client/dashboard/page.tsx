@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
 import { validateEgyptianPhone } from "@/lib/validations/phone";
 import SecureEmailUpdateModal from "@/components/auth/SecureEmailUpdateModal";
+import { logoutAndRedirect } from "@/utils/logout";
 
 interface ClientData {
   id: string;
@@ -323,15 +324,7 @@ export default function ClientDashboardPage() {
   }
 
   async function handleLogout() {
-    try {
-      await supabase.auth.signOut();
-    } catch {}
-    document.cookie = "survsta_session=; path=/; max-age=0";
-    document.cookie = "user_role=; path=/; max-age=0";
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("SURVSTA_AUTH_USER");
-    }
-    window.location.href = "/login";
+    await logoutAndRedirect("/login");
   }
 
   return (

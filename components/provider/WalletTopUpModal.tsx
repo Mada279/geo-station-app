@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/utils/supabaseClient';
+import { resolveStoredFileUrls } from '@/lib/storage';
 import { PaymentMethodsConfig, DEFAULT_PAYMENT_CONFIG } from '@/lib/payment/paymentConfig';
 
 interface WalletTopUpModalProps {
@@ -42,6 +43,7 @@ export default function WalletTopUpModal({
   const [paymentMethod, setPaymentMethod] = useState<'vodafone_cash' | 'instapay'>('vodafone_cash');
   const [transferReference, setTransferReference] = useState<string>('');
   const [receiptUrl, setReceiptUrl] = useState<string>('');
+  const [receiptPreview, setReceiptPreview] = useState<string>('');
   const [isUploadingReceipt, setIsUploadingReceipt] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -110,7 +112,9 @@ export default function WalletTopUpModal({
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        setHistoryItems(data);
+        // payment-receipts is a private bucket: rows hold object paths, the links
+        // need short-lived signed URLs.
+        setHistoryItems(await resolveStoredFileUrls(data, ['receipt_url']));
       }
     } catch (err) {
       console.warn('[WalletTopUpModal] Error loading deposit history:', err);
@@ -149,27 +153,28 @@ export default function WalletTopUpModal({
           contentType: file.type,
         });
 
-      let publicUrl = '';
+      let storedPath = '';
       if (!uploadErr && uploadData) {
-        const { data: pubData } = supabase.storage.from('payment-receipts').getPublicUrl(filePath);
-        publicUrl = pubData?.publicUrl || '';
+        storedPath = `payment-receipts/${filePath}`;
       } else {
         // Fallback to attachments bucket if payment-receipts is not yet created in remote storage
-        const { data: fallbackData } = await supabase.storage
+        const { data: fallbackData, error: fallbackErr } = await supabase.storage
           .from('attachments')
           .upload(filePath, file, { upsert: true });
 
-        if (fallbackData) {
-          const { data: fbPub } = supabase.storage.from('attachments').getPublicUrl(filePath);
-          publicUrl = fbPub?.publicUrl || '';
+        if (!fallbackErr && fallbackData) {
+          storedPath = `attachments/${filePath}`;
         }
       }
 
-      if (!publicUrl) {
-        throw new Error('تعذر إنشاء رابط الملف. يرجى إعادة المحاولة.');
+      if (!storedPath) {
+        throw new Error(uploadErr?.message || 'تعذر رفع الملف. يرجى إعادة المحاولة.');
       }
 
-      setReceiptUrl(publicUrl);
+      // The bucket is private, so the row stores the object path; the preview uses a
+      // local blob URL because a signed URL for a brand-new upload costs a round trip.
+      setReceiptUrl(storedPath);
+      setReceiptPreview(URL.createObjectURL(file));
     } catch (err: any) {
       console.error('[Receipt Upload Error]:', err);
       setErrorMessage(err.message || 'حدث خطأ أثناء رفع صورة الإيصال.');
@@ -225,6 +230,7 @@ export default function WalletTopUpModal({
       setSuccessToast('✅ تم إرسال إيصال التحويل بنجاح! جاري مراجعته من قِبل الإدارة وسيتم شحن رصيدك فوراً.');
       setTransferReference('');
       setReceiptUrl('');
+      setReceiptPreview('');
 
       if (onSuccess) onSuccess();
 
@@ -562,7 +568,7 @@ export default function WalletTopUpModal({
                         <div className="flex items-center gap-2">
                           <span className="text-emerald-400 font-bold">✓ تم إرفاق صورة الإيصال بنجاح</span>
                           <a
-                            href={receiptUrl}
+                            href={receiptPreview || undefined}
                             target="_blank"
                             rel="noreferrer"
                             className="text-cyan-400 underline text-[11px]"
@@ -572,7 +578,10 @@ export default function WalletTopUpModal({
                         </div>
                         <button
                           type="button"
-                          onClick={() => setReceiptUrl('')}
+                          onClick={() => {
+                            setReceiptUrl('');
+                            setReceiptPreview('');
+                          }}
                           className="text-gray-400 hover:text-rose-400 text-xs transition"
                         >
                           تغيير الملف ✕

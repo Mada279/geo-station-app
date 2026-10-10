@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
+import { resolveStoredFileUrls } from '@/lib/storage';
 
 interface KycItem {
   id: string;
@@ -40,74 +40,29 @@ export default function AdminKycPage() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // 1. Fetch KYC Requests and Join with Providers / Clients
+  // 1. Fetch KYC Requests and Join with Providers
   const loadKycData = async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch from Supabase kyc_requests
       const { data: dbRequests, error: kycErr } = await supabase
         .from('kyc_requests')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (kycErr) {
-        console.warn('Supabase kyc_requests notice:', kycErr.message);
+        showToast(`⚠️ تعذر تحميل طلبات التوثيق: ${kycErr.message}`);
       }
 
-      // 2. Fetch providers to join
-      let providerMap: Record<string, any> = {};
-      try {
-        const { data: providersData } = await supabase
-          .from('providers')
-          .select('id, name, email, phone, location, is_verified');
+      const providerMap: Record<string, any> = {};
+      const { data: providersData } = await supabase
+        .from('providers')
+        .select('id, name, email, phone, location');
 
-        if (providersData) {
-          providersData.forEach((p: any) => {
-            providerMap[p.id] = p;
-          });
-        }
-      } catch (err) {
-        console.warn('Providers fetch error:', err);
-      }
+      (providersData || []).forEach((p: any) => {
+        providerMap[p.id] = p;
+      });
 
-      // Also check clients table
-      try {
-        const { data: clientsData } = await supabase
-          .from('clients')
-          .select('user_id, full_name, email, phone, company_name');
-
-        if (clientsData) {
-          clientsData.forEach((c: any) => {
-            if (c.user_id && !providerMap[c.user_id]) {
-              providerMap[c.user_id] = {
-                name: c.company_name || c.full_name,
-                email: c.email,
-                phone: c.phone,
-              };
-            }
-          });
-        }
-      } catch {}
-
-      // 3. Fallback localStorage requests
-      let localRequests: KycItem[] = [];
-      if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem('SURVSTA_LOCAL_KYC_REQUESTS');
-        if (stored) {
-          try {
-            localRequests = JSON.parse(stored);
-          } catch {}
-        }
-      }
-
-      // Combine database and local items
-      const existingIds = new Set((dbRequests || []).map((r: any) => r.id));
-      const combinedRaw = [
-        ...(dbRequests || []),
-        ...localRequests.filter((l) => !existingIds.has(l.id)),
-      ];
-
-      let list: KycItem[] = combinedRaw.map((item: any) => {
+      const rows: KycItem[] = (dbRequests || []).map((item: any) => {
         const prov = providerMap[item.provider_id];
         return {
           id: String(item.id),
@@ -118,81 +73,22 @@ export default function AdminKycPage() {
           admin_notes: item.admin_notes || '',
           created_at: item.created_at || new Date().toISOString(),
           updated_at: item.updated_at,
-          company_name: item.company_name || prov?.name || 'مكتب النخبة للمساحة الهندسية',
-          contact_name: prov?.name || 'م. حسام الدين',
-          email: item.email || prov?.email || 'contact@survey-office.com',
-          phone: item.phone || prov?.phone || '01012345678',
-          location: prov?.location || 'القاهرة والجيزة',
+          company_name: prov?.name || 'جهة غير معروفة',
+          contact_name: prov?.name || '—',
+          email: prov?.email || '—',
+          phone: prov?.phone ? String(prov.phone) : '—',
+          location: prov?.location || '—',
         };
       });
 
-      // If empty in dev, supply realistic KYC requests
-      if (list.length === 0) {
-        list = [
-          {
-            id: 'kyc-demo-1',
-            provider_id: 'prov-demo-1',
-            company_name: 'شركة النيل للتجهيزات الجيوديسية والمساحة',
-            contact_name: 'م. شريف عبد المنعم',
-            email: 'nile.geodesy@gmail.com',
-            phone: '01098765432',
-            location: 'القاهرة — مدينة نصر',
-            commercial_register_url: 'https://storage.survsta.com/kyc/demo/nile-commercial-register.pdf',
-            tax_id_url: 'https://storage.survsta.com/kyc/demo/nile-tax-card.jpg',
-            status: 'pending',
-            admin_notes: 'سجل تجاري: 108492 | رقم ضريبي: 492-109-842',
-            created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
-          },
-          {
-            id: 'kyc-demo-2',
-            provider_id: 'prov-demo-2',
-            company_name: 'مكتب الأهرام للمساحة الرقمية وتأجير الأجهزة',
-            contact_name: 'م. مروان الشريف',
-            email: 'ahram.surveying@outlook.com',
-            phone: '01123456789',
-            location: 'الجيزة — الدقي',
-            commercial_register_url: 'https://storage.survsta.com/kyc/demo/ahram-cr.pdf',
-            tax_id_url: 'https://storage.survsta.com/kyc/demo/ahram-tax.pdf',
-            status: 'pending',
-            admin_notes: 'سجل تجاري: 78491 | ضريبي: 381-992-105 — يرجى فحص فرع التجمع',
-            created_at: new Date(Date.now() - 3600000 * 18).toISOString(),
-          },
-          {
-            id: 'kyc-demo-3',
-            provider_id: 'prov-demo-3',
-            company_name: 'الشرق لمعدات ونظم المساحة',
-            contact_name: 'م. تامر الجندي',
-            email: 'sharq.geo@gmail.com',
-            phone: '01234567890',
-            location: 'الإسكندرية — سموحة',
-            commercial_register_url: 'https://storage.survsta.com/kyc/demo/sharq-cr.pdf',
-            tax_id_url: 'https://storage.survsta.com/kyc/demo/sharq-tax.jpg',
-            status: 'approved',
-            admin_notes: 'تمت مطابقة السجل التجاري والبطاقة الضريبية مع مصلحة الضرائب. معتمد بالكامل.',
-            created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
-            updated_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-          },
-          {
-            id: 'kyc-demo-4',
-            provider_id: 'prov-demo-4',
-            company_name: 'مكتب الدلتا للهندسة والمقاولات',
-            contact_name: 'م. وائل يوسف',
-            email: 'delta.eng@yahoo.com',
-            phone: '01011223344',
-            location: 'طنطا — الغربية',
-            commercial_register_url: 'https://storage.survsta.com/kyc/demo/delta-cr.pdf',
-            tax_id_url: '',
-            status: 'rejected',
-            admin_notes: 'لم يتم إرفاق صورة البطاقة الضريبية، والسجل التجاري المرفق منتهي الصلاحية منذ 2023.',
-            created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-            updated_at: new Date(Date.now() - 86400000 * 4).toISOString(),
-          },
-        ];
-      }
-
-      setKycRequests(list);
+      // Documents live in a private bucket: rows store object paths, the UI needs
+      // short-lived signed URLs.
+      setKycRequests(
+        await resolveStoredFileUrls(rows, ['commercial_register_url', 'tax_id_url'])
+      );
     } catch (err) {
       console.warn('KYC load error:', err);
+      showToast('⚠️ حدث خطأ أثناء تحميل طلبات التوثيق.');
     } finally {
       setIsLoading(false);
     }
@@ -208,7 +104,6 @@ export default function AdminKycPage() {
     try {
       const now = new Date().toISOString();
 
-      // 1. Update kyc_requests table in Supabase
       const { error: kycError } = await supabase
         .from('kyc_requests')
         .update({
@@ -219,55 +114,40 @@ export default function AdminKycPage() {
         .eq('id', item.id);
 
       if (kycError) {
-        console.warn('Supabase kyc update error:', kycError.message);
+        showToast(`❌ تعذر حفظ الاعتماد: ${kycError.message}`);
+        return;
       }
 
       // 2. Update provider profile is_verified = true
-      try {
-        await supabase
-          .from('providers')
-          .update({ is_verified: true, status: 'approved' })
-          .eq('id', item.provider_id);
-      } catch {}
+      const { error: providerError } = await supabase
+        .from('providers')
+        .update({ is_verified: true, status: 'approved' })
+        .eq('id', item.provider_id);
 
-      try {
-        await supabase
-          .from('clients')
-          .update({ is_verified: true })
-          .eq('user_id', item.provider_id);
-      } catch {}
+      if (providerError) {
+        showToast(`⚠️ تم اعتماد الطلب لكن تعذر تحديث ملف المزود: ${providerError.message}`);
+      }
 
       // 3. Send in-app notification to provider
-      try {
-        await supabase.from('inapp_notifications').insert([
-          {
-            user_id: item.provider_id,
-            title: 'تهانينا! تم اعتماد توثيق حسابك (KYC) ومنحك شارة التوثيق',
-            message: `تم التحقق من السجل التجاري والبطاقة الضريبية لـ "${item.company_name}". حسابك معتمد وموثق الآن في Survsta وله أولوية الظهور للعملاء.`,
-            type: 'approval',
-            link: '/provider/verification',
-            is_read: false,
-          },
-        ]);
-      } catch {}
+      const { error: notifError } = await supabase.from('inapp_notifications').insert([
+        {
+          user_id: item.provider_id,
+          title: 'تهانينا! تم اعتماد توثيق حسابك (KYC) ومنحك شارة التوثيق',
+          message: `تم التحقق من السجل التجاري والبطاقة الضريبية لـ "${item.company_name}". حسابك معتمد وموثق الآن في Survsta وله أولوية الظهور للعملاء.`,
+          type: 'approval',
+          link: '/provider/verification',
+          is_read: false,
+        },
+      ]);
+
+      if (notifError) {
+        console.warn('KYC approval notification notice:', notifError.message);
+      }
 
       // 4. Update local state
       setKycRequests((prev) =>
         prev.map((k) => (k.id === item.id ? { ...k, status: 'approved', updated_at: now } : k))
       );
-
-      // 5. Update local storage fallback
-      if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem(`SURVSTA_KYC_${item.provider_id}`);
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            parsed.status = 'approved';
-            parsed.updated_at = now;
-            localStorage.setItem(`SURVSTA_KYC_${item.provider_id}`, JSON.stringify(parsed));
-          } catch {}
-        }
-      }
 
       showToast(`✓ تم اعتماد توثيق "${item.company_name}" بنجاح ومنحه شارة التوثيق.`);
     } catch (err) {
@@ -298,30 +178,35 @@ export default function AdminKycPage() {
         .eq('id', rejectingItem.id);
 
       if (kycError) {
-        console.warn('Supabase kyc reject error:', kycError.message);
+        showToast(`❌ تعذر حفظ الاستبعاد: ${kycError.message}`);
+        return;
       }
 
       // 2. Update provider profile is_verified = false
-      try {
-        await supabase
-          .from('providers')
-          .update({ is_verified: false })
-          .eq('id', rejectingItem.provider_id);
-      } catch {}
+      const { error: providerError } = await supabase
+        .from('providers')
+        .update({ is_verified: false })
+        .eq('id', rejectingItem.provider_id);
+
+      if (providerError) {
+        console.warn('Provider is_verified reset notice:', providerError.message);
+      }
 
       // 3. Send in-app notification to provider
-      try {
-        await supabase.from('inapp_notifications').insert([
-          {
-            user_id: rejectingItem.provider_id,
-            title: 'تنبيه: تعذر اعتماد وثائق التوثيق (KYC)',
-            message: `تم فحص مستندات "${rejectingItem.company_name}" وتعذر الاعتماد للسبب: ${reason}. يرجى مراجعة الملاحظات وإعادة الرفع.`,
-            type: 'warning',
-            link: '/provider/verification',
-            is_read: false,
-          },
-        ]);
-      } catch {}
+      const { error: notifError } = await supabase.from('inapp_notifications').insert([
+        {
+          user_id: rejectingItem.provider_id,
+          title: 'تنبيه: تعذر اعتماد وثائق التوثيق (KYC)',
+          message: `تم فحص مستندات "${rejectingItem.company_name}" وتعذر الاعتماد للسبب: ${reason}. يرجى مراجعة الملاحظات وإعادة الرفع.`,
+          type: 'warning',
+          link: '/provider/verification',
+          is_read: false,
+        },
+      ]);
+
+      if (notifError) {
+        console.warn('KYC rejection notification notice:', notifError.message);
+      }
 
       // 4. Update local state
       setKycRequests((prev) =>
@@ -360,10 +245,7 @@ export default function AdminKycPage() {
   const rejectedCount = kycRequests.filter((k) => k.status === 'rejected').length;
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
-      <AdminSidebar pendingCount={pendingCount} />
-
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-cyan-500/20 pb-5">
           <div>
@@ -741,6 +623,5 @@ export default function AdminKycPage() {
           </div>
         )}
       </div>
-    </div>
   );
 }

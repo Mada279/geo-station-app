@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
 
 interface EditEquipmentModalProps {
@@ -530,9 +529,7 @@ export default function AdminEquipmentPage() {
   });
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
-      <AdminSidebar />
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         
         {/* Toast */}
         {toastMessage && (
@@ -696,6 +693,5 @@ export default function AdminEquipmentPage() {
         />
 
       </div>
-    </div>
   );
 }

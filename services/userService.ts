@@ -1,139 +1,59 @@
 import { User, CreateUserInput, UpdateUserInput } from '@/types/user';
 import { supabase } from '@/utils/supabaseClient';
-import { getProvidersSuspensionMetaMap, isProviderActiveSuspended, setProviderSuspension } from '@/services/providerControlService';
-
-export const ADMIN_EMAIL = 'ahmed@survsta.com';
+import { setProviderSuspension } from '@/services/providerControlService';
 
 /**
- * Super Admin default system user representation
+ * Platform administrators are rows in `platform_admins`, not hardcoded
+ * credentials. Seeding is done by `scripts/provision-admin.mjs`.
  */
-const SYSTEM_ADMIN_USER: User = {
-  id: 'usr_admin',
-  name: 'م. أحمد (مدير النظام)',
-  email: ADMIN_EMAIL,
-  role: 'admin',
-  status: 'active',
-  organization: 'إدارة منصة Survsta',
-  phone: '01001234567',
-  createdAt: '2026-08-15T10:00:00Z',
-  sourceTable: 'system',
-  is_suspended: false,
-};
-
-/**
- * Explicit Authentication handler for Admin & Provider accounts
- */
-export async function authenticateUser(email: string, password?: string): Promise<User> {
-  await new Promise((res) => setTimeout(res, 150));
-  const cleanEmail = email.toLowerCase().trim();
-  const cleanPass = (password || '').trim();
-
-  // Strict check for Admin
-  if (cleanEmail === ADMIN_EMAIL) {
-    if (cleanPass !== 'Ahm@d242526') {
-      throw new Error('كلمة المرور غير صحيحة لحساب مدير النظام.');
-    }
-    return SYSTEM_ADMIN_USER;
-  }
-
-  // Check Provider in Supabase
+export async function getPlatformAdminEmails(): Promise<string[]> {
   try {
-    const { data: prov } = await supabase
-      .from('providers')
-      .select('*')
-      .eq('email', cleanEmail)
-      .maybeSingle();
-
-    if (prov) {
-      const suspensionMap = await getProvidersSuspensionMetaMap();
-      const meta = suspensionMap.get(String(prov.id));
-
-      if (meta && meta.is_suspended && meta.suspended_until) {
-        const expiry = new Date(meta.suspended_until);
-        if (new Date() >= expiry) {
-          // LAZY AUTO-RESTORE: Suspension period has elapsed!
-          await setProviderSuspension({
-            providerId: String(prov.id),
-            isSuspended: false,
-            providerEmail: cleanEmail,
-          });
-        } else {
-          const daysLeft = Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-          throw new Error(
-            `تم إيقاف هذا الحساب مؤقتاً حتى ${expiry.toLocaleDateString('ar-EG')} (متبقي ${daysLeft} يوم).${
-              meta.suspension_reason ? ` السبب: ${meta.suspension_reason}` : ''
-            }`
-          );
-        }
-      } else if (prov.status === 'suspended' || (prov as any).is_suspended) {
-        throw new Error(
-          `تم إيقاف هذا الحساب من قبل إدارة المنصة.${meta?.suspension_reason ? ` السبب: ${meta.suspension_reason}` : ''} يرجى التواصل مع الدعم الفني.`
-        );
-      }
-
-      if (prov.status === 'blocked' || prov.status === 'rejected') {
-        throw new Error('هذا الحساب معطل أو تم رفضه من قبل إدارة المنصة.');
-      }
-    }
-  } catch (err: any) {
-    if (err.message && err.message.includes('إيقاف')) throw err;
+    const { data, error } = await supabase.from('platform_admins').select('email');
+    if (error || !data) return [];
+    return data.map((row: any) => String(row.email).toLowerCase().trim()).filter(Boolean);
+  } catch {
+    return [];
   }
-
-  // Check Client in Supabase
-  try {
-    const { data: client } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('email', cleanEmail)
-      .maybeSingle();
-
-    if (client) {
-      const suspensionMap = await getProvidersSuspensionMetaMap();
-      const meta = suspensionMap.get(String(client.id)) || (client.user_id ? suspensionMap.get(String(client.user_id)) : null);
-
-      if (meta && meta.is_suspended && meta.suspended_until) {
-        const expiry = new Date(meta.suspended_until);
-        if (new Date() >= expiry) {
-          // Lazy auto-restore
-          await setProviderSuspension({
-            providerId: String(client.id),
-            isSuspended: false,
-            providerEmail: cleanEmail,
-          });
-        } else {
-          const daysLeft = Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-          throw new Error(
-            `تم إيقاف هذا الحساب مؤقتاً حتى ${expiry.toLocaleDateString('ar-EG')} (متبقي ${daysLeft} يوم).`
-          );
-        }
-      } else if (client.status === 'suspended' || (client as any).is_suspended) {
-        throw new Error('تم إيقاف هذا الحساب من قبل إدارة المنصة. يرجى التواصل مع الدعم الفني.');
-      }
-    }
-  } catch (err: any) {
-    if (err.message && err.message.includes('إيقاف')) throw err;
-  }
-
-  // Fallback demo check
-  return {
-    id: `usr_${Date.now()}`,
-    name: 'مستخدم منصة Survsta',
-    email: cleanEmail,
-    role: 'customer',
-    status: 'active',
-    createdAt: new Date().toISOString(),
-  };
 }
 
 /**
- * Fetch all registered users dynamically from Supabase (clients + providers + admin)
+ * Fetch all registered users dynamically from Supabase (clients + providers + admins)
  */
 export async function getUsers(): Promise<User[]> {
+  // 0. Use secure API route if in browser to guarantee admin permissions and auth.users role mapping
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch('/api/admin/users');
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json.users)) {
+          return json.users;
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[userService] Failed to fetch users via API route, falling back to direct query:', apiErr);
+    }
+  }
+
   try {
     const usersMap = new Map<string, User>();
 
-    // 1. Always include System Admin
-    usersMap.set(ADMIN_EMAIL, SYSTEM_ADMIN_USER);
+    const adminEmails = await getPlatformAdminEmails();
+
+    // 1. Platform administrators
+    for (const email of adminEmails) {
+      usersMap.set(email, {
+        id: `admin_${email}`,
+        name: 'مدير المنصة',
+        email,
+        role: 'admin',
+        status: 'active',
+        organization: 'إدارة منصة Survsta',
+        createdAt: new Date().toISOString(),
+        sourceTable: 'platform_admins',
+        is_suspended: false,
+      });
+    }
 
     // 2. Fetch all registered clients
     const { data: clientsData, error: clientsErr } = await supabase
@@ -148,26 +68,24 @@ export async function getUsers(): Promise<User[]> {
         const email = (c.email || '').toLowerCase().trim();
         if (!email) return;
 
+        const isAdmin = adminEmails.includes(email);
         let role: 'admin' | 'provider' | 'customer' = 'customer';
-        if (email === ADMIN_EMAIL) {
+        if (isAdmin) {
           role = 'admin';
-        } else if (
-          Array.isArray(c.active_modules) &&
-          c.active_modules.includes('provider')
-        ) {
+        } else if (Array.isArray(c.active_modules) && c.active_modules.includes('provider')) {
           role = 'provider';
         }
 
-        const isSuspended = c.status === 'suspended' || c.is_suspended === true;
+        const isSuspended = c.status === 'suspended';
 
         usersMap.set(email, {
           id: String(c.id),
           name: c.full_name || 'عميل مسجل',
           email: c.email,
           role,
-          status: isSuspended ? 'suspended' : (c.status === 'pending' ? 'pending' : 'active'),
+          status: isSuspended ? 'suspended' : c.status === 'pending' ? 'pending' : 'active',
           organization: c.company_name || c.category || '—',
-          phone: c.phone_number || '',
+          phone: c.phone_number ? String(c.phone_number) : '',
           createdAt: c.created_at || new Date().toISOString(),
           sourceTable: 'clients',
           is_suspended: isSuspended,
@@ -188,7 +106,7 @@ export async function getUsers(): Promise<User[]> {
         const email = (p.email || '').toLowerCase().trim();
         if (!email) return;
 
-        const isSuspended = p.status === 'suspended' || p.is_suspended === true;
+        const isSuspended = p.status === 'suspended';
 
         // If user already exists as client, merge information with provider precedence
         const existing = usersMap.get(email);
@@ -198,7 +116,7 @@ export async function getUsers(): Promise<User[]> {
             name: p.name || existing.name,
             role: existing.role === 'admin' ? 'admin' : 'provider',
             organization: p.name || p.location || existing.organization,
-            phone: p.phone || existing.phone,
+            phone: p.phone ? String(p.phone) : existing.phone,
             status: isSuspended || existing.is_suspended ? 'suspended' : existing.status,
             is_suspended: isSuspended || existing.is_suspended,
           });
@@ -208,9 +126,9 @@ export async function getUsers(): Promise<User[]> {
             name: p.name || 'مزوّد خدمة',
             email: p.email,
             role: 'provider',
-            status: isSuspended ? 'suspended' : (p.status === 'pending' ? 'pending' : 'active'),
+            status: isSuspended ? 'suspended' : p.status === 'pending' ? 'pending' : 'active',
             organization: p.name || p.location || 'مكتب مساحي معتمد',
-            phone: p.phone || '',
+            phone: p.phone ? String(p.phone) : '',
             createdAt: p.created_at || new Date().toISOString(),
             sourceTable: 'providers',
             is_suspended: isSuspended,
@@ -222,7 +140,7 @@ export async function getUsers(): Promise<User[]> {
     return Array.from(usersMap.values());
   } catch (err) {
     console.error('[userService] Fatal error fetching users:', err);
-    return [SYSTEM_ADMIN_USER];
+    return [];
   }
 }
 
@@ -234,19 +152,16 @@ export async function toggleUserSuspension(user: User): Promise<User> {
   const newStatus = isCurrentlySuspended ? 'active' : 'suspended';
   const newSuspended = !isCurrentlySuspended;
 
-  // Don't suspend super admin
-  if (user.email === ADMIN_EMAIL) {
-    throw new Error('لا يمكن إيقاف حساب مدير النظام الرئيسي.');
+  const adminEmails = await getPlatformAdminEmails();
+  if (adminEmails.includes((user.email || '').toLowerCase().trim())) {
+    throw new Error('لا يمكن إيقاف حساب مدير المنصة.');
   }
+
+  const normalizedEmail = user.email.toLowerCase().trim();
 
   // 1. Update in clients table if user belongs or matches email
   try {
-    const clientUpdate: any = { status: newStatus };
-    // Try updating status
-    await supabase
-      .from('clients')
-      .update(clientUpdate)
-      .eq('email', user.email.toLowerCase().trim());
+    await supabase.from('clients').update({ status: newStatus }).eq('email', normalizedEmail);
   } catch (cErr) {
     console.warn('[userService] Notice updating client status:', cErr);
   }
@@ -254,15 +169,12 @@ export async function toggleUserSuspension(user: User): Promise<User> {
   // 2. Update in providers table if user belongs or matches email
   try {
     const provStatus = newSuspended ? 'suspended' : 'approved';
-    await supabase
-      .from('providers')
-      .update({ status: provStatus })
-      .eq('email', user.email.toLowerCase().trim());
+    await supabase.from('providers').update({ status: provStatus }).eq('email', normalizedEmail);
   } catch (pErr) {
     console.warn('[userService] Notice updating provider status:', pErr);
   }
 
-  // 3. Keep God Mode suspension metadata synchronized
+  // 3. Keep suspension metadata synchronized
   if (user.id) {
     try {
       await setProviderSuspension({
@@ -288,31 +200,32 @@ export async function getUserById(id: string): Promise<User | null> {
 
 export async function createUser(data: CreateUserInput): Promise<User> {
   const email = data.email.toLowerCase().trim();
-  const newUser: User = {
-    ...data,
-    id: `usr_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    status: data.status || 'active',
-    is_suspended: data.status === 'suspended',
-  };
 
-  // Insert into clients table
-  try {
-    await supabase.from('clients').insert([
+  const { data: inserted, error } = await supabase
+    .from('clients')
+    .insert([
       {
         full_name: data.name,
         email,
-        phone_number: data.phone || '01000000000',
+        phone_number: data.phone || null,
         company_name: data.organization || null,
         status: data.status || 'active',
         active_modules: data.role === 'provider' ? ['client', 'provider'] : ['client'],
       },
-    ]);
-  } catch (err) {
-    console.warn('[userService] Insert into clients notice:', err);
-  }
+    ])
+    .select('id, created_at')
+    .single();
 
-  return newUser;
+  if (error) throw new Error(error.message);
+
+  return {
+    ...data,
+    id: String(inserted.id),
+    createdAt: inserted.created_at || new Date().toISOString(),
+    status: data.status || 'active',
+    is_suspended: data.status === 'suspended',
+    sourceTable: 'clients',
+  };
 }
 
 export async function updateUser(id: string, data: UpdateUserInput): Promise<User> {
@@ -334,16 +247,18 @@ export async function updateUser(id: string, data: UpdateUserInput): Promise<Use
 
   // Persist to Supabase
   if (updated.email) {
+    const normalizedEmail = updated.email.toLowerCase().trim();
+
     try {
       await supabase
         .from('clients')
         .update({
           full_name: updated.name,
-          phone_number: updated.phone,
-          company_name: updated.organization,
+          phone_number: updated.phone || null,
+          company_name: updated.organization || null,
           status: updated.status,
         })
-        .eq('email', updated.email.toLowerCase().trim());
+        .eq('email', normalizedEmail);
     } catch {}
 
     try {
@@ -351,10 +266,10 @@ export async function updateUser(id: string, data: UpdateUserInput): Promise<Use
         .from('providers')
         .update({
           name: updated.name,
-          phone: updated.phone,
+          phone: updated.phone || null,
           status: updated.status === 'suspended' ? 'suspended' : 'approved',
         })
-        .eq('email', updated.email.toLowerCase().trim());
+        .eq('email', normalizedEmail);
     } catch {}
   }
 
@@ -362,11 +277,18 @@ export async function updateUser(id: string, data: UpdateUserInput): Promise<Use
 }
 
 export async function deleteUser(userId: string): Promise<void> {
-  try {
-    await supabase.from('clients').delete().eq('id', userId);
-  } catch {}
+  const target = await getUserById(userId);
+  if (!target) return;
 
-  try {
-    await supabase.from('providers').delete().eq('id', userId);
-  } catch {}
+  // Deleting by email would wipe a person's client *and* provider records with
+  // one call, so scope each delete to the table the row actually came from.
+  if (!target.sourceTable || target.sourceTable === 'clients') {
+    const { error } = await supabase.from('clients').delete().eq('id', userId);
+    if (error) console.warn('[userService] delete from clients:', error.message);
+  }
+
+  if (!target.sourceTable || target.sourceTable === 'providers') {
+    const { error } = await supabase.from('providers').delete().eq('id', userId);
+    if (error) console.warn('[userService] delete from providers:', error.message);
+  }
 }

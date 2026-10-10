@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { supabase } from '@/utils/supabaseClient';
+import { logoutAndRedirect } from '@/utils/logout';
 
 interface UnifiedSidebarProps {
   activeModules: string[];
@@ -29,17 +29,7 @@ export default function UnifiedSidebar({
   const isProviderActive = activeModules.includes('provider');
   const isProviderPending = modulesStatus.provider === 'pending';
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch {}
-    document.cookie = 'survsta_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'survsta_modules=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('SURVSTA_AUTH_USER');
-      window.location.href = '/login';
-    }
-  };
+  const handleLogout = () => logoutAndRedirect('/login');
 
   return (
     <>

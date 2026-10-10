@@ -1,124 +1,59 @@
 import { type EmailOtpType } from '@supabase/supabase-js';
 import { type NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/utils/supabaseClient';
+import { createServerClient } from '@supabase/ssr';
+import { resolveAuthContext, homePathFor } from '@/lib/serverAuth';
+
+export const dynamic = 'force-dynamic';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+function safeNext(next: string | null): string {
+  if (next && next.startsWith('/') && !next.startsWith('//')) return next;
+  return '/dashboard';
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const token_hash = searchParams.get('token_hash');
+  const tokenHash = searchParams.get('token_hash');
   const type = searchParams.get('type') as EmailOtpType | null;
   const code = searchParams.get('code');
-  const next = searchParams.get('next') || '/dashboard';
 
-  const redirectUrl = new URL(next, request.url);
+  const response = NextResponse.redirect(new URL(safeNext(searchParams.get('next')), request.url));
 
-  // 1. Verify via token_hash (PKCE / Email OTP Link)
-  if (token_hash && type) {
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        type,
-        token_hash,
-      });
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll: (cookiesToSet) => {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+      },
+    },
+  });
 
-      if (!error && data?.user) {
-        const user = data.user;
-        const role =
-          user.email === 'ahmed@survsta.com'
-            ? 'admin'
-            : user.user_metadata?.role ||
-              (user.user_metadata?.active_modules?.provider ? 'provider' : 'client');
+  let verifyError: unknown = null;
 
-        const name = user.user_metadata?.name || user.user_metadata?.full_name || 'مستخدم سيرفستا';
-        const org = user.user_metadata?.organization || user.user_metadata?.company_name || '';
-
-        const targetDestination =
-          role === 'admin'
-            ? '/admin'
-            : role === 'provider'
-            ? '/provider/dashboard'
-            : '/dashboard';
-
-        const finalUrl = new URL(targetDestination, request.url);
-        const response = NextResponse.redirect(finalUrl);
-
-        response.cookies.set(
-          'survsta_session',
-          encodeURIComponent(
-            JSON.stringify({
-              id: user.id,
-              email: user.email,
-              name,
-              role,
-              org,
-            })
-          ),
-          { path: '/', maxAge: 86400 * 30, sameSite: 'lax' }
-        );
-
-        response.cookies.set('user_role', role, {
-          path: '/',
-          maxAge: 86400 * 30,
-          sameSite: 'lax',
-        });
-
-        return response;
-      }
-    } catch (err) {
-      console.error('[auth/confirm error]:', err);
-    }
+  if (tokenHash && type) {
+    ({ error: verifyError } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash }));
+  } else if (code) {
+    ({ error: verifyError } = await supabase.auth.exchangeCodeForSession(code));
+  } else {
+    return response;
   }
 
-  // 2. Verify via Authorization Code (OAuth / PKCE flow)
-  if (code) {
-    try {
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-      if (!error && data?.user) {
-        const user = data.user;
-        const role =
-          user.email === 'ahmed@survsta.com'
-            ? 'admin'
-            : user.user_metadata?.role ||
-              (user.user_metadata?.active_modules?.provider ? 'provider' : 'client');
-
-        const name = user.user_metadata?.name || user.user_metadata?.full_name || 'مستخدم سيرفستا';
-        const org = user.user_metadata?.organization || user.user_metadata?.company_name || '';
-
-        const targetDestination =
-          role === 'admin'
-            ? '/admin'
-            : role === 'provider'
-            ? '/provider/dashboard'
-            : '/dashboard';
-
-        const finalUrl = new URL(targetDestination, request.url);
-        const response = NextResponse.redirect(finalUrl);
-
-        response.cookies.set(
-          'survsta_session',
-          encodeURIComponent(
-            JSON.stringify({
-              id: user.id,
-              email: user.email,
-              name,
-              role,
-              org,
-            })
-          ),
-          { path: '/', maxAge: 86400 * 30, sameSite: 'lax' }
-        );
-
-        response.cookies.set('user_role', role, {
-          path: '/',
-          maxAge: 86400 * 30,
-          sameSite: 'lax',
-        });
-
-        return response;
-      }
-    } catch (err) {
-      console.error('[auth/callback code exchange error]:', err);
-    }
+  if (verifyError) {
+    console.warn('[auth/confirm] verification failed:', verifyError);
+    return NextResponse.redirect(new URL('/login?message=invalid_link', request.url));
   }
 
-  // Fallback to destination if verification already occurred or direct redirect
-  return NextResponse.redirect(redirectUrl);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const ctx = user ? await resolveAuthContext(user) : null;
+  if (!ctx) {
+    return NextResponse.redirect(new URL('/login?message=invalid_link', request.url));
+  }
+
+  return NextResponse.redirect(new URL(homePathFor(ctx.role), request.url));
 }

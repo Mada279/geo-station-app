@@ -2,9 +2,11 @@
  * Formats a phone number for WhatsApp wa.me links, specifically handling Egyptian numbers.
  * If the number starts with '01', strips the leading '0' and prepends '20' (e.g. 01033134413 -> 201033134413).
  */
-export function formatWhatsAppNumber(phone: string): string {
-  if (!phone) return '';
-  let cleaned = phone.replace(/\D/g, '');
+export function formatWhatsAppNumber(phone: any): string {
+  if (phone === null || phone === undefined) return '';
+  const str = String(phone).trim();
+  if (!str) return '';
+  let cleaned = str.replace(/\D/g, '');
 
   if (cleaned.startsWith('0020')) {
     cleaned = cleaned.substring(2);
@@ -20,8 +22,9 @@ export function formatWhatsAppNumber(phone: string): string {
 /**
  * Returns a fully formed WhatsApp click-to-chat URL with country code and optional pre-filled message.
  */
-export function getWhatsAppLink(phone: string, message?: string): string {
+export function getWhatsAppLink(phone: any, message?: string): string {
   const formatted = formatWhatsAppNumber(phone);
+  if (!formatted) return '';
   const base = `https://wa.me/${formatted}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }

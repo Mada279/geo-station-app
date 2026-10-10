@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { supabase } from '@/utils/supabaseClient';
+import { logoutAndRedirect } from '@/utils/logout';
 
 interface AdminSidebarProps {
   pendingCount?: number;
@@ -59,31 +59,7 @@ export default function AdminSidebar({ pendingCount = 0, isOpen = false, onClose
     },
   ];
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch {}
-
-    // Explicitly delete cookies with max-age=0 and path=/
-    document.cookie = 'survsta_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'user_role=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('SURVSTA_AUTH_USER');
-      localStorage.removeItem('SURVSTA_LOGGED_OUT');
-      localStorage.removeItem('GS_LOGGED_OUT');
-    }
-
-    try {
-      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-        const bc = new BroadcastChannel('survsta_auth_channel');
-        bc.postMessage({ type: 'LOGOUT' });
-        bc.close();
-      }
-    } catch {}
-
-    window.location.replace('/login');
-  };
+  const handleLogout = () => logoutAndRedirect('/login');
 
   const isActive = (href: string) => {
     if (href === '/admin') return pathname === '/admin';

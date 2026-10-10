@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
 import { formatWhatsAppNumber, getWhatsAppLink } from '@/utils/phoneUtils';
 import {
@@ -486,9 +485,7 @@ export default function AdminProvidersPage() {
   });
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
-      <AdminSidebar />
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         {/* Toast */}
         {toastMessage && (
           <div className="fixed top-5 left-5 z-50 rounded-xl bg-cyan-500 px-5 py-3 text-xs font-bold text-slate-950 shadow-2xl animate-bounce">
@@ -632,10 +629,10 @@ export default function AdminProvidersPage() {
 
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-cyan-300 font-bold" dir="ltr">{provider.phone || '—'}</span>
-                            {provider.phone && (
+                            <span className="font-mono text-cyan-300 font-bold" dir="ltr">{provider.phone || (provider as any)?.whatsapp || '—'}</span>
+                            {(provider?.phone || (provider as any)?.whatsapp) && (
                               <a
-                                href={getWhatsAppLink(provider.phone, `أهلاً ${provider.name}، بخصوص حسابكم في منصة Survsta:`)}
+                                href={getWhatsAppLink(provider?.phone || (provider as any)?.whatsapp || '', `أهلاً ${provider?.name || ''}، بخصوص حسابكم في منصة Survsta:`)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-1 rounded bg-[#25D366]/20 text-[#25D366] hover:bg-[#25D366]/30 transition"
@@ -927,9 +924,9 @@ export default function AdminProvidersPage() {
 
               <div className="space-y-2 pt-2">
                 {/* WhatsApp Trigger */}
-                {commTarget.provider.phone ? (
+                {(commTarget?.provider?.phone || (commTarget?.provider as any)?.whatsapp) ? (
                   <a
-                    href={`https://wa.me/${formatWhatsAppNumber(commTarget.provider.phone)}?text=${encodeURIComponent(
+                    href={`https://wa.me/${formatWhatsAppNumber(commTarget?.provider?.phone || (commTarget?.provider as any)?.whatsapp)}?text=${encodeURIComponent(
                       `${commTarget.defaultMessage}${commNotes ? `\n\nملاحظة: ${commNotes}` : ''}`
                     )}`}
                     target="_blank"
@@ -980,6 +977,5 @@ export default function AdminProvidersPage() {
           }}
         />
       </div>
-    </div>
   );
 }

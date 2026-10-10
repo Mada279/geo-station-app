@@ -309,7 +309,9 @@ async function getHomepageJobs(): Promise<HomepageJob[]> {
       .limit(6);
 
     if (error) {
-      console.error('[HomePage] Supabase error fetching jobs:', error.message || error);
+      if (!error.message?.includes('schema cache') && !error.message?.includes('does not exist')) {
+        console.warn('[HomePage] Notice fetching jobs:', error.message || error);
+      }
       return FALLBACK_JOBS;
     }
 
@@ -404,7 +406,7 @@ export default async function HomePage() {
       {/* WebSite Structured Data Schema with Sitelinks Searchbox */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, '\\u003c') }}
       />
       
       {/* 1. Hero Section (Dark Navy #081933) */}

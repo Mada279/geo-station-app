@@ -1,42 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { getAuthContext } from '@/lib/serverAuth';
 import { supabaseAdmin } from '@/utils/supabaseAdmin';
 
 export const dynamic = 'force-dynamic';
 
+const deleteSchema = z.object({ id: z.string().trim().min(1).max(120) });
+
 export async function DELETE(req: NextRequest) {
+  // Identity comes from the Supabase session cookie only. The old
+  // survsta_session / user_role cookies were unsigned and client-writable.
+  const ctx = await getAuthContext();
+  if (!ctx) {
+    return NextResponse.json(
+      { error: 'غير مصرح: يجب تسجيل الدخول أولاً لإتمام عملية الحذف.' },
+      { status: 401 }
+    );
+  }
+
+  let payload: z.infer<typeof deleteSchema>;
   try {
-    // 1. Session verification from cookies or authorization header
-    const sessionCookie = req.cookies.get('survsta_session')?.value;
-    const roleCookie = req.cookies.get('user_role')?.value;
-    const authHeader = req.headers.get('authorization');
+    payload = deleteSchema.parse(await req.json().catch(() => null));
+  } catch {
+    return NextResponse.json(
+      { error: 'معرّف الجهاز (id) مطلوب لإتمام عملية الحذف.' },
+      { status: 400 }
+    );
+  }
 
-    const hasValidSession = !!(sessionCookie || roleCookie || (authHeader && authHeader.startsWith('Bearer ')));
-
-    if (!hasValidSession) {
-      return NextResponse.json(
-        { error: 'غير مصرح: يجب تسجيل الدخول أولاً لإتمام عملية الحذف.' },
-        { status: 401 }
-      );
-    }
-
-    // 2. Parse request body
-    const body = await req.json().catch(() => null);
-    if (!body || !body.id) {
-      return NextResponse.json(
-        { error: 'معرّف الجهاز (id) مطلوب لإتمام عملية الحذف.' },
-        { status: 400 }
-      );
-    }
-
-    const { id } = body;
-
-    // 3. Perform admin deletion bypassing RLS
-    const { data, error } = await supabaseAdmin
+  try {
+    const { data: item, error: lookupError } = await supabaseAdmin
       .from('equipment')
-      .delete()
-      .eq('id', id)
-      .select('id');
+      .select('id, title, provider_id')
+      .eq('id', payload.id)
+      .maybeSingle();
 
+    if (lookupError) {
+      console.error('[API Equipment DELETE lookup error]:', lookupError);
+      return NextResponse.json({ error: 'تعذر التحقق من ملكية الجهاز.' }, { status: 500 });
+    }
+    if (!item) {
+      return NextResponse.json({ error: 'الجهاز غير موجود أو تم حذفه مسبقاً.' }, { status: 404 });
+    }
+
+    const isOwner = !!ctx.providerId && String(item.provider_id) === ctx.providerId;
+    if (ctx.role !== 'admin' && !isOwner) {
+      return NextResponse.json(
+        { error: 'غير مصرح: يمكنك حذف الأجهزة المملوكة لمكتبك فقط.' },
+        { status: 403 }
+      );
+    }
+
+    const { error } = await supabaseAdmin.from('equipment').delete().eq('id', payload.id);
     if (error) {
       console.error('[API Equipment DELETE Error]:', error);
       return NextResponse.json(
@@ -48,7 +63,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'تم حذف الجهاز بنجاح من قاعدة البيانات.',
-      deleted: data,
+      deleted: [{ id: item.id, title: item.title }],
     });
   } catch (err: any) {
     console.error('[API Equipment DELETE Exception]:', err);

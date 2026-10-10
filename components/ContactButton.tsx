@@ -22,19 +22,6 @@ function getLocalUser() {
       if (parsed && (parsed.id || parsed.email)) return parsed;
     }
   } catch {}
-
-  try {
-    const cookies = document.cookie.split(';');
-    for (const c of cookies) {
-      const trimmed = c.trim();
-      if (trimmed.startsWith('survsta_session=')) {
-        const val = trimmed.substring('survsta_session='.length);
-        const decoded = decodeURIComponent(val);
-        const parsed = JSON.parse(decoded);
-        if (parsed && (parsed.email || parsed.role)) return parsed;
-      }
-    }
-  } catch {}
   return null;
 }
 

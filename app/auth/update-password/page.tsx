@@ -66,7 +66,7 @@ function UpdatePasswordForm() {
       }
 
       // Supabase Update Password
-      const { data, error: updateError } = await supabase.auth.updateUser({
+      const { error: updateError } = await supabase.auth.updateUser({
         password: pass,
       });
 
@@ -76,12 +76,6 @@ function UpdatePasswordForm() {
           throw new Error('جلسة الاستعادة مفقودة أو منتهية الصلاحية. يرجى طلب رابط استعادة جديد.');
         }
         throw new Error(updateError.message);
-      }
-
-      // Update local storage credentials if user was locally cached
-      if (typeof window !== 'undefined' && data?.user?.email) {
-        const emailKey = 'SURVSTA_PROVIDER_CRED_' + data.user.email.toLowerCase().trim();
-        localStorage.setItem(emailKey, pass);
       }
 
       setIsSuccess(true);

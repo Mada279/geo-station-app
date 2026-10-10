@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import NotificationBell from '@/components/dashboard/NotificationBell';
+import { logoutAndRedirect } from '@/utils/logout';
 
 interface NavbarProps {
   user?: {
@@ -96,11 +97,7 @@ export default function Navbar({ user }: NavbarProps) {
               )}
               <span className="text-xs text-gray-400">{user.name}</span>
               <button
-                onClick={() => {
-                  document.cookie = "survsta_session=; path=/; max-age=0";
-                  document.cookie = "user_role=; path=/; max-age=0";
-                  window.location.href = "/login";
-                }}
+                onClick={() => logoutAndRedirect('/login')}
                 className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-300 hover:bg-red-500/20 hover:text-red-400 transition"
               >
                 خروج

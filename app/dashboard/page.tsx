@@ -103,11 +103,17 @@ export default function UnifiedDashboardPage() {
           }
         }
 
-        // Direct cookie check for provider role
-        if (typeof document !== 'undefined' && document.cookie.includes('user_role=provider')) {
-          setActiveModules((prev) => Array.from(new Set([...prev, 'provider'])));
-          setModulesMap((prev) => ({ ...prev, provider: prev['provider'] || 'active' }));
-        }
+        // Server-resolved role is the only trusted source for module access.
+        try {
+          const sessionRes = await fetch('/api/auth/session', { cache: 'no-store' });
+          if (sessionRes.ok) {
+            const session = await sessionRes.json();
+            if (session?.role === 'provider') {
+              setActiveModules((prev) => Array.from(new Set([...prev, 'provider'])));
+              setModulesMap((prev) => ({ ...prev, provider: prev['provider'] || 'active' }));
+            }
+          }
+        } catch {}
       } catch (e) {
         console.error('Error loading dashboard overview:', e);
       }

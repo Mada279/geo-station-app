@@ -1,67 +1,64 @@
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+const PROTECTED_PREFIXES = ['/admin', '/provider', '/client', '/freelancer', '/dashboard'];
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+function isProtected(pathname: string) {
+  return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Ignore static files, images, icons, and API internal calls
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.startsWith('/images') ||
-    pathname.startsWith('/favicon.ico') ||
-    pathname.startsWith('/manifest.json')
-  ) {
-    return NextResponse.next();
-  }
+  let response = NextResponse.next({ request });
 
-  // 1. Inspect cookies for active session
-  const sessionCookie = request.cookies.get('survsta_session')?.value;
-  const roleCookie = request.cookies.get('user_role')?.value;
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll: (cookiesToSet) => {
+        cookiesToSet.forEach(({ name, value }) => {
+          request.cookies.set(name, value);
+        });
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
+      },
+    },
+  });
 
-  let userRole: string | null = roleCookie || null;
-  let userEmail: string | null = null;
+  const hasSessionCookie = request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.startsWith('sb-'));
 
-  if (sessionCookie) {
-    try {
-      const decoded = decodeURIComponent(sessionCookie);
-      const parsed = JSON.parse(decoded);
-      if (parsed) {
-        if (!userRole && parsed.role) userRole = parsed.role;
-        if (parsed.email) userEmail = parsed.email;
-      }
-    } catch {
-      // In case sessionCookie is raw string
-      if (sessionCookie !== 'undefined') userEmail = sessionCookie;
-    }
-  }
-
-  // Admin Override
-  if (userEmail === 'ahmed@survsta.com') {
-    userRole = 'admin';
-  }
-
-  // 2. Protect Admin Route
-  if (pathname.startsWith('/admin')) {
-    if (userRole !== 'admin' && userRole !== 'super_admin') {
+  // Anonymous visitors never reach Supabase Auth: public pages stay fast, and
+  // protected pages bounce straight to /login.
+  if (!hasSessionCookie) {
+    if (isProtected(pathname)) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
+    return response;
   }
 
-  // 3. Protect Provider Route
-  if (pathname.startsWith('/provider')) {
-    const isAuthorized =
-      userRole === 'provider' || userRole === 'admin' || userRole === 'super_admin';
-    if (!isAuthorized) {
+  // Signature + expiry are verified by Supabase Auth, not by us.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    if (isProtected(pathname)) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
+    return response;
   }
 
-  // Return standard response with refreshed headers
-  const response = NextResponse.next();
   return response;
 }
 
@@ -74,6 +71,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public files (images, svg, etc.)
      */
-    '/((?!_next/static|_next/image|favicon.ico|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|images|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

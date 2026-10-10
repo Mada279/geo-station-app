@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
 import { getWhatsAppLink, formatWhatsAppNumber } from '@/utils/phoneUtils';
 
@@ -206,9 +205,7 @@ export default function AdminApprovalsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
-      <AdminSidebar pendingCount={items.length} />
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         
         {/* Toast */}
         {actionToast && (
@@ -464,6 +461,5 @@ export default function AdminApprovalsPage() {
         )}
 
       </div>
-    </div>
   );
 }

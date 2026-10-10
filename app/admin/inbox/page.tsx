@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
 
 interface AdminInquiryItem {
@@ -248,7 +247,7 @@ export default function AdminInboxPage() {
   const unreadCount = inquiries.filter((i) => i.status === 'unread').length;
 
   return (
-    <div className="flex h-screen bg-[#081933] text-slate-100 overflow-hidden" dir="rtl">
+    <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#081933] text-slate-100">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-6 left-6 z-50 bg-[#0F253E] border border-cyan-500/50 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-3 animate-fade-in">
@@ -256,9 +255,6 @@ export default function AdminInboxPage() {
           <span className="text-sm font-medium">{toastMessage}</span>
         </div>
       )}
-
-      {/* Admin Sidebar */}
-      <AdminSidebar />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">

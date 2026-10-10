@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AdminVerificationPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -27,9 +26,7 @@ export default function AdminVerificationPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
-      <AdminSidebar />
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-cyan-500/20 pb-5">
@@ -168,6 +165,5 @@ export default function AdminVerificationPage() {
         )}
 
       </div>
-    </div>
   );
 }

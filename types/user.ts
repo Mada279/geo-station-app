@@ -10,7 +10,7 @@ export interface User {
   organization?: string;
   phone?: string;
   createdAt: string;
-  sourceTable?: 'clients' | 'providers' | 'system';
+  sourceTable?: 'clients' | 'providers' | 'platform_admins' | 'system';
   is_suspended?: boolean;
 }
 

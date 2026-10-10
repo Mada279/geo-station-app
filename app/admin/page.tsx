@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabaseClient';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { getWhatsAppLink } from '@/utils/phoneUtils';
 
 
@@ -61,7 +60,6 @@ export default function AdminDashboardPage() {
   const [pendingProviders, setPendingProviders] = useState<PendingProvider[]>([]);
   const [approvedProviders, setApprovedProviders] = useState<PendingProvider[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [selectedProvider, setSelectedProvider] = useState<PendingProvider | null>(null);
 
   // OTP Verification state
@@ -199,35 +197,16 @@ export default function AdminDashboardPage() {
   const maxSpark = Math.max(...sparkValues);
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
-      
-      {/* Unified Admin Sidebar */}
-      <AdminSidebar
-        pendingCount={pendingProviders.length}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
+    <div className="p-4 sm:p-8 space-y-6 max-w-7xl mx-auto w-full">
 
-      {/* Main Content Area */}
-      <div className="flex-1 min-w-0 p-4 sm:p-8 space-y-6">
-
-        {/* Page Top Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-cyan-500/20 pb-5">
-          <div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setIsSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-xl bg-slate-900 border border-slate-800 text-cyan-300"
-              >
-                ☰
-              </button>
-              <h1 className="text-2xl sm:text-3xl font-black text-white">نظرة عامة على المنصة</h1>
-            </div>
-            <p className="text-xs sm:text-sm text-gray-400 mt-1">
-              حالة التشغيل اليومي — طابور المراجعة، نمو السوق، وجودة البيانات.
-            </p>
-          </div>
+      {/* Page Top Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-cyan-500/20 pb-5">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white">نظرة عامة على المنصة</h1>
+          <p className="text-xs sm:text-sm text-gray-400 mt-1">
+            حالة التشغيل اليومي — طابور المراجعة، نمو السوق، وجودة البيانات.
+          </p>
+        </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <select className="rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs font-semibold text-gray-300 focus:outline-none focus:border-cyan-400">
@@ -628,8 +607,6 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </div>
-
-      </div>
 
       {/* Review & Verification Modal with OTP and WhatsApp/Email deep links */}
       {selectedProvider && (

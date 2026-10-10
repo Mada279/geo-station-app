@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -20,23 +21,55 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://survsta.com';
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-FFCDYX5JBS';
+const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://survsta.com'),
-  title: 'Survsta — المنصة الرقمية لقطاع المساحة والجيوماتكس',
-  description: 'سوق الأجهزة المساحية والخدمات والوظائف الهندسية في مصر والشرق الأوسط',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Survsta — المنصة الرقمية لقطاع المساحة والجيوماتكس',
+    template: '%s | Survsta - سيرفستا',
+  },
+  description:
+    'المنصة الهندسية المتخصصة في تأجير وبيع الأجهزة المساحية (Total Station, GPS RTK)، دليل المكاتب المساحية المعتمدة، وسوق الخدمات الهندسية والوظائف في مصر والشرق الأوسط.',
+  applicationName: 'Survsta',
   keywords: [
     'Survsta',
     'سيرفستا',
     'أجهزة مساحة',
-    'تأجير محطات رصد',
+    'تأجير أجهزة مساحة',
+    'توتال ستيشن',
     'Total Station',
     'GPS RTK',
+    'ميزان قامة',
     'مكاتب مساحة معتمدة',
+    'خدمات مساحية مصر',
     'وظائف مساحة مصر',
+    'سوق المساحة والجيوماتكس',
     'Geomatics Egypt',
   ],
+  authors: [{ name: 'Survsta Team', url: siteUrl }],
+  creator: 'Survsta',
+  publisher: 'Survsta',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   alternates: {
-    canonical: 'https://survsta.com',
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   icons: {
     icon: '/favicon.ico',
@@ -50,26 +83,28 @@ export const metadata: Metadata = {
     title: 'Survsta',
   },
   openGraph: {
-    title: 'Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر',
-    description: 'المنصة الرائدة لربط المهندسين والمقاولين بمزودي أجهزة Total Station و GPS RTK ومكاتب المساحة المعتمدة.',
-    url: 'https://survsta.com',
-    siteName: 'Survsta | سيرفستا',
-    locale: 'ar_EG',
     type: 'website',
+    locale: 'ar_EG',
+    url: siteUrl,
+    siteName: 'Survsta | سيرفستا',
+    title: 'Survsta | سيرفستا - المنصة الرقمية للمساحة والجيوماتكس',
+    description:
+      'المنصة الرائدة لربط المهندسين والمقاولين بمزودي أجهزة Total Station و GPS RTK ومكاتب المساحة المعتمدة في مصر والشرق الأوسط.',
     images: [
       {
-        url: 'https://survsta.com/images/survsta-og-banner.jpg',
+        url: '/images/survsta-og-banner.jpg',
         width: 1200,
         height: 630,
-        alt: 'Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر',
+        alt: 'Survsta | سيرفستا - المنصة الرقمية للمساحة والجيوماتكس',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Survsta | سيرفستا - سوق وخدمات أجهزة المساحة في مصر',
-    description: 'المنصة الرائدة لربط المهندسين والمقاولين بمزودي أجهزة Total Station و GPS RTK ومكاتب المساحة المعتمدة.',
-    images: ['https://survsta.com/images/survsta-og-banner.jpg'],
+    title: 'Survsta | سيرفستا - المنصة الرقمية للمساحة والجيوماتكس',
+    description:
+      'سوق أجهزة المساحة وتأجير المحطات وربط المكاتب الهندسية المعتمدة في مصر والشرق الأوسط.',
+    images: ['/images/survsta-og-banner.jpg'],
   },
 };
 
@@ -104,7 +139,7 @@ export default function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd).replace(/</g, '\\u003c') }}
         />
       </head>
       <body className="min-h-screen bg-[#f4f7fa] text-slate-800 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between">
@@ -117,7 +152,38 @@ export default function RootLayout({
         <Footer />
         <FloatingAdButton />
         <PwaInstallPrompt />
-        <GoogleAnalytics gaId="G-FFCDYX5JBS" />
+
+        {/* Analytics & Performance Tracking */}
+        {gaMeasurementId && <GoogleAnalytics gaId={gaMeasurementId} />}
+
+        {/* Meta Pixel (Facebook Pixel) */}
+        {metaPixelId && (
+          <>
+            <Script id="meta-pixel" strategy="afterInteractive">
+              {`
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${metaPixelId}');
+                fbq('track', 'PageView');
+              `}
+            </Script>
+            <noscript>
+              <img
+                height="1"
+                width="1"
+                style={{ display: 'none' }}
+                src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
+                alt="Meta Pixel"
+              />
+            </noscript>
+          </>
+        )}
       </body>
     </html>
   );

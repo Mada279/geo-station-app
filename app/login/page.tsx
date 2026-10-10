@@ -3,12 +3,43 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/utils/supabaseClient';
-import { authenticateUser } from '@/services/userService';
+
+interface ResolvedSession {
+  authenticated: boolean;
+  id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'provider' | 'customer';
+  providerStatus: string | null;
+  home: string;
+}
+
+const BLOCKED_PROVIDER_STATUSES: Record<string, string> = {
+  suspended: 'تم إيقاف هذا الحساب من قبل إدارة المنصة. يرجى التواصل مع الدعم الفني.',
+  blocked: 'هذا الحساب معطل. يرجى التواصل مع إدارة المنصة.',
+  rejected: 'تم رفض طلب التسجيل. يرجى التواصل مع إدارة المنصة.',
+  pending: 'حسابك قيد المراجعة والاعتماد من قبل إدارة المنصة. يرجى الانتظار حتى اعتماده.',
+};
+
+function translateAuthError(message: string): string {
+  if (message.includes('Invalid login credentials')) {
+    return 'بيانات الدخول غير صحيحة. يرجى التأكد من البريد الإلكتروني وكلمة المرور.';
+  }
+  if (message.includes('Email not confirmed')) {
+    return 'يرجى تأكيد بريدك الإلكتروني من رسالة التفعيل قبل تسجيل الدخول.';
+  }
+  if (message.toLowerCase().includes('rate limit')) {
+    return 'تمت محاولات دخول كثيرة متتالية. يرجى الانتظار دقائق ثم المحاولة مرة أخرى.';
+  }
+  if (message.includes('Email rate limit exceeded')) {
+    return 'تم تجاوز حد المحاولات المسموح. يرجى الانتظار قليلاً وإعادة المحاولة.';
+  }
+  return 'تعذر تسجيل الدخول. يرجى التحقق من البريد الإلكتروني وكلمة المرور.';
+}
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
 
@@ -17,58 +48,29 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Active Session Guard: Immediately redirect away from /login if user is already authenticated
+  const safeTarget = (fallback: string) =>
+    callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('//') ? callbackUrl : fallback;
+
+  // An active session makes the login form meaningless — send the user to their portal.
   useEffect(() => {
-    let isMounted = true;
+    let cancelled = false;
 
-    async function checkExistingSession() {
-      // 1. Check localStorage first
-      if (typeof window !== 'undefined' && window.localStorage) {
-        try {
-          const stored = localStorage.getItem('SURVSTA_AUTH_USER');
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (parsed && parsed.role) {
-              const target =
-                callbackUrl && callbackUrl.startsWith('/')
-                  ? callbackUrl
-                  : parsed.role === 'admin'
-                  ? '/admin'
-                  : parsed.role === 'provider'
-                  ? '/provider/dashboard'
-                  : '/provider/dashboard';
-              window.location.replace(target);
-              return;
-            }
-          }
-        } catch {}
-      }
-
-      // 2. Check live Supabase Auth session
+    (async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user && isMounted) {
-          let role = session.user.user_metadata?.role || '';
-          if (!role && typeof document !== 'undefined') {
-            const match = document.cookie.match(/(?:^|;\s*)user_role=([^;]+)/);
-            if (match && match[1]) role = decodeURIComponent(match[1]);
-          }
-          const target =
-            callbackUrl && callbackUrl.startsWith('/')
-              ? callbackUrl
-              : role === 'admin' || session.user.email === 'ahmed@survsta.com'
-              ? '/admin'
-              : '/provider/dashboard';
-          window.location.replace(target);
-        }
-      } catch {}
-    }
-
-    checkExistingSession();
+        const res = await fetch('/api/auth/session', { cache: 'no-store' });
+        if (!res.ok) return;
+        const session: ResolvedSession = await res.json();
+        if (cancelled || !session?.role) return;
+        window.location.replace(safeTarget(session.home));
+      } catch {
+        // Offline or server error: stay on the form.
+      }
+    })();
 
     return () => {
-      isMounted = false;
+      cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,237 +80,91 @@ function LoginForm() {
 
     try {
       const cleanEmail = email.toLowerCase().trim();
-      const cleanPass = password.trim();
+      const cleanPass = password;
 
-      // 1. Strict Admin Credentials Check
-      if (cleanEmail === 'ahmed@survsta.com') {
-        if (cleanPass !== 'Ahm@d242526') {
-          throw new Error('كلمة المرور غير صحيحة لحساب مدير النظام.');
-        }
-
-        document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({
-          role: 'admin',
-          email: 'ahmed@survsta.com',
-          name: 'م. أحمد',
-          org: 'Survsta Admin'
-        })) + "; path=/; max-age=86400";
-        document.cookie = "user_role=admin; path=/; max-age=86400";
-
-        if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.removeItem('SURVSTA_LOGGED_OUT');
-          localStorage.removeItem('GS_LOGGED_OUT');
-          localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify({
-            id: 'admin-ahmed',
-            email: 'ahmed@survsta.com',
-            name: 'م. أحمد',
-            role: 'admin',
-            org: 'Survsta Admin',
-            av: 'أح'
-          }));
-
-          try {
-            if ('BroadcastChannel' in window) {
-              const bc = new BroadcastChannel('survsta_auth_channel');
-              bc.postMessage({ type: 'AUTH_STATE_CHANGED', email: 'ahmed@survsta.com' });
-              bc.close();
-            }
-          } catch {}
-        }
-
-        const targetUrl = callbackUrl && callbackUrl.startsWith('/admin') ? callbackUrl : '/admin';
-        window.location.replace(targetUrl);
-        return;
+      if (!cleanEmail || !cleanPass) {
+        throw new Error('يرجى إدخال البريد الإلكتروني وكلمة المرور.');
       }
 
-      // 2. Real Provider Authentication via Supabase Auth & Live Providers Database
-      let dbProv: any = null;
-      try {
-        const { data } = await supabase
-          .from('providers')
-          .select('*')
-          .eq('email', cleanEmail)
-          .maybeSingle();
-        dbProv = data;
-      } catch (dbErr) {
-        console.warn('[DB Check Exception]:', dbErr);
+      // Supabase Auth is the credential authority.
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: cleanPass,
+      });
+
+      if (authError || !authData?.user) {
+        throw new Error(translateAuthError(authError?.message || ''));
       }
 
-      // Check account approval status if registered in providers table
-      if (dbProv) {
-        if (dbProv.status === 'suspended' || dbProv.is_suspended) {
-          throw new Error('تم إيقاف هذا الحساب من قبل إدارة المنصة. يرجى التواصل مع الدعم الفني.');
-        }
-        if (dbProv.status === 'blocked' || dbProv.status === 'rejected') {
-          throw new Error('هذا الحساب معطل أو تم رفضه. يرجى التواصل مع إدارة المنصة.');
-        }
-        if (dbProv.status === 'pending') {
-          throw new Error('حسابك قيد المراجعة والاعتماد من قبل إدارة المنصة. يرجى الانتظار حتى اعتماده.');
-        }
-      }
-
-      // Check client table for suspension status
-      try {
-        const { data: dbClient } = await supabase
-          .from('clients')
-          .select('id, status')
-          .eq('email', cleanEmail)
-          .maybeSingle();
-
-        if (dbClient && (dbClient.status === 'suspended' || (dbClient as any).is_suspended)) {
-          throw new Error('تم إيقاف هذا الحساب من قبل إدارة المنصة. يرجى التواصل مع الدعم الفني.');
-        }
-      } catch (clientErr: any) {
-        if (clientErr?.message && clientErr.message.includes('إيقاف')) throw clientErr;
-      }
-
-      // Attempt Supabase Auth validation
-      let authSuccess = false;
-      let authUser: any = null;
-
-      try {
-        const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password: cleanPass,
-        });
-
-        if (authData?.user && !authErr) {
-          authSuccess = true;
-          authUser = authData.user;
-        } else if (authErr?.message === 'Email not confirmed') {
-          // Email confirmation required by Supabase Auth, but email and password are confirmed valid
-          authSuccess = true;
-          authUser = { id: dbProv?.id || 'sb-user', email: cleanEmail };
-        } else if (authErr?.message && authErr.message.includes('Invalid login credentials')) {
-          // Check if provider exists in providers table or locally
-          const localStoredPass = typeof window !== 'undefined' ? localStorage.getItem('SURVSTA_PROVIDER_CRED_' + cleanEmail) : null;
-          if (localStoredPass && localStoredPass !== cleanPass) {
-            throw new Error('كلمة المرور غير صحيحة. يرجى التحقق من كلمة المرور وإعادة المحاولة.');
-          } else if (!dbProv && !localStoredPass) {
-            throw new Error('بيانات الدخول غير صحيحة. يرجى التأكد من البريد وكلمة المرور.');
-          }
-        }
-      } catch (authEx: any) {
-        if (authEx?.message && (authEx.message.includes('غير صحيحة') || authEx.message.includes('معطل') || authEx.message.includes('قيد المراجعة'))) {
-          throw authEx;
-        }
-      }
-
-      // Verify against client-cached registered credentials
-      if (!authSuccess && typeof window !== 'undefined' && window.localStorage) {
-        const storedPass = localStorage.getItem('SURVSTA_PROVIDER_CRED_' + cleanEmail);
-        if (storedPass !== null) {
-          if (cleanPass === storedPass) {
-            authSuccess = true;
-          } else {
-            throw new Error('كلمة المرور غير صحيحة. يرجى التحقق من كلمة المرور وإعادة المحاولة.');
-          }
-        }
-      }
-
-      // If provider exists and is approved in live database (e.g. registered before Auth sync)
-      if (!authSuccess && dbProv && dbProv.status === 'approved') {
-        // Cache credentials locally so future logins verify against this exact password
-        if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.setItem('SURVSTA_PROVIDER_CRED_' + cleanEmail, cleanPass);
-        }
-        // Also register in Supabase Auth in the background
+      // Allow cookies to synchronize, then verify session with retry
+      let session: ResolvedSession | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          supabase.auth.signUp({
-            email: cleanEmail,
-            password: cleanPass,
-            options: { data: { role: 'provider', name: dbProv.name } }
-          }).catch(() => {});
-        } catch {}
-
-        authSuccess = true;
-      }
-
-      // If user is a verified Provider
-      if (authSuccess || dbProv) {
-        if (!authSuccess) {
-          throw new Error('كلمة المرور غير صحيحة. يرجى التحقق من كلمة المرور وإعادة المحاولة.');
-        }
-
-        const role = 'provider';
-        const name = dbProv?.name || authUser?.user_metadata?.name || 'مزوّد الخدمة';
-        const org = dbProv?.name || authUser?.user_metadata?.organization || 'مكتب مساحي معتمد';
-
-        document.cookie = `survsta_session=${encodeURIComponent(JSON.stringify({ role, email: cleanEmail, name, org }))}; path=/; max-age=86400`;
-        document.cookie = 'user_role=provider; path=/; max-age=86400';
-
-        if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.removeItem('SURVSTA_LOGGED_OUT');
-          localStorage.removeItem('GS_LOGGED_OUT');
-          localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify({
-            id: dbProv?.id || authUser?.id || 'provider-1',
-            email: cleanEmail,
-            name,
-            role,
-            org,
-            av: name.slice(0, 2)
-          }));
-
-          try {
-            if ('BroadcastChannel' in window) {
-              const bc = new BroadcastChannel('survsta_auth_channel');
-              bc.postMessage({ type: 'AUTH_STATE_CHANGED', email: cleanEmail });
-              bc.close();
+          const res = await fetch('/api/auth/session', { cache: 'no-store' });
+          if (res.ok) {
+            const data: ResolvedSession = await res.json();
+            if (data?.authenticated) {
+              session = data;
+              break;
             }
-          } catch {}
-        }
-
-        const targetUrl = callbackUrl && callbackUrl.startsWith('/') ? callbackUrl : '/provider/dashboard';
-        window.location.replace(targetUrl);
-        return;
+          }
+        } catch {}
+        await new Promise((r) => setTimeout(r, 150));
       }
 
-      // 4. Fallback Provider / User Authentication Handler
-      const user = await authenticateUser(cleanEmail, cleanPass);
+      // Fallback: If session route was slightly delayed in cookie propagation, derive from user metadata
+      if (!session || !session.authenticated) {
+        const userMeta = authData.user.user_metadata || {};
+        const role = userMeta.role === 'provider' ? 'provider' : userMeta.role === 'admin' ? 'admin' : 'customer';
+        const home = role === 'admin' ? '/admin' : role === 'provider' ? '/provider/dashboard' : '/dashboard';
 
-      document.cookie = "survsta_session=" + encodeURIComponent(JSON.stringify({
-        role: user.role,
-        email: user.email,
-        name: user.name,
-        org: user.organization
-      })) + "; path=/; max-age=86400";
-      document.cookie = `user_role=${user.role}; path=/; max-age=86400`;
+        session = {
+          authenticated: true,
+          id: authData.user.id,
+          email: authData.user.email || cleanEmail,
+          name: userMeta.name || userMeta.full_name || 'مستخدم المنصة',
+          role: role as any,
+          providerStatus: null,
+          home,
+        };
+      }
 
-      if (typeof window !== 'undefined' && window.localStorage) {
+      const blockedReason = session.providerStatus
+        ? BLOCKED_PROVIDER_STATUSES[session.providerStatus]
+        : null;
+
+      if (blockedReason) {
+        await supabase.auth.signOut();
+        throw new Error(blockedReason);
+      }
+
+      if (typeof window !== 'undefined') {
         localStorage.removeItem('SURVSTA_LOGGED_OUT');
         localStorage.removeItem('GS_LOGGED_OUT');
-        localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify({
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          org: user.organization,
-          av: user.name.slice(0, 2)
-        }));
+        localStorage.setItem(
+          'SURVSTA_AUTH_USER',
+          JSON.stringify({
+            id: session.id,
+            email: session.email,
+            name: session.name,
+            role: session.role === 'customer' ? 'client' : session.role,
+            av: (session.name || '').slice(0, 2),
+          })
+        );
 
         try {
           if ('BroadcastChannel' in window) {
             const bc = new BroadcastChannel('survsta_auth_channel');
-            bc.postMessage({ type: 'AUTH_STATE_CHANGED', email: user.email });
+            bc.postMessage({ type: 'AUTH_STATE_CHANGED', email: session.email });
             bc.close();
           }
         } catch {}
       }
 
-      const targetUrl =
-        callbackUrl && callbackUrl.startsWith('/')
-          ? callbackUrl
-          : user.role === 'admin'
-          ? '/admin'
-          : user.role === 'provider'
-          ? '/provider/dashboard'
-          : '/';
-      window.location.replace(targetUrl);
-      return;
+      window.location.replace(safeTarget(session.home));
     } catch (err: unknown) {
       setError(
-        err instanceof Error
-          ? err.message
-          : 'تعذر تسجيل الدخول. يرجى التحقق من البريد الإلكتروني وكلمة المرور.'
+        err instanceof Error ? err.message : 'تعذر تسجيل الدخول. يرجى المحاولة مرة أخرى.'
       );
     } finally {
       setIsLoading(false);

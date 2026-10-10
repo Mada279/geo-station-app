@@ -63,6 +63,10 @@ export default function ProviderRegistrationWizard() {
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [registration, setRegistration] = useState<{
+    providerId: string;
+    autoApproved: boolean;
+  } | null>(null);
 
   const validateStep1 = () => {
     const newErrors: { [key: string]: string } = {};
@@ -76,8 +80,8 @@ export default function ProviderRegistrationWizard() {
     } else {
       formData.phone = phoneVal.normalized;
     }
-    if (!formData.password || formData.password.length < 6) {
-      newErrors.password = 'كلمة المرور يجب أن لا تقل عن 6 أحرف أو أرقام';
+    if (!formData.password || formData.password.length < 8) {
+      newErrors.password = 'كلمة المرور يجب أن لا تقل عن 8 أحرف أو أرقام';
     }
     if (!formData.confirmPassword || formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'كلمتا المرور غير متطابقتين';
@@ -95,106 +99,36 @@ export default function ProviderRegistrationWizard() {
       setIsSubmitting(true);
       setSubmitError(null);
       try {
-        const cleanEmail = formData.email.trim().toLowerCase();
-        const fullLocation = formData.location
-          ? `${formData.governorate} — ${formData.location}`
-          : formData.governorate;
-
-        const displayName = formData.organization
-          ? `${formData.organization} (${formData.name})`
-          : formData.name;
-
-        // 1. Register credentials in Supabase Auth
-        try {
-          const { error: authError } = await supabase.auth.signUp({
-            email: cleanEmail,
-            password: formData.password,
-            options: {
-              data: {
-                name: displayName,
-                role: 'provider',
-                phone: formData.phone.trim(),
-                organization: formData.organization || displayName,
-              },
-            },
-          });
-          if (authError && !authError.message.includes('already registered')) {
-            console.warn('[Supabase Auth SignUp warn]:', authError.message);
-          }
-        } catch (authEx) {
-          console.warn('[Supabase Auth SignUp Exception]:', authEx);
-        }
-
-        // 2. Cache registered credentials locally for seamless verification
-        if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.setItem('SURVSTA_PROVIDER_CRED_' + cleanEmail, formData.password);
-        }
-
-        // 3. Check auto_approve_providers setting
-        let isAutoApproved = false;
-        try {
-          const { data: autoApproveRow } = await supabase
-            .from('platform_settings')
-            .select('setting_value')
-            .eq('setting_key', 'auto_approve_providers')
-            .maybeSingle();
-
-          if (autoApproveRow && autoApproveRow.setting_value !== undefined) {
-            isAutoApproved = autoApproveRow.setting_value === true || autoApproveRow.setting_value === 'true';
-          }
-        } catch (setEx) {
-          console.warn('[Wizard] Error checking auto_approve_providers:', setEx);
-        }
-
-        // 4. Insert record into providers table
-        const insertPayload: Record<string, any> = {
-          name: displayName,
-          email: cleanEmail,
-          phone: formData.phone.trim(),
-          location: fullLocation,
-          status: isAutoApproved ? 'approved' : 'pending',
-          logo_url: formData.equipmentPhotos.length > 0 ? formData.equipmentPhotos[0] : null,
-          equipment_photos: formData.equipmentPhotos,
-        };
-
-        let { error } = await supabase.from('providers').insert([insertPayload]);
-
-        // Fallback gracefully if logo_url or equipment_photos columns do not exist yet in Supabase
-        if (error && (error.message?.includes('column') || error.code === 'PGRST204')) {
-          console.warn('[Supabase Insert retry with basic schema]:', error.message);
-          const basicPayload = {
-            name: displayName,
-            email: cleanEmail,
+        // Account creation, the providers row and the welcome mail all happen in
+        // /api/providers/register with the service role: the RLS insert policy
+        // only accepts a row whose email matches the signed-in caller, which a
+        // brand-new signup cannot satisfy from the browser.
+        const res = await fetch('/api/providers/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            email: formData.email.trim().toLowerCase(),
             phone: formData.phone.trim(),
-            location: fullLocation,
-            status: isAutoApproved ? 'approved' : 'pending',
-          };
-          const res = await supabase.from('providers').insert([basicPayload]);
-          error = res.error;
-        }
+            password: formData.password,
+            organization: formData.organization.trim() || undefined,
+            governorate: formData.governorate || undefined,
+            location: formData.location.trim() || undefined,
+            equipmentPhotos: formData.equipmentPhotos.slice(0, 8),
+          }),
+        });
 
-        if (error) {
-          console.error('[Supabase Registration Error]', error);
-          setSubmitError('تعذر إرسال البيانات إلى السحابة: ' + (error.message || 'يرجى المحاولة لاحقاً'));
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok || !data?.success) {
+          setSubmitError(data?.error || 'تعذر إرسال بيانات التسجيل، يرجى المحاولة لاحقاً.');
           return;
         }
 
-        // 5. Fire official welcome email via Resend gateway
-        try {
-          await fetch('/api/admin/notify-provider', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              providerEmail: cleanEmail,
-              providerName: displayName,
-              actionType: isAutoApproved ? 'approved' : 'welcome',
-              userType: 'provider',
-            }),
-          });
-        } catch (mailEx) {
-          console.warn('[Wizard] Failed to dispatch registration welcome email:', mailEx);
-        }
-
+        setRegistration({
+          providerId: String(data.providerId || ''),
+          autoApproved: !!data.autoApproved,
+        });
         setStep('success');
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'حدث خطأ أثناء إرسال البيانات';
@@ -744,17 +678,23 @@ export default function ProviderRegistrationWizard() {
           </div>
           <div className="space-y-2">
             <h2 className="text-xl sm:text-2xl font-black text-white">
-              تم استلام طلبك بنجاح. سيتم مراجعة البيانات وإرسال كود التفعيل قريباً.
+              {registration?.autoApproved
+                ? 'تم إنشاء حسابك بنجاح ويمكنك تسجيل الدخول الآن.'
+                : 'تم استلام طلبك بنجاح. سيتم مراجعة البيانات وإرسال كود التفعيل قريباً.'}
             </h2>
             <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
-              يقوم فريق إدارة المنصة بمراجعة بيانات النشاط وصور الأجهزة وتوليد كود التفعيل المباشر وتزويدك به عبر الواتساب أو البريد الإلكتروني.
+              {registration?.autoApproved
+                ? 'استخدم البريد الإلكتروني وكلمة المرور اللذين أدخلتهما للدخول إلى لوحة تحكم المكتب.'
+                : 'يقوم فريق إدارة المنصة بمراجعة بيانات النشاط وصور الأجهزة وتوليد كود التفعيل المباشر وتزويدك به عبر الواتساب أو البريد الإلكتروني.'}
             </p>
           </div>
 
           <div className="rounded-xl border border-gray-800 bg-gray-950 p-4 max-w-sm mx-auto text-xs text-gray-300 text-right space-y-1">
-            <div className="flex justify-between">
-              <span className="text-gray-500">رقم الطلب المرجعي:</span>
-              <span className="font-mono text-cyan-400 font-bold">SRV-{Math.floor(100000 + Math.random() * 900000)}</span>
+            <div className="flex justify-between gap-3">
+              <span className="text-gray-500 shrink-0">رقم الطلب المرجعي:</span>
+              <span className="font-mono text-cyan-400 font-bold break-all">
+                {registration?.providerId ? `SRV-${registration.providerId.slice(0, 8).toUpperCase()}` : '—'}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">المسؤول:</span>

@@ -47,3 +47,6 @@ pnpm-debug.log*
 All images/
 
 .vercel
+
+# Local backups contain full DB dumps (PII) - never commit
+backups/

@@ -8,6 +8,7 @@ import { supabase } from '@/utils/supabaseClient';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import { GlobalAnnouncement } from '@/services/announcementService';
 import { normalizeUser, AuthenticatedUser } from '@/lib/auth/userNormalizer';
+import { logoutAndRedirect } from '@/utils/logout';
 import InstallPwaButton from '@/components/InstallPwaButton';
 
 interface NavbarProps {
@@ -16,47 +17,51 @@ interface NavbarProps {
   isDismissedInitial?: boolean;
 }
 
-function getActiveSession(): AuthenticatedUser | null {
+function getCachedUser(): AuthenticatedUser | null {
   if (typeof window === 'undefined') return null;
-
-  // 1. Check localStorage first
   try {
     const raw = localStorage.getItem('SURVSTA_AUTH_USER');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      const normalized = normalizeUser(parsed);
-      if (normalized) return normalized;
-    }
-  } catch {}
+    if (!raw) return null;
+    return normalizeUser(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
 
-  // 2. Check cookies
+async function fetchSessionUser(): Promise<AuthenticatedUser | null> {
   try {
-    const cookies = document.cookie.split(';');
-    for (const c of cookies) {
-      const trimmed = c.trim();
-      if (trimmed.startsWith('survsta_session=')) {
-        const val = trimmed.substring('survsta_session='.length);
-        const decoded = decodeURIComponent(val);
-        try {
-          const parsed = JSON.parse(decoded);
-          const normalized = normalizeUser(parsed);
-          if (normalized) return normalized;
-        } catch {
-          if (decoded && decoded !== 'undefined') {
-            return normalizeUser({ email: decoded });
-          }
-        }
+    const res = await fetch('/api/auth/session', { cache: 'no-store' });
+    if (!res.ok) {
+      // 401 or non-OK response: simply terminate and return null
+      return null;
+    }
+    const session = await res.json();
+    if (!session?.authenticated) return null;
+    return normalizeUser({
+      id: session.id,
+      email: session.email,
+      name: session.name,
+      role: session.role === 'customer' ? 'client' : session.role,
+    });
+  } catch {
+    return null;
+  }
+}
+
+function cacheUser(norm: AuthenticatedUser | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (norm) {
+      const val = JSON.stringify(norm);
+      if (localStorage.getItem('SURVSTA_AUTH_USER') !== val) {
+        localStorage.setItem('SURVSTA_AUTH_USER', val);
       }
-      if (trimmed.startsWith('user_role=')) {
-        const role = trimmed.substring('user_role='.length);
-        if (role && role !== 'undefined') {
-          return normalizeUser({ role });
-        }
+    } else {
+      if (localStorage.getItem('SURVSTA_AUTH_USER') !== null) {
+        localStorage.removeItem('SURVSTA_AUTH_USER');
       }
     }
   } catch {}
-
-  return null;
 }
 
 export default function Navbar({
@@ -72,6 +77,7 @@ export default function Navbar({
   const [isDismissed, setIsDismissed] = useState<boolean>(isDismissedInitial);
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const isCheckingAuthRef = useRef(false);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -109,132 +115,76 @@ export default function Navbar({
     document.cookie = `survsta_banner_dismissed_${announcement.id}=true; path=/; max-age=${maxAge}; SameSite=Lax`;
   };
 
-  const syncUserToCookiesAndStorage = (norm: AuthenticatedUser | null) => {
-    if (!norm) {
-      document.cookie = 'survsta_session=; path=/; max-age=0';
-      document.cookie = 'user_role=; path=/; max-age=0';
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.removeItem('SURVSTA_AUTH_USER');
-      }
-      return;
-    }
-
-    try {
-      document.cookie = `survsta_session=${encodeURIComponent(JSON.stringify({
-        id: norm.id,
-        email: norm.email,
-        name: norm.name,
-        role: norm.role,
-        org: norm.organization,
-        modules: norm.modules,
-      }))}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = `user_role=${norm.role}; path=/; max-age=86400; SameSite=Lax`;
-
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify(norm));
-      }
-    } catch {}
-  };
-
   useEffect(() => {
     let isMounted = true;
 
     async function checkAuth() {
-      // 1. Check local session first
-      const local = getActiveSession();
-      if (local && isMounted) {
-        setCurrentUser(local);
-        setIsAuthResolved(true);
-      }
+      if (isCheckingAuthRef.current || !isMounted) return;
+      isCheckingAuthRef.current = true;
 
-      // 2. Fetch live Supabase session
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user && isMounted) {
-          const fallbackRole = local?.role || currentUser?.role;
-          let norm = normalizeUser(session.user, fallbackRole);
-          if (norm && norm.role !== 'admin' && norm.role !== 'provider' && session.user.email) {
-            try {
-              const { data: provRow } = await supabase
-                .from('providers')
-                .select('id, name, status')
-                .eq('email', session.user.email.toLowerCase().trim())
-                .maybeSingle();
-              if (provRow && provRow.status !== 'blocked' && provRow.status !== 'rejected') {
-                norm.role = 'provider';
-                if (provRow.name) norm.organization = provRow.name;
-              }
-            } catch {}
-          }
-          if (norm) {
-            setCurrentUser(norm);
-            syncUserToCookiesAndStorage(norm);
-          }
-        } else if (!local && isMounted) {
-          setCurrentUser(null);
-        }
-      } catch (err) {
-        console.warn('[Navbar Auth Check]:', err);
-      } finally {
-        if (isMounted) {
+        const cached = getCachedUser();
+        if (cached && isMounted) {
+          setCurrentUser((prev) => (prev?.id === cached.id && prev?.role === cached.role ? prev : cached));
           setIsAuthResolved(true);
         }
+
+        const resolved = await fetchSessionUser();
+        if (!isMounted) return;
+
+        if (resolved) {
+          setCurrentUser((prev) => (prev?.id === resolved.id && prev?.role === resolved.role ? prev : resolved));
+          cacheUser(resolved);
+        } else {
+          // 401 or unauthenticated: set null cleanly without re-render loop if already null
+          setCurrentUser((prev) => (prev === null ? null : null));
+          cacheUser(null);
+        }
+        setIsAuthResolved(true);
+      } finally {
+        isCheckingAuthRef.current = false;
       }
     }
 
+    // Run auth check strictly once on mount
     checkAuth();
 
-    // 3. Supabase Auth real-time listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT') {
-        setCurrentUser(null);
-        syncUserToCookiesAndStorage(null);
-      } else if (session?.user) {
-        const local = getActiveSession();
-        const fallbackRole = local?.role || currentUser?.role;
-        let norm = normalizeUser(session.user, fallbackRole);
-        if (norm && norm.role !== 'admin' && norm.role !== 'provider' && session.user.email) {
-          try {
-            const { data: provRow } = await supabase
-              .from('providers')
-              .select('id, name, status')
-              .eq('email', session.user.email.toLowerCase().trim())
-              .maybeSingle();
-            if (provRow && provRow.status !== 'blocked' && provRow.status !== 'rejected') {
-              norm.role = 'provider';
-              if (provRow.name) norm.organization = provRow.name;
-            }
-          } catch {}
-        }
-        if (norm) {
-          setCurrentUser(norm);
-          syncUserToCookiesAndStorage(norm);
-        }
-      } else {
-        const local = getActiveSession();
-        setCurrentUser(local);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
+      if (event === 'SIGNED_OUT' || (!session && event === 'INITIAL_SESSION')) {
+        setCurrentUser((prev) => (prev === null ? null : null));
+        cacheUser(null);
+        setIsAuthResolved(true);
+        return;
       }
-      setIsAuthResolved(true);
+
+      // Only check auth when an active session change event occurs
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        checkAuth();
+      }
     });
 
-    // 4. Cross-tab synchronization via BroadcastChannel & Storage event
+    // Cross-tab synchronization via BroadcastChannel & Storage event
     let authChannel: BroadcastChannel | null = null;
     try {
       if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
         authChannel = new BroadcastChannel('survsta_auth_channel');
         authChannel.onmessage = (msgEvent) => {
+          if (!isMounted) return;
           if (msgEvent.data?.type === 'AUTH_STATE_CHANGED') {
             checkAuth();
           } else if (msgEvent.data?.type === 'LOGOUT') {
             setCurrentUser(null);
-            syncUserToCookiesAndStorage(null);
+            cacheUser(null);
           }
         };
       }
     } catch {}
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'SURVSTA_AUTH_USER' || e.key?.startsWith('sb-')) {
+      if (!isMounted) return;
+      if (e.key === 'SURVSTA_AUTH_USER' || (e.key?.startsWith('sb-') && e.newValue)) {
         checkAuth();
       }
     };
@@ -248,38 +198,12 @@ export default function Navbar({
     };
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setIsMobileMenuOpen(false);
     setIsProfileDropdownOpen(false);
-
-    try {
-      await supabase.auth.signOut();
-    } catch {}
-
-    // Explicitly clear cookies with path=/
-    document.cookie = 'survsta_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'user_role=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-
-    // Clear localStorage
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.removeItem('SURVSTA_AUTH_USER');
-      localStorage.removeItem('SURVSTA_LOGGED_OUT');
-      localStorage.removeItem('GS_LOGGED_OUT');
-    }
-
-    syncUserToCookiesAndStorage(null);
+    cacheUser(null);
     setCurrentUser(null);
-
-    // Notify other open tabs
-    try {
-      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-        const bc = new BroadcastChannel('survsta_auth_channel');
-        bc.postMessage({ type: 'LOGOUT' });
-        bc.close();
-      }
-    } catch {}
-
-    window.location.replace('/login');
+    logoutAndRedirect('/login');
   };
 
   const dashboardHref =

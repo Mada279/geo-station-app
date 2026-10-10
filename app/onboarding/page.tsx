@@ -420,7 +420,7 @@ export default function OnboardingPage() {
         } catch {}
       }
 
-      // 4. Update session storage and cookies
+      // 4. Update the local display cache and let the server decide the destination
       const assignedRole = (selectedModules.includes('provider') || activeMods['provider']) ? 'provider' : 'client';
       if (typeof window !== 'undefined') {
         const storedUser = localStorage.getItem('SURVSTA_AUTH_USER');
@@ -436,15 +436,6 @@ export default function OnboardingPage() {
           active_modules: activeMods,
         };
         localStorage.setItem('SURVSTA_AUTH_USER', JSON.stringify(updated));
-        document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(activeMods))}; path=/; max-age=2592000; SameSite=Lax`;
-        document.cookie = `user_role=${assignedRole}; path=/; max-age=2592000; SameSite=Lax`;
-        document.cookie = `survsta_session=${encodeURIComponent(JSON.stringify({
-          id: userId || parsed.id,
-          role: assignedRole,
-          email: activeEmail,
-          name: fullName.trim(),
-          modules: activeMods,
-        }))}; path=/; max-age=2592000; SameSite=Lax`;
 
         // Broadcast session change to all other open tabs (e.g., Navbar)
         try {
@@ -456,17 +447,19 @@ export default function OnboardingPage() {
         } catch {}
       }
 
-      const destination = assignedRole === 'provider' ? '/provider/dashboard' : '/dashboard';
+      let destination = assignedRole === 'provider' ? '/provider/dashboard' : '/dashboard';
+      try {
+        const sessionRes = await fetch('/api/auth/session', { cache: 'no-store' });
+        if (sessionRes.ok) {
+          const session = await sessionRes.json();
+          if (session?.home) destination = session.home;
+        }
+      } catch {}
       router.push(destination);
     } catch (err: any) {
       console.error('[Onboarding finalize error]:', err);
       const assignedRole = (selectedModules.includes('provider') || activeMods['provider']) ? 'provider' : 'client';
-      if (typeof window !== 'undefined') {
-        document.cookie = `survsta_modules=${encodeURIComponent(JSON.stringify(activeMods))}; path=/; max-age=2592000; SameSite=Lax`;
-        document.cookie = `user_role=${assignedRole}; path=/; max-age=2592000; SameSite=Lax`;
-      }
-      const destination = assignedRole === 'provider' ? '/provider/dashboard' : '/dashboard';
-      router.push(destination);
+      router.push(assignedRole === 'provider' ? '/provider/dashboard' : '/dashboard');
     } finally {
       setIsSubmitting(false);
     }

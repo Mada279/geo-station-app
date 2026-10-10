@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/utils/supabaseClient';
+import { resolveStoredFileUrls } from '@/lib/storage';
 
 interface PaymentRequestItem {
   id: string;
@@ -48,49 +48,116 @@ export default function AdminPaymentsPage() {
   const fetchPayments = async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch payment requests
+      // 0. Fetch via secure server route to bypass RLS and ensure complete metadata mapping
+      try {
+        const res = await fetch('/api/admin/payments');
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.requests)) {
+            setRequests(json.requests);
+            return;
+          }
+        }
+      } catch (apiErr) {
+        console.warn('[AdminPayments] Secure route failed, falling back to direct DB fetch:', apiErr);
+      }
+
+      // 1. Fetch payment requests with direct Foreign Key JOIN
       const { data: payData, error: payErr } = await supabase
         .from('manual_payment_requests')
-        .select('*')
+        .select(`
+          *,
+          provider:providers(id, name, company_name, phone, email, wallet_balance)
+        `)
         .order('created_at', { ascending: false });
 
       if (payErr) {
-        console.warn('[AdminPayments] Error fetching payment requests:', payErr.message);
-        // Fallback demo data if table is not yet populated
-        setRequests(getFallbackDemoData());
+        console.warn('[AdminPayments] Direct join failed, falling back to multi-step fetch:', payErr.message);
+
+        // Fallback: Two-step fetch if PostgREST schema cache has not yet refreshed the foreign key
+        const { data: rawRequests, error: rawErr } = await supabase
+          .from('manual_payment_requests')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (rawErr) {
+          showToast(`⚠️ تعذر تحميل طلبات الشحن: ${rawErr.message}`);
+          setRequests([]);
+          return;
+        }
+
+        if (!rawRequests || rawRequests.length === 0) {
+          setRequests([]);
+          return;
+        }
+
+        const providerIds = Array.from(new Set(rawRequests.map((p) => p.provider_id).filter(Boolean)));
+        let providersMap = new Map<string, any>();
+
+        if (providerIds.length > 0) {
+          const { data: provData } = await supabase
+            .from('providers')
+            .select('id, name, company_name, phone, email, wallet_balance')
+            .in('id', providerIds);
+
+          if (provData) {
+            provData.forEach((prov) => providersMap.set(prov.id, prov));
+          }
+        }
+
+        const merged: PaymentRequestItem[] = rawRequests.map((item) => ({
+          ...item,
+          provider: providersMap.get(item.provider_id) || null,
+        }));
+
+        setRequests(await resolveStoredFileUrls(merged, ['receipt_url']));
         return;
       }
 
       if (!payData || payData.length === 0) {
-        setRequests(getFallbackDemoData());
+        setRequests([]);
         return;
       }
 
-      // 2. Fetch associated providers
-      const providerIds = Array.from(new Set(payData.map((p) => p.provider_id).filter(Boolean)));
-      let providersMap = new Map<string, any>();
+      // 2. Normalize nested provider object (handles both object and single-element array returns)
+      const normalizedRequests: PaymentRequestItem[] = payData.map((item: any) => {
+        let provObj = null;
+        if (item.provider) {
+          provObj = Array.isArray(item.provider) ? item.provider[0] : item.provider;
+        }
+        return {
+          ...item,
+          provider: provObj || null,
+        };
+      });
 
-      if (providerIds.length > 0) {
-        const { data: provData } = await supabase
+      // 3. Fallback for any records where direct join returned null but provider_id is valid
+      const missingProvIds = normalizedRequests
+        .filter((r) => !r.provider && r.provider_id)
+        .map((r) => r.provider_id);
+
+      if (missingProvIds.length > 0) {
+        const uniqueMissing = Array.from(new Set(missingProvIds));
+        const { data: missingProviders } = await supabase
           .from('providers')
           .select('id, name, company_name, phone, email, wallet_balance')
-          .in('id', providerIds);
+          .in('id', uniqueMissing);
 
-        if (provData) {
-          provData.forEach((prov) => providersMap.set(prov.id, prov));
+        if (missingProviders && missingProviders.length > 0) {
+          const map = new Map(missingProviders.map((p) => [p.id, p]));
+          normalizedRequests.forEach((req) => {
+            if (!req.provider && map.has(req.provider_id)) {
+              req.provider = map.get(req.provider_id);
+            }
+          });
         }
       }
 
-      // Map joined data
-      const merged: PaymentRequestItem[] = payData.map((item) => ({
-        ...item,
-        provider: providersMap.get(item.provider_id) || null,
-      }));
-
-      setRequests(merged);
+      setRequests(await resolveStoredFileUrls(normalizedRequests, ['receipt_url']));
     } catch (err) {
       console.error('[AdminPayments] Exception fetching payments:', err);
-      setRequests(getFallbackDemoData());
+      showToast('⚠️ حدث خطأ أثناء تحميل طلبات الشحن.');
+      setRequests([]);
     } finally {
       setIsLoading(false);
     }
@@ -99,47 +166,6 @@ export default function AdminPaymentsPage() {
   useEffect(() => {
     fetchPayments();
   }, []);
-
-  function getFallbackDemoData(): PaymentRequestItem[] {
-    return [
-      {
-        id: 'req-demo-1',
-        provider_id: 'prov-1',
-        amount: 750,
-        payment_method: 'vodafone_cash',
-        transfer_reference: '01099887766',
-        receipt_url: '/uploads/image-1.png',
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        provider: {
-          id: 'prov-1',
-          name: 'م. أحمد الشناوي',
-          company_name: 'الأهرام للمساحة والهندسة',
-          phone: '01012345678',
-          email: 'ahmed@ahram-survey.com',
-          wallet_balance: 120,
-        },
-      },
-      {
-        id: 'req-demo-2',
-        provider_id: 'prov-2',
-        amount: 1500,
-        payment_method: 'instapay',
-        transfer_reference: 'karim_geo@instapay',
-        receipt_url: '/uploads/image-1.png',
-        status: 'pending',
-        created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
-        provider: {
-          id: 'prov-2',
-          name: 'م. كريم عثمان',
-          company_name: 'جيو تك للمعدات',
-          phone: '01123456789',
-          email: 'karim@geotech.com',
-          wallet_balance: 450,
-        },
-      },
-    ];
-  }
 
   // Handle Approve Action
   const handleApprove = async (item: PaymentRequestItem) => {
@@ -316,9 +342,7 @@ export default function AdminPaymentsPage() {
   const approvedSum = approvedRequests.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-200" style={{ direction: 'rtl' }}>
-      <AdminSidebar pendingCount={pendingRequests.length} />
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-cyan-500/20 pb-5">
@@ -474,13 +498,18 @@ export default function AdminPaymentsPage() {
                     <tr key={item.id} className="hover:bg-slate-800/40 transition">
                       <td className="p-4">
                         <div className="font-bold text-white text-sm">
-                          {item.provider?.company_name || item.provider?.name || 'مزوّد مساحي'}
+                          {item.provider?.company_name || item.provider?.name || (item.provider_id ? `مزوّد (${item.provider_id.slice(0, 8)})` : 'مزوّد غير محدد')}
                         </div>
                         <div className="text-[11px] text-gray-400 mt-0.5" dir="ltr">
-                          {item.provider?.phone || '—'} • {item.provider?.email || ''}
+                          {item.provider?.phone ? (
+                            <span className="text-gray-300 font-mono">📞 {item.provider.phone}</span>
+                          ) : (
+                            <span className="text-gray-500 italic">لا يوجد هاتف</span>
+                          )}
+                          {item.provider?.email ? ` • ${item.provider.email}` : ''}
                         </div>
                         <div className="text-[10px] text-emerald-400 font-mono mt-0.5">
-                          الرصيد الحالي: {Number(item.provider?.wallet_balance || 0).toLocaleString('en-US')} ج.م
+                          الرصيد الحالي: {Number(item.provider?.wallet_balance ?? 0).toLocaleString('en-US')} ج.م
                         </div>
                       </td>
 
@@ -601,7 +630,7 @@ export default function AdminPaymentsPage() {
                 <div>
                   <h3 className="text-base font-bold text-white">معاينة إيصال التحويل البنكي</h3>
                   <p className="text-xs text-gray-400">
-                    {inspectItem.provider?.name} • مبلغ: {inspectItem.amount.toLocaleString('en-US')} ج.م
+                    {inspectItem.provider?.company_name || inspectItem.provider?.name || (inspectItem.provider_id ? `مزوّد (${inspectItem.provider_id.slice(0, 8)})` : 'مزوّد غير محدد')} • مبلغ: {inspectItem.amount.toLocaleString('en-US')} ج.م
                   </p>
                 </div>
                 <button
@@ -700,7 +729,7 @@ export default function AdminPaymentsPage() {
               </div>
 
               <p className="text-xs text-gray-300">
-                يرجى توضيح سبب الرفض ليتم إرساله في إشعار رسمي للمزود ({rejectingItem.provider?.name}):
+                يرجى توضيح سبب الرفض ليتم إرساله في إشعار رسمي للمزود ({rejectingItem.provider?.company_name || rejectingItem.provider?.name || (rejectingItem.provider_id ? `مزوّد (${rejectingItem.provider_id.slice(0, 8)})` : 'المزوّد')}):
               </p>
 
               <div>
@@ -742,6 +771,5 @@ export default function AdminPaymentsPage() {
         )}
 
       </div>
-    </div>
   );
 }

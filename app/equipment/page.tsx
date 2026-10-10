@@ -93,7 +93,7 @@ export default function EquipmentMarketplacePage() {
   const [bookingItem, setBookingItem] = useState<MarketplaceEquipmentItem | null>(null);
   const [detailItem, setDetailItem] = useState<MarketplaceEquipmentItem | null>(null);
   const [inquiryItem, setInquiryItem] = useState<MarketplaceEquipmentItem | null>(null);
-  const [rentalDuration, setRentalDuration] = useState('3 أيام');
+  const [rentalDuration, setRentalDuration] = useState('3');
   const [rentalType, setRentalType] = useState<'daily' | 'monthly'>('daily');
   const [startDate, setStartDate] = useState('');
   const [projectLocation, setProjectLocation] = useState('القاهرة');
@@ -104,7 +104,7 @@ export default function EquipmentMarketplacePage() {
   const [bookingNotes, setBookingNotes] = useState('');
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [bookingSuccessOrder, setBookingSuccessOrder] = useState<string | null>(null);
-  const [activeClientId, setActiveClientId] = useState<string | null>(null);
+  const [confirmedTotal, setConfirmedTotal] = useState<number>(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -142,7 +142,6 @@ export default function EquipmentMarketplacePage() {
         try {
           const { data: authData } = await supabase.auth.getUser();
           if (authData?.user) {
-            setActiveClientId(authData.user.id);
             setClientEmail(authData.user.email || '');
           }
         } catch {}
@@ -155,7 +154,6 @@ export default function EquipmentMarketplacePage() {
               if (parsed.name) setClientName(parsed.name);
               if (parsed.phone || parsed.phoneNumber) setClientPhone(parsed.phone || parsed.phoneNumber);
               if (parsed.email) setClientEmail(parsed.email);
-              if (parsed.id && !activeClientId) setActiveClientId(parsed.id);
             } catch {}
           }
         }
@@ -406,6 +404,7 @@ export default function EquipmentMarketplacePage() {
   const handleOpenBooking = (item: MarketplaceEquipmentItem) => {
     setBookingItem(item);
     setBookingSuccessOrder(null);
+    setConfirmedTotal(0);
     if (!startDate) {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -413,14 +412,17 @@ export default function EquipmentMarketplacePage() {
     }
   };
 
+  // Display estimate only — the amount stored on the order is recomputed by
+  // /api/orders from the equipment record.
   const calculateEstimatedTotal = () => {
     if (!bookingItem) return 0;
-    if (rentalType === 'monthly' && bookingItem.monthlyPrice) {
-      return bookingItem.monthlyPrice;
+    const duration = parseInt(rentalDuration, 10) || 1;
+    if (rentalType === 'monthly') {
+      const rate = bookingItem.monthlyPrice ?? (bookingItem.dailyPrice ? bookingItem.dailyPrice * 30 : 0);
+      return rate * duration;
     }
-    const days = parseInt(rentalDuration, 10) || 3;
-    const rate = bookingItem.dailyPrice || 1200;
-    return days * rate;
+    const rate = bookingItem.dailyPrice ?? (bookingItem.monthlyPrice ? Math.ceil(bookingItem.monthlyPrice / 30) : 0);
+    return rate * duration;
   };
 
   const handleSubmitBooking = async (e: React.FormEvent) => {
@@ -441,68 +443,74 @@ export default function EquipmentMarketplacePage() {
     setClientPhoneError(null);
     const validPhone = phoneValidation.normalized;
 
+    const duration = parseInt(rentalDuration, 10);
+    if (!duration || duration < 1) {
+      showToast('⚠️ يرجى تحديد مدة الإيجار المطلوبة.');
+      return;
+    }
+
     setIsSubmittingBooking(true);
-    const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
-    const estimatedTotal = calculateEstimatedTotal();
 
     try {
-      // 1. Insert into orders table
-      const orderPayload = {
-        order_number: orderNumber,
-        client_id: activeClientId || null,
-        provider_id: bookingItem.providerId || null,
-        client_email: clientEmail || null,
-        equipment_name: bookingItem.title,
-        category: bookingItem.category,
-        duration: `${rentalDuration} (${rentalType === 'monthly' ? 'شهري' : 'يومي'}) - تاريخ البدء: ${startDate}`,
-        total_price: estimatedTotal,
-        status: 'pending',
-      };
+      // Pricing, order numbering and the provider notification all happen in
+      // /api/orders — the browser never sends an amount.
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          equipmentId: bookingItem.id,
+          rentalType,
+          duration,
+          startDate: startDate || undefined,
+          clientName: clientName.trim(),
+          clientPhone: validPhone,
+          clientEmail: clientEmail.trim() || undefined,
+          projectLocation: projectLocation.trim() || undefined,
+          notes: bookingNotes.trim() || undefined,
+        }),
+      });
 
-      const { data: orderRes, error: orderErr } = await supabase
-        .from('orders')
-        .insert([orderPayload])
-        .select()
-        .single();
+      const data = await res.json().catch(() => null);
 
-      if (orderErr) {
-        console.warn('[EquipmentMarketplace] Notice inserting order:', orderErr.message);
+      if (!res.ok || !data?.success) {
+        const message = data?.error || 'تعذر إرسال طلب الحجز، يرجى المحاولة مرة أخرى.';
+        showToast(`❌ ${message}`);
+        return;
       }
 
-      // 2. Insert In-App Notification targeted at provider
-      if (bookingItem.providerId) {
-        try {
-          await supabase.from('inapp_notifications').insert([
-            {
-              user_id: bookingItem.providerId,
-              title: 'طلب استئجار جديد 📥',
-              message: `تلقيت طلب استئجار جديد لجهاز (${bookingItem.title}) بقيمة تقديرية ${estimatedTotal.toLocaleString('en-US')} ج.م من العميل: ${clientName} (${clientPhone}).`,
-              type: 'info',
-              link: '/provider/orders',
-            },
-          ]);
-        } catch {}
-      }
+      setConfirmedTotal(Number(data.totalAmount) || 0);
 
-      // 3. Cache locally for offline demo resilience
       if (typeof window !== 'undefined') {
         try {
           const cached = localStorage.getItem('SURVSTA_LOCAL_CLIENT_ORDERS');
           const list = cached ? JSON.parse(cached) : [];
           list.unshift({
-            ...orderPayload,
-            id: orderRes?.id || orderNumber,
+            id: data.orderId,
+            order_number: data.orderNumber,
+            client_name: clientName.trim(),
+            client_phone: validPhone,
+            client_email: clientEmail.trim() || null,
+            equipment_id: bookingItem.id,
+            equipment_name: bookingItem.title,
+            category: bookingItem.category,
+            provider_id: bookingItem.providerId || null,
+            rental_type: rentalType,
+            rental_days: rentalType === 'monthly' ? duration * 30 : duration,
+            duration: `${duration} ${rentalType === 'monthly' ? 'شهر' : 'يوم'}`,
+            start_date: startDate || null,
+            total_amount: Number(data.totalAmount) || 0,
+            status: data.status || 'pending',
             created_at: new Date().toISOString(),
           });
           localStorage.setItem('SURVSTA_LOCAL_CLIENT_ORDERS', JSON.stringify(list));
         } catch {}
       }
 
-      setBookingSuccessOrder(orderNumber);
-      showToast(`✓ تم إرسال طلب الحجز بنجاح برقم ${orderNumber}`);
+      setBookingSuccessOrder(data.orderNumber);
+      showToast(`✓ تم إرسال طلب الحجز بنجاح برقم ${data.orderNumber}`);
     } catch (err) {
-      console.warn('[EquipmentMarketplace] Booking error:', err);
-      setBookingSuccessOrder(orderNumber);
+      console.error('[EquipmentMarketplace] Booking error:', err);
+      showToast('❌ تعذر الاتصال بالخادم، تحقق من اتصالك بالإنترنت ثم أعد المحاولة.');
     } finally {
       setIsSubmittingBooking(false);
     }
@@ -997,8 +1005,8 @@ export default function EquipmentMarketplacePage() {
                     <span className="text-amber-400 font-bold">{bookingItem.providerName}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">القيمة التقديرية:</span>
-                    <span className="font-mono font-bold text-emerald-400">{calculateEstimatedTotal().toLocaleString('en-US')} ج.م</span>
+                    <span className="text-gray-400">القيمة المحسوبة من المنصة:</span>
+                    <span className="font-mono font-bold text-emerald-400">{(confirmedTotal || calculateEstimatedTotal()).toLocaleString('en-US')} ج.م</span>
                   </div>
                 </div>
 
@@ -1041,7 +1049,11 @@ export default function EquipmentMarketplacePage() {
                       <label className="block text-gray-300 font-semibold mb-1">نظام التأجير</label>
                       <select
                         value={rentalType}
-                        onChange={(e: any) => setRentalType(e.target.value)}
+                        onChange={(e: any) => {
+                          const nextType = e.target.value as 'daily' | 'monthly';
+                          setRentalType(nextType);
+                          setRentalDuration(nextType === 'monthly' ? '1' : '3');
+                        }}
                         className="w-full p-2.5 rounded-xl bg-[#081933] border border-amber-500/30 text-white focus:outline-none focus:border-amber-400"
                       >
                         <option value="daily">إيجار يومي</option>
@@ -1050,12 +1062,15 @@ export default function EquipmentMarketplacePage() {
                     </div>
 
                     <div>
-                      <label className="block text-gray-300 font-semibold mb-1">المدة المطلوبة</label>
+                      <label className="block text-gray-300 font-semibold mb-1">
+                        المدة المطلوبة ({rentalType === 'monthly' ? 'عدد الشهور' : 'عدد الأيام'})
+                      </label>
                       <input
-                        type="text"
+                        type="number"
+                        min={1}
+                        max={rentalType === 'monthly' ? 24 : 365}
                         value={rentalDuration}
                         onChange={(e) => setRentalDuration(e.target.value)}
-                        placeholder="مثال: 3 أيام، أسبوع، شهر"
                         className="w-full p-2.5 rounded-xl bg-[#081933] border border-amber-500/30 text-white focus:outline-none focus:border-amber-400"
                         required
                       />

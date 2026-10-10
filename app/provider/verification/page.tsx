@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabaseClient';
+import { resolveStoredFileUrl } from '@/lib/storage';
 
 interface KycRequest {
   id: string;
@@ -22,6 +23,10 @@ export default function ProviderVerificationPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [currentKyc, setCurrentKyc] = useState<KycRequest | null>(null);
   const [isVerified, setIsVerified] = useState<boolean>(false);
+  const [docLinks, setDocLinks] = useState<{ cr: string | null; tax: string | null }>({
+    cr: null,
+    tax: null,
+  });
 
   // Form Fields
   const [crNumber, setCrNumber] = useState('');
@@ -56,38 +61,49 @@ export default function ProviderVerificationPage() {
         }
 
         // Local storage fallback
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && !currentUid) {
           const stored = localStorage.getItem('SURVSTA_AUTH_USER');
           if (stored) {
             try {
               const parsed = JSON.parse(stored);
-              if (!currentUid && parsed.id) currentUid = parsed.id;
+              if (parsed.id) currentUid = parsed.id;
               if (parsed.name || parsed.org) company = parsed.org || parsed.name;
               if (parsed.is_verified) setIsVerified(true);
             } catch {}
           }
         }
 
-        setProviderId(currentUid);
-        setProviderName(company);
+        // kyc_requests.provider_id points at the providers row, not at the auth
+        // user, and RLS resolves ownership the same way.
+        const sessionEmail = (authData?.user?.email || '').toLowerCase();
+        const filters: string[] = [];
+        if (currentUid) filters.push(`user_id.eq.${currentUid}`);
+        if (sessionEmail) filters.push(`email.eq.${sessionEmail}`);
 
-        if (currentUid) {
-          // Check provider profile verification status
+        let providerRowId: string | null = null;
+        if (filters.length > 0) {
           const { data: provRow } = await supabase
             .from('providers')
-            .select('is_verified')
-            .eq('id', currentUid)
+            .select('id, name, is_verified')
+            .or(filters.join(','))
             .maybeSingle();
 
-          if (provRow?.is_verified) {
-            setIsVerified(true);
+          if (provRow) {
+            providerRowId = provRow.id;
+            if (provRow.name) company = provRow.name;
+            if (provRow.is_verified) setIsVerified(true);
           }
+        }
 
+        setProviderId(providerRowId);
+        setProviderName(company);
+
+        if (providerRowId) {
           // Check latest KYC request
           const { data: kycRow, error: kycErr } = await supabase
             .from('kyc_requests')
             .select('*')
-            .eq('provider_id', currentUid)
+            .eq('provider_id', providerRowId)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -96,18 +112,6 @@ export default function ProviderVerificationPage() {
             setCurrentKyc(kycRow);
             if (kycRow.status === 'approved') {
               setIsVerified(true);
-            }
-          } else {
-            // Check fallback local KYC storage for demo mode
-            if (typeof window !== 'undefined') {
-              const localKyc = localStorage.getItem(`SURVSTA_KYC_${currentUid}`);
-              if (localKyc) {
-                try {
-                  const parsed = JSON.parse(localKyc);
-                  setCurrentKyc(parsed);
-                  if (parsed.status === 'approved') setIsVerified(true);
-                } catch {}
-              }
             }
           }
         }
@@ -121,30 +125,46 @@ export default function ProviderVerificationPage() {
     loadProviderKyc();
   }, []);
 
-  // 2. Upload Helper (Supabase Storage with fallback simulation)
-  const uploadDocument = async (file: File, docType: string): Promise<string> => {
-    try {
-      const fileExt = file.name.split('.').pop() || 'pdf';
-      const fileName = `${providerId || 'guest'}_${docType}_${Date.now()}.${fileExt}`;
-      const filePath = `verification/${fileName}`;
+  // The stored values are private-bucket object paths, so the preview links need
+  // short-lived signed URLs.
+  useEffect(() => {
+    let cancelled = false;
 
-      // Try Supabase Storage upload to kyc_documents bucket
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('kyc_documents')
-        .upload(filePath, file, { upsert: true });
-
-      if (!uploadError && uploadData) {
-        const { data: publicUrlData } = supabase.storage
-          .from('kyc_documents')
-          .getPublicUrl(filePath);
-        return publicUrlData.publicUrl;
+    (async () => {
+      if (!currentKyc) {
+        setDocLinks({ cr: null, tax: null });
+        return;
       }
-    } catch (err) {
-      console.warn('Direct bucket upload notice (using secure simulation):', err);
+
+      const [cr, tax] = await Promise.all([
+        resolveStoredFileUrl(currentKyc.commercial_register_url),
+        resolveStoredFileUrl(currentKyc.tax_id_url),
+      ]);
+
+      if (!cancelled) setDocLinks({ cr, tax });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentKyc]);
+
+  // 2. Upload Helper (private bucket: the row stores the object path, readers
+  //    exchange it for a signed URL)
+  const uploadDocument = async (file: File, docType: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop() || 'pdf';
+    const fileName = `${providerId || 'guest'}_${docType}_${Date.now()}.${fileExt}`;
+    const filePath = `verification/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('kyc-documents')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      throw new Error(`تعذر رفع الملف (${file.name}): ${uploadError.message}`);
     }
 
-    // High fidelity fallback link
-    return `https://storage.survsta.com/kyc/${providerId || 'demo'}/${docType}-${encodeURIComponent(file.name)}`;
+    return `kyc-documents/${filePath}`;
   };
 
   // 3. Submit KYC Request
@@ -161,6 +181,12 @@ export default function ProviderVerificationPage() {
         throw new Error('يرجى إرفاق ملف أو رابط البطاقة الضريبية.');
       }
 
+      if (!providerId) {
+        throw new Error(
+          'لم يتم التعرف على حساب المزود الخاص بك. يرجى تسجيل الدخول مرة أخرى ثم إعادة المحاولة.'
+        );
+      }
+
       let finalCrUrl = crUrl;
       let finalTaxUrl = taxUrl;
 
@@ -173,7 +199,7 @@ export default function ProviderVerificationPage() {
       }
 
       const newKycData = {
-        provider_id: providerId || 'demo-provider-id',
+        provider_id: providerId,
         commercial_register_url: finalCrUrl,
         tax_id_url: finalTaxUrl,
         status: 'pending' as const,
@@ -182,48 +208,36 @@ export default function ProviderVerificationPage() {
         updated_at: new Date().toISOString(),
       };
 
-      // 1. Insert into Supabase table
       const { data: inserted, error: insertError } = await supabase
         .from('kyc_requests')
         .insert([newKycData])
         .select()
         .single();
 
-      if (insertError) {
-        console.warn('Supabase kyc insert notice:', insertError.message);
+      if (insertError || !inserted) {
+        throw new Error(
+          `تعذر إرسال طلب التوثيق: ${insertError?.message || 'لم تُرجع قاعدة البيانات أي سجل.'}`
+        );
       }
 
-      const activeRecord = inserted || { ...newKycData, id: `kyc-${Date.now()}` };
-      setCurrentKyc(activeRecord);
+      setCurrentKyc(inserted);
 
-      // 2. Cache in localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`SURVSTA_KYC_${providerId}`, JSON.stringify(activeRecord));
-        // Add to global admin queue fallback
-        const adminQueue = localStorage.getItem('SURVSTA_LOCAL_KYC_REQUESTS') || '[]';
-        try {
-          const parsedQueue = JSON.parse(adminQueue);
-          parsedQueue.unshift({
-            ...activeRecord,
-            company_name: providerName,
-          });
-          localStorage.setItem('SURVSTA_LOCAL_KYC_REQUESTS', JSON.stringify(parsedQueue));
-        } catch {}
+      // Self-notification: allowed by the RLS insert policy (user_id = own provider id).
+      const { error: notifError } = await supabase.from('inapp_notifications').insert([
+        {
+          user_id: providerId,
+          title: 'تم استلام وثائق التحقق (KYC)',
+          message: 'تم إرسال السجل التجاري والبطاقة الضريبية للإدارة بنجاح. سيتم فحصها واعتماد الحساب قريباً.',
+          type: 'system',
+          link: '/provider/verification',
+          is_read: false,
+        },
+      ]);
+
+      if (notifError) {
+        showToast(`⚠️ تم إرسال الطلب، لكن تعذر إنشاء الإشعار: ${notifError.message}`);
+        return;
       }
-
-      // 3. Send confirmation in-app notification
-      try {
-        await supabase.from('inapp_notifications').insert([
-          {
-            user_id: providerId,
-            title: 'تم استلام وثائق التحقق (KYC)',
-            message: 'تم إرسال السجل التجاري والبطاقة الضريبية للإدارة بنجاح. سيتم فحصها واعتماد الحساب قريباً.',
-            type: 'system',
-            link: '/provider/verification',
-            is_read: false,
-          },
-        ]);
-      } catch {}
 
       showToast('✓ تم إرسال وثائق التوثيق بنجاح، طلبك قيد المراجعة الفنية الآن.');
     } catch (err: unknown) {
@@ -317,9 +331,9 @@ export default function ProviderVerificationPage() {
 
             {currentKyc && (
               <div className="pt-2 flex items-center gap-3 text-xs">
-                {currentKyc.commercial_register_url && (
+                {docLinks.cr && (
                   <a
-                    href={currentKyc.commercial_register_url}
+                    href={docLinks.cr}
                     target="_blank"
                     rel="noreferrer"
                     className="text-cyan-400 hover:underline inline-flex items-center gap-1"
@@ -328,9 +342,9 @@ export default function ProviderVerificationPage() {
                     <span>↗</span>
                   </a>
                 )}
-                {currentKyc.tax_id_url && (
+                {docLinks.tax && (
                   <a
-                    href={currentKyc.tax_id_url}
+                    href={docLinks.tax}
                     target="_blank"
                     rel="noreferrer"
                     className="text-cyan-400 hover:underline inline-flex items-center gap-1 mr-3"
