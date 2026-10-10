@@ -1,0 +1,197 @@
+'use client';
+
+import React, { useState } from 'react';
+export default function AdminLeadsPage() {
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [selectedLead, setSelectedLead] = useState<any | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+        
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-cyan-500/20 pb-5">
+          <div>
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[11px] font-bold mb-2">
+              <span>📥 مسار الطلبات وعروض الأسعار</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">إدارة الطلبات</h1>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">
+              متابعة وتوجيه طلبات استئجار المعدات وعروض الأسعار بين العملاء والمزوّدين.
+            </p>
+          </div>
+        </div>
+
+        
+        {/* KPI Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+            <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
+              <span>طلبات جديدة واردة</span>
+              <span className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 text-base">🔔</span>
+            </div>
+            <div className="text-2xl font-black text-cyan-400">9 <span className="text-xs text-gray-400 font-normal">طلبات</span></div>
+            <div className="text-[11px] text-cyan-300 mt-2 font-semibold">تتطلب توجيه للمزوّدين الأنسب</div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+            <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
+              <span>قيد التفاوض والتسعير</span>
+              <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 text-base">💬</span>
+            </div>
+            <div className="text-2xl font-black text-white">14</div>
+            <div className="text-[11px] text-amber-300/80 mt-2 font-semibold">عروض أسعار قيد المراجعة</div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+            <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
+              <span>صفقات تم إغلاقها</span>
+              <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 text-base">🤝</span>
+            </div>
+            <div className="text-2xl font-black text-white">89 <span className="text-xs text-emerald-400 font-normal">صفقة</span></div>
+            <div className="text-[11px] text-emerald-400 mt-2 font-semibold">▲ تسليم واستلام ناجح</div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+            <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
+              <span>نسبة تحويل الطلبات</span>
+              <span className="p-2 rounded-xl bg-purple-500/10 text-purple-400 text-base">📊</span>
+            </div>
+            <div className="text-2xl font-black text-white">74.2%</div>
+            <div className="text-[11px] text-emerald-400 mt-2 font-semibold">معدل إغلاق ممتاز</div>
+          </div>
+        </div>
+
+        {/* Leads Table */}
+        <div className="rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800/50 pb-4">
+            <div>
+              <h3 className="text-base font-bold text-white">قائمة الطلبات وعروض الأسعار الحالية</h3>
+              <p className="text-xs text-gray-400 mt-0.5">متابعة الطلبات المفتوحة وتوزيعها جغرافياً على مزوّدي المعدات</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => showToast('ℹ️ يتم استقبال الطلبات تلقائياً عبر متجر الأجهزة ونماذج التواصل')}
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-l from-cyan-500 to-sky-500 text-xs font-bold text-slate-950 shadow-md hover:brightness-110 transition cursor-pointer"
+              >
+                + إنشاء طلب يدوي
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-right text-xs text-slate-200 bg-slate-900">
+              <thead className="bg-slate-950 text-slate-300 border-b border-slate-800 font-bold">
+                <tr>
+                  <th className="p-3.5 text-slate-300">رقم الطلب</th>
+                  <th className="p-3.5 text-slate-300">الجهة الطالبة</th>
+                  <th className="p-3.5 text-slate-300">المعدات المطلوبة</th>
+                  <th className="p-3.5 text-slate-300">موقع المشروع والمدة</th>
+                  <th className="p-3.5 text-slate-300">الميزانية المقترحة</th>
+                  <th className="p-3.5 text-slate-300">حالة الطلب</th>
+                  <th className="p-3.5 text-slate-300 text-center">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {[
+                  { id: 'ORD-8921', requester_name: 'شركة أوراسكوم للإنشاءات', equipment: 'عدد 2 جهاز GNSS + Base', location: 'العاصمة الإدارية — 3 أسابيع', budget: '42,000 ج.م', status: 'جديد بانتظار العروض', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
+                  { id: 'ORD-8919', requester_name: 'مكتب خطيب وعلمي', equipment: 'محطة رصد متكاملة Leica TS16', location: 'العلمين الجديدة — شهرين', budget: '80,000 ج.م', status: 'جاري التفاوض', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+                  { id: 'ORD-8910', requester_name: 'مجموعة حسن علام', equipment: 'ميزان قامة دقيق + ملحقات', location: 'السادس من أكتوبر — 10 أيام', budget: '15,000 ج.م', status: 'تم الاتفاق والتوريد', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+                ].map((lead: any, idx: number) => (
+                  <tr key={idx} className="hover:bg-slate-800/50 transition">
+                    <td className="p-3.5 font-mono font-bold text-cyan-300">{lead.id}</td>
+                    <td className="p-3.5 font-bold text-white">
+                      <span>{lead.requester_name || lead.viewer_id || 'زائر غير مسجل'}</span>
+                    </td>
+                    <td className="p-3.5 text-slate-200">{lead.equipment}</td>
+                    <td className="p-3.5 text-slate-300">{lead.location}</td>
+                    <td className="p-3.5 font-bold text-white">{lead.budget}</td>
+                    <td className="p-3.5">
+                      <span className={`inline-flex items-center justify-center px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border ${lead.color || (
+                        lead.status === 'جديد بانتظار العروض' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' :
+                        lead.status === 'جاري التفاوض' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
+                        'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                      )}`}>
+                        {lead.status}
+                      </span>
+                    </td>
+                    <td className="p-3.5 text-center space-x-2 space-x-reverse">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLead(lead)}
+                        className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 font-bold transition cursor-pointer"
+                      >
+                        عرض التفاصيل
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Lead Details Modal */}
+        {selectedLead && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 space-y-4 shadow-2xl text-right">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 className="font-bold text-white text-base">تفاصيل الطلب: {selectedLead.id}</h3>
+                <button
+                  type="button"
+                  onClick={() => setSelectedLead(null)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-gray-400 block mb-1">الجهة الطالبة:</span>
+                  <span className="font-bold text-white">{selectedLead.requester_name}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block mb-1">المعدات:</span>
+                  <span className="font-mono text-cyan-300">{selectedLead.equipment}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block mb-1">الموقع والمدة:</span>
+                  <span className="text-slate-200">{selectedLead.location}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block mb-1">الميزانية التقديرية:</span>
+                  <span className="text-emerald-400 font-bold">{selectedLead.budget}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block mb-1">الحالة الحالية:</span>
+                  <span className="text-cyan-300 font-bold">{selectedLead.status}</span>
+                </div>
+              </div>
+              <div className="pt-3 border-t border-slate-800 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setSelectedLead(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-gray-200 text-xs font-bold hover:bg-slate-700 transition"
+                >
+                  إغلاق
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Feedback Toast */}
+        {toastMessage && (
+          <div className="fixed bottom-6 left-6 z-50 rounded-xl border border-cyan-500/30 bg-gray-900/95 px-5 py-3 text-sm text-cyan-300 shadow-2xl backdrop-blur-md animate-bounce">
+            {toastMessage}
+          </div>
+        )}
+
+      </div>
+  );
+}
+

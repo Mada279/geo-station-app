@@ -1,11 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { GoogleAnalytics } from '@next/third-parties/google';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import FloatingAdButton from '@/components/FloatingAdButton';
-import TrustMarquee from '@/components/ui/TrustMarquee';
-import PwaInstallPrompt from '@/components/PwaInstallPrompt';
 import './styles/font.css';
 import './styles/tokens.css';
 import './styles/style.css';
@@ -142,16 +137,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd).replace(/</g, '\\u003c') }}
         />
       </head>
-      <body className="min-h-screen bg-[#f4f7fa] text-slate-800 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col justify-between">
-        {/* Unified Sticky Header: Trust Marquee & Navbar welded together */}
-        <header className="sticky top-0 z-[100] w-full flex flex-col bg-[#0B1528] shadow-lg">
-          <TrustMarquee />
-          <Navbar />
-        </header>
-        <main className="flex-grow">{children}</main>
-        <Footer />
-        <FloatingAdButton />
-        <PwaInstallPrompt />
+      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-cyan-500 selection:text-gray-950 flex flex-col font-sans">
+        {children}
 
         {/* Analytics & Performance Tracking */}
         {gaMeasurementId && <GoogleAnalytics gaId={gaMeasurementId} />}
